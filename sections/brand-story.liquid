@@ -42,7 +42,7 @@
 
 <style>
   .brand-story {
-    padding: var(--space-3xl) 0;
+    padding: var(--space-section, clamp(5rem, 3rem + 6vw, 10rem)) 0;
   }
   .brand-story--text-center .brand-story__inner {
     text-align: center;
@@ -51,7 +51,7 @@
   .brand-story--text-right .brand-story__inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-xl);
+    gap: clamp(2rem, 1.5rem + 3vw, 5rem);
     align-items: center;
   }
   .brand-story--text-right .brand-story__image {
@@ -71,27 +71,30 @@
     height: auto;
   }
   .brand-story__image--below {
-    margin-top: var(--space-xl);
+    margin-top: clamp(2rem, 1.5rem + 3vw, 5rem);
   }
   .brand-story__subheading {
     font-size: var(--text-xs);
-    font-weight: var(--font-weight-medium);
-    letter-spacing: 0.15em;
+    font-weight: normal;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    opacity: 0.5;
+    opacity: 0.4;
     margin-bottom: var(--space-sm);
   }
   .brand-story__heading {
-    font-size: var(--text-5xl);
-    line-height: 1.05;
+    font-size: var(--text-display, clamp(4rem, 2rem + 8vw, 10rem));
+    font-weight: normal;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    line-height: 0.9;
     margin-bottom: var(--space-lg);
   }
   .brand-story__body {
-    font-size: var(--text-lg);
-    line-height: 1.7;
+    font-size: var(--text-base);
+    line-height: 1.75;
     color: var(--color-text-light);
     margin-bottom: var(--space-lg);
-    max-width: 600px;
+    max-width: 500px;
   }
   .brand-story--text-center .brand-story__body {
     margin-left: auto;

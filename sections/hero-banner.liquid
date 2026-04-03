@@ -61,7 +61,8 @@
   .hero {
     position: relative;
     height: 100vh;
-    min-height: 600px;
+    height: 100svh;
+    min-height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,8 +87,8 @@
     justify-content: center;
   }
   .hero__placeholder-svg {
-    width: 40%;
-    opacity: 0.2;
+    width: 30%;
+    opacity: 0.1;
   }
   .hero__overlay {
     position: absolute;
@@ -96,8 +97,8 @@
   .hero__content {
     position: relative;
     z-index: 1;
-    padding: var(--space-xl);
-    max-width: 900px;
+    padding: clamp(1.5rem, 1rem + 3vw, 4rem);
+    max-width: 1100px;
     width: 100%;
   }
   .hero__content--center {
@@ -115,26 +116,32 @@
   .hero__content--bottom-left {
     text-align: left;
     position: absolute;
-    bottom: var(--space-2xl);
-    left: var(--space-xl);
+    bottom: clamp(2rem, 1rem + 4vw, 5rem);
+    left: clamp(1.5rem, 1rem + 3vw, 4rem);
   }
+  /* Hero heading — Jacquemus-scale: massive, uppercase, tight */
   .hero__heading {
     font-family: var(--font-heading);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin-bottom: var(--space-md);
+    font-weight: var(--font-weight-normal);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-lg);
   }
   @media (max-width: 768px) {
     .hero__heading {
-      font-size: clamp(2rem, 8vw, 3.5rem) !important;
+      font-size: clamp(2.5rem, 10vw, 4.5rem) !important;
     }
   }
   .hero__subheading {
-    font-size: var(--text-lg);
-    opacity: 0.85;
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-normal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
     margin-bottom: var(--space-lg);
-    max-width: 500px;
-    line-height: 1.5;
+    max-width: 400px;
+    line-height: 1.6;
   }
   .hero__content--center .hero__subheading {
     margin-left: auto;
@@ -142,6 +149,8 @@
   }
   .hero .btn {
     margin-top: var(--space-sm);
+    border-color: currentColor;
+    color: inherit;
   }
 </style>
 

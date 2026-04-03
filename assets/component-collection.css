@@ -1,11 +1,12 @@
 /* ============================================
-   COLLECTION PAGE
+   COLLECTION PAGE — Jacquemus-inspired
+   Gallery-like grid, editorial feel
    ============================================ */
 
 /* --- Collection Hero --- */
 .collection-hero {
   position: relative;
-  min-height: 40vh;
+  min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,22 +35,27 @@
 }
 
 .collection-hero__title {
-  font-size: var(--text-5xl);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--text-display);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  line-height: 0.9;
   margin-bottom: var(--space-sm);
 }
 
 .collection-hero__description {
-  font-size: var(--text-lg);
-  opacity: 0.8;
-  max-width: 500px;
+  font-size: var(--text-sm);
+  opacity: 0.7;
+  max-width: 400px;
   margin: 0 auto;
+  letter-spacing: 0.03em;
+  line-height: 1.6;
 }
 
-/* --- Filter Bar --- */
+/* --- Filter Bar — barely there, inline with content --- */
 .filter-bar {
   padding: var(--space-md) 0;
-  border-bottom: var(--border-thin);
+  border-bottom: 1px solid rgba(10, 10, 10, 0.06);
 }
 
 .filter-bar__inner {
@@ -63,7 +69,7 @@
 .filter-bar__filters {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: clamp(1rem, 0.5rem + 1.5vw, 2rem);
 }
 
 .filter-bar__group {
@@ -73,25 +79,31 @@
 .filter-bar__toggle {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 6px;
   background: none;
   border: none;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.08em;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   padding: var(--space-xs) 0;
   color: var(--color-primary);
   min-height: 44px;
+  opacity: 0.5;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.filter-bar__toggle:hover {
+  opacity: 1;
 }
 
 .filter-bar__toggle-icon {
-  width: 8px;
-  height: 8px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
+  width: 6px;
+  height: 6px;
+  border-right: 0.5px solid currentColor;
+  border-bottom: 0.5px solid currentColor;
   transform: rotate(45deg);
   transition: transform var(--duration-fast) var(--ease-out);
 }
@@ -100,10 +112,10 @@
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 180px;
+  min-width: 200px;
   background-color: var(--color-secondary);
-  border: var(--border-thin);
-  padding: var(--space-sm);
+  border: 1px solid rgba(10, 10, 10, 0.08);
+  padding: var(--space-md);
   z-index: 10;
   display: none;
 }
@@ -115,9 +127,10 @@
 .filter-bar__option {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) 0;
-  font-size: var(--text-sm);
+  gap: var(--space-sm);
+  padding: 0.375rem 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
   cursor: pointer;
 }
 
@@ -126,8 +139,8 @@
 }
 
 .filter-bar__count {
-  font-size: var(--text-xs);
-  opacity: 0.5;
+  font-size: var(--text-micro);
+  opacity: 0.3;
 }
 
 .filter-bar__sort {
@@ -141,17 +154,18 @@
   border: none;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.08em;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-primary);
   cursor: pointer;
   min-height: 44px;
+  opacity: 0.5;
 }
 
-/* --- Product Grid --- */
+/* --- Product Grid — gallery-like, generous spacing --- */
 .product-grid {
-  padding: var(--space-lg) 0 var(--space-2xl);
+  padding: var(--space-lg) 0 var(--space-section);
 }
 
 .product-grid__grid {
@@ -179,7 +193,7 @@
   padding: var(--space-xl) 0;
 }
 
-/* Mobile filter toggle */
+/* Mobile filter */
 @media (max-width: 768px) {
   .filter-bar__filters {
     display: none;
@@ -190,7 +204,7 @@
     align-items: flex-start;
     width: 100%;
     padding-top: var(--space-sm);
-    border-top: var(--border-thin);
+    border-top: 1px solid rgba(10, 10, 10, 0.06);
   }
   .filter-bar__mobile-toggle {
     display: flex;

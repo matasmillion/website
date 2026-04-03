@@ -58,7 +58,7 @@
 
 <style>
   .featured-products {
-    padding: var(--space-2xl) 0;
+    padding: var(--space-section) 0;
   }
   .featured-products__header {
     display: flex;
@@ -68,19 +68,24 @@
   }
   .featured-products__heading {
     font-size: var(--text-xs);
-    font-weight: var(--font-weight-medium);
-    letter-spacing: 0.15em;
+    font-weight: normal;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    opacity: 0.5;
+    opacity: 0.4;
   }
   .featured-products__link {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
     font-size: var(--text-xs);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
+    opacity: 0.5;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .featured-products__link:hover {
+    opacity: 1;
   }
   .featured-products__carousel {
     position: relative;
@@ -93,37 +98,37 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    padding-bottom: var(--space-sm);
   }
   .featured-products__track::-webkit-scrollbar {
     display: none;
   }
   .featured-products__slide {
-    flex: 0 0 280px;
+    flex: 0 0 260px;
     scroll-snap-align: start;
   }
   @media (max-width: 768px) {
     .featured-products__slide {
-      flex: 0 0 220px;
+      flex: 0 0 200px;
     }
   }
   .featured-products__arrow {
     position: absolute;
     top: 40%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-secondary);
-    border: var(--border-thin);
+    background: none;
+    border: 1px solid rgba(10, 10, 10, 0.12);
     cursor: pointer;
     z-index: 2;
+    opacity: 0.5;
     transition: opacity var(--duration-fast) var(--ease-out);
   }
   .featured-products__arrow:hover {
-    opacity: 0.7;
+    opacity: 1;
   }
   .featured-products__arrow--prev { left: 0; }
   .featured-products__arrow--next { right: 0; }
