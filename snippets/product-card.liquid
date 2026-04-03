@@ -1,6 +1,8 @@
 {%- comment -%}
   Product Card Snippet — Jacquemus-style
-  Usage: {% render 'product-card', product: product, show_secondary_image: true %}
+  Figma layout: image → name (left) + price (below name) + heart (bottom-right)
+  Color dots top-right of image
+  Usage: {% render 'product-card', product: product %}
 {%- endcomment -%}
 
 {%- liquid
@@ -17,7 +19,7 @@
           srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
                   {{ product.featured_image | image_url: width: 600 }} 600w,
                   {{ product.featured_image | image_url: width: 800 }} 800w"
-          sizes="(max-width: 768px) 50vw, 33vw"
+          sizes="(max-width: 768px) 50vw, 25vw"
           alt="{{ product.featured_image.alt | escape }}"
           loading="lazy"
           width="{{ product.featured_image.width }}"
@@ -30,7 +32,7 @@
             srcset="{{ product.images[1] | image_url: width: 400 }} 400w,
                     {{ product.images[1] | image_url: width: 600 }} 600w,
                     {{ product.images[1] | image_url: width: 800 }} 800w"
-            sizes="(max-width: 768px) 50vw, 33vw"
+            sizes="(max-width: 768px) 50vw, 25vw"
             alt="{{ product.images[1].alt | escape }}"
             loading="lazy"
             width="{{ product.images[1].width }}"
@@ -38,34 +40,71 @@
             class="product-card__image product-card__image--secondary"
           >
         {%- endif -%}
+
+        {%- comment -%} Color dots (top-right of image, like Figma) {% endcomment -%}
+        {%- if product.options_by_name['Color'].values.size > 1 -%}
+          <div class="product-card__colors">
+            {%- for color in product.options_by_name['Color'].values limit: 5 -%}
+              {%- liquid
+                assign cl = color | downcase | replace: ' ', ''
+                assign sc = '#000'
+                if cl contains 'white' or cl contains 'ivory' or cl contains 'cream'
+                  assign sc = '#FFFFFF'
+                elsif cl contains 'black'
+                  assign sc = '#000000'
+                elsif cl contains 'navy'
+                  assign sc = '#1B2A4A'
+                elsif cl contains 'brown' or cl contains 'tan'
+                  assign sc = '#8B6914'
+                elsif cl contains 'green' or cl contains 'olive'
+                  assign sc = '#556B2F'
+                elsif cl contains 'blue'
+                  assign sc = '#3B5998'
+                elsif cl contains 'red' or cl contains 'burgundy'
+                  assign sc = '#8B0000'
+                elsif cl contains 'grey' or cl contains 'gray'
+                  assign sc = '#808080'
+                elsif cl contains 'beige' or cl contains 'sand'
+                  assign sc = '#D4C5A9'
+                elsif cl contains 'pink'
+                  assign sc = '#D4A0A0'
+                endif
+              -%}
+              <span class="product-card__color-dot" style="background:{{ sc }};{% if cl contains 'white' or cl contains 'ivory' %}border-color:rgba(0,0,0,0.15);{% endif %}"></span>
+            {%- endfor -%}
+            {%- if product.options_by_name['Color'].values.size > 5 -%}
+              <span class="product-card__color-more">+ {{ product.options_by_name['Color'].values.size | minus: 5 }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
       {%- else -%}
         <div class="product-card__placeholder">
           {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
         </div>
       {%- endif -%}
     </div>
-
-    <div class="product-card__info">
-      <div class="product-card__info-row">
-        <h3 class="product-card__title">{{ product.title }}</h3>
-        <div class="product-card__info-right">
-          <span class="product-card__price">
-            {%- if product.compare_at_price > product.price -%}
-              <span class="product-card__price--sale">{{ product.price | money }}</span>
-            {%- else -%}
-              {{ product.price | money }}
-            {%- endif -%}
-          </span>
-        </div>
-      </div>
-      <button
-        class="product-card__wishlist"
-        data-wishlist-toggle="{{ product.handle }}"
-        aria-label="Save {{ product.title }}"
-        aria-pressed="false"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
-    </div>
   </a>
+
+  <div class="product-card__info">
+    <div class="product-card__info-left">
+      <a href="{{ product.url }}" class="product-card__title-link">
+        <h3 class="product-card__title">{{ product.title }}</h3>
+      </a>
+      <span class="product-card__price">
+        {%- if product.compare_at_price > product.price -%}
+          <span class="product-card__price--sale">{{ product.price | money }}</span>
+        {%- else -%}
+          {{ product.price | money }}
+        {%- endif -%}
+      </span>
+    </div>
+    <button
+      class="product-card__wishlist"
+      data-wishlist-toggle="{{ product.handle }}"
+      aria-label="Save {{ product.title }}"
+      aria-pressed="false"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
 </article>

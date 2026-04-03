@@ -2,105 +2,277 @@
   assign current_variant = product.selected_or_first_available_variant
 -%}
 
-<div class="product-info">
-  <div class="product-info__inner">
-    {%- comment -%} Gallery goes in the left column via template JSON ordering {% endcomment -%}
+{{ 'component-product-page.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
-    <div class="product-info__details">
-      <h1 class="product-info__title">{{ product.title }}</h1>
-
-      <div class="product-info__price" data-product-price>
-        <span data-price>{{ current_variant.price | money }}</span>
-        {%- if current_variant.compare_at_price > current_variant.price -%}
-          <span class="product-info__price--compare" data-compare-price>{{ current_variant.compare_at_price | money }}</span>
-        {%- endif -%}
-      </div>
-
-      {%- if section.settings.show_short_description and product.description != blank -%}
-        <div class="product-info__description">
-          {{ product.description | strip_html | truncate: 160 }}
+<div class="pdp" data-pdp>
+  {%- comment -%} ===== IMAGE GALLERY (LEFT ON DESKTOP) ===== {% endcomment -%}
+  <div class="pdp__gallery" data-product-gallery>
+    <div class="pdp__gallery-main" data-gallery-main>
+      {%- for image in product.images -%}
+        <div class="pdp__gallery-slide{% if forloop.first %} is-active{% endif %}" data-gallery-slide="{{ forloop.index0 }}">
+          <img
+            src="{{ image | image_url: width: 1200 }}"
+            srcset="{{ image | image_url: width: 600 }} 600w,
+                    {{ image | image_url: width: 900 }} 900w,
+                    {{ image | image_url: width: 1200 }} 1200w"
+            sizes="(min-width: 769px) 58vw, 100vw"
+            alt="{{ image.alt | default: product.title | escape }}"
+            width="{{ image.width }}"
+            height="{{ image.height }}"
+            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            class="pdp__gallery-img"
+          >
         </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if product.images.size > 1 -%}
+      <div class="pdp__gallery-dots">
+        {%- for image in product.images -%}
+          <button
+            class="pdp__gallery-dot{% if forloop.first %} is-active{% endif %}"
+            data-gallery-dot="{{ forloop.index0 }}"
+            aria-label="View image {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+      <button class="pdp__gallery-nav pdp__gallery-nav--prev" data-gallery-prev aria-label="Previous image">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
+      </button>
+      <button class="pdp__gallery-nav pdp__gallery-nav--next" data-gallery-next aria-label="Next image">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="1 1 7 6.5 1 12"/></svg>
+      </button>
+    {%- endif -%}
+
+    {%- comment -%} Wishlist button on image {% endcomment -%}
+    <button
+      class="pdp__wishlist-img"
+      data-wishlist-toggle="{{ product.handle }}"
+      aria-label="Save {{ product.title }}"
+      aria-pressed="false"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+
+  {%- comment -%} ===== PRODUCT DETAILS (RIGHT ON DESKTOP) ===== {% endcomment -%}
+  <div class="pdp__details">
+    <div class="pdp__details-inner">
+      {%- comment -%} Collection / Vendor {% endcomment -%}
+      {%- if product.collections.size > 0 -%}
+        <p class="pdp__collection">{{ product.collections.first.title }}</p>
       {%- endif -%}
 
-      {%- comment -%} Product Form {% endcomment -%}
-      {%- form 'product', product, data-add-to-cart: true -%}
-        <input type="hidden" name="id" value="{{ current_variant.id }}">
+      <h1 class="pdp__title">{{ product.title }}</h1>
 
-        {%- comment -%} Size Selector {% endcomment -%}
-        {%- for option in product.options_with_values -%}
-          <div class="product-info__sizes">
-            <div class="product-info__size-header">
-              <span class="product-info__size-label">{{ option.name }}</span>
-              {%- if option.name == 'Size' -%}
-                <button type="button" class="product-info__size-guide" data-modal-open="size-chart-modal">
-                  {{ 'products.size_guide' | t }}
-                </button>
-              {%- endif -%}
-            </div>
-            <div class="product-info__size-buttons" data-variant-select>
+      {%- if product.description != blank -%}
+        <p class="pdp__description">{{ product.description | strip_html | truncate: 200 }}</p>
+      {%- endif -%}
+
+      {%- comment -%} ===== COLOR SWATCHES ===== {% endcomment -%}
+      {%- for option in product.options_with_values -%}
+        {%- if option.name == 'Color' or option.name == 'Colour' -%}
+          <div class="pdp__swatches">
+            <p class="pdp__swatch-label">{{ option.selected_value }}</p>
+            <div class="pdp__swatch-list" data-variant-select>
               {%- for value in option.values -%}
+                {%- liquid
+                  assign color_lower = value | downcase | replace: ' ', ''
+                  assign swatch_color = '#000000'
+                  if color_lower contains 'black'
+                    assign swatch_color = '#000000'
+                  elsif color_lower contains 'white' or color_lower contains 'ivory'
+                    assign swatch_color = '#FFFFFF'
+                  elsif color_lower contains 'navy'
+                    assign swatch_color = '#1B2A4A'
+                  elsif color_lower contains 'brown' or color_lower contains 'tan'
+                    assign swatch_color = '#8B6914'
+                  elsif color_lower contains 'green' or color_lower contains 'khaki' or color_lower contains 'olive'
+                    assign swatch_color = '#556B2F'
+                  elsif color_lower contains 'blue'
+                    assign swatch_color = '#3B5998'
+                  elsif color_lower contains 'red' or color_lower contains 'burgundy'
+                    assign swatch_color = '#8B0000'
+                  elsif color_lower contains 'grey' or color_lower contains 'gray'
+                    assign swatch_color = '#808080'
+                  elsif color_lower contains 'beige' or color_lower contains 'sand' or color_lower contains 'cream'
+                    assign swatch_color = '#D4C5A9'
+                  elsif color_lower contains 'pink'
+                    assign swatch_color = '#D4A0A0'
+                  elsif color_lower contains 'orange'
+                    assign swatch_color = '#C4632A'
+                  elsif color_lower contains 'yellow'
+                    assign swatch_color = '#D4B44A'
+                  elsif color_lower contains 'purple'
+                    assign swatch_color = '#663399'
+                  endif
+                -%}
                 <button
                   type="button"
-                  class="product-info__size-btn{% if option.selected_value == value %} is-selected{% endif %}"
+                  class="pdp__swatch{% if option.selected_value == value %} is-selected{% endif %}"
                   data-variant-option="{{ value }}"
+                  aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
-                >
-                  {{ value }}
-                </button>
+                  style="background-color: {{ swatch_color }};{% if color_lower contains 'white' or color_lower contains 'ivory' or color_lower contains 'cream' %} border-color: rgba(0,0,0,0.2);{% endif %}"
+                  title="{{ value }}"
+                ></button>
               {%- endfor -%}
             </div>
           </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- comment -%} ===== SIZE SELECTOR ===== {% endcomment -%}
+      {%- form 'product', product, data-add-to-cart: true, class: 'pdp__form' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+        {%- for option in product.options_with_values -%}
+          {%- unless option.name == 'Color' or option.name == 'Colour' -%}
+            <div class="pdp__sizes">
+              <div class="pdp__size-header">
+                <span class="pdp__size-label">{{ option.name }}</span>
+                {%- if option.name == 'Size' -%}
+                  <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">Size guide</button>
+                {%- endif -%}
+              </div>
+              <div class="pdp__size-buttons" data-variant-select>
+                {%- for value in option.values -%}
+                  <button
+                    type="button"
+                    class="pdp__size-btn{% if option.selected_value == value %} is-selected{% endif %}"
+                    data-variant-option="{{ value }}"
+                    aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
+                  >{{ value }}</button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endunless -%}
         {%- endfor -%}
 
-        {%- comment -%} Quantity {% endcomment -%}
-        <div class="product-info__quantity" data-quantity>
-          <button type="button" class="product-info__quantity-btn" data-quantity-minus aria-label="Decrease quantity">−</button>
-          <input
-            type="number"
-            name="quantity"
-            value="1"
-            min="1"
-            max="99"
-            class="product-info__quantity-input"
-            data-quantity-input
-            aria-label="{{ 'products.quantity' | t }}"
-          >
-          <button type="button" class="product-info__quantity-btn" data-quantity-plus aria-label="Increase quantity">+</button>
-        </div>
-
-        {%- comment -%} Add to Cart {% endcomment -%}
+        {%- comment -%} ===== ADD TO CART BUTTON (DESKTOP) ===== {% endcomment -%}
         <button
           type="submit"
-          class="btn btn--primary product-info__add-btn"
+          class="pdp__add-btn"
           data-add-btn
           {% unless current_variant.available %}disabled{% endunless %}
         >
-          {%- if current_variant.available -%}
-            {{ 'products.add_to_cart' | t }}
-          {%- else -%}
-            {{ 'products.sold_out' | t }}
-          {%- endif -%}
+          <svg class="pdp__add-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <span class="pdp__add-text">
+            {%- if current_variant.available -%}Add to cart{%- else -%}Sold out{%- endif -%}
+          </span>
+          <span class="pdp__add-price" data-price>{{ current_variant.price | money }}</span>
         </button>
       {%- endform -%}
 
-      {%- comment -%} Estimated Delivery — app placeholder {% endcomment -%}
-      <div class="product-delivery" id="delivery-estimate-container">
-        {%- if section.settings.delivery_text != blank -%}
-          <p>{{ section.settings.delivery_text }}</p>
-        {%- endif -%}
+      {%- comment -%} Book appointment link {% endcomment -%}
+      {%- if section.settings.show_appointment_link -%}
+        <a href="{{ section.settings.appointment_link }}" class="pdp__appointment">
+          See availability and book an appointment in store
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} ===== TABS (Details | Delivery and returns | Assistance) ===== {% endcomment -%}
+      <div class="pdp__tabs" data-pdp-tabs>
+        <div class="pdp__tab-list" role="tablist">
+          <button class="pdp__tab is-active" role="tab" data-tab="details" aria-selected="true">Details</button>
+          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false">Delivery and returns</button>
+          <button class="pdp__tab" role="tab" data-tab="assistance" aria-selected="false">Assistance</button>
+        </div>
+
+        <div class="pdp__tab-panel is-active" data-tab-panel="details" role="tabpanel">
+          {%- if product.collections.size > 0 -%}
+            <p class="pdp__tab-collection">{{ product.collections.first.title }}</p>
+          {%- endif -%}
+          <p class="pdp__tab-subtitle">{{ product.title }}</p>
+          {%- if product.description != blank -%}
+            <div class="pdp__tab-description">{{ product.description }}</div>
+          {%- endif -%}
+          {%- if product.metafields.custom.material != blank -%}
+            <p class="pdp__tab-meta">{{ product.metafields.custom.material }}</p>
+          {%- endif -%}
+          {%- if product.metafields.custom.made_in != blank -%}
+            <p class="pdp__tab-meta">Made in {{ product.metafields.custom.made_in }}</p>
+          {%- endif -%}
+          <p class="pdp__tab-meta">Ref. {{ product.variants.first.sku | default: product.id }}</p>
+        </div>
+
+        <div class="pdp__tab-panel" data-tab-panel="delivery" role="tabpanel">
+          <p class="pdp__tab-subtitle">Delivery</p>
+          <p>Free delivery and easy returns within 14 days.</p>
+          <p>Standard delivery: 3-5 business days.</p>
+          <p>Express delivery: 1-2 business days.</p>
+        </div>
+
+        <div class="pdp__tab-panel" data-tab-panel="assistance" role="tabpanel">
+          <p class="pdp__tab-subtitle">Need help?</p>
+          <p>Contact our customer service team for assistance with sizing, orders, or any questions.</p>
+          <a href="/pages/contact" class="pdp__tab-link">Contact us</a>
+        </div>
       </div>
     </div>
   </div>
+
+  {%- comment -%} ===== STICKY BOTTOM BAR (MOBILE) ===== {% endcomment -%}
+  <div class="pdp__sticky-bar" data-pdp-sticky>
+    <div class="pdp__sticky-inner">
+      <span class="pdp__sticky-title">{{ product.title }}</span>
+      <button
+        class="pdp__sticky-heart"
+        data-wishlist-toggle="{{ product.handle }}"
+        aria-label="Save {{ product.title }}"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+    <button class="pdp__sticky-add" data-sticky-add onclick="document.querySelector('[data-add-to-cart]').requestSubmit()">
+      <span>Add to cart</span>
+      <span class="pdp__sticky-price" data-price>{{ current_variant.price | money }}</span>
+    </button>
+  </div>
 </div>
+
+{%- comment -%} ===== COMPLETE THE LOOK ===== {% endcomment -%}
+{%- if product.collections.size > 0 -%}
+  {%- assign related_collection = product.collections.first -%}
+  {%- if related_collection.products.size > 1 -%}
+    <section class="pdp-related reveal">
+      <h2 class="pdp-related__heading">Complete the look</h2>
+      <div class="pdp-related__carousel" data-carousel>
+        <div class="pdp-related__track" data-carousel-track>
+          {%- for related_product in related_collection.products limit: 8 -%}
+            {%- unless related_product.handle == product.handle -%}
+              <div class="pdp-related__slide">
+                {%- render 'product-card', product: related_product -%}
+              </div>
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+        <button class="pdp-related__nav pdp-related__nav--prev" data-carousel-prev aria-label="Previous">
+          <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
+        </button>
+        <button class="pdp-related__nav pdp-related__nav--next" data-carousel-next aria-label="Next">
+          <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="1 1 7 6.5 1 12"/></svg>
+        </button>
+      </div>
+    </section>
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ===== RECENTLY VIEWED ===== {% endcomment -%}
+<section class="pdp-recent reveal" data-recently-viewed>
+  <h2 class="pdp-recent__heading">Recently viewed</h2>
+  <div class="pdp-recent__grid" data-recently-viewed-grid></div>
+</section>
 
 {%- comment -%} Size Chart Modal {% endcomment -%}
 {{ 'component-modal.css' | asset_url | stylesheet_tag }}
 <div class="modal" id="size-chart-modal" aria-hidden="true">
   <div class="modal__overlay"></div>
-  <div class="modal__panel" role="dialog" aria-label="{{ 'products.size_guide' | t }}">
+  <div class="modal__panel" role="dialog" aria-label="Size guide">
     <div class="modal__header">
-      <h2 class="modal__title">{{ 'products.size_guide' | t }}</h2>
-      <button class="modal__close" data-modal-close aria-label="{{ 'general.close' | t }}">
+      <h2 class="modal__title">Size guide</h2>
+      <button class="modal__close" data-modal-close aria-label="Close">
         {%- render 'icon-close' -%}
       </button>
     </div>
@@ -108,11 +280,26 @@
       {%- if section.settings.size_chart_content != blank -%}
         {{ section.settings.size_chart_content }}
       {%- else -%}
-        <p>Size chart will be displayed here. Install Kiwi Size Chart or VibeTry AI to enable dynamic size recommendations.</p>
+        <p>Size chart coming soon.</p>
       {%- endif -%}
     </div>
   </div>
 </div>
+
+<script>
+  // Track recently viewed
+  (function() {
+    const handle = '{{ product.handle }}';
+    const key = 'fr_recently_viewed';
+    try {
+      let items = JSON.parse(localStorage.getItem(key)) || [];
+      items = items.filter(h => h !== handle);
+      items.unshift(handle);
+      items = items.slice(0, 8);
+      localStorage.setItem(key, JSON.stringify(items));
+    } catch(e) {}
+  })();
+</script>
 
 {% schema %}
 {
@@ -122,21 +309,30 @@
     {
       "type": "checkbox",
       "id": "show_short_description",
-      "label": "Show short description above fold",
+      "label": "Show short description",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_appointment_link",
+      "label": "Show appointment link",
+      "default": false
+    },
+    {
+      "type": "url",
+      "id": "appointment_link",
+      "label": "Appointment page link"
     },
     {
       "type": "text",
       "id": "delivery_text",
-      "label": "Delivery estimate text (placeholder)",
-      "default": "Order today for delivery within 5 business days",
-      "info": "Will be replaced by DT: Estimated Delivery Date app"
+      "label": "Delivery estimate text",
+      "default": "Order today for delivery within 5 business days"
     },
     {
       "type": "richtext",
       "id": "size_chart_content",
-      "label": "Size chart content (placeholder)",
-      "info": "Will be replaced by Kiwi Size Chart app"
+      "label": "Size chart content"
     }
   ]
 }

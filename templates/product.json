@@ -4,93 +4,12 @@
       "type": "product-info",
       "settings": {
         "show_short_description": true,
+        "show_appointment_link": false,
         "delivery_text": "Order today for delivery within 5 business days"
-      }
-    },
-    "product_guarantees": {
-      "type": "product-guarantees",
-      "blocks": {
-        "guarantee_1": {
-          "type": "guarantee",
-          "settings": { "icon": "returns", "text": "Free Returns & Exchanges" }
-        },
-        "guarantee_2": {
-          "type": "guarantee",
-          "settings": { "icon": "clock", "text": "5-Day Delivery Guarantee" }
-        },
-        "guarantee_3": {
-          "type": "guarantee",
-          "settings": { "icon": "shipping", "text": "Complimentary Express Over $150" }
-        }
-      },
-      "block_order": ["guarantee_1", "guarantee_2", "guarantee_3"]
-    },
-    "product_accordion": {
-      "type": "product-details-accordion",
-      "blocks": {
-        "description": {
-          "type": "accordion_item",
-          "settings": { "heading": "Description", "content": "<p>Premium travel essentials designed for the modern explorer.</p>" }
-        },
-        "materials": {
-          "type": "accordion_item",
-          "settings": { "heading": "Materials & Care", "content": "<p>Details about materials, fabric composition, and care instructions.</p>" }
-        },
-        "shipping": {
-          "type": "accordion_item",
-          "settings": { "heading": "Shipping & Returns", "content": "<p>Complimentary shipping on orders over $150. Free returns and exchanges within 30 days.</p>" }
-        },
-        "features": {
-          "type": "accordion_item",
-          "settings": { "heading": "Features", "content": "<p>Product-specific features and travel-friendly design details.</p>" }
-        }
-      },
-      "block_order": ["description", "materials", "shipping", "features"]
-    },
-    "product_video": {
-      "type": "product-video",
-      "settings": {
-        "autoplay": false,
-        "full_width": true,
-        "aspect_ratio": "16/9"
-      }
-    },
-    "product_upsell": {
-      "type": "product-upsell-carousel",
-      "settings": {
-        "heading": "Pairs with",
-        "products_count": 4
-      }
-    },
-    "product_reviews": {
-      "type": "product-reviews-container",
-      "settings": {
-        "heading": "Reviews"
-      }
-    },
-    "product_editorial": {
-      "type": "product-editorial-image",
-      "settings": {
-        "text_color": "#FFFFFF",
-        "overlay_opacity": 20
-      }
-    },
-    "product_recommendations": {
-      "type": "product-recommendations",
-      "settings": {
-        "heading": "You May Also Like",
-        "products_count": 4
       }
     }
   },
   "order": [
-    "product_info",
-    "product_guarantees",
-    "product_accordion",
-    "product_video",
-    "product_upsell",
-    "product_reviews",
-    "product_editorial",
-    "product_recommendations"
+    "product_info"
   ]
 }

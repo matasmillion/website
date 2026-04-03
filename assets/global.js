@@ -375,6 +375,69 @@
   // Expose globally for wishlist page
   window.FRWishlist = Wishlist;
 
+  /* --- PDP Tabs --- */
+  const initPdpTabs = () => {
+    document.querySelectorAll('[data-pdp-tabs]').forEach(container => {
+      const tabs = container.querySelectorAll('[data-tab]');
+      const panels = container.querySelectorAll('[data-tab-panel]');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => { t.classList.remove('is-active'); t.setAttribute('aria-selected', 'false'); });
+          panels.forEach(p => p.classList.remove('is-active'));
+          tab.classList.add('is-active');
+          tab.setAttribute('aria-selected', 'true');
+          const panel = container.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
+          if (panel) panel.classList.add('is-active');
+        });
+      });
+    });
+  };
+
+  /* --- PDP Gallery (swipe + dots + arrows) --- */
+  const initPdpGallery = () => {
+    const gallery = document.querySelector('[data-product-gallery]');
+    if (!gallery) return;
+    const main = gallery.querySelector('[data-gallery-main]');
+    const dots = gallery.querySelectorAll('[data-gallery-dot]');
+    const prev = gallery.querySelector('[data-gallery-prev]');
+    const next = gallery.querySelector('[data-gallery-next]');
+    const slides = gallery.querySelectorAll('[data-gallery-slide]');
+    if (!main || !slides.length) return;
+
+    let current = 0;
+    const total = slides.length;
+
+    const goTo = (idx) => {
+      current = Math.max(0, Math.min(total - 1, idx));
+      main.scrollTo({ left: main.offsetWidth * current, behavior: 'smooth' });
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+    };
+
+    dots.forEach(dot => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.galleryDot))));
+    if (prev) prev.addEventListener('click', () => goTo(current - 1));
+    if (next) next.addEventListener('click', () => goTo(current + 1));
+
+    // Sync dots on scroll
+    let scrollTimeout;
+    main.addEventListener('scroll', () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const idx = Math.round(main.scrollLeft / main.offsetWidth);
+        if (idx !== current) {
+          current = idx;
+          dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+        }
+      }, 100);
+    }, { passive: true });
+  };
+
+  /* --- PDP Sticky Bar (show on scroll past add-to-cart) --- */
+  const initPdpStickyBar = () => {
+    const stickyBar = document.querySelector('[data-pdp-sticky]');
+    if (!stickyBar) return;
+    // Always visible on mobile via CSS, no extra JS needed
+  };
+
   /* --- Initialize Everything --- */
   const init = () => {
     initReveal();
@@ -390,6 +453,9 @@
     initFilters();
     initAddToCart();
     initWishlist();
+    initPdpTabs();
+    initPdpGallery();
+    initPdpStickyBar();
   };
 
   if (document.readyState === 'loading') {
