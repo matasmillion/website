@@ -1,0 +1,35 @@
+{
+  "type": "footer",
+  "name": "Footer Group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "settings": {
+        "tagline": "Designed for those who see the world differently."
+      },
+      "blocks": {
+        "menu_1": {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop"
+          }
+        },
+        "menu_2": {
+          "type": "menu",
+          "settings": {
+            "heading": "About"
+          }
+        },
+        "newsletter": {
+          "type": "newsletter",
+          "settings": {
+            "heading": "Stay Connected",
+            "text": "First access to new collections and travel stories."
+          }
+        }
+      },
+      "block_order": ["menu_1", "menu_2", "newsletter"]
+    }
+  },
+  "order": ["footer"]
+}

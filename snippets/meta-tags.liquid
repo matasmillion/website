@@ -1,0 +1,31 @@
+{%- comment -%} Open Graph / Social Meta Tags {%- endcomment -%}
+
+{%- if template.name == 'product' -%}
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="{{ product.title }}">
+  <meta property="og:description" content="{{ product.description | strip_html | truncate: 200 | escape }}">
+  {%- if product.featured_image -%}
+    <meta property="og:image" content="https:{{ product.featured_image | image_url: width: 1200 }}">
+  {%- endif -%}
+  <meta property="og:price:amount" content="{{ product.price | money_without_currency }}">
+  <meta property="og:price:currency" content="{{ cart.currency.iso_code }}">
+{%- elsif template.name == 'collection' -%}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ collection.title }}">
+  <meta property="og:description" content="{{ collection.description | strip_html | truncate: 200 | escape }}">
+  {%- if collection.image -%}
+    <meta property="og:image" content="https:{{ collection.image | image_url: width: 1200 }}">
+  {%- endif -%}
+{%- else -%}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ page_title | escape }}">
+  {%- if page_description -%}
+    <meta property="og:description" content="{{ page_description | escape }}">
+  {%- endif -%}
+{%- endif -%}
+
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:site_name" content="{{ shop.name }}">
+
+{%- comment -%} Twitter Card {%- endcomment -%}
+<meta name="twitter:card" content="summary_large_image">

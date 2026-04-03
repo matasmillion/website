@@ -1,0 +1,106 @@
+{{ 'component-product-page.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign gallery_style = section.settings.gallery_style | default: 'thumbnails'
+-%}
+
+<div class="product-gallery" data-product-gallery>
+  {%- if gallery_style == 'thumbnails' -%}
+    <div class="product-gallery__layout product-gallery__layout--thumbnails">
+      <div class="product-gallery__thumbs">
+        {%- for image in product.images -%}
+          <button
+            class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+            data-gallery-thumb="{{ image | image_url: width: 800 }}"
+            data-thumb-srcset="{{ image | image_url: width: 600 }} 600w, {{ image | image_url: width: 800 }} 800w"
+            aria-label="View image {{ forloop.index }}"
+          >
+            <img
+              src="{{ image | image_url: width: 100 }}"
+              alt="{{ image.alt | escape }}"
+              width="80"
+              height="100"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            >
+          </button>
+        {%- endfor -%}
+      </div>
+      <div class="product-gallery__main" data-gallery-main>
+        {%- if product.featured_image -%}
+          <img
+            src="{{ product.featured_image | image_url: width: 800 }}"
+            srcset="{{ product.featured_image | image_url: width: 600 }} 600w,
+                    {{ product.featured_image | image_url: width: 800 }} 800w,
+                    {{ product.featured_image | image_url: width: 1200 }} 1200w"
+            sizes="(max-width: 768px) 100vw, 55vw"
+            alt="{{ product.featured_image.alt | escape }}"
+            width="{{ product.featured_image.width }}"
+            height="{{ product.featured_image.height }}"
+            loading="eager"
+          >
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag }}
+        {%- endif -%}
+      </div>
+    </div>
+
+  {%- elsif gallery_style == 'scroll' -%}
+    <div class="product-gallery__layout product-gallery__layout--scroll">
+      <div class="product-gallery__scroll-images">
+        {%- for image in product.images -%}
+          <div class="product-gallery__main">
+            <img
+              src="{{ image | image_url: width: 800 }}"
+              srcset="{{ image | image_url: width: 600 }} 600w,
+                      {{ image | image_url: width: 800 }} 800w,
+                      {{ image | image_url: width: 1200 }} 1200w"
+              sizes="(max-width: 768px) 100vw, 55vw"
+              alt="{{ image.alt | escape }}"
+              width="{{ image.width }}"
+              height="{{ image.height }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            >
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+
+  {%- elsif gallery_style == 'grid' -%}
+    <div class="product-gallery__layout product-gallery__layout--grid">
+      {%- for image in product.images -%}
+        <div class="product-gallery__main">
+          <img
+            src="{{ image | image_url: width: 600 }}"
+            srcset="{{ image | image_url: width: 400 }} 400w,
+                    {{ image | image_url: width: 600 }} 600w"
+            sizes="(max-width: 768px) 100vw, 28vw"
+            alt="{{ image.alt | escape }}"
+            width="{{ image.width }}"
+            height="{{ image.height }}"
+            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+          >
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Product Gallery",
+  "class": "section-product-gallery",
+  "settings": [
+    {
+      "type": "select",
+      "id": "gallery_style",
+      "label": "Gallery style",
+      "options": [
+        { "value": "thumbnails", "label": "Thumbnails" },
+        { "value": "scroll", "label": "Vertical scroll" },
+        { "value": "grid", "label": "Grid" }
+      ],
+      "default": "thumbnails"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Foreign World",
+        "text": "<p>Welcome to Foreign World, your gateway to the cities and cultures that inspire every collection. Explore interactive travel content, neighborhood guides, and local recommendations curated by our global community. From the back alleys of Tokyo to the rooftops of Marrakech, these are the places that move us and the stories behind what we create. Dive in, discover something new, and let the world shape your perspective.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Page Title",
+        "text": "<p>Page content will appear here. Customize this through the theme editor.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

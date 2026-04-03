@@ -1,0 +1,56 @@
+{
+  "general": {
+    "skip_to_content": "Skip to content",
+    "search": "Search",
+    "close": "Close",
+    "menu": "Menu",
+    "cart": "Cart",
+    "account": "Account"
+  },
+  "products": {
+    "add_to_cart": "Add to Cart",
+    "sold_out": "Sold Out",
+    "unavailable": "Unavailable",
+    "quantity": "Quantity",
+    "size_guide": "Size Guide",
+    "description": "Description",
+    "materials_care": "Materials & Care",
+    "shipping_returns": "Shipping & Returns",
+    "features": "Features",
+    "pairs_with": "Pairs with",
+    "you_may_also_like": "You May Also Like",
+    "recently_viewed": "Recently Viewed",
+    "notify_me": "Notify Me",
+    "price": {
+      "from": "From",
+      "sale": "Sale"
+    }
+  },
+  "collections": {
+    "filter": "Filter",
+    "sort": "Sort by",
+    "load_more": "Load More",
+    "no_products": "No products found"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "continue_shopping": "Continue Shopping",
+    "remove": "Remove",
+    "shipping_note": "Shipping & taxes calculated at checkout"
+  },
+  "newsletter": {
+    "placeholder": "Enter your email",
+    "submit": "Subscribe",
+    "success": "Thank you for subscribing"
+  },
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "close_menu": "Close menu",
+    "open_menu": "Open menu",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "header",
+  "name": "Header Group",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {
+        "show_announcement": true,
+        "text": "Complimentary shipping on orders over $150",
+        "bg_color": "#0A0A0A",
+        "text_color": "#F5F0EB"
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "logo_position": "left",
+        "sticky_header": true,
+        "transparent_header": true
+      }
+    }
+  },
+  "order": ["announcement-bar", "header"]
+}

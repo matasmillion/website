@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Search",
+        "text": "<p>Search results will appear here.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

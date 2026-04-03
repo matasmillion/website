@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Contact Us",
+        "text": "<p>We are here for you. Whether you have a question about your order, want to learn more about the Foreign Fund, or just want to say hello, we would love to hear from you. Reach out to our team and we will get back to you as soon as possible. Your experience matters to us, and we are committed to making it a great one.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

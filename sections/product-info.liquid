@@ -1,0 +1,143 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+
+<div class="product-info">
+  <div class="product-info__inner">
+    {%- comment -%} Gallery goes in the left column via template JSON ordering {% endcomment -%}
+
+    <div class="product-info__details">
+      <h1 class="product-info__title">{{ product.title }}</h1>
+
+      <div class="product-info__price" data-product-price>
+        <span data-price>{{ current_variant.price | money }}</span>
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="product-info__price--compare" data-compare-price>{{ current_variant.compare_at_price | money }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_short_description and product.description != blank -%}
+        <div class="product-info__description">
+          {{ product.description | strip_html | truncate: 160 }}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Product Form {% endcomment -%}
+      {%- form 'product', product, data-add-to-cart: true -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+        {%- comment -%} Size Selector {% endcomment -%}
+        {%- for option in product.options_with_values -%}
+          <div class="product-info__sizes">
+            <div class="product-info__size-header">
+              <span class="product-info__size-label">{{ option.name }}</span>
+              {%- if option.name == 'Size' -%}
+                <button type="button" class="product-info__size-guide" data-modal-open="size-chart-modal">
+                  {{ 'products.size_guide' | t }}
+                </button>
+              {%- endif -%}
+            </div>
+            <div class="product-info__size-buttons" data-variant-select>
+              {%- for value in option.values -%}
+                <button
+                  type="button"
+                  class="product-info__size-btn{% if option.selected_value == value %} is-selected{% endif %}"
+                  data-variant-option="{{ value }}"
+                  aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
+                >
+                  {{ value }}
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endfor -%}
+
+        {%- comment -%} Quantity {% endcomment -%}
+        <div class="product-info__quantity" data-quantity>
+          <button type="button" class="product-info__quantity-btn" data-quantity-minus aria-label="Decrease quantity">−</button>
+          <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            max="99"
+            class="product-info__quantity-input"
+            data-quantity-input
+            aria-label="{{ 'products.quantity' | t }}"
+          >
+          <button type="button" class="product-info__quantity-btn" data-quantity-plus aria-label="Increase quantity">+</button>
+        </div>
+
+        {%- comment -%} Add to Cart {% endcomment -%}
+        <button
+          type="submit"
+          class="btn btn--primary product-info__add-btn"
+          data-add-btn
+          {% unless current_variant.available %}disabled{% endunless %}
+        >
+          {%- if current_variant.available -%}
+            {{ 'products.add_to_cart' | t }}
+          {%- else -%}
+            {{ 'products.sold_out' | t }}
+          {%- endif -%}
+        </button>
+      {%- endform -%}
+
+      {%- comment -%} Estimated Delivery — app placeholder {% endcomment -%}
+      <div class="product-delivery" id="delivery-estimate-container">
+        {%- if section.settings.delivery_text != blank -%}
+          <p>{{ section.settings.delivery_text }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Size Chart Modal {% endcomment -%}
+{{ 'component-modal.css' | asset_url | stylesheet_tag }}
+<div class="modal" id="size-chart-modal" aria-hidden="true">
+  <div class="modal__overlay"></div>
+  <div class="modal__panel" role="dialog" aria-label="{{ 'products.size_guide' | t }}">
+    <div class="modal__header">
+      <h2 class="modal__title">{{ 'products.size_guide' | t }}</h2>
+      <button class="modal__close" data-modal-close aria-label="{{ 'general.close' | t }}">
+        {%- render 'icon-close' -%}
+      </button>
+    </div>
+    <div class="modal__body" id="size-chart-content">
+      {%- if section.settings.size_chart_content != blank -%}
+        {{ section.settings.size_chart_content }}
+      {%- else -%}
+        <p>Size chart will be displayed here. Install Kiwi Size Chart or VibeTry AI to enable dynamic size recommendations.</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Info",
+  "class": "section-product-info",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_short_description",
+      "label": "Show short description above fold",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "delivery_text",
+      "label": "Delivery estimate text (placeholder)",
+      "default": "Order today for delivery within 5 business days",
+      "info": "Will be replaced by DT: Estimated Delivery Date app"
+    },
+    {
+      "type": "richtext",
+      "id": "size_chart_content",
+      "label": "Size chart content (placeholder)",
+      "info": "Will be replaced by Kiwi Size Chart app"
+    }
+  ]
+}
+{% endschema %}

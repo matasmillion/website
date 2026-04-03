@@ -1,0 +1,73 @@
+{
+  "current": {
+    "color_primary": "#0A0A0A",
+    "color_secondary": "#F5F0EB",
+    "color_accent": "#C4632A",
+    "color_supporting_green": "#7A8B6F",
+    "color_supporting_sand": "#D4C5A9",
+    "font_heading": "inter_n5",
+    "font_body": "inter_n4",
+    "font_body_size": 16,
+    "cart_type": "drawer",
+    "free_shipping_threshold": 150,
+    "sections": {
+      "header-group": {
+        "type": "header",
+        "sections": {
+          "announcement-bar": {
+            "type": "announcement-bar",
+            "settings": {
+              "show_announcement": true,
+              "text": "Complimentary shipping on orders over $150",
+              "bg_color": "#0A0A0A",
+              "text_color": "#F5F0EB"
+            }
+          },
+          "header": {
+            "type": "header",
+            "settings": {
+              "logo_position": "left",
+              "sticky_header": true,
+              "transparent_header": true
+            }
+          }
+        },
+        "order": ["announcement-bar", "header"]
+      },
+      "footer-group": {
+        "type": "footer",
+        "sections": {
+          "footer": {
+            "type": "footer",
+            "settings": {
+              "tagline": "Designed for those who see the world differently."
+            },
+            "blocks": {
+              "menu_1": {
+                "type": "menu",
+                "settings": {
+                  "heading": "Shop"
+                }
+              },
+              "menu_2": {
+                "type": "menu",
+                "settings": {
+                  "heading": "About"
+                }
+              },
+              "newsletter": {
+                "type": "newsletter",
+                "settings": {
+                  "heading": "Stay Connected",
+                  "text": "First access to new collections and travel stories."
+                }
+              }
+            },
+            "block_order": ["menu_1", "menu_2", "newsletter"]
+          }
+        },
+        "order": ["footer"]
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "FAQ",
+        "text": "<p>Got questions? We have answers. Find everything you need to know about ordering, shipping, sizing, returns, and the Foreign Fund. If something is not covered here, our team is always ready to help. We believe in transparency and want you to feel confident every step of the way.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

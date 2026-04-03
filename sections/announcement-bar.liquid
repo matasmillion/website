@@ -1,0 +1,74 @@
+{%- if section.settings.show_announcement -%}
+  <div class="announcement-bar" role="region" aria-label="Announcement" style="
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+  ">
+    <div class="announcement-bar__inner container">
+      {%- if section.settings.link != blank -%}
+        <a href="{{ section.settings.link }}" class="announcement-bar__link">
+          {{ section.settings.text }}
+        </a>
+      {%- else -%}
+        <p class="announcement-bar__text">{{ section.settings.text }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+  .announcement-bar {
+    text-align: center;
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+  }
+  .announcement-bar__link {
+    text-decoration: none;
+    color: inherit;
+  }
+  .announcement-bar__link:hover {
+    opacity: 0.8;
+  }
+  .announcement-bar__text {
+    margin: 0;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "class": "section-announcement",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Complimentary shipping on orders over $150"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#0A0A0A"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#F5F0EB"
+    }
+  ]
+}
+{% endschema %}

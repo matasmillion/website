@@ -1,0 +1,250 @@
+{%- liquid
+  assign text_position = section.settings.text_position | default: 'center'
+  assign text_color = section.settings.text_color | default: '#FFFFFF'
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+-%}
+
+<section class="hero reveal" aria-label="Hero">
+  <div class="hero__media">
+    {%- if section.settings.video != blank -%}
+      <video
+        class="hero__video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="{{ section.settings.image | image_url: width: 1920 }}"
+      >
+        <source src="{{ section.settings.video }}" type="video/mp4">
+      </video>
+    {%- elsif section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 1920 }}"
+        srcset="{{ section.settings.image | image_url: width: 1000 }} 1000w,
+                {{ section.settings.image | image_url: width: 1400 }} 1400w,
+                {{ section.settings.image | image_url: width: 1920 }} 1920w"
+        sizes="100vw"
+        alt="{{ section.settings.image.alt | default: section.settings.heading | escape }}"
+        loading="eager"
+        class="hero__image"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+      >
+    {%- else -%}
+      <div class="hero__placeholder">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'hero__placeholder-svg' }}
+      </div>
+    {%- endif -%}
+
+    <div class="hero__overlay" style="background: rgba(0,0,0,{{ overlay_opacity }})"></div>
+  </div>
+
+  <div class="hero__content hero__content--{{ text_position }}" style="color: {{ text_color }}">
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hero__heading" style="
+        font-size: {{ section.settings.heading_size }}px;
+        font-weight: {{ section.settings.heading_weight }};
+      ">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+    {%- if section.settings.subheading != blank -%}
+      <p class="hero__subheading">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+    {%- if section.settings.cta_text != blank -%}
+      <a href="{{ section.settings.cta_link }}" class="btn {{ section.settings.cta_style }}">
+        {{ section.settings.cta_text }}
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hero__media {
+    position: absolute;
+    inset: 0;
+  }
+  .hero__image,
+  .hero__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-supporting-sand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero__placeholder-svg {
+    width: 40%;
+    opacity: 0.2;
+  }
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+  }
+  .hero__content {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-xl);
+    max-width: 900px;
+    width: 100%;
+  }
+  .hero__content--center {
+    text-align: center;
+    margin: 0 auto;
+  }
+  .hero__content--left {
+    text-align: left;
+    margin-right: auto;
+  }
+  .hero__content--right {
+    text-align: right;
+    margin-left: auto;
+  }
+  .hero__content--bottom-left {
+    text-align: left;
+    position: absolute;
+    bottom: var(--space-2xl);
+    left: var(--space-xl);
+  }
+  .hero__heading {
+    font-family: var(--font-heading);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--space-md);
+  }
+  @media (max-width: 768px) {
+    .hero__heading {
+      font-size: clamp(2rem, 8vw, 3.5rem) !important;
+    }
+  }
+  .hero__subheading {
+    font-size: var(--text-lg);
+    opacity: 0.85;
+    margin-bottom: var(--space-lg);
+    max-width: 500px;
+    line-height: 1.5;
+  }
+  .hero__content--center .hero__subheading {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero .btn {
+    margin-top: var(--space-sm);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "class": "section-hero",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image"
+    },
+    {
+      "type": "text",
+      "id": "video",
+      "label": "Video URL (MP4)",
+      "info": "Paste a direct link to an MP4 video file"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Travel is the only thing you buy that makes you richer"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size (px)",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "default": 64,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "min": 300,
+      "max": 700,
+      "step": 100,
+      "default": 500
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Shop Collection"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "Button style",
+      "options": [
+        { "value": "btn--primary", "label": "Filled" },
+        { "value": "btn--secondary", "label": "Outlined" }
+      ],
+      "default": "btn--secondary"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" },
+        { "value": "bottom-left", "label": "Bottom left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay darkness (%)",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 30,
+      "unit": "%"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Foreign Fund",
+        "text": "<p>The Foreign Fund is our commitment to the communities that need it most. In partnership with UNHCR, we match customer donations and direct a portion of every sale toward supporting displaced people around the world. When you shop with Foreign Resource, you're not just wearing something, you're standing for something. Together, we've helped fund shelter, education, and relief for families rebuilding their lives. Track our impact, learn about our partners, and join us in making belonging universal.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Our Story",
+        "text": "<p>Foreign Resource was born from a simple conviction: the places we travel and the people we meet shape who we become. Every collection draws from the textures, colors, and rhythms of cities around the world, channeled into garments built for real life. Through the Foreign Fund, a portion of every purchase supports displaced communities worldwide, because belonging shouldn't have borders. This is more than a brand. It's a community rooted in curiosity, generosity, and the belief that what we wear can carry meaning far beyond the fabric.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

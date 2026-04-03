@@ -1,0 +1,206 @@
+{%- comment -%} Component CSS {% endcomment -%}
+{{ 'component-header.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign logo_position = section.settings.logo_position
+  assign sticky = section.settings.sticky_header
+  assign transparent = section.settings.transparent_header
+-%}
+
+<header
+  class="header{% if transparent %} header--transparent{% endif %}"
+  data-header
+  {% if sticky %}data-sticky="true"{% endif %}
+  role="banner"
+>
+  <div class="header__inner container">
+    {%- if logo_position == 'left' -%}
+      {%- comment -%} LEFT LOGO LAYOUT {% endcomment -%}
+      <div class="header__left">
+        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+          {%- if settings.logo -%}
+            <img
+              src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
+              alt="{{ shop.name }}"
+              width="{{ settings.logo_width }}"
+              height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
+              loading="eager"
+            >
+          {%- else -%}
+            <span class="header__logo-text">{{ shop.name }}</span>
+          {%- endif -%}
+        </a>
+      </div>
+
+      <nav class="header__nav header__center" role="navigation" aria-label="Main navigation">
+        {%- for link in section.settings.menu.links -%}
+          <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+
+      <div class="header__right">
+        <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
+          {%- render 'icon-search' -%}
+        </a>
+        <a href="/account" class="header__icon" aria-label="{{ 'general.account' | t }}">
+          {%- render 'icon-account' -%}
+        </a>
+        <a href="/cart" class="header__icon header__cart" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
+          {%- render 'icon-cart' -%}
+          <span class="header__cart-count" data-cart-count style="{% if cart.item_count == 0 %}display:none{% endif %}">{{ cart.item_count }}</span>
+        </a>
+        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
+          {%- render 'icon-menu' -%}
+        </button>
+      </div>
+    {%- else -%}
+      {%- comment -%} CENTER LOGO LAYOUT {% endcomment -%}
+      <div class="header__left">
+        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
+          {%- render 'icon-menu' -%}
+        </button>
+        <nav class="header__nav" role="navigation" aria-label="Main navigation">
+          {%- for link in section.settings.menu.links -%}
+            <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
+          {%- endfor -%}
+        </nav>
+      </div>
+
+      <div class="header__center">
+        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+          {%- if settings.logo -%}
+            <img
+              src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
+              alt="{{ shop.name }}"
+              width="{{ settings.logo_width }}"
+              height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
+              loading="eager"
+            >
+          {%- else -%}
+            <span class="header__logo-text">{{ shop.name }}</span>
+          {%- endif -%}
+        </a>
+      </div>
+
+      <div class="header__right">
+        <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
+          {%- render 'icon-search' -%}
+        </a>
+        <a href="/account" class="header__icon" aria-label="{{ 'general.account' | t }}">
+          {%- render 'icon-account' -%}
+        </a>
+        <a href="/cart" class="header__icon header__cart" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
+          {%- render 'icon-cart' -%}
+          <span class="header__cart-count" data-cart-count style="{% if cart.item_count == 0 %}display:none{% endif %}">{{ cart.item_count }}</span>
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Mobile Menu Overlay {% endcomment -%}
+  <div class="mobile-menu" data-menu-overlay aria-hidden="true">
+    <div class="mobile-menu__inner">
+      <div class="mobile-menu__header">
+        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+          {%- if settings.logo -%}
+            <img src="{{ settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="100" loading="lazy">
+          {%- else -%}
+            <span class="header__logo-text">{{ shop.name }}</span>
+          {%- endif -%}
+        </a>
+        <button class="header__icon" data-menu-close aria-label="{{ 'accessibility.close_menu' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <nav class="mobile-menu__nav" role="navigation" aria-label="Mobile navigation">
+        {%- for link in section.settings.menu.links -%}
+          <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+      <div class="mobile-menu__footer">
+        <a href="/account" class="mobile-menu__link mobile-menu__link--small">Account</a>
+        <a href="/search" class="mobile-menu__link mobile-menu__link--small">Search</a>
+        {%- render 'social-icons' -%}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Cart Drawer {% endcomment -%}
+  <div class="cart-drawer" data-cart-drawer aria-hidden="true">
+    <div class="cart-drawer__overlay"></div>
+    <div class="cart-drawer__panel">
+      <div class="cart-drawer__header">
+        <h2 class="cart-drawer__title">{{ 'cart.title' | t }}</h2>
+        <button class="header__icon" data-cart-drawer-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <div class="cart-drawer__content" id="cart-drawer-content">
+        {%- if cart.item_count > 0 -%}
+          {%- for item in cart.items -%}
+            <div class="cart-drawer__item">
+              <img src="{{ item.image | image_url: width: 120 }}" alt="{{ item.title | escape }}" width="60" height="75" loading="lazy">
+              <div class="cart-drawer__item-info">
+                <p class="cart-drawer__item-title">{{ item.product.title }}</p>
+                {%- if item.variant.title != 'Default Title' -%}
+                  <p class="cart-drawer__item-variant">{{ item.variant.title }}</p>
+                {%- endif -%}
+                <p class="cart-drawer__item-price">{{ item.final_line_price | money }}</p>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- else -%}
+          <p class="cart-drawer__empty">{{ 'cart.empty' | t }}</p>
+        {%- endif -%}
+      </div>
+      {%- if cart.item_count > 0 -%}
+        <div class="cart-drawer__footer">
+          <div class="cart-drawer__subtotal">
+            <span>{{ 'cart.subtotal' | t }}</span>
+            <span>{{ cart.total_price | money }}</span>
+          </div>
+          <p class="cart-drawer__note">{{ 'cart.shipping_note' | t }}</p>
+          <a href="/checkout" class="btn btn--primary btn--full">{{ 'cart.checkout' | t }}</a>
+          <a href="/cart" class="cart-drawer__view-cart">View Cart</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Main menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "Logo position",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "Sticky header",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_header",
+      "label": "Transparent header on homepage",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

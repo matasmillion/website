@@ -1,0 +1,153 @@
+<section class="social-grid reveal">
+  <div class="{% if section.settings.full_width %}container--full{% else %}container{% endif %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="social-grid__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="social-grid__grid social-grid__grid--{{ section.settings.columns }}" style="gap: {{ section.settings.gap }}px;">
+      {%- for block in section.blocks -%}
+        <div class="social-grid__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" target="_blank" rel="noopener noreferrer" class="social-grid__link" aria-label="View on Instagram">
+          {%- endif -%}
+            {%- if block.settings.image != blank -%}
+              {%- render 'responsive-image', image: block.settings.image, sizes: '(max-width: 768px) 50vw, 20vw', max_width: 400, class: 'social-grid__image' -%}
+            {%- else -%}
+              <div class="social-grid__placeholder">
+                {{ 'lifestyle-1' | placeholder_svg_tag }}
+              </div>
+            {%- endif -%}
+          {%- if block.settings.link != blank -%}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .social-grid {
+    padding: var(--space-2xl) 0;
+  }
+  .social-grid__heading {
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+  }
+  .social-grid__grid {
+    display: grid;
+  }
+  .social-grid__grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .social-grid__grid--4 { grid-template-columns: repeat(4, 1fr); }
+  .social-grid__grid--5 { grid-template-columns: repeat(5, 1fr); }
+  .social-grid__grid--6 { grid-template-columns: repeat(6, 1fr); }
+  @media (max-width: 768px) {
+    .social-grid__grid--5,
+    .social-grid__grid--6 { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .social-grid__grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  .social-grid__item {
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+  .social-grid__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .social-grid__link:hover {
+    opacity: 1;
+  }
+  .social-grid__image,
+  .social-grid__link img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+  .social-grid__link:hover img {
+    transform: scale(1.05);
+  }
+  .social-grid__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-supporting-sand);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Social / Image Grid",
+  "class": "section-social-grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "@foreignresource"
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap (px)",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "default": 4,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width (edge to edge)",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (e.g. Instagram post URL)"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Social / Image Grid",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}

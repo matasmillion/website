@@ -1,0 +1,29 @@
+{
+  "sections": {
+    "collection_hero": {
+      "type": "collection-hero",
+      "settings": {
+        "show_hero": true,
+        "text_position": "center",
+        "overlay_opacity": 30,
+        "show_description": true
+      }
+    },
+    "filter_bar": {
+      "type": "collection-filter-bar",
+      "settings": {}
+    },
+    "product_grid": {
+      "type": "main-collection",
+      "settings": {
+        "columns_desktop": 3,
+        "image_ratio": "portrait",
+        "products_per_page": 12,
+        "pagination_type": "paginated",
+        "show_description": false,
+        "description_position": "below"
+      }
+    }
+  },
+  "order": ["collection_hero", "filter_bar", "product_grid"]
+}

@@ -1,0 +1,60 @@
+{%- comment -%}
+  Product Card Snippet
+  Usage: {% render 'product-card', product: product, show_secondary_image: true %}
+{%- endcomment -%}
+
+{%- liquid
+  assign show_secondary = show_secondary_image | default: true
+  assign image_ratio = image_aspect_ratio | default: 'portrait'
+-%}
+
+<article class="product-card">
+  <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
+    <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
+      {%- if product.featured_image -%}
+        <img
+          src="{{ product.featured_image | image_url: width: 600 }}"
+          srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
+                  {{ product.featured_image | image_url: width: 600 }} 600w,
+                  {{ product.featured_image | image_url: width: 800 }} 800w"
+          sizes="(max-width: 768px) 50vw, 33vw"
+          alt="{{ product.featured_image.alt | escape }}"
+          loading="lazy"
+          width="{{ product.featured_image.width }}"
+          height="{{ product.featured_image.height }}"
+          class="product-card__image product-card__image--primary"
+        >
+        {%- if show_secondary and product.images.size > 1 -%}
+          <img
+            src="{{ product.images[1] | image_url: width: 600 }}"
+            srcset="{{ product.images[1] | image_url: width: 400 }} 400w,
+                    {{ product.images[1] | image_url: width: 600 }} 600w,
+                    {{ product.images[1] | image_url: width: 800 }} 800w"
+            sizes="(max-width: 768px) 50vw, 33vw"
+            alt="{{ product.images[1].alt | escape }}"
+            loading="lazy"
+            width="{{ product.images[1].width }}"
+            height="{{ product.images[1].height }}"
+            class="product-card__image product-card__image--secondary"
+          >
+        {%- endif -%}
+      {%- else -%}
+        <div class="product-card__placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="product-card__info">
+      <h3 class="product-card__title">{{ product.title }}</h3>
+      <div class="product-card__price">
+        {%- if product.compare_at_price > product.price -%}
+          <span class="product-card__price--sale">{{ product.price | money }}</span>
+          <span class="product-card__price--compare">{{ product.compare_at_price | money }}</span>
+        {%- else -%}
+          <span>{{ product.price | money }}</span>
+        {%- endif -%}
+      </div>
+    </div>
+  </a>
+</article>

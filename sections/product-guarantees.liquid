@@ -1,0 +1,69 @@
+<div class="product-guarantees">
+  <div class="product-guarantees__list">
+    {%- for block in section.blocks -%}
+      <div class="product-guarantees__item" {{ block.shopify_attributes }}>
+        {%- if block.settings.icon == 'shipping' -%}
+          <svg class="product-guarantees__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        {%- elsif block.settings.icon == 'returns' -%}
+          <svg class="product-guarantees__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        {%- elsif block.settings.icon == 'shield' -%}
+          <svg class="product-guarantees__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        {%- elsif block.settings.icon == 'clock' -%}
+          <svg class="product-guarantees__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        {%- endif -%}
+        <span>{{ block.settings.text }}</span>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Guarantees",
+  "class": "section-product-guarantees",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "guarantee",
+      "name": "Guarantee",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "returns", "label": "Returns" },
+            { "value": "shipping", "label": "Shipping" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "clock", "label": "Clock" }
+          ],
+          "default": "shield"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free Returns & Exchanges"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 5,
+  "default": {
+    "blocks": [
+      {
+        "type": "guarantee",
+        "settings": { "icon": "returns", "text": "Free Returns & Exchanges" }
+      },
+      {
+        "type": "guarantee",
+        "settings": { "icon": "clock", "text": "5-Day Delivery Guarantee" }
+      },
+      {
+        "type": "guarantee",
+        "settings": { "icon": "shipping", "text": "Complimentary Express Over $150" }
+      }
+    ]
+  }
+}
+{% endschema %}

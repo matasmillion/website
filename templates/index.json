@@ -1,0 +1,114 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-banner",
+      "settings": {
+        "heading": "Travel is the only thing you buy that makes you richer",
+        "heading_size": 64,
+        "heading_weight": 500,
+        "cta_text": "Shop Collection",
+        "cta_style": "btn--secondary",
+        "text_position": "center",
+        "text_color": "#FFFFFF",
+        "overlay_opacity": 30
+      }
+    },
+    "split_content": {
+      "type": "split-content",
+      "settings": {
+        "image_position": "left",
+        "subheading": "Our Mission",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p>",
+        "cta_text": "Learn More",
+        "cta_style": "btn--secondary"
+      }
+    },
+    "collection_grid": {
+      "type": "collection-grid-feature",
+      "settings": {
+        "heading": "Collections",
+        "layout": "asymmetric"
+      },
+      "blocks": {
+        "collection_1": {
+          "type": "collection_item",
+          "settings": { "title": "Technical Traveler" }
+        },
+        "collection_2": {
+          "type": "collection_item",
+          "settings": { "title": "Staples" }
+        },
+        "collection_3": {
+          "type": "collection_item",
+          "settings": { "title": "New Arrivals" }
+        }
+      },
+      "block_order": ["collection_1", "collection_2", "collection_3"]
+    },
+    "full_width_banner": {
+      "type": "full-width-banner",
+      "settings": {
+        "heading": "Freedom through confidence",
+        "text_alignment": "center",
+        "text_color": "#FFFFFF",
+        "overlay_opacity": 30
+      }
+    },
+    "featured_products": {
+      "type": "featured-products",
+      "settings": {
+        "heading": "Featured",
+        "products_count": 8,
+        "link_text": "View All"
+      }
+    },
+    "brand_story": {
+      "type": "brand-story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_style": "btn--secondary"
+      }
+    },
+    "email_signup": {
+      "type": "email-signup",
+      "settings": {
+        "heading": "Join the Journey",
+        "subtext": "First access to new collections, travel stories, and exclusive offers.",
+        "placeholder": "Enter your email",
+        "button_text": "Subscribe",
+        "bg_color": "#D4C5A9"
+      }
+    },
+    "social_grid": {
+      "type": "image-grid-social",
+      "settings": {
+        "heading": "@foreignresource",
+        "columns": 4,
+        "gap": 4,
+        "full_width": true
+      },
+      "blocks": {
+        "img_1": { "type": "image" },
+        "img_2": { "type": "image" },
+        "img_3": { "type": "image" },
+        "img_4": { "type": "image" }
+      },
+      "block_order": ["img_1", "img_2", "img_3", "img_4"]
+    }
+  },
+  "order": [
+    "hero",
+    "split_content",
+    "collection_grid",
+    "full_width_banner",
+    "featured_products",
+    "brand_story",
+    "email_signup",
+    "social_grid"
+  ]
+}

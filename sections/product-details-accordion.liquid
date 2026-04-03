@@ -1,0 +1,74 @@
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+
+<div class="product-accordion">
+  <div class="accordion" data-accordion>
+    {%- for block in section.blocks -%}
+      <div class="accordion__item" data-accordion-item {{ block.shopify_attributes }}>
+        <button class="accordion__trigger" data-accordion-trigger aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+          {{ block.settings.heading }}
+          <span class="accordion__icon" aria-hidden="true"></span>
+        </button>
+        <div class="accordion__content" data-accordion-content style="{% if forloop.first %}max-height: 500px;{% else %}max-height: 0;{% endif %}">
+          <div class="accordion__content-inner">
+            {{ block.settings.content }}
+          </div>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+<style>
+  .product-accordion {
+    padding: var(--space-lg) 0;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Details Accordion",
+  "class": "section-product-accordion",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "accordion_item",
+      "name": "Accordion item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Description"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>Add your product description here. Tell the story behind this piece — where it was designed, what inspired it, and how it fits into the Foreign Resource world.</p>"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "default": {
+    "blocks": [
+      {
+        "type": "accordion_item",
+        "settings": { "heading": "Description", "content": "<p>Premium travel essentials designed for the modern explorer. Each piece is crafted with intention — built to move with you from airport to city to coast.</p>" }
+      },
+      {
+        "type": "accordion_item",
+        "settings": { "heading": "Materials & Care", "content": "<p>Details about materials, fabric composition, and care instructions will appear here.</p>" }
+      },
+      {
+        "type": "accordion_item",
+        "settings": { "heading": "Shipping & Returns", "content": "<p>Complimentary shipping on orders over $150. Free returns and exchanges within 30 days. 5-day delivery guarantee on all domestic orders.</p>" }
+      },
+      {
+        "type": "accordion_item",
+        "settings": { "heading": "Features", "content": "<p>Product-specific features such as anti-odor treatment, hidden zip pockets, wrinkle resistance, and travel-friendly design details.</p>" }
+      }
+    ]
+  }
+}
+{% endschema %}

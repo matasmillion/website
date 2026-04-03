@@ -1,0 +1,279 @@
+{{ 'component-collection.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign columns_desktop = section.settings.columns_desktop
+  assign image_ratio = section.settings.image_ratio
+  assign products_per_page = section.settings.products_per_page
+  assign pagination_type = section.settings.pagination_type
+  assign show_description = section.settings.show_description
+  assign description_position = section.settings.description_position
+-%}
+
+<style>
+  .collection-grid {
+    padding: 0 0 4rem;
+  }
+
+  .collection-grid__description {
+    max-width: 72rem;
+    margin: 0 0 2rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  .collection-grid__description--below {
+    margin: 2rem 0 0;
+  }
+
+  .collection-grid__products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 750px) {
+    .collection-grid__products {
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 990px) {
+    .collection-grid__products--2-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .collection-grid__products--3-cols {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .collection-grid__products--4-cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .collection-grid__empty {
+    text-align: center;
+    padding: 4rem 0;
+  }
+
+  .collection-grid__empty p {
+    font-size: 1.1rem;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+
+  .collection-grid__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+  }
+
+  .collection-grid__pagination a,
+  .collection-grid__pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid rgba(var(--color-foreground), 0.15);
+    border-radius: 0;
+    text-decoration: none;
+    font-size: 0.875rem;
+    color: rgb(var(--color-foreground));
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .collection-grid__pagination a:hover {
+    border-color: rgb(var(--color-foreground));
+  }
+
+  .collection-grid__pagination .current {
+    background-color: rgb(var(--color-foreground));
+    color: rgb(var(--color-background));
+    border-color: rgb(var(--color-foreground));
+  }
+
+  .collection-grid__load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+  }
+
+  .collection-grid__load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2.5rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background-color: rgb(var(--color-foreground));
+    color: rgb(var(--color-background));
+    border: 1px solid rgb(var(--color-foreground));
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .collection-grid__load-more-btn:hover {
+    background-color: transparent;
+    color: rgb(var(--color-foreground));
+  }
+</style>
+
+<section class="collection-grid">
+  <div class="container">
+    {%- if show_description and description_position == 'above' and collection.description != blank -%}
+      <div class="collection-grid__description rte">
+        {{ collection.description }}
+      </div>
+    {%- endif -%}
+
+    {%- paginate collection.products by products_per_page -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="collection-grid__products collection-grid__products--{{ columns_desktop }}-cols" id="product-grid">
+          {%- for product in collection.products -%}
+            {%- render 'product-card', product: product, image_aspect_ratio: image_ratio -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          {%- if pagination_type == 'load_more' -%}
+            <div class="collection-grid__load-more">
+              {%- if paginate.next -%}
+                <a
+                  href="{{ paginate.next.url }}"
+                  class="collection-grid__load-more-btn"
+                  data-load-more
+                >
+                  {{ 'collections.general.load_more' | t | default: 'Load More' }}
+                </a>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <nav class="collection-grid__pagination" role="navigation" aria-label="Pagination">
+              {%- if paginate.previous -%}
+                <a href="{{ paginate.previous.url }}" aria-label="{{ 'accessibility.previous' | t | default: 'Previous page' }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </a>
+              {%- endif -%}
+
+              {%- for part in paginate.parts -%}
+                {%- if part.is_link -%}
+                  <a href="{{ part.url }}">{{ part.title }}</a>
+                {%- else -%}
+                  {%- if part.title == paginate.current_page -%}
+                    <span class="current" aria-current="page">{{ part.title }}</span>
+                  {%- else -%}
+                    <span>{{ part.title }}</span>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if paginate.next -%}
+                <a href="{{ paginate.next.url }}" aria-label="{{ 'accessibility.next' | t | default: 'Next page' }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              {%- endif -%}
+            </nav>
+          {%- endif -%}
+        {%- endif -%}
+      {%- else -%}
+        <div class="collection-grid__empty">
+          <p>{{ 'collections.general.no_matches' | t | default: 'No products found in this collection.' }}</p>
+        </div>
+      {%- endif -%}
+    {%- endpaginate -%}
+
+    {%- if show_description and description_position == 'below' and collection.description != blank -%}
+      <div class="collection-grid__description collection-grid__description--below rte">
+        {{ collection.description }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Grid",
+  "tag": "section",
+  "class": "section-main-collection",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Grid layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        { "value": "portrait", "label": "Portrait (2:3)" },
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "landscape", "label": "Landscape (3:2)" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 24,
+      "step": 4,
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "pagination_type",
+      "label": "Pagination style",
+      "options": [
+        { "value": "paginated", "label": "Numbered pagination" },
+        { "value": "load_more", "label": "Load more button" }
+      ],
+      "default": "paginated"
+    },
+    {
+      "type": "header",
+      "content": "Collection description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "description_position",
+      "label": "Description position",
+      "options": [
+        { "value": "above", "label": "Above products" },
+        { "value": "below", "label": "Below products" }
+      ],
+      "default": "above"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Grid"
+    }
+  ]
+}
+{% endschema %}
