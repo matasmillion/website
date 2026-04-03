@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "product_info": {
@@ -5,11 +14,29 @@
       "settings": {
         "show_short_description": true,
         "show_appointment_link": false,
-        "delivery_text": "Order today for delivery within 5 business days"
+        "appointment_link": "",
+        "delivery_text": "Order today for delivery within 5 business days",
+        "size_chart_content": ""
+      }
+    },
+    "brand_story_GAGwDD": {
+      "type": "brand-story",
+      "disabled": true,
+      "name": "Brand Story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
       }
     }
   },
   "order": [
-    "product_info"
+    "product_info",
+    "brand_story_GAGwDD"
   ]
 }

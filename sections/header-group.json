@@ -1,24 +1,39 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "header",
   "name": "Header Group",
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
+      "disabled": true,
       "settings": {
         "show_announcement": true,
         "text": "Complimentary shipping on orders over $150",
-        "bg_color": "#0A0A0A",
-        "text_color": "#F5F0EB"
+        "link": "",
+        "bg_color": "#0a0a0a",
+        "text_color": "#f5f0eb"
       }
     },
     "header": {
       "type": "header",
       "settings": {
+        "menu": "main-menu",
         "logo_position": "left",
         "sticky_header": true,
-        "transparent_header": true
+        "transparent_header": false
       }
     }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }

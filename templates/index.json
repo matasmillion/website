@@ -1,34 +1,52 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "story_1": {
       "type": "collection-story",
-      "settings": {
-        "collection": "",
-        "products_count": 4
-      },
       "blocks": {
+        "hero_image_cLWJXA": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-03-06_at_10.18.10_AM.jpg",
+            "video": "",
+            "label": "New In Women",
+            "link": ""
+          }
+        },
         "hero_1a": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "image": "shopify://shop_images/Screenshot_2026-03-04_at_5.47.15_PM-2.jpg",
+            "video": "",
             "label": "New In Women",
             "link": ""
           }
         }
       },
-      "block_order": ["hero_1a"]
+      "block_order": [
+        "hero_image_cLWJXA",
+        "hero_1a"
+      ],
+      "settings": {
+        "collection": "jewelry",
+        "products_count": 4
+      }
     },
     "story_2": {
       "type": "collection-story",
-      "settings": {
-        "collection": "",
-        "products_count": 4
-      },
       "blocks": {
         "hero_2a": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "video": "",
             "label": "Women New In",
             "link": ""
           }
@@ -36,25 +54,29 @@
         "hero_2b": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "video": "",
             "label": "Men New In",
             "link": ""
           }
         }
       },
-      "block_order": ["hero_2a", "hero_2b"]
-    },
-    "story_3": {
-      "type": "collection-story",
+      "block_order": [
+        "hero_2a",
+        "hero_2b"
+      ],
+      "disabled": true,
       "settings": {
         "collection": "",
         "products_count": 4
-      },
+      }
+    },
+    "story_3": {
+      "type": "collection-story",
       "blocks": {
         "hero_3a": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "video": "",
             "label": "Les Classiques",
             "link": ""
           }
@@ -62,25 +84,28 @@
         "hero_3b": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "video": "",
             "label": "The Féfé",
             "link": ""
           }
         }
       },
-      "block_order": ["hero_3a", "hero_3b"]
-    },
-    "story_4": {
-      "type": "collection-story",
+      "block_order": [
+        "hero_3a",
+        "hero_3b"
+      ],
+      "disabled": true,
       "settings": {
         "collection": "",
         "products_count": 4
-      },
+      }
+    },
+    "story_4": {
+      "type": "collection-story",
       "blocks": {
         "hero_4a": {
           "type": "hero_image",
           "settings": {
-            "image": "",
             "video": "",
             "label": "Our Savoir-faire",
             "link": ""
@@ -89,13 +114,20 @@
         "hero_4b": {
           "type": "hero_image",
           "settings": {
-            "image": "",
+            "video": "",
             "label": "",
             "link": ""
           }
         }
       },
-      "block_order": ["hero_4a", "hero_4b"]
+      "block_order": [
+        "hero_4a",
+        "hero_4b"
+      ],
+      "settings": {
+        "collection": "best-sellers",
+        "products_count": 4
+      }
     },
     "info_bar": {
       "type": "info-bar",
@@ -122,7 +154,12 @@
           }
         }
       },
-      "block_order": ["info_1", "info_2", "info_3"]
+      "block_order": [
+        "info_1",
+        "info_2",
+        "info_3"
+      ],
+      "settings": {}
     }
   },
   "order": [
