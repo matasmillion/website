@@ -1,15 +1,28 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
       "type": "hero-banner",
       "settings": {
+        "image": "shopify://shop_images/Screenshot_2026-03-04_at_5.47.15_PM-2.jpg",
+        "video": "",
         "heading": "Travel is the only thing you buy that makes you richer",
         "heading_size": 64,
         "heading_weight": 500,
+        "subheading": "",
         "cta_text": "Shop Collection",
+        "cta_link": "",
         "cta_style": "btn--secondary",
         "text_position": "center",
-        "text_color": "#FFFFFF",
+        "text_color": "#ffffff",
         "overlay_opacity": 30
       }
     },
@@ -21,37 +34,60 @@
         "heading": "To inspire global travel",
         "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p>",
         "cta_text": "Learn More",
-        "cta_style": "btn--secondary"
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": "",
+        "text_bg_color": ""
       }
     },
     "collection_grid": {
       "type": "collection-grid-feature",
-      "settings": {
-        "heading": "Collections",
-        "layout": "asymmetric"
-      },
       "blocks": {
         "collection_1": {
           "type": "collection_item",
-          "settings": { "title": "Technical Traveler" }
+          "settings": {
+            "title": "Technical Traveler",
+            "link": "",
+            "text_position": "bottom-left"
+          }
         },
         "collection_2": {
           "type": "collection_item",
-          "settings": { "title": "Staples" }
+          "settings": {
+            "title": "Staples",
+            "link": "",
+            "text_position": "bottom-left"
+          }
         },
         "collection_3": {
           "type": "collection_item",
-          "settings": { "title": "New Arrivals" }
+          "settings": {
+            "title": "New Arrivals",
+            "link": "",
+            "text_position": "bottom-left"
+          }
         }
       },
-      "block_order": ["collection_1", "collection_2", "collection_3"]
+      "block_order": [
+        "collection_1",
+        "collection_2",
+        "collection_3"
+      ],
+      "settings": {
+        "heading": "Collections",
+        "layout": "asymmetric"
+      }
     },
     "full_width_banner": {
       "type": "full-width-banner",
       "settings": {
         "heading": "Freedom through confidence",
+        "subtext": "",
+        "cta_text": "",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
         "text_alignment": "center",
-        "text_color": "#FFFFFF",
+        "text_color": "#ffffff",
         "overlay_opacity": 30
       }
     },
@@ -59,8 +95,10 @@
       "type": "featured-products",
       "settings": {
         "heading": "Featured",
+        "collection": "best-sellers",
         "products_count": 8,
-        "link_text": "View All"
+        "link_text": "View All",
+        "link_url": ""
       }
     },
     "brand_story": {
@@ -71,7 +109,9 @@
         "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
         "layout": "text-center",
         "cta_text": "Our Mission",
-        "cta_style": "btn--secondary"
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
       }
     },
     "email_signup": {
@@ -81,24 +121,49 @@
         "subtext": "First access to new collections, travel stories, and exclusive offers.",
         "placeholder": "Enter your email",
         "button_text": "Subscribe",
-        "bg_color": "#D4C5A9"
+        "bg_color": "#d4c5a9"
       }
     },
     "social_grid": {
       "type": "image-grid-social",
+      "blocks": {
+        "img_1": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "img_2": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "img_3": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        },
+        "img_4": {
+          "type": "image",
+          "settings": {
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "img_1",
+        "img_2",
+        "img_3",
+        "img_4"
+      ],
       "settings": {
         "heading": "@foreignresource",
         "columns": 4,
         "gap": 4,
         "full_width": true
-      },
-      "blocks": {
-        "img_1": { "type": "image" },
-        "img_2": { "type": "image" },
-        "img_3": { "type": "image" },
-        "img_4": { "type": "image" }
-      },
-      "block_order": ["img_1", "img_2", "img_3", "img_4"]
+      }
     }
   },
   "order": [
