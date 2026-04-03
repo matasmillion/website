@@ -7,7 +7,7 @@
 :root {
   /* Colors — mapped from theme settings */
   --color-primary: {{ settings.color_primary | default: '#0A0A0A' }};
-  --color-secondary: {{ settings.color_secondary | default: '#F5F0EB' }};
+  --color-secondary: {{ settings.color_secondary | default: '#FFFFFF' }};
   --color-accent: {{ settings.color_accent | default: '#C4632A' }};
   --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
   --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};
@@ -52,7 +52,7 @@
   --container-max: 1440px;
   --container-narrow: 720px;
   --container-wide: 1600px;
-  --grid-gap: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+  --grid-gap: 3px;
   --header-height: 50px;
 
   /* Transitions — subtle, barely perceptible */

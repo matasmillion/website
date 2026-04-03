@@ -5,30 +5,36 @@
     "footer": {
       "type": "footer",
       "settings": {
-        "tagline": "Designed for those who see the world differently."
+        "newsletter_heading": "Subscribe to the newsletter",
+        "newsletter_text": "Subscribe to receive all the information by email on our latest collections, products, and projects.",
+        "newsletter_button": "Register",
+        "contact_heading": "Need help? Contact us",
+        "contact_hours": "Monday to Friday from 9:00am to 5:00pm EST.",
+        "contact_link_1_text": "Contact form",
+        "contact_link_2_text": "Track an order",
+        "contact_link_3_text": "Register a return"
       },
       "blocks": {
         "menu_1": {
           "type": "menu",
           "settings": {
-            "heading": "Shop"
+            "heading": "Legal"
           }
         },
         "menu_2": {
           "type": "menu",
           "settings": {
-            "heading": "About"
+            "heading": "FAQ"
           }
         },
-        "newsletter": {
-          "type": "newsletter",
+        "menu_3": {
+          "type": "menu",
           "settings": {
-            "heading": "Stay Connected",
-            "text": "First access to new collections and travel stories."
+            "heading": "Company"
           }
         }
       },
-      "block_order": ["menu_1", "menu_2", "newsletter"]
+      "block_order": ["menu_1", "menu_2", "menu_3"]
     }
   },
   "order": ["footer"]

@@ -46,14 +46,15 @@
     </div>
 
     <div class="product-card__info">
-      <h3 class="product-card__title">{{ product.title }}</h3>
-      <div class="product-card__price">
-        {%- if product.compare_at_price > product.price -%}
-          <span class="product-card__price--sale">{{ product.price | money }}</span>
-          <span class="product-card__price--compare">{{ product.compare_at_price | money }}</span>
-        {%- else -%}
-          <span>{{ product.price | money }}</span>
-        {%- endif -%}
+      <div class="product-card__info-row">
+        <h3 class="product-card__title">{{ product.title }}</h3>
+        <div class="product-card__price">
+          {%- if product.compare_at_price > product.price -%}
+            <span class="product-card__price--sale">{{ product.price | money }}</span>
+          {%- else -%}
+            <span>{{ product.price | money }}</span>
+          {%- endif -%}
+        </div>
       </div>
     </div>
   </a>

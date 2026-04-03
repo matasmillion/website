@@ -1,12 +1,3 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "hero": {
@@ -14,166 +5,58 @@
       "settings": {
         "image": "shopify://shop_images/Screenshot_2026-03-04_at_5.47.15_PM-2.jpg",
         "video": "",
-        "heading": "Travel is the only thing you buy that makes you richer",
+        "heading": "",
         "heading_size": 64,
-        "heading_weight": 500,
+        "heading_weight": 400,
         "subheading": "",
-        "cta_text": "Shop Collection",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "text_position": "center",
-        "text_color": "#ffffff",
-        "overlay_opacity": 30
-      }
-    },
-    "split_content": {
-      "type": "split-content",
-      "settings": {
-        "image_position": "left",
-        "subheading": "Our Mission",
-        "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p>",
-        "cta_text": "Learn More",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "bg_color": "",
-        "text_bg_color": ""
-      }
-    },
-    "collection_grid": {
-      "type": "collection-grid-feature",
-      "blocks": {
-        "collection_1": {
-          "type": "collection_item",
-          "settings": {
-            "title": "Technical Traveler",
-            "link": "",
-            "text_position": "bottom-left"
-          }
-        },
-        "collection_2": {
-          "type": "collection_item",
-          "settings": {
-            "title": "Staples",
-            "link": "",
-            "text_position": "bottom-left"
-          }
-        },
-        "collection_3": {
-          "type": "collection_item",
-          "settings": {
-            "title": "New Arrivals",
-            "link": "",
-            "text_position": "bottom-left"
-          }
-        }
-      },
-      "block_order": [
-        "collection_1",
-        "collection_2",
-        "collection_3"
-      ],
-      "settings": {
-        "heading": "Collections",
-        "layout": "asymmetric"
-      }
-    },
-    "full_width_banner": {
-      "type": "full-width-banner",
-      "settings": {
-        "heading": "Freedom through confidence",
-        "subtext": "",
         "cta_text": "",
         "cta_link": "",
         "cta_style": "btn--secondary",
-        "text_alignment": "center",
-        "text_color": "#ffffff",
-        "overlay_opacity": 30
+        "text_position": "bottom-left",
+        "text_color": "#FFFFFF",
+        "overlay_opacity": 0
       }
     },
     "featured_products": {
       "type": "featured-products",
       "settings": {
-        "heading": "Featured",
+        "heading": "",
         "collection": "best-sellers",
         "products_count": 8,
-        "link_text": "View All",
-        "link_url": ""
+        "link_text": ""
       }
     },
-    "brand_story": {
-      "type": "brand-story",
-      "settings": {
-        "subheading": "Our Story",
-        "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
-        "layout": "text-center",
-        "cta_text": "Our Mission",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "bg_color": ""
-      }
-    },
-    "email_signup": {
-      "type": "email-signup",
-      "settings": {
-        "heading": "Join the Journey",
-        "subtext": "First access to new collections, travel stories, and exclusive offers.",
-        "placeholder": "Enter your email",
-        "button_text": "Subscribe",
-        "bg_color": "#d4c5a9"
-      }
-    },
-    "social_grid": {
-      "type": "image-grid-social",
+    "info_bar": {
+      "type": "info-bar",
       "blocks": {
-        "img_1": {
-          "type": "image",
+        "info_1": {
+          "type": "info_item",
           "settings": {
-            "link": ""
+            "title": "Complimentary shipping",
+            "text": "Free express shipping on orders over $150."
           }
         },
-        "img_2": {
-          "type": "image",
+        "info_2": {
+          "type": "info_item",
           "settings": {
-            "link": ""
+            "title": "Free returns & exchanges",
+            "text": "Easy returns within 30 days, no questions asked."
           }
         },
-        "img_3": {
-          "type": "image",
+        "info_3": {
+          "type": "info_item",
           "settings": {
-            "link": ""
-          }
-        },
-        "img_4": {
-          "type": "image",
-          "settings": {
-            "link": ""
+            "title": "Secure payment",
+            "text": "Visa, Mastercard, PayPal, Apple Pay, and more."
           }
         }
       },
-      "block_order": [
-        "img_1",
-        "img_2",
-        "img_3",
-        "img_4"
-      ],
-      "settings": {
-        "heading": "@foreignresource",
-        "columns": 4,
-        "gap": 4,
-        "full_width": true
-      }
+      "block_order": ["info_1", "info_2", "info_3"]
     }
   },
   "order": [
     "hero",
-    "split_content",
-    "collection_grid",
-    "full_width_banner",
     "featured_products",
-    "brand_story",
-    "email_signup",
-    "social_grid"
+    "info_bar"
   ]
 }
