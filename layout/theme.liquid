@@ -27,9 +27,19 @@
   {%- comment -%} Preconnect to Shopify CDN {% endcomment -%}
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
 
-  {%- comment -%} Font preloading {% endcomment -%}
-  {{ settings.font_heading | font_face: font_display: 'swap' }}
-  {{ settings.font_body | font_face: font_display: 'swap' }}
+  {%- comment -%} Font loading — Inter from Shopify's font library {% endcomment -%}
+  {%- if settings.font_heading.family -%}
+    {{ settings.font_heading | font_face: font_display: 'swap' }}
+  {%- endif -%}
+  {%- if settings.font_body.family -%}
+    {{ settings.font_body | font_face: font_display: 'swap' }}
+  {%- endif -%}
+  {%- comment -%} Fallback: load Inter directly if font pickers not configured {% endcomment -%}
+  {%- unless settings.font_body.family -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  {%- endunless -%}
 
   {%- comment -%} Base CSS — always loaded {% endcomment -%}
   {{ 'base.css' | asset_url | stylesheet_tag }}
