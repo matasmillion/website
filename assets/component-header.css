@@ -30,13 +30,21 @@
   border-bottom: 1px solid rgba(10, 10, 10, 0.06);
 }
 
+/* Figma mobile: height 68px, padding 12px. Desktop: height 82px, padding 30px */
 .header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--header-height);
-  padding: 0 clamp(1.25rem, 1rem + 2vw, 3rem);
+  height: 68px;
+  padding: 0 12px;
   max-width: none;
+}
+
+@media (min-width: 769px) {
+  .header__inner {
+    height: 82px;
+    padding: 0 30px;
+  }
 }
 
 /* Logo — Jacquemus style: bold, heavy weight, left-aligned */
@@ -93,15 +101,16 @@
   gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
 }
 
-/* Nav links — sentence case, ~14px, clean, like Jacquemus */
+/* Figma desktop nav: ~16px, sentence case, medium weight */
 .header__nav-link {
-  font-size: var(--text-base);
-  font-weight: var(--font-weight-normal);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   text-transform: none;
   text-decoration: none;
   position: relative;
   padding: 0.25rem 0;
+  color: #2E2E2E;
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
@@ -124,30 +133,36 @@
   width: 100%;
 }
 
-/* Icons — smaller, more refined */
+/* Figma: icons 20x20 on mobile, 15x15 on desktop */
 .header__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 20px;
+  height: 20px;
   background: none;
   border: none;
   cursor: pointer;
   color: inherit;
   text-decoration: none;
   position: relative;
-  opacity: 0.7;
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .header__icon:hover {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .header__icon svg {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
+}
+
+@media (min-width: 769px) {
+  .header__icon svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 
 /* Wishlist heart */
@@ -196,11 +211,12 @@
   letter-spacing: 0.01em;
 }
 
+/* Figma: dot 6.6px on both mobile and desktop, bg #2E2E2E, rounded */
 .header__cart-dot {
-  width: 8px;
-  height: 8px;
+  width: 6.6px;
+  height: 6.6px;
   border-radius: 50%;
-  background-color: var(--color-primary);
+  background-color: #2E2E2E;
   display: inline-block;
   opacity: 0.2;
   transition: opacity var(--duration-fast) var(--ease-out);
@@ -212,19 +228,16 @@
 }
 
 .header__cart-dot span {
-  display: none; /* count hidden, dot is the indicator */
+  display: none;
 }
 
 @media (max-width: 768px) {
   .header__cart-text { display: none; }
   .header__cart-link {
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     justify-content: center;
-  }
-  .header__cart-dot {
-    width: 10px;
-    height: 10px;
+    padding: 0;
   }
 }
 
@@ -234,11 +247,15 @@
   .header__nav { display: flex; }
 }
 
-/* Mobile: show hamburger, hide nav */
+/* Mobile: show hamburger + all icons (search, heart, cart), hide nav links */
 @media (max-width: 768px) {
   .header__nav { display: none; }
   .header__menu-toggle { display: flex; }
-  .header__icon:not(.header__menu-toggle):not(.header__cart) { display: none; }
+  .header__right {
+    gap: 21px; /* Figma: icons spaced ~41px apart from center to center, icon width 20px = 21px gap */
+  }
+  /* Account icon hidden on mobile (Figma doesn't show it) */
+  .header__icon--account { display: none; }
 }
 
 /* --- Mobile Menu Overlay — Jacquemus-style: full screen, typographic --- */
