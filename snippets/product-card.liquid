@@ -92,9 +92,9 @@
       </a>
       <span class="product-card__price">
         {%- if product.compare_at_price > product.price -%}
-          <span class="product-card__price--sale">{{ product.price | money }}</span>
+          <span class="product-card__price--sale">{{ product.price | money_without_trailing_zeros }}</span>
         {%- else -%}
-          {{ product.price | money }}
+          {{ product.price | money_without_trailing_zeros }}
         {%- endif -%}
       </span>
     </div>

@@ -161,7 +161,7 @@
           <span class="pdp__add-text">
             {%- if current_variant.available -%}Add to cart{%- else -%}Sold out{%- endif -%}
           </span>
-          <span class="pdp__add-price" data-price>{{ current_variant.price | money }}</span>
+          <span class="pdp__add-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
         </button>
       {%- endform -%}
 
@@ -227,7 +227,7 @@
     </div>
     <button class="pdp__sticky-add" data-sticky-add onclick="document.querySelector('[data-add-to-cart]').requestSubmit()">
       <span>Add to cart</span>
-      <span class="pdp__sticky-price" data-price>{{ current_variant.price | money }}</span>
+      <span class="pdp__sticky-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
     </button>
   </div>
 </div>

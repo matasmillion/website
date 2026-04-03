@@ -31,6 +31,7 @@
 }
 .pdp__gallery-main::-webkit-scrollbar { display: none; }
 
+/* Mobile: image takes ~85vh so product info sits low */
 .pdp__gallery-slide {
   flex: 0 0 100%;
   scroll-snap-align: start;
@@ -40,6 +41,14 @@
   width: 100%;
   height: auto;
   display: block;
+  min-height: 85vh;
+  object-fit: cover;
+}
+
+@media (min-width: 769px) {
+  .pdp__gallery-img {
+    min-height: auto;
+  }
 }
 
 @media (min-width: 769px) {
@@ -185,10 +194,10 @@
   margin-bottom: 0.5rem;
 }
 
-/* Title — Figma: 15.9px, tracking 0.8px, medium weight, #2E2E2E */
+/* Title — Figma: 15.9px desktop, ~13px mobile */
 .pdp__title {
   font-family: var(--font-body);
-  font-size: 15.9px;
+  font-size: 13px;
   font-weight: var(--font-weight-medium);
   text-transform: none;
   line-height: 1.3;
@@ -197,14 +206,26 @@
   margin-bottom: 0.5rem;
 }
 
-/* Description — Figma: 11.4px, tracking 0.7px */
+@media (min-width: 769px) {
+  .pdp__title {
+    font-size: 15.9px;
+  }
+}
+
+/* Description — Figma: 11.4px, truncate on mobile */
 .pdp__description {
-  font-size: 11.4px;
+  font-size: 10.5px;
   font-weight: var(--font-weight-medium);
   line-height: 1.6;
   letter-spacing: 0.06em;
   color: #2E2E2E;
   margin-bottom: 1.5rem;
+}
+
+@media (min-width: 769px) {
+  .pdp__description {
+    font-size: 11.4px;
+  }
 }
 
 /* ===== COLOR SWATCHES ===== */
@@ -636,6 +657,26 @@
 
 .pdp-related__nav--prev { left: 0; }
 .pdp-related__nav--next { right: 0; }
+
+/* Card text inside PDP carousels — match Jacquemus ref */
+.pdp-related .product-card__title,
+.pdp-recent .product-card__title {
+  font-size: 11px;
+}
+.pdp-related .product-card__price,
+.pdp-recent .product-card__price {
+  font-size: 11px;
+}
+@media (max-width: 768px) {
+  .pdp-related .product-card__title,
+  .pdp-recent .product-card__title {
+    font-size: 9px;
+  }
+  .pdp-related .product-card__price,
+  .pdp-recent .product-card__price {
+    font-size: 9px;
+  }
+}
 
 .pdp-recent__grid {
   display: flex;
