@@ -70,6 +70,7 @@
 /* Product info — name left, price right, like Jacquemus */
 .product-card__info {
   padding: 0.625rem 0.25rem 0;
+  position: relative;
 }
 
 .product-card__info-row {
@@ -103,6 +104,41 @@
 .product-card__price--sale {
   color: var(--color-primary);
   opacity: 1;
+}
+
+.product-card__info-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+/* Wishlist heart on product card */
+.product-card__wishlist {
+  position: absolute;
+  bottom: 0.625rem;
+  right: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.375rem;
+  color: var(--color-primary);
+  opacity: 0.3;
+  transition: opacity var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+  z-index: 2;
+}
+
+.product-card__wishlist:hover {
+  opacity: 0.7;
+}
+
+.product-card__wishlist.is-saved {
+  opacity: 1;
+}
+
+.product-card__wishlist.is-saved svg {
+  fill: currentColor;
 }
 
 .product-card__price--compare {

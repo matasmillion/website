@@ -313,6 +313,68 @@
     });
   };
 
+  /* --- Wishlist (localStorage) --- */
+  const Wishlist = {
+    key: 'fr_wishlist',
+    get() {
+      try { return JSON.parse(localStorage.getItem(this.key)) || []; }
+      catch { return []; }
+    },
+    save(items) {
+      localStorage.setItem(this.key, JSON.stringify(items));
+      this.updateCounts();
+      this.updateButtons();
+    },
+    toggle(handle) {
+      const items = this.get();
+      const idx = items.indexOf(handle);
+      if (idx > -1) { items.splice(idx, 1); }
+      else { items.push(handle); }
+      this.save(items);
+      return idx === -1; // true if added
+    },
+    has(handle) {
+      return this.get().includes(handle);
+    },
+    updateCounts() {
+      const count = this.get().length;
+      document.querySelectorAll('[data-wishlist-count]').forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? '' : 'none';
+      });
+    },
+    updateButtons() {
+      document.querySelectorAll('[data-wishlist-toggle]').forEach(btn => {
+        const handle = btn.dataset.wishlistToggle;
+        const isSaved = this.has(handle);
+        btn.classList.toggle('is-saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        const svg = btn.querySelector('svg');
+        if (svg) svg.setAttribute('fill', isSaved ? 'currentColor' : 'none');
+      });
+    }
+  };
+
+  const initWishlist = () => {
+    Wishlist.updateCounts();
+    Wishlist.updateButtons();
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-wishlist-toggle]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const handle = btn.dataset.wishlistToggle;
+      const added = Wishlist.toggle(handle);
+      // Brief animation feedback
+      btn.style.transform = 'scale(1.2)';
+      setTimeout(() => { btn.style.transform = ''; }, 200);
+    });
+  };
+
+  // Expose globally for wishlist page
+  window.FRWishlist = Wishlist;
+
   /* --- Initialize Everything --- */
   const init = () => {
     initReveal();
@@ -327,6 +389,7 @@
     initProductGallery();
     initFilters();
     initAddToCart();
+    initWishlist();
   };
 
   if (document.readyState === 'loading') {
