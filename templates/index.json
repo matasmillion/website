@@ -107,6 +107,7 @@
         "hero_4a": {
           "type": "hero_image",
           "settings": {
+            "image": "shopify://shop_images/hf_20260222_144054_bbfca5ab-2f43-44c9-8524-b107f65f93d6.jpg",
             "video": "",
             "label": "Our Savoir-faire",
             "link": ""
@@ -114,6 +115,7 @@
         },
         "hero_4b": {
           "type": "hero_image",
+          "disabled": true,
           "settings": {
             "video": "",
             "label": "",
