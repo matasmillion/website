@@ -12,7 +12,7 @@
     "product_info": {
       "type": "product-info",
       "settings": {
-        "show_short_description": true,
+        "show_short_description": false,
         "show_appointment_link": false,
         "appointment_link": "",
         "delivery_text": "Order today for delivery within 5 business days",
