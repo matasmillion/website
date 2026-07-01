@@ -15,16 +15,22 @@
     padding: 0 0 var(--space-section);
   }
 
+  /* Full-bleed grid — images touch screen edges (Jacquemus) */
+  .collection-grid .container {
+    max-width: 100%;
+    padding: 0;
+  }
+
   .collection-grid__description {
     max-width: 500px;
-    margin: 0 0 var(--space-lg);
+    margin: 0 clamp(1.25rem, 1rem + 2vw, 3rem) var(--space-lg);
     font-size: var(--text-base);
     line-height: 1.75;
     color: var(--color-text-light);
   }
 
   .collection-grid__description--below {
-    margin: var(--space-lg) 0 0;
+    margin: var(--space-lg) clamp(1.25rem, 1rem + 2vw, 3rem) 0;
   }
 
   .collection-grid__products {
@@ -143,7 +149,7 @@
       {%- if collection.products.size > 0 -%}
         <div class="collection-grid__products collection-grid__products--{{ columns_desktop }}-cols" id="product-grid">
           {%- for product in collection.products -%}
-            {%- render 'product-card', product: product, image_aspect_ratio: image_ratio -%}
+            {%- render 'product-card', product: product, image_aspect_ratio: image_ratio, context: 'collection' -%}
           {%- endfor -%}
         </div>
 

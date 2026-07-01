@@ -1,7 +1,6 @@
 /* ============================================
    PRODUCT CARD — Jacquemus Figma Match
-   Name left, price below name, heart bottom-right
-   Color dots top-right of image
+   Contexts: --homepage (hover reveal), --collection (centered), --default (left)
    ============================================ */
 
 .product-card {
@@ -24,24 +23,9 @@
   background-color: #F5F5F3;
 }
 
-/* Jacquemus ref: very tall images, roughly 3:4 to 2:3 */
-.product-card__image-wrapper--portrait {
-  aspect-ratio: 3 / 4;
-}
-
-@media (min-width: 769px) {
-  .product-card__image-wrapper--portrait {
-    aspect-ratio: 3 / 4;
-  }
-}
-
-.product-card__image-wrapper--square {
-  aspect-ratio: 1 / 1;
-}
-
-.product-card__image-wrapper--landscape {
-  aspect-ratio: 4 / 3;
-}
+.product-card__image-wrapper--portrait { aspect-ratio: 3 / 4; }
+.product-card__image-wrapper--square { aspect-ratio: 1 / 1; }
+.product-card__image-wrapper--landscape { aspect-ratio: 4 / 3; }
 
 .product-card__image {
   position: absolute;
@@ -52,13 +36,8 @@
   transition: opacity var(--duration-slow) var(--ease-out);
 }
 
-.product-card__image--secondary {
-  opacity: 0;
-}
-
-.product-card__link:hover .product-card__image--secondary {
-  opacity: 1;
-}
+.product-card__image--secondary { opacity: 0; }
+.product-card__link:hover .product-card__image--secondary { opacity: 1; }
 
 .product-card__placeholder {
   aspect-ratio: 3 / 4;
@@ -74,7 +53,25 @@
   opacity: 0.15;
 }
 
-/* Color dots — top-right of image, like Figma */
+/* Badge on image — top-left (uppercase, tiny) */
+.product-card__badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2E2E2E;
+  z-index: 1;
+}
+
+@media (min-width: 769px) {
+  .product-card__badge { top: 1rem; left: 1rem; }
+}
+
+/* Color swatches — top-right of image (Jacquemus squares) */
 .product-card__colors {
   position: absolute;
   top: 0.75rem;
@@ -86,16 +83,12 @@
 }
 
 @media (min-width: 769px) {
-  .product-card__colors {
-    top: 1rem;
-    right: 1rem;
-  }
+  .product-card__colors { top: 1rem; right: 1rem; }
 }
 
 .product-card__color-dot {
   width: 13px;
   height: 13px;
-  border-radius: 50%;
   border: 1px solid transparent;
   display: block;
 }
@@ -107,34 +100,13 @@
   margin-left: 0.125rem;
 }
 
-/* Jacquemus ref: name left + price below, heart far right
-   Very compact padding, tiny text */
-.product-card__info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 0.5rem 0.5rem 0.25rem;
-  position: relative;
-}
-
-.product-card__info-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  min-width: 0;
-  flex: 1;
-}
-
+/* ===== BASE INFO ===== */
 .product-card__title-link {
   text-decoration: none;
   color: inherit;
 }
+.product-card__title-link:hover { opacity: 0.5; }
 
-.product-card__title-link:hover {
-  opacity: 0.5;
-}
-
-/* Jacquemus ref: tiny text ~11-12px on desktop, ~9-10px on mobile */
 .product-card__title {
   font-family: var(--font-body);
   font-size: 11px;
@@ -148,33 +120,24 @@
   text-overflow: ellipsis;
 }
 
-@media (max-width: 768px) {
-  .product-card__title {
-    font-size: 9.5px;
-  }
-}
-
-/* Jacquemus ref: price same size as name, stacked below */
 .product-card__price {
   font-size: 11px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
-  color: #2E2E2E;
+  color: #A4A4A4;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .product-card__price {
-    font-size: 9.5px;
-  }
-}
+.product-card__price--sale { color: #8B0000; }
 
-.product-card__price--sale {
+.product-card__badge-text {
+  font-size: 9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #2E2E2E;
 }
 
-/* Jacquemus ref: heart always visible, right side of info row */
 .product-card__wishlist {
   background: none;
   border: none;
@@ -185,17 +148,102 @@
   transition: opacity var(--duration-fast) var(--ease-out),
               transform var(--duration-fast) var(--ease-out);
   flex-shrink: 0;
+}
+.product-card__wishlist:hover { opacity: 0.7; }
+.product-card__wishlist.is-saved { opacity: 1; }
+.product-card__wishlist.is-saved svg { fill: currentColor; }
+
+/* ============================================
+   DEFAULT context — name left, price below, heart right
+   (PDP carousels: "Complete the look", "Recently viewed")
+   ============================================ */
+.product-card--default .product-card__info {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title heart"
+    "price heart";
+  align-items: start;
+  padding: 0.5rem 0.5rem 0.25rem;
+  column-gap: 0.5rem;
+}
+.product-card--default .product-card__title-link { grid-area: title; min-width: 0; }
+.product-card--default .product-card__price { grid-area: price; margin-top: 0.125rem; }
+.product-card--default .product-card__wishlist { grid-area: heart; margin-top: 0.125rem; }
+
+/* ============================================
+   COLLECTION context — name + price CENTERED, heart top-right
+   ============================================ */
+.product-card--collection .product-card__info {
+  position: relative;
+  text-align: center;
+  padding: 0.75rem 2.25rem 0.5rem;
+}
+.product-card--collection .product-card__title {
+  font-size: 13px;
+  white-space: normal;
+  margin-bottom: 0.125rem;
+}
+.product-card--collection .product-card__price {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 0.125rem;
+}
+.product-card--collection .product-card__badge-text {
+  display: block;
   margin-top: 0.125rem;
 }
-
-.product-card__wishlist:hover {
-  opacity: 0.7;
+.product-card--collection .product-card__wishlist {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.5rem;
 }
 
-.product-card__wishlist.is-saved {
-  opacity: 1;
+@media (max-width: 768px) {
+  .product-card--collection .product-card__title { font-size: 12px; }
+  .product-card--collection .product-card__price { font-size: 11px; }
+  .product-card--collection .product-card__info { padding: 0.6rem 1.75rem 0.75rem; }
 }
 
-.product-card__wishlist.is-saved svg {
-  fill: currentColor;
+/* ============================================
+   HOMEPAGE context — image only; hover reveals info (desktop)
+   No text on mobile.
+   ============================================ */
+.product-card--homepage .product-card__info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title heart"
+    "price heart";
+  align-items: end;
+  padding: 0.75rem 0.875rem;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.product-card--homepage .product-card__title-link { grid-area: title; min-width: 0; }
+.product-card--homepage .product-card__price {
+  grid-area: price;
+  margin-top: 0.125rem;
+  text-align: left;
+}
+.product-card--homepage .product-card__wishlist { grid-area: heart; align-self: end; }
+
+/* Homepage: swatches hidden until hover */
+.product-card--homepage .product-card__colors { opacity: 0; transition: opacity var(--duration-base) var(--ease-out); }
+
+@media (min-width: 769px) {
+  .product-card--homepage:hover .product-card__info { opacity: 1; pointer-events: auto; }
+  .product-card--homepage:hover .product-card__colors { opacity: 1; }
+}
+
+/* Mobile: homepage tiles are image-only (no name/price area at all) */
+@media (max-width: 768px) {
+  .product-card--homepage .product-card__info { display: none; }
+  .product-card--homepage .product-card__colors { display: none; }
 }

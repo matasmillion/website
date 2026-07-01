@@ -1,52 +1,57 @@
-<div class="filter-bar">
-  <div class="filter-bar__inner container">
-    <button class="filter-bar__mobile-toggle btn btn--secondary" data-filter-toggle=".filter-bar__filters" aria-label="{{ 'collections.filter' | t }}">
-      {{ 'collections.filter' | t }}
-    </button>
+{{ 'component-collection.css' | asset_url | stylesheet_tag }}
 
-    <div class="filter-bar__filters">
-      {%- for filter in collection.filters -%}
-        <div class="filter-bar__group">
-          <button class="filter-bar__toggle" data-filter-toggle=".filter-dropdown-{{ filter.param_name }}" aria-expanded="false">
-            {{ filter.label }}
-            <span class="filter-bar__toggle-icon"></span>
-          </button>
-          <div class="filter-bar__dropdown filter-dropdown-{{ filter.param_name }}">
-            {%- case filter.type -%}
-              {%- when 'list' -%}
-                {%- for value in filter.values -%}
-                  <label class="filter-bar__option">
-                    <input
-                      type="checkbox"
-                      name="{{ value.param_name }}"
-                      value="{{ value.value }}"
-                      {% if value.active %}checked{% endif %}
-                    >
-                    {{ value.label }}
-                    <span class="filter-bar__count">({{ value.count }})</span>
-                  </label>
-                {%- endfor -%}
-              {%- when 'price_range' -%}
-                <div class="filter-bar__price-range">
-                  <input type="number" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | money_without_currency }}" placeholder="Min" class="filter-bar__price-input" min="0">
-                  <span>—</span>
-                  <input type="number" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | money_without_currency }}" placeholder="Max" class="filter-bar__price-input" min="0">
-                </div>
-            {%- endcase -%}
-          </div>
-        </div>
-      {%- endfor -%}
+{%- comment -%} Jacquemus-style collection header: title + count, then Sort By / Filters {% endcomment -%}
+<div class="jc-collection">
+  <div class="jc-collection__head container">
+    <h1 class="jc-collection__title">
+      {{ collection.title }}<sup class="jc-collection__count">{{ collection.products_count }}</sup>
+    </h1>
+  </div>
+
+  <div class="jc-collection__bar container">
+    {%- comment -%} Sort By {% endcomment -%}
+    <div class="jc-collection__sort" data-sort-wrap>
+      <button type="button" class="jc-collection__sort-toggle" data-filter-toggle=".jc-sort-menu" aria-expanded="false">
+        {{ 'collections.sort' | t | default: 'Sort By' }}
+      </button>
+      <div class="jc-collection__menu jc-sort-menu">
+        {%- for option in collection.sort_options -%}
+          <a
+            href="{{ request.path }}?sort_by={{ option.value }}"
+            class="jc-collection__menu-item{% if collection.sort_by == option.value %} is-active{% endif %}"
+            data-sort-value="{{ option.value }}"
+          >{{ option.name }}</a>
+        {%- endfor -%}
+      </div>
     </div>
 
-    <div class="filter-bar__sort">
-      <label for="sort-select" class="visually-hidden">{{ 'collections.sort' | t }}</label>
-      <select id="sort-select" class="filter-bar__sort-select" data-sort-select>
-        {%- for option in collection.sort_options -%}
-          <option value="{{ option.value }}" {% if collection.sort_by == option.value %}selected{% endif %}>
-            {{ option.name }}
-          </option>
-        {%- endfor -%}
-      </select>
+    {%- comment -%} Filters {% endcomment -%}
+    <div class="jc-collection__filters" data-filters-wrap>
+      <button type="button" class="jc-collection__filters-toggle" data-filter-toggle=".jc-filter-menu" aria-expanded="false">
+        {{ 'collections.filter' | t | default: 'Filters' }}
+      </button>
+      {%- if collection.filters.size > 0 -%}
+        <div class="jc-collection__menu jc-collection__menu--filters jc-filter-menu">
+          {%- for filter in collection.filters -%}
+            <div class="jc-collection__filter-group">
+              <p class="jc-collection__filter-heading">{{ filter.label }}</p>
+              {%- case filter.type -%}
+                {%- when 'list' -%}
+                  {%- for value in filter.values -%}
+                    <a
+                      href="{{ value.url_to_add }}"
+                      class="jc-collection__filter-option{% if value.active %} is-active{% endif %}"
+                    >
+                      {{ value.label }} <span class="jc-collection__filter-count">({{ value.count }})</span>
+                    </a>
+                  {%- endfor -%}
+                {%- when 'price_range' -%}
+                  <p class="jc-collection__filter-option">Price filtering available on desktop.</p>
+              {%- endcase -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </div>

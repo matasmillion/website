@@ -57,21 +57,17 @@
     {%- if collection_handle != blank -%}
       {%- for product in collections[collection_handle].products limit: limit -%}
         <div class="cs__product">
-          {%- render 'product-card', product: product -%}
+          {%- render 'product-card', product: product, context: 'homepage' -%}
         </div>
       {%- endfor -%}
     {%- else -%}
       {%- for i in (1..4) -%}
         <div class="cs__product">
-          <article class="product-card">
+          <article class="product-card product-card--homepage">
             <div class="product-card__image-wrapper product-card__image-wrapper--portrait">
               <div class="product-card__placeholder">
                 {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
               </div>
-            </div>
-            <div class="product-card__info">
-              <h3 class="product-card__title">Product {{ i }}</h3>
-              <span class="product-card__price">{{ 8500 | money }}</span>
             </div>
           </article>
         </div>
@@ -82,7 +78,7 @@
 
 <style>
   .cs {
-    margin: 0;
+    margin: 0 0 var(--grid-gap);
     padding: 0;
   }
   .cs__heroes {

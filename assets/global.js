@@ -255,10 +255,28 @@
 
   /* --- Collection Filters --- */
   const initFilters = () => {
-    document.querySelectorAll('[data-filter-toggle]').forEach(toggle => {
-      toggle.addEventListener('click', () => {
+    const toggles = document.querySelectorAll('[data-filter-toggle]');
+    toggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
         const target = document.querySelector(toggle.dataset.filterToggle);
-        if (target) target.classList.toggle('is-open');
+        if (!target) return;
+        const willOpen = !target.classList.contains('is-open');
+        // Close any other open menus
+        document.querySelectorAll('.jc-collection__menu.is-open').forEach(m => {
+          if (m !== target) m.classList.remove('is-open');
+        });
+        target.classList.toggle('is-open', willOpen);
+        toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      document.querySelectorAll('.jc-collection__menu.is-open').forEach(menu => {
+        if (!menu.closest('[data-sort-wrap], [data-filters-wrap]').contains(e.target)) {
+          menu.classList.remove('is-open');
+        }
       });
     });
   };

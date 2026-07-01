@@ -3,7 +3,7 @@
     "collection_hero": {
       "type": "collection-hero",
       "settings": {
-        "show_hero": true,
+        "show_hero": false,
         "text_position": "center",
         "overlay_opacity": 30,
         "show_description": true
