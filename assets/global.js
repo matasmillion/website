@@ -431,11 +431,12 @@
     }, { passive: true });
   };
 
-  /* --- PDP Sticky Bar (show on scroll past add-to-cart) --- */
-  const initPdpStickyBar = () => {
-    const stickyBar = document.querySelector('[data-pdp-sticky]');
-    if (!stickyBar) return;
-    // Always visible on mobile via CSS, no extra JS needed
+  /* --- PDP Mobile Band ATC button --- */
+  const initPdpMobileBand = () => {
+    const mobileBtn = document.querySelector('[data-mobile-submit]');
+    const form = document.querySelector('[data-add-to-cart]');
+    if (!mobileBtn || !form) return;
+    mobileBtn.addEventListener('click', () => form.requestSubmit());
   };
 
   /* --- Initialize Everything --- */
@@ -455,7 +456,7 @@
     initWishlist();
     initPdpTabs();
     initPdpGallery();
-    initPdpStickyBar();
+    initPdpMobileBand();
   };
 
   if (document.readyState === 'loading') {

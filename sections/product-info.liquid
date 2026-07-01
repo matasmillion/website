@@ -45,7 +45,7 @@
       </button>
     {%- endif -%}
 
-    {%- comment -%} Wishlist button on image {% endcomment -%}
+    {%- comment -%} Wishlist on image — desktop only {% endcomment -%}
     <button
       class="pdp__wishlist-img"
       data-wishlist-toggle="{{ product.handle }}"
@@ -56,17 +56,36 @@
     </button>
   </div>
 
+  {%- comment -%} ===== MOBILE BAND: title + heart + ATC (mobile only, below image) ===== {% endcomment -%}
+  <div class="pdp__mobile-band">
+    <div class="pdp__mobile-top">
+      <h1 class="pdp__mobile-title">{{ product.title }}</h1>
+      <button
+        class="pdp__mobile-heart"
+        data-wishlist-toggle="{{ product.handle }}"
+        aria-label="Save {{ product.title }}"
+        aria-pressed="false"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+    <button type="button" class="pdp__mobile-atc" data-mobile-submit>
+      <span>Add to cart</span>
+      <span data-mobile-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
+    </button>
+  </div>
+
   {%- comment -%} ===== PRODUCT DETAILS (RIGHT ON DESKTOP) ===== {% endcomment -%}
   <div class="pdp__details">
     <div class="pdp__details-inner">
-      {%- comment -%} Collection / Vendor {% endcomment -%}
+      {%- comment -%} Desktop-only: collection label + title {% endcomment -%}
       {%- if product.collections.size > 0 -%}
         <p class="pdp__collection">{{ product.collections.first.title }}</p>
       {%- endif -%}
 
       <h1 class="pdp__title">{{ product.title }}</h1>
 
-      {%- if product.description != blank -%}
+      {%- if product.description != blank and section.settings.show_short_description -%}
         <p class="pdp__description">{{ product.description | strip_html | truncate: 200 }}</p>
       {%- endif -%}
 
@@ -123,9 +142,9 @@
         {%- endif -%}
       {%- endfor -%}
 
-      {%- comment -%} ===== SIZE SELECTOR ===== {% endcomment -%}
+      {%- comment -%} ===== SIZE SELECTOR + ADD TO CART ===== {% endcomment -%}
       {%- form 'product', product, data-add-to-cart: true, class: 'pdp__form' -%}
-        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
 
         {%- for option in product.options_with_values -%}
           {%- unless option.name == 'Color' or option.name == 'Colour' -%}
@@ -150,14 +169,12 @@
           {%- endunless -%}
         {%- endfor -%}
 
-        {%- comment -%} ===== ADD TO CART BUTTON (DESKTOP) ===== {% endcomment -%}
         <button
           type="submit"
           class="pdp__add-btn"
           data-add-btn
           {% unless current_variant.available %}disabled{% endunless %}
         >
-          <svg class="pdp__add-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           <span class="pdp__add-text">
             {%- if current_variant.available -%}Add to cart{%- else -%}Sold out{%- endif -%}
           </span>
@@ -165,14 +182,13 @@
         </button>
       {%- endform -%}
 
-      {%- comment -%} Book appointment link {% endcomment -%}
       {%- if section.settings.show_appointment_link -%}
         <a href="{{ section.settings.appointment_link }}" class="pdp__appointment">
           See availability and book an appointment in store
         </a>
       {%- endif -%}
 
-      {%- comment -%} ===== TABS (Details | Delivery and returns | Assistance) ===== {% endcomment -%}
+      {%- comment -%} ===== TABS ===== {% endcomment -%}
       <div class="pdp__tabs" data-pdp-tabs>
         <div class="pdp__tab-list" role="tablist">
           <button class="pdp__tab is-active" role="tab" data-tab="details" aria-selected="true">Details</button>
@@ -182,7 +198,7 @@
 
         <div class="pdp__tab-panel is-active" data-tab-panel="details" role="tabpanel">
           {%- if product.collections.size > 0 -%}
-            <p class="pdp__tab-collection">{{ product.collections.first.title }}</p>
+            <p class="pdp__tab-collection">{{ product.collections.first.title | upcase }}</p>
           {%- endif -%}
           <p class="pdp__tab-subtitle">{{ product.title }}</p>
           {%- if product.description != blank -%}
@@ -198,37 +214,19 @@
         </div>
 
         <div class="pdp__tab-panel" data-tab-panel="delivery" role="tabpanel">
-          <p class="pdp__tab-subtitle">Delivery</p>
-          <p>Free delivery and easy returns within 14 days.</p>
-          <p>Standard delivery: 3-5 business days.</p>
-          <p>Express delivery: 1-2 business days.</p>
+          {%- if section.settings.delivery_text != blank -%}
+            <p class="pdp__tab-meta" style="margin-bottom:1rem">{{ section.settings.delivery_text }}</p>
+          {%- endif -%}
+          <p class="pdp__tab-meta">Free delivery and easy returns within 14 days.</p>
+          <p class="pdp__tab-meta">Express delivery: 1-2 business days.</p>
         </div>
 
         <div class="pdp__tab-panel" data-tab-panel="assistance" role="tabpanel">
-          <p class="pdp__tab-subtitle">Need help?</p>
-          <p>Contact our customer service team for assistance with sizing, orders, or any questions.</p>
-          <a href="/pages/contact" class="pdp__tab-link">Contact us</a>
+          <p class="pdp__tab-meta" style="margin-bottom:1rem">Monday to Friday from 10:00 am to 6:00pm CET.</p>
+          <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
         </div>
       </div>
     </div>
-  </div>
-
-  {%- comment -%} ===== STICKY BOTTOM BAR (MOBILE) ===== {% endcomment -%}
-  <div class="pdp__sticky-bar" data-pdp-sticky>
-    <div class="pdp__sticky-inner">
-      <span class="pdp__sticky-title">{{ product.title }}</span>
-      <button
-        class="pdp__sticky-heart"
-        data-wishlist-toggle="{{ product.handle }}"
-        aria-label="Save {{ product.title }}"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
-    </div>
-    <button class="pdp__sticky-add" data-sticky-add onclick="document.querySelector('[data-add-to-cart]').requestSubmit()">
-      <span>Add to cart</span>
-      <span class="pdp__sticky-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
-    </button>
   </div>
 </div>
 
@@ -265,7 +263,6 @@
   <div class="pdp-recent__grid" data-recently-viewed-grid></div>
 </section>
 
-{%- comment -%} Size Chart Modal {% endcomment -%}
 {{ 'component-modal.css' | asset_url | stylesheet_tag }}
 <div class="modal" id="size-chart-modal" aria-hidden="true">
   <div class="modal__overlay"></div>
@@ -287,7 +284,6 @@
 </div>
 
 <script>
-  // Track recently viewed
   (function() {
     const handle = '{{ product.handle }}';
     const key = 'fr_recently_viewed';
@@ -310,7 +306,7 @@
       "type": "checkbox",
       "id": "show_short_description",
       "label": "Show short description",
-      "default": true
+      "default": false
     },
     {
       "type": "checkbox",
