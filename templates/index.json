@@ -12,16 +12,6 @@
     "story_1": {
       "type": "collection-story",
       "blocks": {
-        "hero_image_cLWJXA": {
-          "type": "hero_image",
-          "disabled": true,
-          "settings": {
-            "image": "shopify://shop_images/Screenshot_2026-03-06_at_10.18.10_AM.jpg",
-            "video": "",
-            "label": "New In Women",
-            "link": ""
-          }
-        },
         "hero_1a": {
           "type": "hero_image",
           "settings": {
@@ -33,7 +23,6 @@
         }
       },
       "block_order": [
-        "hero_image_cLWJXA",
         "hero_1a"
       ],
       "settings": {
