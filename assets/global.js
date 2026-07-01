@@ -271,9 +271,13 @@
         const btn = form.querySelector('[data-add-btn]');
         if (!btn || btn.disabled) return;
 
+        // Update only the text label so icon/price markup is preserved
+        const label = btn.querySelector('.pdp__add-text') || btn;
+        const original = label.textContent;
+        const setLabel = (txt) => { label.textContent = txt; };
+
         btn.disabled = true;
-        const original = btn.textContent;
-        btn.textContent = 'Adding...';
+        setLabel('Adding...');
 
         try {
           const formData = new FormData(form);
@@ -283,7 +287,7 @@
           });
 
           if (res.ok) {
-            btn.textContent = 'Added';
+            setLabel('Added');
             // Update cart count
             const cartRes = await fetch('/cart.js');
             const cart = await cartRes.json();
@@ -299,14 +303,14 @@
             }
           } else {
             const data = await res.json();
-            btn.textContent = data.description || 'Error';
+            setLabel(data.description || 'Error');
           }
         } catch (err) {
-          btn.textContent = 'Error';
+          setLabel('Error');
         }
 
         setTimeout(() => {
-          btn.textContent = original;
+          setLabel(original);
           btn.disabled = false;
         }, 2000);
       });
