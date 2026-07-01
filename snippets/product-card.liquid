@@ -15,12 +15,14 @@
 
   assign tags_down = product.tags | join: ',' | downcase
   assign badge = ''
-  if tags_down contains 'personalizable'
-    assign badge = 'Personalizable'
+  if product.available == false or tags_down contains 'sold out' or tags_down contains 'sold-out'
+    assign badge = 'Sold out'
+  elsif tags_down contains 'restocking soon' or tags_down contains 'restocking-soon'
+    assign badge = 'Restocking soon'
   elsif tags_down contains 'exclusive'
     assign badge = 'Exclusive'
-  elsif tags_down contains 'sold out' or product.available == false
-    assign badge = 'Sold out'
+  elsif tags_down contains 'personalizable'
+    assign badge = 'Personalizable'
   elsif tags_down contains 'new'
     assign badge = 'New'
   endif
@@ -62,8 +64,8 @@
         </div>
       {%- endif -%}
 
-      {%- comment -%} Badge on image (top-left) — homepage & default {% endcomment -%}
-      {%- if badge != blank and context != 'collection' -%}
+      {%- comment -%} Label — always top-left, plain text (Jacquemus style) {% endcomment -%}
+      {%- if badge != blank -%}
         <span class="product-card__badge">{{ badge | upcase }}</span>
       {%- endif -%}
 
@@ -114,14 +116,12 @@
     </a>
     <span class="product-card__price">
       {%- if product.compare_at_price > product.price -%}
-        <span class="product-card__price--sale">{{ product.price | money_without_trailing_zeros }}</span>
+        <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+        <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
       {%- else -%}
         {{ product.price | money_without_trailing_zeros }}
       {%- endif -%}
     </span>
-    {%- if badge != blank and context == 'collection' -%}
-      <span class="product-card__badge-text">{{ badge | upcase }}</span>
-    {%- endif -%}
     <button
       class="product-card__wishlist"
       data-wishlist-toggle="{{ product.handle }}"

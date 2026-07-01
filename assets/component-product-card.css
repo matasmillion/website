@@ -23,7 +23,10 @@
   background-color: #F5F5F3;
 }
 
+/* Jacquemus tiles are 3:4 (0.75) — confirmed from their Figma capture */
 .product-card__image-wrapper--portrait { aspect-ratio: 3 / 4; }
+.product-card__image-wrapper--portrait-45 { aspect-ratio: 4 / 5; }
+.product-card__image-wrapper--portrait-23 { aspect-ratio: 2 / 3; }
 .product-card__image-wrapper--square { aspect-ratio: 1 / 1; }
 .product-card__image-wrapper--landscape { aspect-ratio: 4 / 3; }
 
@@ -128,15 +131,14 @@
   white-space: nowrap;
 }
 
-.product-card__price--sale { color: #8B0000; }
-
-.product-card__badge-text {
-  font-size: 9px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #2E2E2E;
+/* Sale: struck-through original (grey) + reduced price (red) */
+.product-card__price-compare {
+  color: #A4A4A4;
+  text-decoration: line-through;
+  margin-right: 0.4em;
 }
+
+.product-card__price-sale { color: #B23A2E; }
 
 .product-card__wishlist {
   background: none;
@@ -188,10 +190,6 @@
   display: block;
   font-size: 12px;
   margin-bottom: 0.125rem;
-}
-.product-card--collection .product-card__badge-text {
-  display: block;
-  margin-top: 0.125rem;
 }
 .product-card--collection .product-card__wishlist {
   position: absolute;
