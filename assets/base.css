@@ -184,6 +184,17 @@ a:hover { opacity: 0.5; }
   padding: 0;
 }
 
+/* The header is fixed. The homepage hero sits behind it on purpose; every other
+   template must start below it so content doesn't overlap the nav. */
+body:not(.template-index) #main-content {
+  padding-top: 68px;
+}
+@media (min-width: 769px) {
+  body:not(.template-index) #main-content {
+    padding-top: 82px;
+  }
+}
+
 /* --- Images --- */
 img {
   max-width: 100%;

@@ -42,12 +42,12 @@
         </div>
 
         {%- if section.settings.show_foreign_world -%}
-          <a href="{{ section.settings.foreign_world_link | default: '#' }}" class="header__nav-link">
+          <a href="{{ section.settings.foreign_world_link | default: '/pages/foreign-world' }}" class="header__nav-link">
             {{ section.settings.foreign_world_label | default: 'Foreign World' }}
           </a>
         {%- endif -%}
         {%- if section.settings.show_foreign_fund -%}
-          <a href="{{ section.settings.foreign_fund_link | default: '#' }}" class="header__nav-link">
+          <a href="{{ section.settings.foreign_fund_link | default: '/pages/foreign-fund' }}" class="header__nav-link">
             {{ section.settings.foreign_fund_label | default: 'Foreign Fund' }}
           </a>
         {%- endif -%}

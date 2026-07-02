@@ -27,9 +27,10 @@
   elsif tags_down contains 'new'
     assign badge = 'New'
   endif
+  assign card_context = context | default: 'overlay'
 -%}
 
-<article class="product-card">
+<article class="product-card product-card--{{ card_context }}">
   <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
     <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
       {%- if product.featured_image -%}
@@ -114,23 +115,21 @@
     <a href="{{ product.url }}" class="product-card__title-link">
       <h3 class="product-card__title">{{ product.title }}</h3>
     </a>
-    <div class="product-card__meta">
-      <span class="product-card__price">
-        {%- if product.compare_at_price > product.price -%}
-          <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
-          <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
-        {%- else -%}
-          {{ product.price | money_without_trailing_zeros }}
-        {%- endif -%}
-      </span>
-      <button
-        class="product-card__wishlist"
-        data-wishlist-toggle="{{ product.handle }}"
-        aria-label="Save {{ product.title }}"
-        aria-pressed="false"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
-    </div>
+    <span class="product-card__price">
+      {%- if product.compare_at_price > product.price -%}
+        <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+        <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
+      {%- else -%}
+        {{ product.price | money_without_trailing_zeros }}
+      {%- endif -%}
+    </span>
+    <button
+      class="product-card__wishlist"
+      data-wishlist-toggle="{{ product.handle }}"
+      aria-label="Save {{ product.title }}"
+      aria-pressed="false"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
   </div>
 </article>

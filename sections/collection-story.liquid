@@ -72,7 +72,7 @@
     <div class="cs__grid">
       {%- for product in collections[collection_handle].products limit: limit -%}
         <div class="cs__product">
-          {%- render 'product-card', product: product, context: 'homepage' -%}
+          {%- render 'product-card', product: product, context: 'overlay' -%}
         </div>
       {%- endfor -%}
     </div>
