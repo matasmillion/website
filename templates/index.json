@@ -12,6 +12,15 @@
     "story_1": {
       "type": "collection-story",
       "blocks": {
+        "hero_image_6zkkeR": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-03-06_at_10.18.10_AM.jpg",
+            "video": "",
+            "label": "New In Women",
+            "link": ""
+          }
+        },
         "hero_1a": {
           "type": "hero_image",
           "settings": {
@@ -23,9 +32,11 @@
         }
       },
       "block_order": [
+        "hero_image_6zkkeR",
         "hero_1a"
       ],
       "settings": {
+        "hero_height": "full",
         "collection": "artic-ambush",
         "products_count": 4
       }
@@ -56,6 +67,7 @@
       ],
       "disabled": true,
       "settings": {
+        "hero_height": "full",
         "collection": "",
         "products_count": 4
       }
@@ -86,6 +98,7 @@
       ],
       "disabled": true,
       "settings": {
+        "hero_height": "full",
         "collection": "",
         "products_count": 4
       }
@@ -117,6 +130,7 @@
         "hero_4b"
       ],
       "settings": {
+        "hero_height": "full",
         "collection": "best-sellers",
         "products_count": 4
       }
