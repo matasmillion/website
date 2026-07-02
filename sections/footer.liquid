@@ -113,6 +113,7 @@
       <div class="footer__localization">
         {%- if localization.available_countries.size > 1 -%}
           {%- form 'localization', id: 'footer-country-form', class: 'footer__loc-form' -%}
+            <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-country">Country</label>
             <select id="footer-country" name="country_code" data-loc-select>
               {%- for country in localization.available_countries -%}
@@ -125,6 +126,7 @@
         {%- endif -%}
         {%- if localization.available_languages.size > 1 -%}
           {%- form 'localization', id: 'footer-language-form', class: 'footer__loc-form' -%}
+            <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-language">Language</label>
             <select id="footer-language" name="locale_code" data-loc-select>
               {%- for language in localization.available_languages -%}
