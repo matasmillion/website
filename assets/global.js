@@ -524,6 +524,16 @@
     }, { passive: true });
   };
 
+  /* --- Localization selectors (country + language) --- */
+  const initLocalization = () => {
+    document.querySelectorAll('[data-loc-select]').forEach((select) => {
+      select.addEventListener('change', () => {
+        const form = select.closest('form');
+        if (form) form.submit();
+      });
+    });
+  };
+
   /* --- Footer accordions (newsletter + menu columns) --- */
   const initFooterAccordions = () => {
     document.querySelectorAll('.footer__accordion-trigger').forEach((trigger) => {
@@ -609,6 +619,7 @@
     initPdpMobileBand();
     initFooterAccordions();
     initNewsletterForms();
+    initLocalization();
   };
 
   if (document.readyState === 'loading') {
