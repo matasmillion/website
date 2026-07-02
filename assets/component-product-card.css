@@ -9,9 +9,6 @@
 }
 
 .product-card__link {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
   display: block;
   text-decoration: none;
   color: inherit;
