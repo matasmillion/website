@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "color_primary": "#0A0A0A",
@@ -10,63 +19,26 @@
     "font_body_size": 16,
     "cart_type": "drawer",
     "free_shipping_threshold": 150,
-    "sections": {
-      "header-group": {
-        "type": "header",
-        "sections": {
-          "announcement-bar": {
-            "type": "announcement-bar",
-            "settings": {
-              "show_announcement": true,
-              "text": "Complimentary shipping on orders over $150",
-              "bg_color": "#0A0A0A",
-              "text_color": "#F5F0EB"
-            }
-          },
-          "header": {
-            "type": "header",
-            "settings": {
-              "logo_position": "left",
-              "sticky_header": true,
-              "transparent_header": true
-            }
-          }
-        },
-        "order": ["announcement-bar", "header"]
-      },
-      "footer-group": {
-        "type": "footer",
-        "sections": {
-          "footer": {
-            "type": "footer",
-            "settings": {
-              "tagline": "Designed for those who see the world differently."
-            },
-            "blocks": {
-              "menu_1": {
-                "type": "menu",
-                "settings": {
-                  "heading": "Shop"
-                }
-              },
-              "menu_2": {
-                "type": "menu",
-                "settings": {
-                  "heading": "About"
-                }
-              },
-              "newsletter": {
-                "type": "newsletter",
-                "settings": {
-                  "heading": "Stay Connected",
-                  "text": "First access to new collections and travel stories."
-                }
-              }
-            },
-            "block_order": ["menu_1", "menu_2", "newsletter"]
-          }
-        },
-        "order": ["footer"]
+    "content_for_index": [],
+    "blocks": {
+      "15683396631634586217": {
+        "type": "shopify://apps/inbox/blocks/chat/841fc607-4181-4ad1-842d-e24d7f8bad6b",
+        "disabled": false,
+        "settings": {
+          "greeting_message": "",
+          "background_color": "#FFFFFF",
+          "font_color": "#000000",
+          "button_color": "#000000",
+          "secondary_color": "#FFFFFF",
+          "ternary_color": "#6A6A6A",
+          "button_icon": "no_icon",
+          "button_text": "live_chat",
+          "button_horizontal_position": "bottom_right",
+          "button_vertical_position": "lowest",
+          "agent_inherit_fonts": true,
+          "agent_font": "system_ui_n4",
+          "agent_border_radius": 16
+        }
       }
     }
   }
