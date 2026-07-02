@@ -9,7 +9,9 @@
   left: 0;
   width: 100%;
   z-index: 100;
-  background-color: var(--color-secondary);
+  /* Transparent at the top so the hero shows through behind it;
+     becomes solid once the page is scrolled. */
+  background-color: transparent;
   transition: background-color var(--duration-base) var(--ease-out),
               transform var(--duration-base) var(--ease-out);
 }
@@ -18,7 +20,8 @@
   background-color: transparent;
 }
 
-.header--transparent.is-scrolled {
+.header--transparent.is-scrolled,
+.header.is-scrolled {
   background-color: var(--color-secondary);
 }
 
@@ -65,7 +68,8 @@
 }
 
 .header__logo-text {
-  font-family: var(--font-heading);
+  /* Serif wordmark — matches the original brand-name look */
+  font-family: 'Times New Roman', Times, serif;
   font-size: clamp(1rem, 0.8rem + 0.8vw, 1.375rem);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.08em;
