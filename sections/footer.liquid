@@ -29,6 +29,15 @@
                 {{ section.settings.newsletter_button | default: 'Register' }}
               </button>
             </div>
+            <label class="footer__newsletter-dob-label" for="footer-dob">Date of birth</label>
+            <input
+              type="date"
+              id="footer-dob"
+              name="contact[note]"
+              class="footer__newsletter-dob"
+              aria-label="Date of birth"
+            >
+            <p class="footer__newsletter-dob-hint">So we can celebrate you with a birthday treat.</p>
           {%- endform -%}
         </div>
       </div>
@@ -215,6 +224,33 @@
   .footer__newsletter-success {
     font-size: var(--text-sm);
     margin-bottom: var(--space-sm);
+  }
+  .footer__newsletter-dob-label {
+    display: block;
+    margin-top: var(--space-md);
+    margin-bottom: 0.4rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+  }
+  .footer__newsletter-dob {
+    width: 100%;
+    max-width: 420px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-primary);
+    padding: 0.6rem 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-primary);
+  }
+  .footer__newsletter-dob:focus { outline: none; }
+  .footer__newsletter-dob-hint {
+    margin-top: 0.5rem;
+    font-size: var(--text-micro);
+    color: var(--color-text-light);
+    letter-spacing: 0.03em;
   }
 
   /* --- Accordion triggers --- */

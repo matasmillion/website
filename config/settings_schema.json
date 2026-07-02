@@ -143,5 +143,35 @@
         "unit": "$"
       }
     ]
+  },
+  {
+    "name": "Live chat / assistance",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "chat_enable",
+        "label": "Show floating assistance button",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "chat_text",
+        "label": "Button text",
+        "default": "Live Assistance"
+      },
+      {
+        "type": "url",
+        "id": "chat_link",
+        "label": "Fallback link",
+        "info": "Opens Shopify Inbox chat if available; otherwise goes here (e.g. contact page)."
+      },
+      {
+        "type": "checkbox",
+        "id": "chat_hide_inbox",
+        "label": "Hide Shopify Inbox default bubble",
+        "info": "Hides the standard Inbox chat bubble so only this text button shows.",
+        "default": true
+      }
+    ]
   }
 ]

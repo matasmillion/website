@@ -14,6 +14,9 @@
 
       {%- form 'customer', id: 'email-signup-form' -%}
         <input type="hidden" name="contact[tags]" value="newsletter">
+        {%- if form.posted_successfully? -%}
+          <p class="email-signup__success">Thank you — you're subscribed.</p>
+        {%- endif -%}
         <div class="email-signup__form">
           <input
             type="email"
@@ -27,6 +30,14 @@
             {{ section.settings.button_text | default: 'Subscribe' }}
           </button>
         </div>
+        <label class="email-signup__dob-label" for="email-signup-dob">Date of birth</label>
+        <input
+          type="date"
+          id="email-signup-dob"
+          name="contact[note]"
+          class="email-signup__dob"
+          aria-label="Date of birth"
+        >
       {%- endform -%}
     </div>
   </div>
@@ -94,6 +105,33 @@
   }
   .email-signup__btn:hover {
     opacity: 1;
+  }
+  .email-signup__dob-label {
+    display: block;
+    margin-top: var(--space-md);
+    margin-bottom: 0.4rem;
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    opacity: 0.5;
+  }
+  .email-signup__dob {
+    width: 100%;
+    background: none;
+    border: none;
+    border-bottom: 0.5px solid rgba(10, 10, 10, 0.25);
+    padding: var(--space-sm) 0;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+    outline: none;
+  }
+  .email-signup__success {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-md);
+    letter-spacing: 0.05em;
   }
 </style>
 

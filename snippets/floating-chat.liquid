@@ -1,0 +1,57 @@
+{%- comment -%}
+  Floating "Live Assistance" text button (bottom-right).
+  Best-effort: opens the Shopify Inbox launcher if present, otherwise
+  follows the configured link. Optionally hides the default Inbox bubble.
+{%- endcomment -%}
+{%- if settings.chat_enable -%}
+  <a
+    href="{{ settings.chat_link | default: '/pages/contact' }}"
+    class="fr-chat"
+    data-fr-chat
+  >{{ settings.chat_text | default: 'Live Assistance' }}</a>
+
+  <style>
+    .fr-chat {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      z-index: 95;
+      font-family: var(--font-body);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--color-primary);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 0.5px;
+      padding: 0.35rem 0.1rem;
+      transition: opacity var(--duration-fast) var(--ease-out);
+    }
+    .fr-chat:hover { opacity: 0.55; }
+    @media (max-width: 768px) {
+      .fr-chat { right: 1rem; bottom: 1rem; font-size: 11px; }
+    }
+    {%- if settings.chat_hide_inbox -%}
+      /* Hide Shopify Inbox's default bubble so only our text button shows */
+      #shopify-chat,
+      [id^="shopify-chat"],
+      .shopify-chat-button { display: none !important; }
+    {%- endif -%}
+  </style>
+
+  <script>
+    (function () {
+      var btn = document.querySelector('[data-fr-chat]');
+      if (!btn) return;
+      btn.addEventListener('click', function (e) {
+        // If Shopify Inbox has injected a launcher, open it instead of navigating.
+        var inbox = document.querySelector(
+          '#shopify-chat button, [id^="shopify-chat"] button, .shopify-chat-button, button[aria-label*="chat" i]'
+        );
+        if (inbox) {
+          e.preventDefault();
+          inbox.click();
+        }
+      });
+    })();
+  </script>
+{%- endif -%}

@@ -72,6 +72,9 @@
 
   {%- sections 'footer-group' -%}
 
+  {%- comment -%} Floating "Live Assistance" button {% endcomment -%}
+  {%- render 'floating-chat' -%}
+
   {%- comment -%} Global JS — loaded at end {% endcomment -%}
   <script src="{{ 'global.js' | asset_url }}" defer></script>
 </body>
