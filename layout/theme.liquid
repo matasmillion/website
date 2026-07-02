@@ -44,6 +44,23 @@
   {%- comment -%} Base CSS — always loaded {% endcomment -%}
   {{ 'base.css' | asset_url | stylesheet_tag }}
 
+  {%- comment -%}
+    Settings-driven CSS variables. base.css is a static .css file, so Liquid
+    inside it is NOT processed — these must be defined here (processed as Liquid)
+    and loaded AFTER base.css so they take effect.
+  {%- endcomment -%}
+  <style>
+    :root {
+      --color-primary: {{ settings.color_primary | default: '#2E2E2E' }};
+      --color-secondary: {{ settings.color_secondary | default: '#FFFFFF' }};
+      --color-accent: {{ settings.color_accent | default: '#C4632A' }};
+      --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
+      --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};
+      --font-heading: {{ settings.font_heading.family | default: 'Inter' }}, {{ settings.font_heading.fallback_families | default: 'sans-serif' }};
+      --font-body: {{ settings.font_body.family | default: 'Inter' }}, {{ settings.font_body.fallback_families | default: 'sans-serif' }};
+    }
+  </style>
+
   {%- comment -%} Shopify essentials {% endcomment -%}
   {{ content_for_header }}
 

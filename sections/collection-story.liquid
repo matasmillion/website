@@ -4,12 +4,14 @@
   assign collection_handle = section.settings.collection
   assign limit = section.settings.products_count | default: 4
   assign hero_images = section.blocks | where: 'type', 'hero_image'
+  assign hero_height = section.settings.hero_height | default: 'full'
+  assign product_count = collections[collection_handle].products.size
 -%}
 
 <section class="cs reveal" id="cs-{{ section.id }}">
-  {%- comment -%} Hero Images — 1 or 2 side-by-side (desktop) {% endcomment -%}
+  {%- comment -%} Hero Images — 1 fills the screen / 2 split evenly (desktop) {% endcomment -%}
   {%- if hero_images.size > 0 -%}
-    <div class="cs__heroes cs__heroes--{{ hero_images.size }}">
+    <div class="cs__heroes cs__heroes--{{ hero_images.size }} cs__heroes--h-{{ hero_height }}">
       {%- for block in hero_images -%}
         <div class="cs__hero" {{ block.shopify_attributes }}>
           {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}" class="cs__hero-link">{%- endif -%}
@@ -52,28 +54,16 @@
     </div>
   {%- endif -%}
 
-  {%- comment -%} Product Grid {% endcomment -%}
-  <div class="cs__grid">
-    {%- if collection_handle != blank -%}
+  {%- comment -%} Product Grid — only when a collection with products is set {% endcomment -%}
+  {%- if collection_handle != blank and product_count > 0 -%}
+    <div class="cs__grid">
       {%- for product in collections[collection_handle].products limit: limit -%}
         <div class="cs__product">
           {%- render 'product-card', product: product, context: 'homepage' -%}
         </div>
       {%- endfor -%}
-    {%- else -%}
-      {%- for i in (1..4) -%}
-        <div class="cs__product">
-          <article class="product-card product-card--homepage">
-            <div class="product-card__image-wrapper product-card__image-wrapper--portrait">
-              <div class="product-card__placeholder">
-                {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
-              </div>
-            </div>
-          </article>
-        </div>
-      {%- endfor -%}
-    {%- endif -%}
-  </div>
+    </div>
+  {%- endif -%}
 </section>
 
 <style>
@@ -81,14 +71,10 @@
     margin: 0 0 var(--grid-gap);
     padding: 0;
   }
+  /* Heroes: mobile stacked (1 column); desktop 2-up splits evenly */
   .cs__heroes {
     display: grid;
     gap: var(--grid-gap);
-  }
-  .cs__heroes--1 {
-    grid-template-columns: 1fr;
-  }
-  .cs__heroes--2 {
     grid-template-columns: 1fr;
   }
   @media (min-width: 769px) {
@@ -102,22 +88,23 @@
   }
   .cs__hero-link {
     display: block;
+    height: 100%;
     text-decoration: none;
     color: inherit;
   }
   .cs__hero-link:hover { opacity: 1; }
+
+  /* Media: mobile uses a portrait ratio; desktop uses a fixed viewport height
+     so a single hero fills the screen and a 2-up pair is always even. */
   .cs__hero-media {
     position: relative;
+    width: 100%;
     aspect-ratio: 3 / 4;
   }
   @media (min-width: 769px) {
-    .cs__heroes--2 .cs__hero-media {
-      aspect-ratio: 3 / 4;
-    }
-    .cs__heroes--1 .cs__hero-media {
-      aspect-ratio: 3 / 4;
-      max-height: 80vh;
-    }
+    .cs__heroes--h-full .cs__hero-media   { aspect-ratio: auto; height: 100vh; }
+    .cs__heroes--h-tall .cs__hero-media   { aspect-ratio: auto; height: 78vh; }
+    .cs__heroes--h-medium .cs__hero-media { aspect-ratio: auto; height: 56vh; }
   }
   .cs__hero-img,
   .cs__hero-video {
@@ -128,14 +115,14 @@
     object-fit: cover;
   }
   .cs__hero-placeholder {
-    background-color: var(--color-supporting-sand);
+    background-color: #EDEAE3;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .cs__placeholder-svg {
     width: 20%;
-    opacity: 0.1;
+    opacity: 0.12;
   }
   .cs__hero-label {
     position: absolute;
@@ -178,6 +165,18 @@
   "name": "Collection Story",
   "class": "section-collection-story",
   "settings": [
+    {
+      "type": "select",
+      "id": "hero_height",
+      "label": "Hero height (desktop)",
+      "options": [
+        { "value": "full", "label": "Full screen" },
+        { "value": "tall", "label": "Tall" },
+        { "value": "medium", "label": "Medium" }
+      ],
+      "default": "full",
+      "info": "Applies to the hero image(s) at the top of this section."
+    },
     {
       "type": "collection",
       "id": "collection",
