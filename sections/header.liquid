@@ -29,7 +29,7 @@
       {%- comment -%} Desktop: Shop dropdown + Foreign World + Foreign Fund {% endcomment -%}
       <nav class="header__nav header__desktop-only" role="navigation" aria-label="Main navigation">
         <div class="header__shop" data-shop-menu>
-          <button class="header__nav-link header__shop-trigger" aria-expanded="false" aria-haspopup="true">
+          <button type="button" class="header__nav-link header__shop-trigger" aria-expanded="false" aria-haspopup="true">
             {{ section.settings.shop_label | default: 'Shop' }}
             <svg class="header__shop-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
