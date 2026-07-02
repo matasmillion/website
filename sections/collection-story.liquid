@@ -84,10 +84,11 @@
     margin: 0 0 var(--grid-gap);
     padding: 0;
   }
-  /* Heroes: mobile shows only the FIRST image; desktop shows both (even split) */
+  /* Heroes: mobile shows only the FIRST image; desktop shows both (even split).
+     No gap between hero images — the 3px gap is only for product cards. */
   .cs__heroes {
     display: grid;
-    gap: var(--grid-gap);
+    gap: 0;
     grid-template-columns: 1fr;
   }
   @media (max-width: 768px) {

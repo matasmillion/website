@@ -24,20 +24,46 @@
                 placeholder="Email address"
                 aria-label="Email address"
                 required
+                data-nl-email
               >
               <button type="submit" class="btn btn--primary footer__register-btn">
                 {{ section.settings.newsletter_button | default: 'Register' }}
               </button>
             </div>
-            <label class="footer__newsletter-dob-label" for="footer-dob">Date of birth</label>
-            <input
-              type="date"
-              id="footer-dob"
-              class="footer__newsletter-dob"
-              aria-label="Date of birth"
-              data-birthday
-            >
-            <p class="footer__newsletter-dob-hint">So we can celebrate you with a birthday treat.</p>
+
+            <div class="footer__nl-more" data-nl-more hidden>
+              <fieldset class="footer__nl-gender">
+                <legend>Title</legend>
+                <label><input type="radio" name="nl_gender" value="Mrs" data-nl-required> Mrs</label>
+                <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
+                <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
+                <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
+              </fieldset>
+              <input
+                type="text"
+                name="contact[first_name]"
+                class="footer__newsletter-input footer__nl-text"
+                placeholder="First name"
+                aria-label="First name"
+                data-nl-required
+              >
+              <input
+                type="text"
+                name="contact[last_name]"
+                class="footer__newsletter-input footer__nl-text"
+                placeholder="Last name"
+                aria-label="Last name"
+                data-nl-required
+              >
+              <label class="footer__newsletter-dob-label" for="footer-dob">Date of birth</label>
+              <input
+                type="date"
+                id="footer-dob"
+                class="footer__newsletter-dob"
+                aria-label="Date of birth"
+                data-birthday
+              >
+            </div>
           {%- endform -%}
         </div>
       </div>
@@ -246,12 +272,48 @@
     color: var(--color-primary);
   }
   .footer__newsletter-dob:focus { outline: none; }
-  .footer__newsletter-dob-hint {
-    margin-top: 0.5rem;
-    font-size: var(--text-micro);
-    color: var(--color-text-light);
-    letter-spacing: 0.03em;
+
+  /* Progressive fields (revealed after email entered) */
+  .footer__nl-more[hidden] { display: none; }
+  .footer__nl-more {
+    max-width: 420px;
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
   }
+  .footer__nl-gender {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+  }
+  .footer__nl-gender legend {
+    width: 100%;
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    margin-bottom: 0.4rem;
+    padding: 0;
+  }
+  .footer__nl-gender label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+  .footer__nl-gender input { accent-color: var(--color-primary); }
+  .footer__nl-text {
+    width: 100%;
+    border-bottom: 1px solid var(--color-primary);
+    padding: 0.6rem 0;
+  }
+  .footer__nl-text::placeholder { color: var(--color-text-light); }
 
   /* --- Accordion triggers --- */
   .footer__accordion-trigger {

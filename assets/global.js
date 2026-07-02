@@ -453,33 +453,67 @@
     }, { passive: true });
   };
 
-  /* --- Newsletter birthday -> Klaviyo profile property --- */
-  const initKlaviyoBirthday = () => {
-    const sendToKlaviyo = (email, birthday) => {
-      if (!email || !birthday) return;
-      const payload = { '$email': email, 'Birthday': birthday };
+  /* --- Newsletter: progressive reveal + Klaviyo profile properties --- */
+  const initNewsletterForms = () => {
+    const isValidEmail = (v) => /.+@.+\..+/.test(v || '');
+
+    const sendToKlaviyo = (props) => {
+      if (!props || !props['$email']) return;
       try {
         window.klaviyo = window.klaviyo || [];
-        window.klaviyo.push(['identify', payload]);
+        window.klaviyo.push(['identify', props]);
       } catch (e) {}
       try {
         window._learnq = window._learnq || [];
-        window._learnq.push(['identify', payload]);
+        window._learnq.push(['identify', props]);
       } catch (e) {}
     };
 
-    document.querySelectorAll('[data-birthday]').forEach((input) => {
-      const form = input.closest('form');
+    document.querySelectorAll('[data-nl-more]').forEach((more) => {
+      const form = more.closest('form');
       if (!form) return;
+      const email = form.querySelector('[data-nl-email], [name="contact[email]"]');
+      const reqs = more.querySelectorAll('[data-nl-required]');
+
+      const setRequired = (on) => {
+        reqs.forEach((el) => {
+          if (on) el.setAttribute('required', '');
+          else el.removeAttribute('required');
+        });
+      };
+
+      // Only reveal the extra fields once a valid email is entered.
+      const reveal = () => {
+        const show = email && isValidEmail(email.value);
+        more.hidden = !show;
+        setRequired(show);
+      };
+      if (email) email.addEventListener('input', reveal);
+      reveal();
+
       form.addEventListener('submit', (e) => {
-        const emailEl = form.querySelector('[name="contact[email]"]');
-        const email = emailEl ? emailEl.value : '';
-        const birthday = input.value;
-        if (!email || !birthday || form.dataset.klaviyoSent) return;
-        // Send the birthday to Klaviyo, then let the form submit.
+        if (form.dataset.nlSent) return;
+        const getVal = (sel) => {
+          const el = form.querySelector(sel);
+          return el ? el.value.trim() : '';
+        };
+        const props = {};
+        const em = getVal('[name="contact[email]"]');
+        if (!em) return;
+        props['$email'] = em;
+        const fn = getVal('[name="contact[first_name]"]');
+        if (fn) props['$first_name'] = fn;
+        const ln = getVal('[name="contact[last_name]"]');
+        if (ln) props['$last_name'] = ln;
+        const gender = form.querySelector('[name="nl_gender"]:checked');
+        if (gender && gender.value) props['Title'] = gender.value;
+        const bday = getVal('[data-birthday]');
+        if (bday) props['Birthday'] = bday;
+
+        // Send to Klaviyo, then let the native form submit.
         e.preventDefault();
-        form.dataset.klaviyoSent = '1';
-        sendToKlaviyo(email, birthday);
+        form.dataset.nlSent = '1';
+        sendToKlaviyo(props);
         setTimeout(() => form.submit(), 400);
       });
     });
@@ -511,7 +545,7 @@
     initPdpTabs();
     initPdpGallery();
     initPdpMobileBand();
-    initKlaviyoBirthday();
+    initNewsletterForms();
   };
 
   if (document.readyState === 'loading') {

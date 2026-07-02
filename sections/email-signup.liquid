@@ -25,19 +25,26 @@
             required
             class="email-signup__input"
             aria-label="Email address"
+            data-nl-email
           >
           <button type="submit" class="btn btn--primary email-signup__btn">
             {{ section.settings.button_text | default: 'Subscribe' }}
           </button>
         </div>
-        <label class="email-signup__dob-label" for="email-signup-dob">Date of birth</label>
-        <input
-          type="date"
-          id="email-signup-dob"
-          class="email-signup__dob"
-          aria-label="Date of birth"
-          data-birthday
-        >
+
+        <div class="email-signup__more" data-nl-more hidden>
+          <fieldset class="email-signup__gender">
+            <legend>Title</legend>
+            <label><input type="radio" name="nl_gender" value="Mrs" data-nl-required> Mrs</label>
+            <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
+            <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
+            <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
+          </fieldset>
+          <input type="text" name="contact[first_name]" class="email-signup__input email-signup__text" placeholder="First name" aria-label="First name" data-nl-required>
+          <input type="text" name="contact[last_name]" class="email-signup__input email-signup__text" placeholder="Last name" aria-label="Last name" data-nl-required>
+          <label class="email-signup__dob-label" for="email-signup-dob">Date of birth</label>
+          <input type="date" id="email-signup-dob" class="email-signup__dob email-signup__text" aria-label="Date of birth" data-birthday>
+        </div>
       {%- endform -%}
     </div>
   </div>
@@ -108,15 +115,51 @@
   }
   .email-signup__dob-label {
     display: block;
-    margin-top: var(--space-md);
     margin-bottom: 0.4rem;
     font-size: var(--text-micro);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-primary);
     opacity: 0.5;
+    text-align: left;
   }
-  .email-signup__dob {
+  .email-signup__more[hidden] { display: none; }
+  .email-signup__more {
+    margin-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    text-align: left;
+  }
+  .email-signup__gender {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+  }
+  .email-signup__gender legend {
+    width: 100%;
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-bottom: 0.4rem;
+    padding: 0;
+  }
+  .email-signup__gender label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    cursor: pointer;
+  }
+  .email-signup__gender input { accent-color: var(--color-primary); }
+  .email-signup__text {
     width: 100%;
     background: none;
     border: none;
@@ -128,6 +171,7 @@
     color: var(--color-primary);
     outline: none;
   }
+  .email-signup__text::placeholder { color: var(--color-primary); opacity: 0.35; }
   .email-signup__success {
     font-size: var(--text-xs);
     margin-bottom: var(--space-md);
