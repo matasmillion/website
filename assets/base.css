@@ -184,15 +184,12 @@ a:hover { opacity: 0.5; }
   padding: 0;
 }
 
-/* The header is fixed. The homepage hero sits behind it on purpose; every other
-   template must start below it so content doesn't overlap the nav. */
-body:not(.template-index) #main-content {
-  padding-top: 68px;
-}
-@media (min-width: 769px) {
-  body:not(.template-index) #main-content {
-    padding-top: 82px;
-  }
+/* The announcement bar + header are fixed. The homepage hero and the product
+   image are meant to sit behind them (immersive, full-frame). Every other
+   template starts below the chrome so content doesn't overlap the nav.
+   --chrome-h is set by JS (announcement height + header height). */
+body:not(.template-index):not(.template-product) #main-content {
+  padding-top: var(--chrome-h, 82px);
 }
 
 /* --- Images --- */

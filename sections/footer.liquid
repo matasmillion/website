@@ -2,66 +2,64 @@
   <div class="footer__inner">
     {%- comment -%} Top section: Newsletter + Contact side by side {% endcomment -%}
     <div class="footer__top">
-      <div class="footer__newsletter-section">
-        <button class="footer__accordion-trigger" data-accordion-trigger aria-expanded="false">
+      <div class="footer__newsletter-section" data-nl-section>
+        <button type="button" class="footer__accordion-trigger" data-nl-expand aria-expanded="false">
           <span>{{ section.settings.newsletter_heading | default: 'Subscribe to the newsletter' }}</span>
           <svg class="footer__chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div class="footer__accordion-content" data-accordion-content>
-          {%- if section.settings.newsletter_text != blank -%}
-            <p class="footer__newsletter-text">{{ section.settings.newsletter_text }}</p>
+        {%- if section.settings.newsletter_text != blank -%}
+          <p class="footer__newsletter-text">{{ section.settings.newsletter_text }}</p>
+        {%- endif -%}
+        {%- form 'customer', id: 'footer-newsletter' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          {%- if form.posted_successfully? -%}
+            <p class="footer__newsletter-success">Thank you — you're subscribed.</p>
           {%- endif -%}
-          {%- form 'customer', id: 'footer-newsletter' -%}
-            <input type="hidden" name="contact[tags]" value="newsletter">
-            {%- if form.posted_successfully? -%}
-              <p class="footer__newsletter-success">Thank you — you're subscribed.</p>
-            {%- endif -%}
-            <div class="footer__nl-fields" data-nl-form>
-              <input
-                type="email"
-                name="contact[email]"
-                class="footer__nl-input"
-                placeholder="Email *"
-                aria-label="Email"
-                required
-              >
-              <fieldset class="footer__nl-gender">
-                <legend>Title</legend>
-                <label><input type="radio" name="nl_gender" value="Mrs" required> Mrs</label>
-                <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
-                <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
-                <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
-              </fieldset>
-              <input
-                type="text"
-                name="contact[last_name]"
-                class="footer__nl-input"
-                placeholder="Last Name *"
-                aria-label="Last name"
-                required
-              >
-              <input
-                type="text"
-                name="contact[first_name]"
-                class="footer__nl-input"
-                placeholder="First Name *"
-                aria-label="First name"
-                required
-              >
-              <label class="footer__nl-dob-label" for="footer-dob">Date of birth</label>
-              <input
-                type="date"
-                id="footer-dob"
-                class="footer__nl-input"
-                aria-label="Date of birth"
-                data-birthday
-              >
-              <button type="submit" class="footer__nl-submit">
-                {{ section.settings.newsletter_button | default: 'Register' }}
-              </button>
-            </div>
-          {%- endform -%}
-        </div>
+          <div class="footer__nl-fields" data-nl-fields hidden>
+            <input
+              type="email"
+              name="contact[email]"
+              class="footer__nl-input"
+              placeholder="Email *"
+              aria-label="Email"
+              data-nl-required
+            >
+            <fieldset class="footer__nl-gender">
+              <legend>Title</legend>
+              <label><input type="radio" name="nl_gender" value="Mrs" data-nl-required> Mrs</label>
+              <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
+              <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
+              <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
+            </fieldset>
+            <input
+              type="text"
+              name="contact[last_name]"
+              class="footer__nl-input"
+              placeholder="Last Name *"
+              aria-label="Last name"
+              data-nl-required
+            >
+            <input
+              type="text"
+              name="contact[first_name]"
+              class="footer__nl-input"
+              placeholder="First Name *"
+              aria-label="First name"
+              data-nl-required
+            >
+            <label class="footer__nl-dob-label" for="footer-dob">Date of birth</label>
+            <input
+              type="date"
+              id="footer-dob"
+              class="footer__nl-input"
+              aria-label="Date of birth"
+              data-birthday
+            >
+          </div>
+          <button type="submit" class="footer__nl-submit">
+            {{ section.settings.newsletter_button | default: 'Register' }}
+          </button>
+        {%- endform -%}
       </div>
 
       <div class="footer__contact-section">
@@ -247,7 +245,9 @@
     flex-direction: column;
     gap: var(--space-lg);
     max-width: 520px;
+    margin-bottom: var(--space-lg);
   }
+  .footer__nl-fields[hidden] { display: none; }
   .footer__nl-input {
     width: 100%;
     background: none;

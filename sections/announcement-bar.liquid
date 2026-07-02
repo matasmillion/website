@@ -1,15 +1,31 @@
+{%- liquid
+  assign messages = section.blocks | where: 'type', 'message'
+  assign transparent = section.settings.transparent
+  assign speed = section.settings.rotate_speed | default: 4
+-%}
+
 {%- if section.settings.show_announcement -%}
-  <div class="announcement-bar" role="region" aria-label="Announcement" style="
-    background-color: {{ section.settings.bg_color }};
-    color: {{ section.settings.text_color }};
-  ">
-    <div class="announcement-bar__inner container">
-      {%- if section.settings.link != blank -%}
-        <a href="{{ section.settings.link }}" class="announcement-bar__link">
-          {{ section.settings.text }}
-        </a>
+  <div
+    class="announcement-bar{% if transparent %} announcement-bar--transparent{% endif %}"
+    data-announcement
+    data-rotate="{{ speed }}"
+    role="region"
+    aria-label="Announcements"
+    {% unless transparent %}style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};"{% endunless %}
+  >
+    <div class="announcement-bar__viewport">
+      {%- if messages.size > 0 -%}
+        {%- for block in messages -%}
+          <div class="announcement-bar__msg{% if forloop.first %} is-active{% endif %}" data-ann-msg {{ block.shopify_attributes }}>
+            {%- if block.settings.link != blank -%}
+              <a href="{{ block.settings.link }}" class="announcement-bar__link">{{ block.settings.text }}</a>
+            {%- else -%}
+              <span>{{ block.settings.text }}</span>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
       {%- else -%}
-        <p class="announcement-bar__text">{{ section.settings.text }}</p>
+        <div class="announcement-bar__msg is-active" data-ann-msg><span>{{ section.settings.text }}</span></div>
       {%- endif -%}
     </div>
   </div>
@@ -17,23 +33,45 @@
 
 <style>
   .announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 101;
     text-align: center;
-    padding: 0.5rem var(--space-md);
+    padding: 0.55rem var(--space-md);
     font-size: var(--text-micro);
     letter-spacing: 0.15em;
     text-transform: uppercase;
     line-height: 1.4;
   }
+  .announcement-bar--transparent {
+    background-color: transparent;
+    color: var(--color-primary);
+  }
+  .announcement-bar__viewport {
+    position: relative;
+    height: 1.4em;
+  }
+  .announcement-bar__msg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+    pointer-events: none;
+  }
+  .announcement-bar__msg.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
   .announcement-bar__link {
     text-decoration: none;
     color: inherit;
   }
-  .announcement-bar__link:hover {
-    opacity: 0.8;
-  }
-  .announcement-bar__text {
-    margin: 0;
-  }
+  .announcement-bar__link:hover { opacity: 0.7; }
 </style>
 
 {% schema %}
@@ -48,27 +86,58 @@
       "default": true
     },
     {
-      "type": "text",
-      "id": "text",
-      "label": "Text",
-      "default": "Complimentary shipping on orders over $150"
+      "type": "checkbox",
+      "id": "transparent",
+      "label": "Transparent background",
+      "default": true
     },
     {
-      "type": "url",
-      "id": "link",
-      "label": "Link"
+      "type": "range",
+      "id": "rotate_speed",
+      "label": "Seconds per announcement",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "default": 4,
+      "unit": "s"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Fallback text (used if no announcement blocks)",
+      "default": "Complimentary shipping on orders over $150"
     },
     {
       "type": "color",
       "id": "bg_color",
-      "label": "Background color",
-      "default": "#0A0A0A"
+      "label": "Background color (when not transparent)",
+      "default": "#2D2C2F"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text color",
-      "default": "#F5F0EB"
+      "label": "Text color (when not transparent)",
+      "default": "#F1EEE6"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Announcement",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Complimentary shipping on orders over $150" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Announcement Bar",
+      "blocks": [
+        { "type": "message", "settings": { "text": "Complimentary shipping on orders over $150" } },
+        { "type": "message", "settings": { "text": "Free returns within 30 days" } }
+      ]
     }
   ]
 }

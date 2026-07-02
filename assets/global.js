@@ -55,14 +55,56 @@
     });
   };
 
+  /* --- Chrome: stack header below the announcement bar; expose offset --- */
+  const initChrome = () => {
+    const ann = document.querySelector('[data-announcement]');
+    const header = document.querySelector('[data-header]');
+    const setChrome = () => {
+      const annH = ann ? ann.offsetHeight : 0;
+      const headerH = header ? header.offsetHeight : 0;
+      if (header) header.style.top = annH + 'px';
+      document.documentElement.style.setProperty('--chrome-h', (annH + headerH) + 'px');
+    };
+    setChrome();
+    window.addEventListener('resize', setChrome, { passive: true });
+  };
+
+  /* --- Announcement bar: cycle messages --- */
+  const initAnnouncement = () => {
+    const bar = document.querySelector('[data-announcement]');
+    if (!bar) return;
+    const msgs = bar.querySelectorAll('[data-ann-msg]');
+    if (msgs.length < 2) return;
+    const speed = (parseFloat(bar.dataset.rotate) || 4) * 1000;
+    let i = 0;
+    setInterval(() => {
+      msgs[i].classList.remove('is-active');
+      i = (i + 1) % msgs.length;
+      msgs[i].classList.add('is-active');
+    }, speed);
+  };
+
   /* --- Header Scroll Behavior --- */
   const initStickyHeader = () => {
     const header = document.querySelector('[data-header]');
     if (!header || !header.dataset.sticky) return;
+
+    // PDP immersive: on the product page, hide the header ~1s after load so the
+    // large image fills the screen; reveal it again the moment the user scrolls.
+    const isProduct = document.body.classList.contains('template-product');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    let pdpHidden = false;
+    if (isProduct && isMobile) {
+      setTimeout(() => {
+        if (window.scrollY < 20) { header.classList.add('is-hidden'); pdpHidden = true; }
+      }, 1000);
+    }
+
     let lastScroll = 0;
     const onScroll = () => {
       const current = window.scrollY;
       header.classList.toggle('is-scrolled', current > 50);
+      if (pdpHidden) { header.classList.remove('is-hidden'); pdpHidden = false; lastScroll = current; return; }
       if (current > 300) {
         header.classList.toggle('is-hidden', current > lastScroll);
       } else {
@@ -468,6 +510,89 @@
   // Expose globally for wishlist page
   window.FRWishlist = Wishlist;
 
+  /* --- Search Drawer (swipe up) with predictive results + most viewed --- */
+  const initSearchDrawer = () => {
+    const drawer = document.querySelector('[data-search-drawer]');
+    if (!drawer) return;
+    const input = drawer.querySelector('[data-search-input]');
+    const results = drawer.querySelector('[data-search-results]');
+    const dflt = drawer.querySelector('[data-search-default]');
+    const mv = drawer.querySelector('[data-search-mostviewed]');
+
+    const money = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
+
+    const itemHTML = (url, image, title, priceStr) =>
+      '<a href="' + url + '" class="sd-item">' +
+        '<div class="sd-item__img">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + '</div>' +
+        '<div class="sd-item__title">' + title + '</div>' +
+        '<div class="sd-item__price">' + (priceStr || '') + '</div>' +
+      '</a>';
+
+    // Most viewed = the shopper's recently viewed items (per-user, on device)
+    const renderMostViewed = async () => {
+      if (!mv) return;
+      let items = [];
+      try { items = JSON.parse(localStorage.getItem('fr_recently_viewed')) || []; } catch (e) {}
+      const label = mv.previousElementSibling;
+      if (!items.length) { if (label) label.style.display = 'none'; return; }
+      const products = await Promise.all(items.slice(0, 4).map(async (h) => {
+        try { const r = await fetch('/products/' + h + '.js'); if (r.ok) return r.json(); } catch (e) {}
+        return null;
+      }));
+      const valid = products.filter(Boolean);
+      if (!valid.length) { if (label) label.style.display = 'none'; return; }
+      if (label) label.style.display = '';
+      mv.innerHTML = valid.map((p) => itemHTML('/products/' + p.handle, p.featured_image || (p.images && p.images[0]), p.title, money(p.price))).join('');
+    };
+
+    const open = () => {
+      renderMostViewed();
+      drawer.classList.add('is-active');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => input && input.focus(), 250);
+    };
+    const close = () => {
+      drawer.classList.remove('is-active');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+
+    document.querySelectorAll('[data-search-open]').forEach((b) =>
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        const mm = document.querySelector('[data-menu-overlay]');
+        if (mm) mm.classList.remove('is-active');
+        open();
+      }));
+    drawer.querySelectorAll('[data-search-close]').forEach((b) => b.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer.classList.contains('is-active')) close();
+    });
+
+    // Predictive search
+    let t;
+    if (input) input.addEventListener('input', () => {
+      clearTimeout(t);
+      const q = input.value.trim();
+      if (q.length < 2) { results.hidden = true; results.innerHTML = ''; if (dflt) dflt.hidden = false; return; }
+      t = setTimeout(async () => {
+        try {
+          const r = await fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=8');
+          if (!r.ok) return;
+          const data = await r.json();
+          const products = (data.resources && data.resources.results && data.resources.results.products) || [];
+          if (dflt) dflt.hidden = true;
+          results.hidden = false;
+          results.innerHTML = products.length
+            ? products.map((p) => itemHTML(p.url, p.image || p.featured_image, p.title, p.price)).join('')
+            : '<p class="search-drawer__label" style="grid-column:1/-1">No results — press enter to search.</p>';
+        } catch (e) {}
+      }, 250);
+    });
+  };
+
   /* --- PDP Tabs --- */
   const initPdpTabs = () => {
     document.querySelectorAll('[data-pdp-tabs]').forEach(container => {
@@ -534,9 +659,9 @@
     });
   };
 
-  /* --- Footer accordions (newsletter + menu columns) --- */
+  /* --- Footer accordions (menu columns only) --- */
   const initFooterAccordions = () => {
-    document.querySelectorAll('.footer__accordion-trigger').forEach((trigger) => {
+    document.querySelectorAll('.footer__menu-group .footer__accordion-trigger').forEach((trigger) => {
       trigger.addEventListener('click', () => {
         const content = trigger.nextElementSibling;
         if (!content) return;
@@ -546,47 +671,54 @@
     });
   };
 
-  /* --- Newsletter -> Klaviyo profile properties --- */
+  /* --- Newsletter: expandable fields + Klaviyo profile properties --- */
   const initNewsletterForms = () => {
     const sendToKlaviyo = (props) => {
       if (!props || !props['$email']) return;
-      try {
-        window.klaviyo = window.klaviyo || [];
-        window.klaviyo.push(['identify', props]);
-      } catch (e) {}
-      try {
-        window._learnq = window._learnq || [];
-        window._learnq.push(['identify', props]);
-      } catch (e) {}
+      try { window.klaviyo = window.klaviyo || []; window.klaviyo.push(['identify', props]); } catch (e) {}
+      try { window._learnq = window._learnq || []; window._learnq.push(['identify', props]); } catch (e) {}
     };
 
-    document.querySelectorAll('[data-nl-form]').forEach((wrap) => {
-      const form = wrap.closest('form');
-      if (!form) return;
+    const bind = (scope) => {
+      const form = scope.tagName === 'FORM' ? scope : scope.querySelector('form');
+      if (!form || form.dataset.nlBound) return;
+      form.dataset.nlBound = '1';
+
+      const fields = scope.querySelector('[data-nl-fields]'); // collapsible (footer) or null
+      const expanders = scope.querySelectorAll('[data-nl-expand]');
+      const reqs = scope.querySelectorAll('[data-nl-required]');
+      const trigger = scope.querySelector('[data-nl-expand]');
+
+      const setReq = (on) => reqs.forEach((el) => (on ? el.setAttribute('required', '') : el.removeAttribute('required')));
+      const expand = () => { if (fields) { fields.hidden = false; setReq(true); if (trigger) trigger.setAttribute('aria-expanded', 'true'); } };
+      const collapse = () => { if (fields) { fields.hidden = true; setReq(false); if (trigger) trigger.setAttribute('aria-expanded', 'false'); } };
+
+      expanders.forEach((b) => b.addEventListener('click', () => (fields && fields.hidden ? expand() : collapse())));
+
       form.addEventListener('submit', (e) => {
+        // Clicking Register while collapsed just opens the form.
+        if (fields && fields.hidden) { e.preventDefault(); expand(); return; }
         if (form.dataset.nlSent) return;
-        const getVal = (sel) => {
-          const el = form.querySelector(sel);
-          return el ? el.value.trim() : '';
-        };
+        const getVal = (sel) => { const el = form.querySelector(sel); return el ? el.value.trim() : ''; };
         const em = getVal('[name="contact[email]"]');
         if (!em) return;
         const props = { '$email': em };
-        const fn = getVal('[name="contact[first_name]"]');
-        if (fn) props['$first_name'] = fn;
-        const ln = getVal('[name="contact[last_name]"]');
-        if (ln) props['$last_name'] = ln;
-        const gender = form.querySelector('[name="nl_gender"]:checked');
-        if (gender && gender.value) props['Title'] = gender.value;
-        const bday = getVal('[data-birthday]');
-        if (bday) props['Birthday'] = bday;
-
-        // Send to Klaviyo, then let the native form submit.
+        const fn = getVal('[name="contact[first_name]"]'); if (fn) props['$first_name'] = fn;
+        const ln = getVal('[name="contact[last_name]"]'); if (ln) props['$last_name'] = ln;
+        const gender = form.querySelector('[name="nl_gender"]:checked'); if (gender && gender.value) props['Title'] = gender.value;
+        const bday = getVal('[data-birthday]'); if (bday) props['Birthday'] = bday;
         e.preventDefault();
         form.dataset.nlSent = '1';
         sendToKlaviyo(props);
         setTimeout(() => form.submit(), 400);
       });
+    };
+
+    document.querySelectorAll('[data-nl-section]').forEach(bind);
+    document.querySelectorAll('[data-nl-form]').forEach((el) => {
+      if (el.closest('[data-nl-section]')) return;
+      const form = el.closest('form');
+      if (form) bind(form);
     });
   };
 
@@ -602,6 +734,8 @@
   const init = () => {
     initReveal();
     initMobileMenu();
+    initChrome();
+    initAnnouncement();
     initStickyHeader();
     initCarousels();
     initVariantSelectors();
@@ -614,6 +748,7 @@
     initAddToCart();
     initWishlist();
     initWishlistDrawer();
+    initSearchDrawer();
     initPdpTabs();
     initPdpGallery();
     initPdpMobileBand();

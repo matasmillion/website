@@ -77,10 +77,10 @@
       <button type="button" class="header__icon header__wishlist header__desktop-only" data-wishlist-open aria-label="Saved items">
         {%- render 'icon-heart' -%}
       </button>
-      {%- comment -%} Both: search {% endcomment -%}
-      <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
+      {%- comment -%} Both: search (opens swipe-up drawer) {% endcomment -%}
+      <button type="button" class="header__icon" data-search-open aria-label="{{ 'general.search' | t }}">
         {%- render 'icon-search' -%}
-      </a>
+      </button>
       {%- comment -%} Desktop: account {% endcomment -%}
       <a href="/account" class="header__icon header__desktop-only" aria-label="{{ 'general.account' | t }}">
         {%- render 'icon-account' -%}
@@ -121,7 +121,7 @@
           <a href="/account/login" class="mobile-menu__link mobile-menu__link--small">Log in</a>
           <a href="/account/register" class="mobile-menu__link mobile-menu__link--small">Register</a>
         {%- endif -%}
-        <a href="/search" class="mobile-menu__link mobile-menu__link--small">Search</a>
+        <button type="button" class="mobile-menu__link mobile-menu__link--small" data-search-open style="background:none;border:none;cursor:pointer;text-align:left;">Search</button>
         {%- render 'social-icons' -%}
       </div>
     </div>
@@ -182,6 +182,47 @@
       <div class="wl-drawer__content" data-wishlist-content>
         <p class="wl-drawer__empty" data-wishlist-empty>You haven't saved any items yet.</p>
         <div class="wl-drawer__grid" data-wishlist-grid></div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Search Drawer (swipe up from bottom) {% endcomment -%}
+  <div class="search-drawer" data-search-drawer aria-hidden="true">
+    <div class="search-drawer__overlay" data-search-close></div>
+    <div class="search-drawer__panel">
+      <div class="search-drawer__head">
+        <h2 class="search-drawer__title">Search</h2>
+        <button class="header__icon" data-search-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-drawer__form">
+        <input
+          type="search"
+          name="q"
+          class="search-drawer__input"
+          placeholder="Search here"
+          autocomplete="off"
+          data-search-input
+          aria-label="Search"
+        >
+      </form>
+
+      {%- comment -%} Live results (predictive) {% endcomment -%}
+      <div class="search-drawer__results" data-search-results hidden></div>
+
+      {%- comment -%} Default state: suggestions + most viewed {% endcomment -%}
+      <div class="search-drawer__default" data-search-default>
+        {%- if section.settings.menu != blank -%}
+          <p class="search-drawer__label">Suggestions</p>
+          <div class="search-drawer__suggest">
+            {%- for link in section.settings.menu.links limit: 5 -%}
+              <a href="{{ link.url }}" class="search-drawer__suggest-link">{{ link.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        <p class="search-drawer__label">Most viewed items</p>
+        <div class="search-drawer__mv" data-search-mostviewed></div>
       </div>
     </div>
   </div>
