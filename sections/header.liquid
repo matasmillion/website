@@ -2,7 +2,6 @@
 {{ 'component-header.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign logo_position = section.settings.logo_position
   assign sticky = section.settings.sticky_header
   assign transparent = section.settings.transparent_header
 -%}
@@ -13,100 +12,89 @@
   {% if sticky %}data-sticky="true"{% endif %}
   role="banner"
 >
-  <div class="header__inner container">
-    {%- if logo_position == 'left' -%}
-      {%- comment -%} LEFT LOGO LAYOUT {% endcomment -%}
-      <div class="header__left">
-        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
-          {%- if settings.logo -%}
-            <img
-              src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
-              alt="{{ shop.name }}"
-              width="{{ settings.logo_width }}"
-              height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
-              loading="eager"
-            >
-          {%- else -%}
-            <span class="header__logo-text">{{ shop.name }}</span>
-          {%- endif -%}
+  <div class="header__bar">
+    {%- comment -%} ===== LEFT ===== {% endcomment -%}
+    <div class="header__left">
+      {%- comment -%} Mobile: hamburger + wishlist {% endcomment -%}
+      <div class="header__mobile-cluster header__mobile-only">
+        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
+          {%- render 'icon-menu' -%}
+        </button>
+        <a href="/pages/wishlist" class="header__icon header__wishlist" aria-label="Saved items">
+          {%- render 'icon-heart' -%}
+          <span class="header__wishlist-count" data-wishlist-count style="display:none">0</span>
         </a>
       </div>
 
-      <nav class="header__nav header__center" role="navigation" aria-label="Main navigation">
-        {%- for link in section.settings.menu.links -%}
-          <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
-        {%- endfor -%}
+      {%- comment -%} Desktop: Shop dropdown + Foreign World + Foreign Fund {% endcomment -%}
+      <nav class="header__nav header__desktop-only" role="navigation" aria-label="Main navigation">
+        <div class="header__shop" data-shop-menu>
+          <button class="header__nav-link header__shop-trigger" aria-expanded="false" aria-haspopup="true">
+            {{ section.settings.shop_label | default: 'Shop' }}
+            <svg class="header__shop-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          {%- if section.settings.menu != blank -%}
+            <div class="header__dropdown">
+              {%- for link in section.settings.menu.links -%}
+                <a href="{{ link.url }}" class="header__dropdown-link">{{ link.title }}</a>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.show_foreign_world -%}
+          <a href="{{ section.settings.foreign_world_link | default: '#' }}" class="header__nav-link">
+            {{ section.settings.foreign_world_label | default: 'Foreign World' }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_fund -%}
+          <a href="{{ section.settings.foreign_fund_link | default: '#' }}" class="header__nav-link">
+            {{ section.settings.foreign_fund_label | default: 'Foreign Fund' }}
+          </a>
+        {%- endif -%}
       </nav>
+    </div>
 
-      <div class="header__right">
-        <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
-          {%- render 'icon-search' -%}
-        </a>
-        <a href="/account" class="header__icon" aria-label="{{ 'general.account' | t }}">
-          {%- render 'icon-account' -%}
-        </a>
-        <a href="/pages/wishlist" class="header__icon header__wishlist" aria-label="Saved items">
-          {%- render 'icon-heart' -%}
-          <span class="header__wishlist-count" data-wishlist-count style="display:none">0</span>
-        </a>
-        <a href="/cart" class="header__cart-link" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
-          <span class="header__cart-text">Shopping cart</span>
-          <span class="header__cart-dot{% if cart.item_count > 0 %} is-active{% endif %}" data-cart-dot>
-            <span data-cart-count style="{% if cart.item_count == 0 %}display:none{% endif %}">{{ cart.item_count }}</span>
-          </span>
-        </a>
-        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
-          {%- render 'icon-menu' -%}
-        </button>
-      </div>
-    {%- else -%}
-      {%- comment -%} CENTER LOGO LAYOUT {% endcomment -%}
-      <div class="header__left">
-        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
-          {%- render 'icon-menu' -%}
-        </button>
-        <nav class="header__nav" role="navigation" aria-label="Main navigation">
-          {%- for link in section.settings.menu.links -%}
-            <a href="{{ link.url }}" class="header__nav-link">{{ link.title }}</a>
-          {%- endfor -%}
-        </nav>
-      </div>
+    {%- comment -%} ===== CENTER: LOGO ===== {% endcomment -%}
+    <div class="header__center">
+      <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+        {%- if settings.logo -%}
+          <img
+            src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
+            alt="{{ shop.name }}"
+            width="{{ settings.logo_width }}"
+            height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
+            loading="eager"
+          >
+        {%- else -%}
+          <span class="header__logo-text">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    </div>
 
-      <div class="header__center">
-        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
-          {%- if settings.logo -%}
-            <img
-              src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
-              alt="{{ shop.name }}"
-              width="{{ settings.logo_width }}"
-              height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
-              loading="eager"
-            >
-          {%- else -%}
-            <span class="header__logo-text">{{ shop.name }}</span>
-          {%- endif -%}
-        </a>
-      </div>
-
-      <div class="header__right">
-        <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
-          {%- render 'icon-search' -%}
-        </a>
-        <a href="/account" class="header__icon" aria-label="{{ 'general.account' | t }}">
-          {%- render 'icon-account' -%}
-        </a>
-        <a href="/pages/wishlist" class="header__icon header__wishlist" aria-label="Saved items">
-          {%- render 'icon-heart' -%}
-          <span class="header__wishlist-count" data-wishlist-count style="display:none">0</span>
-        </a>
-        <a href="/cart" class="header__cart-link" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
-          <span class="header__cart-text">Shopping cart</span>
-          <span class="header__cart-dot{% if cart.item_count > 0 %} is-active{% endif %}" data-cart-dot>
-            <span data-cart-count style="{% if cart.item_count == 0 %}display:none{% endif %}">{{ cart.item_count }}</span>
-          </span>
-        </a>
-      </div>
-    {%- endif -%}
+    {%- comment -%} ===== RIGHT ===== {% endcomment -%}
+    <div class="header__right">
+      {%- comment -%} Desktop: wishlist {% endcomment -%}
+      <a href="/pages/wishlist" class="header__icon header__wishlist header__desktop-only" aria-label="Saved items">
+        {%- render 'icon-heart' -%}
+        <span class="header__wishlist-count" data-wishlist-count style="display:none">0</span>
+      </a>
+      {%- comment -%} Both: search {% endcomment -%}
+      <a href="/search" class="header__icon" aria-label="{{ 'general.search' | t }}">
+        {%- render 'icon-search' -%}
+      </a>
+      {%- comment -%} Desktop: account {% endcomment -%}
+      <a href="/account" class="header__icon header__desktop-only" aria-label="{{ 'general.account' | t }}">
+        {%- render 'icon-account' -%}
+      </a>
+      {%- comment -%} Both: cart (far right) {% endcomment -%}
+      <a href="/cart" class="header__cart-link" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
+        <span class="header__cart-text">Shopping cart</span>
+        <span class="header__cart-dot{% if cart.item_count > 0 %} is-active{% endif %}" data-cart-dot>
+          <span data-cart-count style="{% if cart.item_count == 0 %}display:none{% endif %}">{{ cart.item_count }}</span>
+        </span>
+      </a>
+    </div>
   </div>
 
   {%- comment -%} Mobile Menu Overlay {% endcomment -%}
@@ -130,7 +118,13 @@
         {%- endfor -%}
       </nav>
       <div class="mobile-menu__footer">
-        <a href="/account" class="mobile-menu__link mobile-menu__link--small">Account</a>
+        {%- if customer -%}
+          <a href="/account" class="mobile-menu__link mobile-menu__link--small">My account</a>
+          <a href="/account/logout" class="mobile-menu__link mobile-menu__link--small">Log out</a>
+        {%- else -%}
+          <a href="/account/login" class="mobile-menu__link mobile-menu__link--small">Log in</a>
+          <a href="/account/register" class="mobile-menu__link mobile-menu__link--small">Register</a>
+        {%- endif -%}
         <a href="/search" class="mobile-menu__link mobile-menu__link--small">Search</a>
         {%- render 'social-icons' -%}
       </div>
@@ -188,18 +182,61 @@
     {
       "type": "link_list",
       "id": "menu",
-      "label": "Main menu",
-      "default": "main-menu"
+      "label": "Shop dropdown menu",
+      "default": "main-menu",
+      "info": "Shown under 'Shop' on desktop and as the full-screen menu on mobile."
     },
     {
-      "type": "select",
-      "id": "logo_position",
-      "label": "Logo position",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" }
-      ],
-      "default": "left"
+      "type": "text",
+      "id": "shop_label",
+      "label": "Shop label",
+      "default": "Shop"
+    },
+    {
+      "type": "header",
+      "content": "Foreign World link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_world",
+      "label": "Show Foreign World",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_world_label",
+      "label": "Foreign World label",
+      "default": "Foreign World"
+    },
+    {
+      "type": "url",
+      "id": "foreign_world_link",
+      "label": "Foreign World link"
+    },
+    {
+      "type": "header",
+      "content": "Foreign Fund link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_fund",
+      "label": "Show Foreign Fund",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_fund_label",
+      "label": "Foreign Fund label",
+      "default": "Foreign Fund"
+    },
+    {
+      "type": "url",
+      "id": "foreign_fund_link",
+      "label": "Foreign Fund link"
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
     },
     {
       "type": "checkbox",
@@ -210,7 +247,7 @@
     {
       "type": "checkbox",
       "id": "transparent_header",
-      "label": "Transparent header on homepage",
+      "label": "Transparent header over hero",
       "default": true
     }
   ]

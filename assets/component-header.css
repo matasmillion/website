@@ -33,21 +33,34 @@
   border-bottom: 1px solid rgba(10, 10, 10, 0.06);
 }
 
-/* Figma mobile: height 68px, padding 12px. Desktop: height 82px, padding 30px */
-.header__inner {
-  display: flex;
+/* 3-zone grid so the logo stays truly centered regardless of side widths */
+.header__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   height: 68px;
-  padding: 0 12px;
-  max-width: none;
+  padding: 0 16px;
 }
 
 @media (min-width: 769px) {
-  .header__inner {
+  .header__bar {
     height: 82px;
     padding: 0 30px;
   }
+}
+
+/* Show/hide helpers (utilities — override component display rules) */
+.header__mobile-only { display: flex !important; }
+.header__desktop-only { display: none !important; }
+@media (min-width: 769px) {
+  .header__mobile-only { display: none !important; }
+  .header__desktop-only { display: flex !important; }
+}
+
+.header__mobile-cluster {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 /* Logo — Jacquemus style: bold, heavy weight, left-aligned */
@@ -68,36 +81,102 @@
 }
 
 .header__logo-text {
-  /* Signature Cormorant wordmark */
+  /* Signature Cormorant wordmark — small & centered */
   font-family: var(--font-heading);
-  font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
+  font-size: clamp(1.05rem, 0.85rem + 0.7vw, 1.5rem);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
+.header__logo img {
+  max-height: 22px;
+  width: auto;
+}
 
-/* Navigation */
-.header__left,
-.header__center,
+/* Zones */
+.header__left {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+}
+.header__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+}
 .header__right {
   display: flex;
   align-items: center;
-}
-
-.header__left {
-  gap: clamp(1.5rem, 1rem + 2vw, 3rem);
-}
-
-.header__right {
-  gap: 0;
+  justify-self: end;
+  gap: 18px;
 }
 
 .header__nav {
-  display: flex;
   align-items: center;
-  gap: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  gap: clamp(1.25rem, 0.8rem + 1.5vw, 2.25rem);
 }
+
+/* Shop dropdown */
+.header__shop {
+  position: relative;
+}
+.header__shop-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #2E2E2E;
+  padding: 0.25rem 0;
+}
+.header__shop-caret {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.header__shop:hover .header__shop-caret {
+  transform: rotate(180deg);
+}
+.header__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--color-secondary);
+  border: 1px solid var(--color-border);
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity var(--duration-fast) var(--ease-out),
+              visibility var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out);
+  z-index: 50;
+}
+.header__shop:hover .header__dropdown,
+.header__shop:focus-within .header__dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.header__dropdown-link {
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #2E2E2E;
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  white-space: nowrap;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.header__dropdown-link:hover { opacity: 0.5; }
 
 /* Figma desktop nav: ~16px, sentence case, medium weight */
 .header__nav-link {
@@ -239,21 +318,8 @@
   }
 }
 
-/* Desktop: hide hamburger, show nav */
-@media (min-width: 769px) {
-  .header__menu-toggle { display: none; }
-  .header__nav { display: flex; }
-}
-
-/* Mobile: show hamburger + all icons (search, heart, cart), hide nav links */
 @media (max-width: 768px) {
-  .header__nav { display: none; }
-  .header__menu-toggle { display: flex; }
-  .header__right {
-    gap: 21px; /* Figma: icons spaced ~41px apart from center to center, icon width 20px = 21px gap */
-  }
-  /* Account icon hidden on mobile (Figma doesn't show it) */
-  .header__icon--account { display: none; }
+  .header__right { gap: 18px; }
 }
 
 /* --- Mobile Menu Overlay — Jacquemus-style: full screen, typographic --- */

@@ -453,6 +453,38 @@
     }, { passive: true });
   };
 
+  /* --- Newsletter birthday -> Klaviyo profile property --- */
+  const initKlaviyoBirthday = () => {
+    const sendToKlaviyo = (email, birthday) => {
+      if (!email || !birthday) return;
+      const payload = { '$email': email, 'Birthday': birthday };
+      try {
+        window.klaviyo = window.klaviyo || [];
+        window.klaviyo.push(['identify', payload]);
+      } catch (e) {}
+      try {
+        window._learnq = window._learnq || [];
+        window._learnq.push(['identify', payload]);
+      } catch (e) {}
+    };
+
+    document.querySelectorAll('[data-birthday]').forEach((input) => {
+      const form = input.closest('form');
+      if (!form) return;
+      form.addEventListener('submit', (e) => {
+        const emailEl = form.querySelector('[name="contact[email]"]');
+        const email = emailEl ? emailEl.value : '';
+        const birthday = input.value;
+        if (!email || !birthday || form.dataset.klaviyoSent) return;
+        // Send the birthday to Klaviyo, then let the form submit.
+        e.preventDefault();
+        form.dataset.klaviyoSent = '1';
+        sendToKlaviyo(email, birthday);
+        setTimeout(() => form.submit(), 400);
+      });
+    });
+  };
+
   /* --- PDP Mobile Band ATC button --- */
   const initPdpMobileBand = () => {
     const mobileBtn = document.querySelector('[data-mobile-submit]');
@@ -479,6 +511,7 @@
     initPdpTabs();
     initPdpGallery();
     initPdpMobileBand();
+    initKlaviyoBirthday();
   };
 
   if (document.readyState === 'loading') {
