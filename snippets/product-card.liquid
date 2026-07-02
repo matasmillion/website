@@ -1,15 +1,16 @@
 {%- comment -%}
-  Product Card Snippet — Jacquemus-style
-  Contexts:
-    - 'homepage'   : image only; name/price/colorway/heart revealed on hover (desktop).
-                     No text on mobile (image-only grid).
-    - 'collection' : name + price CENTERED under image + heart (always visible).
-    - 'default'    : name (left) + price (below) + heart (right) — used in PDP carousels.
-  Usage: {% render 'product-card', product: product, context: 'homepage' %}
+  Product Card — Jacquemus-style overlay
+  Layout (over the image):
+    - tag        : top-left
+    - colors     : top-right
+    - name       : bottom-left
+    - price      : bottom-right
+    - heart      : below the price (bottom-right)
+  Mobile: info always visible. Desktop: revealed on hover.
+  Usage: {% render 'product-card', product: product %}
 {%- endcomment -%}
 
 {%- liquid
-  assign context = context | default: 'default'
   assign show_secondary = show_secondary_image | default: true
   assign image_ratio = image_aspect_ratio | default: 'portrait'
 
@@ -28,9 +29,9 @@
   endif
 -%}
 
-<article class="product-card product-card--{{ context }}">
-  <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
-    <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
+<article class="product-card">
+  <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
+    <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
       {%- if product.featured_image -%}
         <img
           src="{{ product.featured_image | image_url: width: 600 }}"
@@ -63,13 +64,14 @@
           {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
         </div>
       {%- endif -%}
+    </a>
 
-      {%- comment -%} Label — always top-left, plain text (Jacquemus style) {% endcomment -%}
+    {%- comment -%} Tag — top-left, plain text {% endcomment -%}
       {%- if badge != blank -%}
         <span class="product-card__badge">{{ badge | upcase }}</span>
       {%- endif -%}
 
-      {%- comment -%} Color swatches (top-right of image) {% endcomment -%}
+      {%- comment -%} Variant colors — top-right {% endcomment -%}
       {%- if product.options_by_name['Color'].values.size > 1 -%}
         <div class="product-card__colors">
           {%- for color in product.options_by_name['Color'].values limit: 5 -%}
@@ -94,8 +96,6 @@
                 assign sc = '#808080'
               elsif cl contains 'beige' or cl contains 'sand'
                 assign sc = '#D4C5A9'
-              elsif cl contains 'pink'
-                assign sc = '#D4A0A0'
               elsif cl contains 'yellow' or cl contains 'mimosa'
                 assign sc = '#D4B44A'
               endif
@@ -107,28 +107,31 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-    </div>
-  </a>
 
-  <div class="product-card__info">
-    <a href="{{ product.url }}" class="product-card__title-link">
-      <h3 class="product-card__title">{{ product.title }}</h3>
-    </a>
-    <span class="product-card__price">
-      {%- if product.compare_at_price > product.price -%}
-        <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
-        <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
-      {%- else -%}
-        {{ product.price | money_without_trailing_zeros }}
-      {%- endif -%}
-    </span>
-    <button
-      class="product-card__wishlist"
-      data-wishlist-toggle="{{ product.handle }}"
-      aria-label="Save {{ product.title }}"
-      aria-pressed="false"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    </button>
+      {%- comment -%} Info overlay — name (BL) + price/heart (BR) {% endcomment -%}
+      <div class="product-card__info">
+        <a href="{{ product.url }}" class="product-card__title-link">
+          <h3 class="product-card__title">{{ product.title }}</h3>
+        </a>
+        <div class="product-card__meta">
+          <span class="product-card__price">
+            {%- if product.compare_at_price > product.price -%}
+              <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+              <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
+            {%- else -%}
+              {{ product.price | money_without_trailing_zeros }}
+            {%- endif -%}
+          </span>
+          <button
+            class="product-card__wishlist"
+            data-wishlist-toggle="{{ product.handle }}"
+            aria-label="Save {{ product.title }}"
+            aria-pressed="false"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </article>

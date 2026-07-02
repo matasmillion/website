@@ -27,19 +27,13 @@
   {%- comment -%} Preconnect to Shopify CDN {% endcomment -%}
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
 
-  {%- comment -%} Font loading — Inter from Shopify's font library {% endcomment -%}
-  {%- if settings.font_heading.family -%}
-    {{ settings.font_heading | font_face: font_display: 'swap' }}
-  {%- endif -%}
-  {%- if settings.font_body.family -%}
-    {{ settings.font_body | font_face: font_display: 'swap' }}
-  {%- endif -%}
-  {%- comment -%} Fallback: load Inter directly if font pickers not configured {% endcomment -%}
-  {%- unless settings.font_body.family -%}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  {%- endunless -%}
+  {%- comment -%}
+    Fonts — Cormorant Garamond is the signature/brand + heading font,
+    Inter is the body/UI font. Loaded from Google Fonts.
+  {%- endcomment -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   {%- comment -%} Base CSS — always loaded {% endcomment -%}
   {{ 'base.css' | asset_url | stylesheet_tag }}
@@ -56,8 +50,8 @@
       --color-accent: {{ settings.color_accent | default: '#C4632A' }};
       --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
       --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};
-      --font-heading: {{ settings.font_heading.family | default: 'Inter' }}, {{ settings.font_heading.fallback_families | default: 'sans-serif' }};
-      --font-body: {{ settings.font_body.family | default: 'Inter' }}, {{ settings.font_body.fallback_families | default: 'sans-serif' }};
+      --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
   </style>
 

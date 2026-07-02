@@ -68,19 +68,13 @@
 }
 
 .header__logo-text {
-  /* Serif wordmark — matches the original brand-name look */
-  font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(1rem, 0.8rem + 0.8vw, 1.375rem);
+  /* Signature Cormorant wordmark */
+  font-family: var(--font-heading);
+  font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.header--transparent:not(.is-scrolled) .header__logo-text,
-.header--transparent:not(.is-scrolled) .header__nav-link,
-.header--transparent:not(.is-scrolled) .header__icon {
-  color: var(--color-white);
 }
 
 /* Navigation */

@@ -4,19 +4,32 @@
   assign collection_handle = section.settings.collection
   assign limit = section.settings.products_count | default: 4
   assign hero_images = section.blocks | where: 'type', 'hero_image'
-  assign hero_height = section.settings.hero_height | default: 'full'
   assign product_count = collections[collection_handle].products.size
 -%}
 
 <section class="cs reveal" id="cs-{{ section.id }}">
-  {%- comment -%} Hero Images — 1 fills the screen / 2 split evenly (desktop) {% endcomment -%}
+  {%- comment -%} Hero Images — mobile shows only the first, desktop shows both (even split) {% endcomment -%}
   {%- if hero_images.size > 0 -%}
-    <div class="cs__heroes cs__heroes--{{ hero_images.size }} cs__heroes--h-{{ hero_height }}">
+    <div class="cs__heroes cs__heroes--{{ hero_images.size }}">
       {%- for block in hero_images -%}
+        {%- liquid
+          assign ratio = block.settings.aspect_ratio | default: '2:3'
+          if ratio == 'fill'
+            assign media_class = 'cs__hero-media cs__hero-media--fill'
+            assign media_style = ''
+          else
+            assign media_class = 'cs__hero-media'
+            capture media_style
+              echo ' style="aspect-ratio: '
+              echo ratio | replace: ':', ' / '
+              echo ';"'
+            endcapture
+          endif
+        -%}
         <div class="cs__hero" {{ block.shopify_attributes }}>
           {%- if block.settings.link != blank -%}<a href="{{ block.settings.link }}" class="cs__hero-link">{%- endif -%}
             {%- if block.settings.video != blank -%}
-              <div class="cs__hero-media cs__hero-media--video">
+              <div class="{{ media_class }} cs__hero-media--video"{{ media_style }}>
                 <video
                   autoplay muted loop playsinline
                   poster="{{ block.settings.image | image_url: width: 1200 }}"
@@ -26,12 +39,12 @@
                 </video>
               </div>
             {%- elsif block.settings.image != blank -%}
-              <div class="cs__hero-media">
+              <div class="{{ media_class }}"{{ media_style }}>
                 <img
-                  src="{{ block.settings.image | image_url: width: 1200 }}"
-                  srcset="{{ block.settings.image | image_url: width: 600 }} 600w,
-                          {{ block.settings.image | image_url: width: 900 }} 900w,
-                          {{ block.settings.image | image_url: width: 1200 }} 1200w"
+                  src="{{ block.settings.image | image_url: width: 1400 }}"
+                  srcset="{{ block.settings.image | image_url: width: 700 }} 700w,
+                          {{ block.settings.image | image_url: width: 1100 }} 1100w,
+                          {{ block.settings.image | image_url: width: 1600 }} 1600w"
                   sizes="{% if hero_images.size == 2 %}(min-width: 769px) 50vw, 100vw{% else %}100vw{% endif %}"
                   alt="{{ block.settings.image.alt | default: block.settings.label | escape }}"
                   loading="lazy"
@@ -41,7 +54,7 @@
                 >
               </div>
             {%- else -%}
-              <div class="cs__hero-media cs__hero-placeholder">
+              <div class="{{ media_class }} cs__hero-placeholder"{{ media_style }}>
                 {{ 'lifestyle-1' | placeholder_svg_tag: 'cs__placeholder-svg' }}
               </div>
             {%- endif -%}
@@ -71,11 +84,17 @@
     margin: 0 0 var(--grid-gap);
     padding: 0;
   }
-  /* Heroes: mobile stacked (1 column); desktop 2-up splits evenly */
+  /* Heroes: mobile shows only the FIRST image; desktop shows both (even split) */
   .cs__heroes {
     display: grid;
     gap: var(--grid-gap);
     grid-template-columns: 1fr;
+  }
+  @media (max-width: 768px) {
+    /* Never show a second hero on mobile */
+    .cs__heroes .cs__hero:nth-child(n + 2) {
+      display: none;
+    }
   }
   @media (min-width: 769px) {
     .cs__heroes--2 {
@@ -94,17 +113,21 @@
   }
   .cs__hero-link:hover { opacity: 1; }
 
-  /* Media: mobile uses a portrait ratio; desktop uses a fixed viewport height
-     so a single hero fills the screen and a 2-up pair is always even. */
+  /* Media aspect ratio is set inline per block (2:3, 9:16, etc.).
+     "fill" fills the viewport height. */
   .cs__hero-media {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 2 / 3;
+  }
+  .cs__hero-media--fill {
+    aspect-ratio: auto;
+    height: 82vh;
   }
   @media (min-width: 769px) {
-    .cs__heroes--h-full .cs__hero-media   { aspect-ratio: auto; height: 100vh; }
-    .cs__heroes--h-tall .cs__hero-media   { aspect-ratio: auto; height: 78vh; }
-    .cs__heroes--h-medium .cs__hero-media { aspect-ratio: auto; height: 56vh; }
+    .cs__hero-media--fill {
+      height: 100vh;
+    }
   }
   .cs__hero-img,
   .cs__hero-video {
@@ -166,18 +189,6 @@
   "class": "section-collection-story",
   "settings": [
     {
-      "type": "select",
-      "id": "hero_height",
-      "label": "Hero height (desktop)",
-      "options": [
-        { "value": "full", "label": "Full screen" },
-        { "value": "tall", "label": "Tall" },
-        { "value": "medium", "label": "Medium" }
-      ],
-      "default": "full",
-      "info": "Applies to the hero image(s) at the top of this section."
-    },
-    {
       "type": "collection",
       "id": "collection",
       "label": "Collection"
@@ -202,6 +213,23 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Aspect ratio",
+          "options": [
+            { "value": "fill", "label": "Fill screen height" },
+            { "value": "9:16", "label": "9:16 (tall portrait)" },
+            { "value": "2:3", "label": "2:3 (portrait)" },
+            { "value": "3:4", "label": "3:4 (portrait)" },
+            { "value": "4:5", "label": "4:5 (portrait)" },
+            { "value": "1:1", "label": "1:1 (square)" },
+            { "value": "4:3", "label": "4:3 (landscape)" },
+            { "value": "3:2", "label": "3:2 (landscape)" },
+            { "value": "16:9", "label": "16:9 (wide)" }
+          ],
+          "default": "2:3"
         },
         {
           "type": "text",

@@ -1,6 +1,7 @@
 /* ============================================
-   PRODUCT CARD — Jacquemus Figma Match
-   Contexts: --homepage (hover reveal), --collection (centered), --default (left)
+   PRODUCT CARD — Jacquemus overlay
+   tag TL · colors TR · name BL · price BR · heart under price
+   Mobile: always visible. Desktop: revealed on hover.
    ============================================ */
 
 .product-card {
@@ -8,14 +9,14 @@
 }
 
 .product-card__link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: block;
   text-decoration: none;
   color: inherit;
 }
-
-.product-card__link:hover {
-  opacity: 1;
-}
+.product-card__link:hover { opacity: 1; }
 
 .product-card__image-wrapper {
   position: relative;
@@ -23,7 +24,7 @@
   background-color: #F5F5F3;
 }
 
-/* Jacquemus tiles are 3:4 (0.75) — confirmed from their Figma capture */
+/* Aspect ratios — Jacquemus product tiles are 3:4 */
 .product-card__image-wrapper--portrait { aspect-ratio: 3 / 4; }
 .product-card__image-wrapper--portrait-45 { aspect-ratio: 4 / 5; }
 .product-card__image-wrapper--portrait-23 { aspect-ratio: 2 / 3; }
@@ -43,59 +44,44 @@
 .product-card__link:hover .product-card__image--secondary { opacity: 1; }
 
 .product-card__placeholder {
-  aspect-ratio: 3 / 4;
+  position: absolute;
+  inset: 0;
   background-color: #F5F5F3;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.product-card__placeholder-svg { width: 40%; height: auto; opacity: 0.15; }
 
-.product-card__placeholder-svg {
-  width: 40%;
-  height: auto;
-  opacity: 0.15;
-}
-
-/* Badge on image — top-left (uppercase, tiny) */
+/* ===== OVERLAY ELEMENTS ===== */
 .product-card__badge {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
+  z-index: 2;
   font-family: var(--font-body);
   font-size: 9px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #2E2E2E;
-  z-index: 1;
 }
 
-@media (min-width: 769px) {
-  .product-card__badge { top: 1rem; left: 1rem; }
-}
-
-/* Color swatches — top-right of image (Jacquemus squares) */
 .product-card__colors {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  z-index: 2;
   display: flex;
   gap: 0.25rem;
   align-items: center;
-  z-index: 1;
 }
-
-@media (min-width: 769px) {
-  .product-card__colors { top: 1rem; right: 1rem; }
-}
-
 .product-card__color-dot {
   width: 13px;
   height: 13px;
   border: 1px solid transparent;
   display: block;
 }
-
 .product-card__color-more {
   font-size: 10px;
   opacity: 0.5;
@@ -103,145 +89,86 @@
   margin-left: 0.125rem;
 }
 
-/* ===== BASE INFO ===== */
-.product-card__title-link {
-  text-decoration: none;
-  color: inherit;
+.product-card__info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
 }
-.product-card__title-link:hover { opacity: 0.5; }
+
+.product-card__title-link { text-decoration: none; color: inherit; min-width: 0; }
+.product-card__title-link:hover { opacity: 0.6; }
 
 .product-card__title {
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: var(--font-weight-medium);
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #2E2E2E;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.product-card__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
 .product-card__price {
   font-size: 11px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
-  color: #A4A4A4;
+  color: #2E2E2E;
   white-space: nowrap;
 }
-
-/* Sale: struck-through original (grey) + reduced price (red) */
 .product-card__price-compare {
   color: #A4A4A4;
   text-decoration: line-through;
   margin-right: 0.4em;
 }
-
 .product-card__price-sale { color: #B23A2E; }
 
 .product-card__wishlist {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0;
   color: #2E2E2E;
-  opacity: 0.35;
-  transition: opacity var(--duration-fast) var(--ease-out),
-              transform var(--duration-fast) var(--ease-out);
-  flex-shrink: 0;
+  line-height: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
 }
-.product-card__wishlist:hover { opacity: 0.7; }
-.product-card__wishlist.is-saved { opacity: 1; }
 .product-card__wishlist.is-saved svg { fill: currentColor; }
 
-/* ============================================
-   DEFAULT context — name left, price below, heart right
-   (PDP carousels: "Complete the look", "Recently viewed")
-   ============================================ */
-.product-card--default .product-card__info {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "title heart"
-    "price heart";
-  align-items: start;
-  padding: 0.5rem 0.5rem 0.25rem;
-  column-gap: 0.5rem;
-}
-.product-card--default .product-card__title-link { grid-area: title; min-width: 0; }
-.product-card--default .product-card__price { grid-area: price; margin-top: 0.125rem; }
-.product-card--default .product-card__wishlist { grid-area: heart; margin-top: 0.125rem; }
-
-/* ============================================
-   COLLECTION context — name + price CENTERED, heart top-right
-   ============================================ */
-.product-card--collection .product-card__info {
-  position: relative;
-  text-align: center;
-  padding: 0.75rem 2.25rem 0.5rem;
-}
-.product-card--collection .product-card__title {
-  font-size: 13px;
-  white-space: normal;
-  margin-bottom: 0.125rem;
-}
-.product-card--collection .product-card__price {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 0.125rem;
-}
-.product-card--collection .product-card__wishlist {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.5rem;
+/* ===== VISIBILITY ===== */
+/* Mobile: everything is steady-state (always visible) */
+.product-card__badge,
+.product-card__colors,
+.product-card__info {
+  opacity: 1;
 }
 
-@media (max-width: 768px) {
-  .product-card--collection .product-card__title { font-size: 12px; }
-  .product-card--collection .product-card__price { font-size: 11px; }
-  .product-card--collection .product-card__info { padding: 0.6rem 1.75rem 0.75rem; }
-}
-
-/* ============================================
-   HOMEPAGE context — image only; hover reveals info (desktop)
-   No text on mobile.
-   ============================================ */
-.product-card--homepage .product-card__info {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "title heart"
-    "price heart";
-  align-items: end;
-  padding: 0.75rem 0.875rem;
-  opacity: 0;
-  transition: opacity var(--duration-base) var(--ease-out);
-  pointer-events: none;
-}
-
-.product-card--homepage .product-card__title-link { grid-area: title; min-width: 0; }
-.product-card--homepage .product-card__price {
-  grid-area: price;
-  margin-top: 0.125rem;
-  text-align: left;
-}
-.product-card--homepage .product-card__wishlist { grid-area: heart; align-self: end; }
-
-/* Homepage: swatches hidden until hover */
-.product-card--homepage .product-card__colors { opacity: 0; transition: opacity var(--duration-base) var(--ease-out); }
-
+/* Desktop: overlay revealed on hover */
 @media (min-width: 769px) {
-  .product-card--homepage:hover .product-card__info { opacity: 1; pointer-events: auto; }
-  .product-card--homepage:hover .product-card__colors { opacity: 1; }
-}
-
-/* Mobile: homepage tiles are image-only (no name/price area at all) */
-@media (max-width: 768px) {
-  .product-card--homepage .product-card__info { display: none; }
-  .product-card--homepage .product-card__colors { display: none; }
+  .product-card__badge,
+  .product-card__colors,
+  .product-card__info {
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  .product-card:hover .product-card__badge,
+  .product-card:hover .product-card__colors,
+  .product-card:hover .product-card__info {
+    opacity: 1;
+  }
+  .product-card__title { font-size: 12px; }
+  .product-card__price { font-size: 12px; }
 }

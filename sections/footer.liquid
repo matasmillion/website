@@ -13,9 +13,22 @@
           {%- endif -%}
           {%- form 'customer', id: 'footer-newsletter' -%}
             <input type="hidden" name="contact[tags]" value="newsletter">
-            <button type="submit" class="btn btn--primary btn--full footer__register-btn">
-              {{ section.settings.newsletter_button | default: 'Register' }}
-            </button>
+            {%- if form.posted_successfully? -%}
+              <p class="footer__newsletter-success">Thank you — you're subscribed.</p>
+            {%- endif -%}
+            <div class="footer__newsletter-field">
+              <input
+                type="email"
+                name="contact[email]"
+                class="footer__newsletter-input"
+                placeholder="Email address"
+                aria-label="Email address"
+                required
+              >
+              <button type="submit" class="btn btn--primary footer__register-btn">
+                {{ section.settings.newsletter_button | default: 'Register' }}
+              </button>
+            </div>
           {%- endform -%}
         </div>
       </div>
@@ -176,9 +189,32 @@
     line-height: 1.6;
     margin-bottom: var(--space-md);
   }
+  .footer__newsletter-field {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border-bottom: 1px solid var(--color-primary);
+    max-width: 420px;
+  }
+  .footer__newsletter-input {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.75rem 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-primary);
+  }
+  .footer__newsletter-input:focus { outline: none; }
   .footer__register-btn {
     font-size: var(--text-xs);
     letter-spacing: 0.15em;
+    padding: 0.5rem 1.5rem;
+    white-space: nowrap;
+  }
+  .footer__newsletter-success {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-sm);
   }
 
   /* --- Accordion triggers --- */
@@ -305,18 +341,20 @@
     border-top: 1px solid rgba(10, 10, 10, 0.08);
   }
   .footer__copyright {
-    font-size: var(--text-micro);
-    opacity: 0.35;
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    opacity: 0.5;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
   .footer__bottom-logo img {
     max-height: 20px;
   }
   .footer__bottom-logo-text {
     font-family: var(--font-heading);
-    font-size: var(--text-lg);
+    font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
     font-weight: var(--font-weight-semibold);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
   .footer__bottom-right {
