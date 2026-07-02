@@ -61,7 +61,7 @@
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2E2E2E;
+  color: #2D2C2F;
 }
 
 .product-card__colors {
@@ -109,7 +109,7 @@
   line-height: 1.25;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #2E2E2E;
+  color: #2D2C2F;
 }
 
 .product-card__meta {
@@ -124,7 +124,7 @@
   font-size: 11px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
-  color: #2E2E2E;
+  color: #2D2C2F;
   white-space: nowrap;
 }
 .product-card__price-compare {
@@ -139,7 +139,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  color: #2E2E2E;
+  color: #2D2C2F;
   line-height: 0;
   transition: transform var(--duration-fast) var(--ease-out);
 }

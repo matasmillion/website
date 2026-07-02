@@ -25,23 +25,22 @@
             required
             class="email-signup__input"
             aria-label="Email address"
-            data-nl-email
           >
           <button type="submit" class="btn btn--primary email-signup__btn">
             {{ section.settings.button_text | default: 'Subscribe' }}
           </button>
         </div>
 
-        <div class="email-signup__more" data-nl-more hidden>
+        <div class="email-signup__more" data-nl-form>
           <fieldset class="email-signup__gender">
             <legend>Title</legend>
-            <label><input type="radio" name="nl_gender" value="Mrs" data-nl-required> Mrs</label>
+            <label><input type="radio" name="nl_gender" value="Mrs" required> Mrs</label>
             <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
             <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
             <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
           </fieldset>
-          <input type="text" name="contact[first_name]" class="email-signup__input email-signup__text" placeholder="First name" aria-label="First name" data-nl-required>
-          <input type="text" name="contact[last_name]" class="email-signup__input email-signup__text" placeholder="Last name" aria-label="Last name" data-nl-required>
+          <input type="text" name="contact[last_name]" class="email-signup__input email-signup__text" placeholder="Last Name" aria-label="Last name" required>
+          <input type="text" name="contact[first_name]" class="email-signup__input email-signup__text" placeholder="First Name" aria-label="First name" required>
           <label class="email-signup__dob-label" for="email-signup-dob">Date of birth</label>
           <input type="date" id="email-signup-dob" class="email-signup__dob email-signup__text" aria-label="Date of birth" data-birthday>
         </div>

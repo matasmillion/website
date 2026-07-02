@@ -64,7 +64,7 @@
   font-size: 20px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
-  color: #2E2E2E;
+  color: #2D2C2F;
   line-height: 1.1;
   text-transform: none;
 }
@@ -72,7 +72,7 @@
 .jc-collection__count {
   font-size: 0.55em;
   font-weight: var(--font-weight-medium);
-  color: #2E2E2E;
+  color: #2D2C2F;
   margin-left: 0.25em;
   top: -0.6em;
 }
@@ -100,7 +100,7 @@
   font-size: 13px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.02em;
-  color: #2E2E2E;
+  color: #2D2C2F;
   cursor: pointer;
   padding: 0;
 }
@@ -143,7 +143,7 @@
 
 .jc-collection__menu-item:hover,
 .jc-collection__menu-item.is-active {
-  color: #2E2E2E;
+  color: #2D2C2F;
   opacity: 1;
 }
 
@@ -160,7 +160,7 @@
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2E2E2E;
+  color: #2D2C2F;
   margin-bottom: 0.5rem;
 }
 
@@ -175,7 +175,7 @@
 
 .jc-collection__filter-option:hover,
 .jc-collection__filter-option.is-active {
-  color: #2E2E2E;
+  color: #2D2C2F;
 }
 
 .jc-collection__filter-count {

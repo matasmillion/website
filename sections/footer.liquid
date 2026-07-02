@@ -16,53 +16,49 @@
             {%- if form.posted_successfully? -%}
               <p class="footer__newsletter-success">Thank you — you're subscribed.</p>
             {%- endif -%}
-            <div class="footer__newsletter-field">
+            <div class="footer__nl-fields" data-nl-form>
               <input
                 type="email"
                 name="contact[email]"
-                class="footer__newsletter-input"
-                placeholder="Email address"
-                aria-label="Email address"
+                class="footer__nl-input"
+                placeholder="Email *"
+                aria-label="Email"
                 required
-                data-nl-email
               >
-              <button type="submit" class="btn btn--primary footer__register-btn">
-                {{ section.settings.newsletter_button | default: 'Register' }}
-              </button>
-            </div>
-
-            <div class="footer__nl-more" data-nl-more hidden>
               <fieldset class="footer__nl-gender">
                 <legend>Title</legend>
-                <label><input type="radio" name="nl_gender" value="Mrs" data-nl-required> Mrs</label>
+                <label><input type="radio" name="nl_gender" value="Mrs" required> Mrs</label>
                 <label><input type="radio" name="nl_gender" value="Mr"> Mr</label>
                 <label><input type="radio" name="nl_gender" value="Mx"> Mx</label>
                 <label><input type="radio" name="nl_gender" value="Prefer not to say"> I prefer not to say</label>
               </fieldset>
               <input
                 type="text"
-                name="contact[first_name]"
-                class="footer__newsletter-input footer__nl-text"
-                placeholder="First name"
-                aria-label="First name"
-                data-nl-required
+                name="contact[last_name]"
+                class="footer__nl-input"
+                placeholder="Last Name *"
+                aria-label="Last name"
+                required
               >
               <input
                 type="text"
-                name="contact[last_name]"
-                class="footer__newsletter-input footer__nl-text"
-                placeholder="Last name"
-                aria-label="Last name"
-                data-nl-required
+                name="contact[first_name]"
+                class="footer__nl-input"
+                placeholder="First Name *"
+                aria-label="First name"
+                required
               >
-              <label class="footer__newsletter-dob-label" for="footer-dob">Date of birth</label>
+              <label class="footer__nl-dob-label" for="footer-dob">Date of birth</label>
               <input
                 type="date"
                 id="footer-dob"
-                class="footer__newsletter-dob"
+                class="footer__nl-input"
                 aria-label="Date of birth"
                 data-birthday
               >
+              <button type="submit" class="footer__nl-submit">
+                {{ section.settings.newsletter_button | default: 'Register' }}
+              </button>
             </div>
           {%- endform -%}
         </div>
@@ -222,98 +218,78 @@
     font-size: var(--text-sm);
     color: var(--color-text-light);
     line-height: 1.6;
-    margin-bottom: var(--space-md);
-  }
-  .footer__newsletter-field {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-    border-bottom: 1px solid var(--color-primary);
-    max-width: 420px;
-  }
-  .footer__newsletter-input {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 0.75rem 0;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-primary);
-  }
-  .footer__newsletter-input:focus { outline: none; }
-  .footer__register-btn {
-    font-size: var(--text-xs);
-    letter-spacing: 0.15em;
-    padding: 0.5rem 1.5rem;
-    white-space: nowrap;
+    margin-bottom: var(--space-lg);
   }
   .footer__newsletter-success {
     font-size: var(--text-sm);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
   }
-  .footer__newsletter-dob-label {
-    display: block;
-    margin-top: var(--space-md);
-    margin-bottom: 0.4rem;
-    font-size: var(--text-xs);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-text-light);
+
+  /* Jacquemus-style stacked newsletter form */
+  .footer__nl-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    max-width: 520px;
   }
-  .footer__newsletter-dob {
+  .footer__nl-input {
     width: 100%;
-    max-width: 420px;
     background: none;
     border: none;
     border-bottom: 1px solid var(--color-primary);
-    padding: 0.6rem 0;
+    padding: 0.65rem 0;
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-primary);
   }
-  .footer__newsletter-dob:focus { outline: none; }
-
-  /* Progressive fields (revealed after email entered) */
-  .footer__nl-more[hidden] { display: none; }
-  .footer__nl-more {
-    max-width: 420px;
-    margin-top: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-  }
+  .footer__nl-input:focus { outline: none; }
+  .footer__nl-input::placeholder { color: var(--color-text-light); }
   .footer__nl-gender {
     border: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1.25rem;
+    gap: 0.6rem 1.5rem;
     align-items: center;
   }
   .footer__nl-gender legend {
     width: 100%;
     font-size: var(--text-xs);
     letter-spacing: 0.05em;
-    text-transform: uppercase;
     color: var(--color-text-light);
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
     padding: 0;
   }
   .footer__nl-gender label {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     font-size: var(--text-sm);
     cursor: pointer;
   }
   .footer__nl-gender input { accent-color: var(--color-primary); }
-  .footer__nl-text {
-    width: 100%;
-    border-bottom: 1px solid var(--color-primary);
-    padding: 0.6rem 0;
+  .footer__nl-dob-label {
+    display: block;
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    color: var(--color-text-light);
+    margin-bottom: -0.75rem;
   }
-  .footer__nl-text::placeholder { color: var(--color-text-light); }
+  .footer__nl-submit {
+    width: 100%;
+    background: var(--color-primary);
+    color: var(--color-secondary);
+    border: none;
+    padding: 1rem;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+  .footer__nl-submit:hover { opacity: 0.85; }
 
   /* --- Accordion triggers --- */
   .footer__accordion-trigger {
@@ -341,6 +317,13 @@
   }
   .footer__accordion-content {
     overflow: hidden;
+  }
+  /* Newsletter is collapsed by default (all breakpoints), like Jacquemus */
+  .footer__newsletter-section .footer__accordion-content {
+    display: none;
+  }
+  .footer__newsletter-section .footer__accordion-content.is-open {
+    display: block;
   }
 
   /* --- Middle: Menus + Social --- */

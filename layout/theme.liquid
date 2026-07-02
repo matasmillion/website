@@ -45,8 +45,9 @@
   {%- endcomment -%}
   <style>
     :root {
-      --color-primary: {{ settings.color_primary | default: '#2E2E2E' }};
-      --color-secondary: {{ settings.color_secondary | default: '#FFFFFF' }};
+      /* Brand palette (hardcoded for now — background #F1EEE6, text #2D2C2F) */
+      --color-primary: #2D2C2F;
+      --color-secondary: #F1EEE6;
       --color-accent: {{ settings.color_accent | default: '#C4632A' }};
       --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
       --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};

@@ -6,7 +6,7 @@
 /* --- CSS Custom Properties --- */
 :root {
   /* Colors — mapped from theme settings */
-  --color-primary: {{ settings.color_primary | default: '#2E2E2E' }};
+  --color-primary: {{ settings.color_primary | default: '#2D2C2F' }};
   --color-secondary: {{ settings.color_secondary | default: '#FFFFFF' }};
   --color-accent: {{ settings.color_accent | default: '#C4632A' }};
   --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};

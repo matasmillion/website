@@ -394,6 +394,77 @@
     });
   };
 
+  /* --- Wishlist Drawer (opens from the heart icon) --- */
+  const initWishlistDrawer = () => {
+    const drawer = document.querySelector('[data-wishlist-drawer]');
+    if (!drawer) return;
+    const grid = drawer.querySelector('[data-wishlist-grid]');
+    const empty = drawer.querySelector('[data-wishlist-empty]');
+
+    const money = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' })
+        .replace(/\.00$/, '');
+
+    const render = async () => {
+      const items = window.FRWishlist ? window.FRWishlist.get() : [];
+      if (!items.length) {
+        empty.style.display = '';
+        grid.innerHTML = '';
+        return;
+      }
+      empty.style.display = 'none';
+      const products = await Promise.all(items.map(async (h) => {
+        try { const r = await fetch('/products/' + h + '.js'); if (r.ok) return r.json(); } catch (e) {}
+        return null;
+      }));
+      const valid = products.filter(Boolean);
+      if (!valid.length) { empty.style.display = ''; grid.innerHTML = ''; return; }
+      grid.innerHTML = valid.map((p) => {
+        const img = p.featured_image || (p.images && p.images[0]) || '';
+        return '<div class="wl-item">' +
+          '<button class="wl-item__remove" data-wishlist-remove="' + p.handle + '" aria-label="Remove">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+          '</button>' +
+          '<a href="/products/' + p.handle + '" class="wl-item__link">' +
+            '<div class="wl-item__img">' + (img ? '<img src="' + img + '" alt="" loading="lazy">' : '') + '</div>' +
+            '<div class="wl-item__info">' +
+              '<span class="wl-item__title">' + p.title + '</span>' +
+              '<span class="wl-item__price">' + money(p.price) + '</span>' +
+            '</div>' +
+          '</a>' +
+        '</div>';
+      }).join('');
+    };
+
+    const open = () => {
+      render();
+      drawer.classList.add('is-active');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+    const close = () => {
+      drawer.classList.remove('is-active');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+
+    document.querySelectorAll('[data-wishlist-open]').forEach((b) =>
+      b.addEventListener('click', (e) => { e.preventDefault(); open(); }));
+    drawer.querySelectorAll('[data-wishlist-close]').forEach((b) =>
+      b.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer.classList.contains('is-active')) close();
+    });
+
+    grid.addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-wishlist-remove]');
+      if (!rm) return;
+      e.preventDefault();
+      if (window.FRWishlist) window.FRWishlist.toggle(rm.dataset.wishlistRemove);
+      render();
+    });
+  };
+
   // Expose globally for wishlist page
   window.FRWishlist = Wishlist;
 
@@ -453,10 +524,20 @@
     }, { passive: true });
   };
 
-  /* --- Newsletter: progressive reveal + Klaviyo profile properties --- */
-  const initNewsletterForms = () => {
-    const isValidEmail = (v) => /.+@.+\..+/.test(v || '');
+  /* --- Footer accordions (newsletter + menu columns) --- */
+  const initFooterAccordions = () => {
+    document.querySelectorAll('.footer__accordion-trigger').forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const content = trigger.nextElementSibling;
+        if (!content) return;
+        const open = content.classList.toggle('is-open');
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+  };
 
+  /* --- Newsletter -> Klaviyo profile properties --- */
+  const initNewsletterForms = () => {
     const sendToKlaviyo = (props) => {
       if (!props || !props['$email']) return;
       try {
@@ -469,38 +550,18 @@
       } catch (e) {}
     };
 
-    document.querySelectorAll('[data-nl-more]').forEach((more) => {
-      const form = more.closest('form');
+    document.querySelectorAll('[data-nl-form]').forEach((wrap) => {
+      const form = wrap.closest('form');
       if (!form) return;
-      const email = form.querySelector('[data-nl-email], [name="contact[email]"]');
-      const reqs = more.querySelectorAll('[data-nl-required]');
-
-      const setRequired = (on) => {
-        reqs.forEach((el) => {
-          if (on) el.setAttribute('required', '');
-          else el.removeAttribute('required');
-        });
-      };
-
-      // Only reveal the extra fields once a valid email is entered.
-      const reveal = () => {
-        const show = email && isValidEmail(email.value);
-        more.hidden = !show;
-        setRequired(show);
-      };
-      if (email) email.addEventListener('input', reveal);
-      reveal();
-
       form.addEventListener('submit', (e) => {
         if (form.dataset.nlSent) return;
         const getVal = (sel) => {
           const el = form.querySelector(sel);
           return el ? el.value.trim() : '';
         };
-        const props = {};
         const em = getVal('[name="contact[email]"]');
         if (!em) return;
-        props['$email'] = em;
+        const props = { '$email': em };
         const fn = getVal('[name="contact[first_name]"]');
         if (fn) props['$first_name'] = fn;
         const ln = getVal('[name="contact[last_name]"]');
@@ -542,9 +603,11 @@
     initFilters();
     initAddToCart();
     initWishlist();
+    initWishlistDrawer();
     initPdpTabs();
     initPdpGallery();
     initPdpMobileBand();
+    initFooterAccordions();
     initNewsletterForms();
   };
 
