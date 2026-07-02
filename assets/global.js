@@ -707,6 +707,9 @@
         const ln = getVal('[name="contact[last_name]"]'); if (ln) props['$last_name'] = ln;
         const gender = form.querySelector('[name="nl_gender"]:checked'); if (gender && gender.value) props['Title'] = gender.value;
         const bday = getVal('[data-birthday]'); if (bday) props['Birthday'] = bday;
+        // Foreign World join = opt-in to be featured on the globe (delineates
+        // globe members from plain email subscribers).
+        if (form.closest('[data-globe-optin]')) props['globe_opt_in'] = true;
         e.preventDefault();
         form.dataset.nlSent = '1';
         sendToKlaviyo(props);

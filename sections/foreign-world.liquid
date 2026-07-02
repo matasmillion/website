@@ -11,6 +11,19 @@
     <p class="fw__intro">{{ section.settings.intro }}</p>
   </div>
 
+  {%- comment -%} Live globe (embedded) or placeholder {% endcomment -%}
+  {%- if section.settings.globe_embed_url != blank -%}
+    <div class="fw__embed">
+      <iframe
+        src="{{ section.settings.globe_embed_url }}"
+        class="fw__embed-frame"
+        title="Foreign World globe"
+        loading="lazy"
+        allow="geolocation; clipboard-write"
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+    </div>
+  {%- else -%}
   {%- comment -%} People / Places toggle {% endcomment -%}
   <div class="fw__toggle" role="tablist" aria-label="View">
     <button class="fw__toggle-btn is-active" data-fw-tab="places" role="tab" aria-selected="true">Places</button>
@@ -56,8 +69,10 @@
     </div>
   </div>
 
+  {%- endif -%}
+
   {%- comment -%} Account / email capture {% endcomment -%}
-  <div class="fw__join">
+  <div class="fw__join" data-globe-optin>
     <h2 class="fw__join-title">Join Foreign World</h2>
     <p class="fw__join-sub">Create an account to add places, follow people, and share your journeys.</p>
     {%- form 'customer', id: 'fw-join' -%}
@@ -75,6 +90,17 @@
 
 <style>
   .fw { padding: var(--space-xl) 0 var(--space-section); }
+
+  /* Embedded globe (fr-globe.html hosted externally) */
+  .fw__embed { width: 100%; margin-bottom: var(--space-2xl); }
+  .fw__embed-frame {
+    display: block;
+    width: 100%;
+    height: calc(100svh - var(--chrome-h, 116px));
+    min-height: 560px;
+    border: 0;
+    background: #E4DED2;
+  }
   .fw__hero {
     text-align: center;
     max-width: 720px;
@@ -234,7 +260,8 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Foreign Resource" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Foreign World" },
-    { "type": "textarea", "id": "intro", "label": "Intro", "default": "An atlas of the extraordinary. Discover places few have been, follow the people going there now, and add your own journeys to the map." }
+    { "type": "textarea", "id": "intro", "label": "Intro", "default": "An atlas of the extraordinary. Discover places few have been, follow the people going there now, and add your own journeys to the map." },
+    { "type": "text", "id": "globe_embed_url", "label": "Globe embed URL", "info": "Hosted URL of fr-globe.html (e.g. Cloudflare Pages or GitHub Pages). Leave blank to show the placeholder." }
   ],
   "presets": [{ "name": "Foreign World" }]
 }
