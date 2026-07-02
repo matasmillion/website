@@ -16,6 +16,7 @@
           "type": "hero_image",
           "settings": {
             "image": "shopify://shop_images/Screenshot_2026-03-06_at_10.18.10_AM.jpg",
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "",
             "link": ""
@@ -25,6 +26,7 @@
           "type": "hero_image",
           "settings": {
             "image": "shopify://shop_images/Screenshot_2026-03-04_at_5.47.15_PM-2.jpg",
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "",
             "link": ""
@@ -36,7 +38,6 @@
         "hero_1a"
       ],
       "settings": {
-        "hero_height": "full",
         "collection": "artic-ambush",
         "products_count": 4
       }
@@ -47,6 +48,7 @@
         "hero_2a": {
           "type": "hero_image",
           "settings": {
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "Women New In",
             "link": ""
@@ -55,6 +57,7 @@
         "hero_2b": {
           "type": "hero_image",
           "settings": {
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "Men New In",
             "link": ""
@@ -67,7 +70,6 @@
       ],
       "disabled": true,
       "settings": {
-        "hero_height": "full",
         "collection": "",
         "products_count": 4
       }
@@ -78,6 +80,7 @@
         "hero_3a": {
           "type": "hero_image",
           "settings": {
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "Les Classiques",
             "link": ""
@@ -86,6 +89,7 @@
         "hero_3b": {
           "type": "hero_image",
           "settings": {
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "The Féfé",
             "link": ""
@@ -98,7 +102,6 @@
       ],
       "disabled": true,
       "settings": {
-        "hero_height": "full",
         "collection": "",
         "products_count": 4
       }
@@ -109,7 +112,8 @@
         "hero_4a": {
           "type": "hero_image",
           "settings": {
-            "image": "shopify://shop_images/hf_20260222_144054_bbfca5ab-2f43-44c9-8524-b107f65f93d6.jpg",
+            "image": "shopify://shop_images/hf_20260222_143502_8dd007c2-b51b-4ab9-a325-b621c318622c.jpg",
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "Our Savoir-faire",
             "link": ""
@@ -117,8 +121,9 @@
         },
         "hero_4b": {
           "type": "hero_image",
-          "disabled": true,
           "settings": {
+            "image": "shopify://shop_images/BLACK_FRIDAY.png",
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "",
             "link": ""
@@ -130,7 +135,6 @@
         "hero_4b"
       ],
       "settings": {
-        "hero_height": "full",
         "collection": "all-products",
         "products_count": 4
       }
