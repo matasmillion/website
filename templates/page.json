@@ -12,8 +12,8 @@
     "main": {
       "type": "placeholder-section",
       "settings": {
-        "heading": "FOREIGN WORLD",
-        "text": "<p>Page content will appear here. Customize this through the theme editor.</p>"
+        "heading": "ERROR",
+        "text": "<p>Not sure how you got here... </p>"
       }
     }
   },
