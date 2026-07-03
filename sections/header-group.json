@@ -16,8 +16,9 @@
       "disabled": true,
       "settings": {
         "show_announcement": true,
+        "transparent": true,
+        "rotate_speed": 4,
         "text": "Complimentary shipping on orders over $150",
-        "link": "",
         "bg_color": "#0a0a0a",
         "text_color": "#f5f0eb"
       }
@@ -26,7 +27,13 @@
       "type": "header",
       "settings": {
         "menu": "main-menu",
-        "logo_position": "left",
+        "shop_label": "Shop",
+        "show_foreign_world": true,
+        "foreign_world_label": "Foreign World",
+        "foreign_world_link": "shopify://pages/sd",
+        "show_foreign_fund": true,
+        "foreign_fund_label": "Foreign Fund",
+        "foreign_fund_link": "",
         "sticky_header": true,
         "transparent_header": false
       }
