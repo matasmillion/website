@@ -135,7 +135,7 @@
     });
   };
 
-  /* --- Product Variant Selector --- */
+  /* --- Product Variant Selector (option toggle only) --- */
   const initVariantSelectors = () => {
     document.querySelectorAll('[data-variant-select]').forEach(container => {
       const buttons = container.querySelectorAll('[data-variant-option]');
@@ -147,22 +147,73 @@
           });
           btn.classList.add('is-selected');
           btn.setAttribute('aria-pressed', 'true');
-
-          const variantId = btn.dataset.variantOption;
-          const form = btn.closest('form');
-          if (form) {
-            const input = form.querySelector('input[name="id"]');
-            if (input) input.value = variantId;
-          }
-
-          const event = new CustomEvent('variant:change', {
-            detail: { variantId, button: btn },
-            bubbles: true
-          });
-          container.dispatchEvent(event);
+          container.dispatchEvent(new CustomEvent('variant:change', { bubbles: true }));
         });
       });
     });
+  };
+
+  /* --- PDP: resolve selected options to a real variant --- */
+  const initPdpVariants = () => {
+    const pdp = document.querySelector('[data-pdp]');
+    if (!pdp) return;
+    const dataEl = pdp.querySelector('[data-variant-json]');
+    if (!dataEl) return;
+    let variants = [];
+    try { variants = JSON.parse(dataEl.textContent); } catch (e) { return; }
+    if (!variants.length) return;
+
+    const groups = pdp.querySelectorAll('[data-variant-select][data-option-position]');
+    const idInput = pdp.querySelector('[data-variant-id]');
+    const addBtn = pdp.querySelector('[data-add-btn]');
+    const addText = pdp.querySelector('.pdp__add-text');
+    const mobileBtn = pdp.querySelector('[data-mobile-submit]');
+    const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
+    const swatchLabel = pdp.querySelector('.pdp__swatch-label');
+
+    const money = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
+
+    const selectedValues = () => {
+      const vals = [];
+      groups.forEach((g) => {
+        const pos = parseInt(g.dataset.optionPosition, 10) - 1;
+        const sel = g.querySelector('.is-selected') || g.querySelector('[aria-pressed="true"]');
+        vals[pos] = sel ? sel.dataset.variantOption : null;
+      });
+      return vals;
+    };
+
+    const resolve = () => {
+      const vals = selectedValues();
+      const variant = variants.find((v) =>
+        vals.every((val, i) => val == null || v['option' + (i + 1)] === val));
+
+      // Colour label reflects the chosen colour
+      if (swatchLabel) {
+        const colorGroup = pdp.querySelector('.pdp__swatch-list .is-selected');
+        if (colorGroup) swatchLabel.textContent = colorGroup.getAttribute('title') || colorGroup.dataset.variantOption;
+      }
+
+      const setState = (btn, textEl, priceSel) => {
+        if (!btn) return;
+        const priceEl = pdp.querySelector(priceSel);
+        if (variant) {
+          if (idInput) idInput.value = variant.id;
+          if (priceEl) priceEl.textContent = money(variant.price);
+          if (variant.available) { btn.disabled = false; if (textEl) textEl.textContent = 'Add to cart'; }
+          else { btn.disabled = true; if (textEl) textEl.textContent = 'Sold out'; }
+        } else {
+          btn.disabled = true;
+          if (textEl) textEl.textContent = 'Unavailable';
+        }
+      };
+      setState(addBtn, addText, '[data-price]');
+      setState(mobileBtn, mobileText, '[data-mobile-price]');
+    };
+
+    groups.forEach((g) => g.addEventListener('variant:change', resolve));
+    resolve();
   };
 
   /* --- Quantity Selector --- */
@@ -782,7 +833,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initFooterAccordions, initNewsletterForms, initLocalization,
+      initPdpMobileBand, initPdpVariants, initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
     });

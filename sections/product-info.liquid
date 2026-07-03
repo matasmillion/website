@@ -94,7 +94,7 @@
         {%- if option.name == 'Color' or option.name == 'Colour' -%}
           <div class="pdp__swatches">
             <p class="pdp__swatch-label">{{ option.selected_value }}</p>
-            <div class="pdp__swatch-list" data-variant-select>
+            <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
                 {%- liquid
                   assign color_lower = value | downcase | replace: ' ', ''
@@ -145,6 +145,7 @@
       {%- comment -%} ===== SIZE SELECTOR + ADD TO CART ===== {% endcomment -%}
       {%- form 'product', product, data-add-to-cart: true, class: 'pdp__form' -%}
         <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+        <script type="application/json" data-variant-json>{{ product.variants | json }}</script>
 
         {%- for option in product.options_with_values -%}
           {%- unless option.name == 'Color' or option.name == 'Colour' -%}
@@ -155,7 +156,7 @@
                   <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">Size guide</button>
                 {%- endif -%}
               </div>
-              <div class="pdp__size-buttons" data-variant-select>
+              <div class="pdp__size-buttons" data-variant-select data-option-position="{{ option.position }}">
                 {%- for value in option.values -%}
                   <button
                     type="button"
