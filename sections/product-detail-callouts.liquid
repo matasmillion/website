@@ -1,0 +1,117 @@
+{%- comment -%}
+  PDP — Detail callouts. Dynamic per product via a metaobject list metafield:
+    product.metafields.custom.detail_callouts  (list of "detail_callout" metaobjects)
+  Each metaobject: image (file), title (text), description (multi-line text).
+  Renders nothing if the product has no callouts.
+{%- endcomment -%}
+
+{%- assign callouts = product.metafields.custom.detail_callouts.value -%}
+{%- if callouts != blank and callouts.size > 0 -%}
+  <section class="pdc reveal">
+    <div class="pdc__head">
+      <h2 class="pdc__title">{{ section.settings.heading | default: 'Details' }}</h2>
+      {%- if callouts.size > 1 -%}
+        <div class="pdc__nav" data-carousel>
+          <button class="pdc__arrow" data-carousel-prev aria-label="Previous">
+            <svg width="22" height="10" viewBox="0 0 24 10" fill="none" stroke="currentColor" stroke-width="1"><line x1="24" y1="5" x2="1" y2="5"/><polyline points="6 1 1 5 6 9"/></svg>
+          </button>
+          <button class="pdc__arrow" data-carousel-next aria-label="Next">
+            <svg width="22" height="10" viewBox="0 0 24 10" fill="none" stroke="currentColor" stroke-width="1"><line x1="0" y1="5" x2="23" y2="5"/><polyline points="18 1 23 5 18 9"/></svg>
+          </button>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="pdc__carousel" data-carousel>
+      <div class="pdc__track" data-carousel-track>
+        {%- for c in callouts -%}
+          <article class="pdc__card">
+            <div class="pdc__media">
+              {%- if c.image.value -%}
+                <img
+                  src="{{ c.image.value | image_url: width: 900 }}"
+                  srcset="{{ c.image.value | image_url: width: 500 }} 500w, {{ c.image.value | image_url: width: 900 }} 900w"
+                  sizes="(min-width: 769px) 32vw, 80vw"
+                  alt="{{ c.title.value | escape }}"
+                  loading="lazy"
+                  class="pdc__img"
+                >
+              {%- endif -%}
+              <div class="pdc__overlay">
+                {%- if c.title.value != blank -%}<h3 class="pdc__card-title">{{ c.title.value }}</h3>{%- endif -%}
+                {%- if c.description.value != blank -%}<p class="pdc__card-desc">{{ c.description.value }}</p>{%- endif -%}
+              </div>
+            </div>
+          </article>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .pdc { padding: var(--space-2xl) 0; border-top: 1px solid var(--color-border); }
+    .pdc__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem);
+      margin-bottom: var(--space-lg);
+    }
+    .pdc__title {
+      font-family: var(--font-heading);
+      font-size: var(--text-3xl);
+      font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+    }
+    .pdc__nav { display: none; gap: 1.25rem; }
+    @media (min-width: 769px) { .pdc__nav { display: flex; } }
+    .pdc__arrow { background: none; border: none; cursor: pointer; color: var(--color-primary); padding: 0; }
+    .pdc__arrow:hover { opacity: 0.5; }
+
+    .pdc__carousel { padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem); }
+    .pdc__track {
+      display: flex;
+      gap: var(--grid-gap);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .pdc__track::-webkit-scrollbar { display: none; }
+    .pdc__card { flex: 0 0 80%; scroll-snap-align: start; }
+    @media (min-width: 769px) { .pdc__card { flex: 0 0 calc(33.333% - var(--grid-gap)); } }
+
+    .pdc__media { position: relative; aspect-ratio: 3 / 4; overflow: hidden; background: #E4DED2; }
+    .pdc__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .pdc__overlay {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 1.5rem;
+      color: #fff;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0) 60%);
+    }
+    .pdc__card-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      line-height: 1.05;
+      margin-bottom: 0.35rem;
+    }
+    .pdc__card-desc { font-size: var(--text-sm); line-height: 1.5; opacity: 0.9; }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP Detail Callouts",
+  "class": "section-pdp-detail-callouts",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Details" },
+    {
+      "type": "paragraph",
+      "content": "Fill per product via the 'detail_callouts' metafield (list of Detail Callout metaobjects: image, title, description)."
+    }
+  ]
+}
+{% endschema %}

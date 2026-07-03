@@ -19,6 +19,14 @@
         "size_chart_content": ""
       }
     },
+    "detail_callouts": {
+      "type": "product-detail-callouts",
+      "settings": { "heading": "Details" }
+    },
+    "style_with": {
+      "type": "product-style-with",
+      "settings": { "heading": "Style it with" }
+    },
     "brand_story_GAGwDD": {
       "type": "brand-story",
       "disabled": true,
@@ -37,6 +45,8 @@
   },
   "order": [
     "product_info",
+    "detail_callouts",
+    "style_with",
     "brand_story_GAGwDD"
   ]
 }

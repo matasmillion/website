@@ -1,0 +1,88 @@
+{%- comment -%}
+  PDP — "Style it with". Dynamic per product via metafields:
+    product.metafields.custom.styling_video      (file — a video), OR
+    product.metafields.custom.styling_video_url  (url — mp4 link)
+    product.metafields.custom.styled_with        (list of product references)
+  Renders nothing if none are set.
+{%- endcomment -%}
+
+{%- liquid
+  assign styled = product.metafields.custom.styled_with.value
+  assign vid = product.metafields.custom.styling_video.value
+  assign vid_url = product.metafields.custom.styling_video_url
+  assign has_video = false
+  if vid != blank or vid_url != blank
+    assign has_video = true
+  endif
+  assign has_products = false
+  if styled != blank and styled.size > 0
+    assign has_products = true
+  endif
+-%}
+
+{%- if has_video or has_products -%}
+  <section class="psw reveal">
+    <h2 class="psw__title">{{ section.settings.heading | default: 'Style it with' }}</h2>
+    <div class="psw__grid">
+      {%- if has_video -%}
+        <div class="psw__video">
+          {%- if vid != blank and vid.sources -%}
+            {{ vid | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'psw__video-el' }}
+          {%- elsif vid_url != blank -%}
+            <video class="psw__video-el" autoplay muted loop playsinline poster="{{ product.featured_image | image_url: width: 900 }}">
+              <source src="{{ vid_url }}" type="video/mp4">
+            </video>
+          {%- elsif product.featured_image -%}
+            <img class="psw__video-el" src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.title | escape }}" loading="lazy">
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if has_products -%}
+        <div class="psw__products">
+          {%- for p in styled limit: 4 -%}
+            {%- render 'product-card', product: p, context: 'below' -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <style>
+    .psw { padding: var(--space-2xl) clamp(1.25rem, 0.5rem + 3vw, 4rem); border-top: 1px solid var(--color-border); }
+    .psw__title {
+      font-family: var(--font-heading);
+      font-size: var(--text-3xl);
+      font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      margin-bottom: var(--space-lg);
+    }
+    .psw__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-lg) var(--grid-gap); }
+    @media (min-width: 769px) {
+      .psw__grid { grid-template-columns: 1.2fr 1fr; align-items: start; gap: clamp(1.5rem, 1rem + 2vw, 3rem); }
+    }
+    .psw__video { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #E4DED2; }
+    .psw__video-el { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .psw__products {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg) var(--grid-gap);
+      align-content: start;
+    }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP Style It With",
+  "class": "section-pdp-style-with",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Style it with" },
+    {
+      "type": "paragraph",
+      "content": "Fill per product via metafields: 'styling_video' (file) or 'styling_video_url' (url), and 'styled_with' (list of products)."
+    }
+  ]
+}
+{% endschema %}
