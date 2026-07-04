@@ -13,32 +13,13 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
-      "blocks": {
-        "message_zPRRer": {
-          "type": "message",
-          "settings": {
-            "text": "Complimentary shipping on orders over $150",
-            "link": ""
-          }
-        },
-        "message_PwahA4": {
-          "type": "message",
-          "settings": {
-            "text": "qwer",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "message_zPRRer",
-        "message_PwahA4"
-      ],
+      "disabled": true,
       "settings": {
-        "show_announcement": true,
+        "show_announcement": false,
         "transparent": true,
         "rotate_speed": 3,
         "text": "Complimentary shipping on orders over $150",
-        "bg_color": "#0a0a0a",
+        "bg_color": "#000000",
         "text_color": "#f5f0eb"
       }
     },
