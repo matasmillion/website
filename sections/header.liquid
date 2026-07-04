@@ -114,9 +114,18 @@
         </button>
       </div>
       <nav class="mobile-menu__nav" role="navigation" aria-label="Mobile navigation">
-        {%- for link in section.settings.menu.links -%}
-          <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
-        {%- endfor -%}
+        {%- comment -%} Shop — tap to reveal collections {% endcomment -%}
+        <button type="button" class="mobile-menu__link mobile-menu__shop" data-mm-shop aria-expanded="false">
+          {{ section.settings.shop_label | default: 'Shop' }}
+          <svg class="mobile-menu__shop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        {%- if section.settings.menu != blank -%}
+          <div class="mobile-menu__sub" data-mm-shop-panel hidden>
+            {%- for link in section.settings.menu.links -%}
+              <a href="{{ link.url }}" class="mobile-menu__sublink">{{ link.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
         {%- if section.settings.show_foreign_resource -%}
           <a href="{{ section.settings.foreign_resource_link | default: pages['foreign-resource'].url | default: '/pages/foreign-resource' }}" class="mobile-menu__link">{{ section.settings.foreign_resource_label | default: 'Foreign Resource' }}</a>
         {%- endif -%}

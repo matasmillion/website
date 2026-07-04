@@ -526,22 +526,52 @@
   flex-direction: column;
   justify-content: center;
   flex: 1;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
-/* Mobile nav links — massive, Jacquemus editorial style */
+/* Mobile nav links — sized so all items fit on one screen */
 .mobile-menu__link {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 2rem + 4vw, 5rem);
-  font-weight: var(--font-weight-normal);
+  font-size: clamp(1.75rem, 1.2rem + 3vw, 2.75rem);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  line-height: 1;
+  line-height: 1.05;
+  color: var(--color-primary);
   transition: opacity var(--duration-fast) var(--ease-out);
+  display: block;
 }
 
-.mobile-menu__link:hover { opacity: 0.3; }
+.mobile-menu__link:hover { opacity: 0.4; }
+
+/* Shop trigger (button) */
+.mobile-menu__shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.mobile-menu__shop-caret { transition: transform var(--duration-fast) var(--ease-out); }
+.mobile-menu__shop[aria-expanded="true"] .mobile-menu__shop-caret { transform: rotate(180deg); }
+
+/* Collections revealed under Shop */
+.mobile-menu__sub { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0 0.75rem 0.25rem; }
+.mobile-menu__sub[hidden] { display: none; }
+.mobile-menu__sublink {
+  font-family: var(--font-heading);
+  font-size: clamp(1.1rem, 0.9rem + 1.5vw, 1.5rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-primary);
+  opacity: 0.6;
+  text-decoration: none;
+}
+.mobile-menu__sublink:hover { opacity: 1; }
 
 .mobile-menu__link--small {
   font-size: var(--text-xs);

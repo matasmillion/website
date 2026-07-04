@@ -53,6 +53,17 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && overlay.classList.contains('is-active')) shut();
     });
+
+    // Shop group expands to reveal collections
+    const shopBtn = overlay.querySelector('[data-mm-shop]');
+    const shopPanel = overlay.querySelector('[data-mm-shop-panel]');
+    if (shopBtn && shopPanel) {
+      shopBtn.addEventListener('click', () => {
+        const open = shopPanel.hidden;
+        shopPanel.hidden = !open;
+        shopBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    }
   };
 
   /* --- Chrome: stack header below the announcement bar; expose offset --- */
