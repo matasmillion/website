@@ -41,6 +41,11 @@
           {%- endif -%}
         </div>
 
+        {%- if section.settings.show_foreign_resource -%}
+          <a href="{{ section.settings.foreign_resource_link | default: pages['foreign-resource'].url | default: '/pages/foreign-resource' }}" class="header__nav-link">
+            {{ section.settings.foreign_resource_label | default: 'Foreign Resource' }}
+          </a>
+        {%- endif -%}
         {%- if section.settings.show_foreign_world -%}
           <a href="{{ section.settings.foreign_world_link | default: pages['foreign-world'].url | default: '/pages/foreign-world' }}" class="header__nav-link">
             {{ section.settings.foreign_world_label | default: 'Foreign World' }}
@@ -112,6 +117,9 @@
         {%- for link in section.settings.menu.links -%}
           <a href="{{ link.url }}" class="mobile-menu__link">{{ link.title }}</a>
         {%- endfor -%}
+        {%- if section.settings.show_foreign_resource -%}
+          <a href="{{ section.settings.foreign_resource_link | default: pages['foreign-resource'].url | default: '/pages/foreign-resource' }}" class="mobile-menu__link">{{ section.settings.foreign_resource_label | default: 'Foreign Resource' }}</a>
+        {%- endif -%}
         {%- if section.settings.show_foreign_world -%}
           <a href="{{ section.settings.foreign_world_link | default: pages['foreign-world'].url | default: '/pages/foreign-world' }}" class="mobile-menu__link">{{ section.settings.foreign_world_label | default: 'Foreign World' }}</a>
         {%- endif -%}
@@ -251,6 +259,27 @@
       "id": "shop_label",
       "label": "Shop label",
       "default": "Shop"
+    },
+    {
+      "type": "header",
+      "content": "Foreign Resource link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_resource",
+      "label": "Show Foreign Resource",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_resource_label",
+      "label": "Foreign Resource label",
+      "default": "Foreign Resource"
+    },
+    {
+      "type": "url",
+      "id": "foreign_resource_link",
+      "label": "Foreign Resource link"
     },
     {
       "type": "header",

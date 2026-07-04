@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "elements": {
+      "type": "foreign-resource",
+      "blocks": {
+        "e1": { "type": "element", "settings": { "name": "Element One" } },
+        "e2": { "type": "element", "settings": { "name": "Element Two" } },
+        "e3": { "type": "element", "settings": { "name": "Element Three" } },
+        "e4": { "type": "element", "settings": { "name": "Element Four" } },
+        "e5": { "type": "element", "settings": { "name": "Element Five" } },
+        "e6": { "type": "element", "settings": { "name": "Element Six" } },
+        "e7": { "type": "element", "settings": { "name": "Element Seven" } }
+      },
+      "block_order": ["e1", "e2", "e3", "e4", "e5", "e6", "e7"]
+    }
+  },
+  "order": ["elements"]
+}
