@@ -11,11 +11,13 @@
     <p class="fw__intro">{{ section.settings.intro }}</p>
   </div>
 
-  {%- comment -%} Live globe (embedded) or placeholder {% endcomment -%}
-  {%- if section.settings.globe_embed_url != blank -%}
+  {%- comment -%} Live globe: external URL if set, else the bundled theme asset {% endcomment -%}
+  {%- assign globe_src = section.settings.globe_embed_url | default: '' -%}
+  {%- if globe_src == blank -%}{%- assign globe_src = 'fr-globe.html' | asset_url -%}{%- endif -%}
+  {%- if globe_src != blank -%}
     <div class="fw__embed">
       <iframe
-        src="{{ section.settings.globe_embed_url }}"
+        src="{{ globe_src }}"
         class="fw__embed-frame"
         title="Foreign World globe"
         loading="lazy"

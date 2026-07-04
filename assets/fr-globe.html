@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foreign Resource — Community Globe</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --charcoal: #2D2C2F;
+    --off-white: #F1EEE6;
+    --sand: #EBE5D5;
+    --stone: #716F70;
+    --soil: #9A816B;
+    --sea: #B5C7D3;
+    --sage: #ADBDA3;
+  }
+
+  body {
+    background: var(--charcoal);
+    color: var(--charcoal);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sans { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 32px;
+    pointer-events: none;
+  }
+  .nav > * { pointer-events: auto; }
+  .nav-brand {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--off-white);
+    line-height: 1;
+  }
+  .nav-actions { display: flex; gap: 12px; align-items: center; }
+  .btn {
+    font-family: 'Helvetica Neue', Inter, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--off-white);
+    padding: 10px 20px;
+    opacity: 0.7;
+  }
+  .btn-ghost:hover { opacity: 1; }
+  .btn-primary {
+    background: var(--off-white);
+    color: var(--charcoal);
+    padding: 10px 24px;
+  }
+  .btn-primary:hover { background: #fff; }
+
+  /* ─── PEOPLE / PLACES TOGGLE ─── */
+  .mode-toggle {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110;
+    display: flex;
+    background: rgba(45,44,47,0.35);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(241,238,230,0.25);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .mode-btn {
+    font-family: 'Helvetica Neue', Inter, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--off-white);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 22px;
+    border-radius: 999px;
+    opacity: 0.6;
+    transition: all 0.25s ease;
+  }
+  .mode-btn.active { background: var(--off-white); color: var(--charcoal); opacity: 1; }
+
+  /* ─── MAP ─── */
+  #map { width: 100vw; height: 100vh; background: var(--charcoal); }
+  .maplibregl-canvas { filter: sepia(0.25) saturate(0.6) brightness(0.98) contrast(1.05); }
+  .maplibregl-ctrl-bottom-left,
+  .maplibregl-ctrl-bottom-right { display: none; }
+
+  /* ─── HERO OVERLAY ─── */
+  .hero-overlay { position: fixed; bottom: 48px; left: 40px; z-index: 50; pointer-events: none; }
+  .hero-tagline { font-weight: 300; font-size: 40px; color: var(--off-white); line-height: 1.2; opacity: 0.9; }
+  .hero-sub { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 12px; color: var(--sand); margin-top: 10px; letter-spacing: 0.5px; }
+
+  /* ─── COUNT ─── */
+  .member-count { position: fixed; bottom: 48px; right: 40px; z-index: 50; text-align: right; pointer-events: none; }
+  .member-count .number { font-weight: 300; font-size: 48px; color: var(--off-white); line-height: 1; }
+  .member-count .label { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sand); margin-top: 4px; }
+
+  /* ─── TOOLTIPS ─── */
+  .dot-tooltip {
+    position: fixed; z-index: 200; background: var(--off-white); color: var(--charcoal);
+    width: 280px; opacity: 0; pointer-events: none; transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.3); overflow: hidden;
+  }
+  .dot-tooltip.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .tt-header { display: flex; align-items: center; gap: 12px; padding: 16px; }
+  .tt-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: var(--sand); flex-shrink: 0; }
+  .tt-info { flex: 1; min-width: 0; }
+  .tt-ig-handle { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 14px; font-weight: 600; color: var(--charcoal); text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tt-ig-handle:hover { text-decoration: underline; }
+  .tt-city-name { font-size: 14px; color: var(--stone); margin-top: 2px; }
+  .tt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; padding: 0 2px; }
+  .tt-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--sand); }
+  .tt-footer { background: var(--charcoal); padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .tt-footer-left { display: flex; align-items: center; gap: 6px; }
+  .tt-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--soil); }
+  .tt-status-text { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sand); }
+  .tt-view-link { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 600; color: var(--off-white); text-decoration: none; letter-spacing: 0.5px; opacity: 0.7; }
+  .tt-view-link:hover { opacity: 1; }
+
+  /* ─── PLACE CARD ─── */
+  .place-card { position: fixed; z-index: 200; background: var(--off-white); color: var(--charcoal); width: 300px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .place-card.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .place-card__body { padding: 18px; }
+  .pc-eyebrow { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--soil); margin-bottom: 6px; }
+  .pc-title { font-size: 24px; font-weight: 500; line-height: 1.1; margin-bottom: 4px; }
+  .pc-city { font-size: 15px; color: var(--stone); margin-bottom: 12px; }
+  .pc-desc { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: var(--charcoal); white-space: pre-line; max-height: 180px; overflow-y: auto; }
+  .pc-by { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 11px; color: var(--stone); margin-top: 14px; }
+  .pc-by a { color: var(--charcoal); font-weight: 600; text-decoration: none; }
+  .pc-by a:hover { text-decoration: underline; }
+
+  /* ─── MODALS ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--off-white); padding: 48px 40px; width: 440px; max-width: 92vw; position: relative; max-height: 92vh; overflow-y: auto; }
+  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--stone); line-height: 1; }
+  .modal-close:hover { color: var(--charcoal); }
+  .modal h2 { font-weight: 400; font-size: 28px; margin-bottom: 8px; color: var(--charcoal); }
+  .modal p.desc { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 13px; color: var(--stone); margin-bottom: 28px; line-height: 1.6; }
+  .social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px; border: 1px solid var(--sand); background: transparent; font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 13px; font-weight: 500; color: var(--charcoal); cursor: pointer; margin-bottom: 10px; transition: all 0.2s ease; }
+  .social-btn:hover { background: var(--charcoal); color: var(--off-white); border-color: var(--charcoal); }
+  .social-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .input-group { margin-bottom: 22px; position: relative; }
+  .input-group label { display: block; font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--stone); margin-bottom: 8px; }
+  .input-group input[type="text"], .input-group textarea { width: 100%; padding: 11px 0; border: none; border-bottom: 1px solid var(--sand); background: transparent; font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 14px; color: var(--charcoal); outline: none; transition: border-color 0.2s; resize: vertical; }
+  .input-group textarea { min-height: 90px; }
+  .input-group input:focus, .input-group textarea:focus { border-bottom-color: var(--charcoal); }
+  .input-group input::placeholder, .input-group textarea::placeholder { color: var(--sand); }
+  .opt { font-size: 10px; color: var(--sand); font-style: italic; letter-spacing: 0; text-transform: none; margin-left: 4px; }
+  .btn-submit { width: 100%; padding: 14px; margin-top: 8px; font-size: 10px; }
+
+  .ac-dropdown { position: absolute; left: 0; right: 0; top: 100%; background: var(--off-white); border: 1px solid var(--sand); max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+  .ac-dropdown.open { display: block; }
+  .ac-item { padding: 10px 12px; font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 13px; color: var(--charcoal); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .ac-item:hover { background: var(--sand); }
+  .ac-item .ac-country { font-size: 11px; color: var(--stone); }
+
+  .user-indicator { display: none; align-items: center; gap: 10px; }
+  .user-indicator.active { display: flex; }
+  .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
+  .user-name { font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 12px; color: var(--off-white); }
+
+  .zoom-hint { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 50; font-family: 'Helvetica Neue', Inter, Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--off-white); opacity: 0.4; pointer-events: none; transition: opacity 1s ease; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 14px 16px; }
+    .nav-brand { display: none; }
+    .mode-toggle { top: 14px; }
+    .hero-overlay { left: 20px; bottom: 76px; }
+    .hero-tagline { font-size: 26px; }
+    .member-count { right: 20px; bottom: 76px; }
+    .member-count .number { font-size: 34px; }
+    .modal { padding: 36px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">Foreign Resource</div>
+  <div class="nav-actions">
+    <div class="user-indicator" id="userIndicator">
+      <span class="user-dot"></span>
+      <span class="user-name" id="userName"></span>
+      <button class="btn btn-ghost" onclick="openSetup()">Update</button>
+    </div>
+    <button class="btn btn-ghost" id="loginBtn" onclick="openAuth()">Log In</button>
+    <button class="btn btn-primary" id="joinBtn" onclick="primaryAction()">Join the Map</button>
+  </div>
+</nav>
+
+<div class="mode-toggle">
+  <button class="mode-btn active" data-mode="people" onclick="setMode('people')">People</button>
+  <button class="mode-btn" data-mode="places" onclick="setMode('places')">Places</button>
+</div>
+
+<div id="map"></div>
+
+<div class="hero-overlay">
+  <div class="hero-tagline" id="heroTagline">Find your people,<br>wherever you go.</div>
+  <div class="hero-sub" id="heroSub">Tap a dot. Discover who's there.</div>
+</div>
+
+<div class="member-count">
+  <div class="number" id="dotCount">0</div>
+  <div class="label" id="countLabel">Community Members</div>
+</div>
+
+<div class="zoom-hint" id="zoomHint">Scroll to zoom into any city</div>
+
+<!-- PERSON CARD -->
+<div class="dot-tooltip" id="tooltip">
+  <div class="tt-header">
+    <img class="tt-avatar" id="ttAvatar" src="" alt="" />
+    <div class="tt-info">
+      <a class="tt-ig-handle" id="ttIg" href="#" target="_blank">@handle</a>
+      <div class="tt-city-name" id="ttCity">City</div>
+    </div>
+  </div>
+  <div class="tt-grid" id="ttGrid"></div>
+  <div class="tt-footer">
+    <div class="tt-footer-left">
+      <span class="tt-status-dot"></span>
+      <span class="tt-status-text" id="ttStatus">Home</span>
+    </div>
+    <a class="tt-view-link" id="ttProfileLink" href="#" target="_blank">View Profile &rarr;</a>
+  </div>
+</div>
+
+<!-- PLACE CARD -->
+<div class="place-card" id="placeCard">
+  <div class="place-card__body">
+    <div class="pc-eyebrow">Place</div>
+    <h3 class="pc-title" id="pcTitle"></h3>
+    <div class="pc-city" id="pcCity"></div>
+    <div class="pc-desc" id="pcDesc"></div>
+    <div class="pc-by" id="pcBy"></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModals()">&times;</button>
+    <h2>Join the community.</h2>
+    <p class="desc">Pin yourself on the globe. See who else from the FR community is near you — wherever you are in the world.</p>
+    <button class="social-btn" onclick="doLogin()" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border-color:transparent;">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      Continue with Instagram
+    </button>
+  </div>
+</div>
+
+<!-- SETUP MODAL (person) -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModals()">&times;</button>
+    <h2>Pin yourself.</h2>
+    <p class="desc">Where are you based? And if you're on the move, where are you right now?</p>
+    <div class="input-group">
+      <label>Home Location</label>
+      <input type="text" id="homeInput" placeholder="Search any location..." autocomplete="off" />
+      <div class="ac-dropdown" id="homeDropdown"></div>
+    </div>
+    <div class="input-group">
+      <label>Visiting <span class="opt">(optional)</span></label>
+      <input type="text" id="visitInput" placeholder="Search any location..." autocomplete="off" />
+      <div class="ac-dropdown" id="visitDropdown"></div>
+    </div>
+    <div class="input-group">
+      <label>Instagram Handle</label>
+      <input type="text" id="igInput" placeholder="@yourhandle" />
+    </div>
+    <button class="btn btn-primary btn-submit" onclick="saveProfile()">Place My Pin</button>
+  </div>
+</div>
+
+<!-- ADD PLACE MODAL -->
+<div class="modal-overlay" id="placeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModals()">&times;</button>
+    <h2>Add a place.</h2>
+    <p class="desc">Share somewhere extraordinary — with the details others need to actually get there.</p>
+    <div class="input-group">
+      <label>Place name</label>
+      <input type="text" id="placeTitleInput" placeholder="e.g. The coal-ore train" />
+    </div>
+    <div class="input-group">
+      <label>Location</label>
+      <input type="text" id="placeLocInput" placeholder="Search any location..." autocomplete="off" />
+      <div class="ac-dropdown" id="placeLocDropdown"></div>
+    </div>
+    <div class="input-group">
+      <label>The guide <span class="opt">(flights, agents, step-by-step)</span></label>
+      <textarea id="placeDescInput" placeholder="How to get there. What to book. Who to text when you arrive."></textarea>
+    </div>
+    <div class="input-group">
+      <label>Your Instagram <span class="opt">(optional)</span></label>
+      <input type="text" id="placeByInput" placeholder="@yourhandle" />
+    </div>
+    <button class="btn btn-primary btn-submit" onclick="savePlace()">Add Place</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"></script>
+<script>
+// ═══════════════ INSTAGRAM CONFIG (fill to enable OAuth) ═══════════════
+const IG_CONFIG = { appId: '', redirectUri: '', proxyUrl: '', scope: 'instagram_business_basic' };
+const igConfigured = IG_CONFIG.appId && IG_CONFIG.proxyUrl && IG_CONFIG.redirectUri;
+let igUserData = null;
+
+function startIGLogin() {
+  const authUrl = 'https://www.instagram.com/oauth/authorize?client_id=' + IG_CONFIG.appId
+    + '&redirect_uri=' + encodeURIComponent(IG_CONFIG.redirectUri)
+    + '&scope=' + IG_CONFIG.scope + '&response_type=code&state=fr_globe';
+  window.location.href = authUrl;
+}
+async function handleOAuthCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (!code || params.get('state') !== 'fr_globe') return false;
+  window.history.replaceState({}, '', window.location.pathname);
+  try {
+    const tokenRes = await fetch(IG_CONFIG.proxyUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, redirect_uri: IG_CONFIG.redirectUri }) });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) throw new Error('no token');
+    const token = tokenData.access_token;
+    const profile = await (await fetch('https://graph.instagram.com/v21.0/me?fields=id,username,profile_picture_url&access_token=' + token)).json();
+    const mediaJson = await (await fetch('https://graph.instagram.com/v21.0/me/media?fields=id,media_url,thumbnail_url,media_type&limit=9&access_token=' + token)).json();
+    const images = (mediaJson.data || []).filter(m => m.media_type === 'IMAGE' || m.media_type === 'CAROUSEL_ALBUM').slice(0,3).map(m => m.media_url || m.thumbnail_url);
+    igUserData = { username: profile.username, profilePic: profile.profile_picture_url || '', media: images, accessToken: token };
+    document.getElementById('igInput').value = '@' + profile.username;
+    document.getElementById('igInput').readOnly = true;
+    document.getElementById('setupModal').classList.add('active');
+    return true;
+  } catch (err) { document.getElementById('setupModal').classList.add('active'); return true; }
+}
+if (igConfigured) handleOAuthCallback();
+
+// ═══════════════ AVATARS ═══════════════
+function makeAvatar(handle) {
+  const clean = handle.replace('@','');
+  return 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(clean) + '&backgroundColor=EBE5D5&textColor=2D2C2F&fontSize=40';
+}
+
+// ═══════════════ PEOPLE (mock; real data comes from Klaviyo via the Worker) ═══════════════
+const members = [
+  { lat:34.05,lng:-118.24,city:"Los Angeles",ig:"@fr.matias",status:"Home",avatar:makeAvatar("fr.matias") },
+  { lat:40.71,lng:-74.01,city:"New York",ig:"@nyc_creative",status:"Home",avatar:makeAvatar("nyc_creative") },
+  { lat:51.51,lng:-0.13,city:"London",ig:"@london.travels",status:"Visiting",avatar:makeAvatar("london.travels") },
+  { lat:35.68,lng:139.69,city:"Tokyo",ig:"@tokyobound",status:"Visiting",avatar:makeAvatar("tokyobound") },
+  { lat:48.86,lng:2.35,city:"Paris",ig:"@parisien_mode",status:"Home",avatar:makeAvatar("parisien_mode") },
+  { lat:-33.87,lng:151.21,city:"Sydney",ig:"@sydney.surf",status:"Home",avatar:makeAvatar("sydney.surf") },
+  { lat:25.20,lng:55.27,city:"Dubai",ig:"@dubai.luxe",status:"Visiting",avatar:makeAvatar("dubai.luxe") },
+  { lat:52.52,lng:13.41,city:"Berlin",ig:"@berlin.tech",status:"Home",avatar:makeAvatar("berlin.tech") },
+  { lat:37.57,lng:126.98,city:"Seoul",ig:"@seoul.street",status:"Visiting",avatar:makeAvatar("seoul.street") },
+  { lat:-22.91,lng:-43.17,city:"Rio de Janeiro",ig:"@rio.waves",status:"Home",avatar:makeAvatar("rio.waves") },
+  { lat:38.72,lng:-9.14,city:"Lisbon",ig:"@lisboa.slow",status:"Home",avatar:makeAvatar("lisboa.slow") },
+  { lat:-8.34,lng:115.09,city:"Bali",ig:"@bali.sunsets",status:"Visiting",avatar:makeAvatar("bali.sunsets") },
+];
+
+// ═══════════════ PLACES (mock; real data = user-added, stored via the Worker) ═══════════════
+const places = [
+  { lat:29.50,lng:60.86,title:"The coal-ore train",city:"Zahedan, Iran",by:"@fr.matias",desc:"Ride the freight line across the Dasht-e Lut.\n\n1. Fly into Tehran (IKA), domestic hop to Zahedan.\n2. Text Reza (fixer) 2 days ahead.\n3. Board before dawn — bring water + a scarf." },
+  { lat:-20.13,lng:-67.49,title:"Salar de Uyuni at dawn",city:"Uyuni, Bolivia",by:"@bsas.culture",desc:"The mirror only appears after rain.\n\n1. Bus from La Paz overnight.\n2. Hire a 4x4 + driver at the plaza.\n3. Go for sunrise, wear rubber boots." },
+  { lat:12.46,lng:53.82,title:"Dragon's blood forest",city:"Socotra, Yemen",by:"@london.travels",desc:"Otherworldly island off the Horn of Africa.\n\n1. Charter flight from Abu Dhabi (seasonal).\n2. Arrange permits via a local operator.\n3. Camp on Diksam plateau." },
+  { lat:53.55,lng:108.16,title:"Lake Baikal ice",city:"Olkhon, Russia",by:"@berlin.tech",desc:"Walk on the deepest lake on earth in February.\n\n1. Train to Irkutsk.\n2. Marshrutka + ferry to Olkhon.\n3. Local guide for the ice caves." },
+  { lat:14.24,lng:40.30,title:"Danakil Depression",city:"Afar, Ethiopia",by:"@capetown.glow",desc:"Sulphur springs and the Erta Ale lava lake.\n\n1. Fly to Mekele.\n2. Only go with an armed guided convoy.\n3. Bring a gas mask + closed shoes." },
+  { lat:35.01,lng:135.77,title:"Fushimi at 5am",city:"Kyoto, Japan",by:"@tokyobound",desc:"The torii gates, empty.\n\n1. Stay near Fushimi-Inari station.\n2. Enter before sunrise to beat crowds.\n3. Climb to the upper shrine for the view." },
+];
+
+// ═══════════════ GEO AUTOCOMPLETE ═══════════════
+let selectedHome = null, selectedVisit = null, selectedPlaceLoc = null;
+function setupGeoAutocomplete(inputId, dropdownId, onSelect) {
+  const input = document.getElementById(inputId), dropdown = document.getElementById(dropdownId);
+  let debounce = null;
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    if (q.length < 2) { dropdown.classList.remove('open'); return; }
+    clearTimeout(debounce);
+    debounce = setTimeout(async () => {
+      try {
+        const data = await (await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=6&addressdetails=1&accept-language=en')).json();
+        if (!data.length) { dropdown.classList.remove('open'); return; }
+        dropdown.innerHTML = data.map((r,i) => {
+          const parts = r.display_name.split(',');
+          return '<div class="ac-item" data-idx="'+i+'"><span>'+parts[0].trim()+'</span><span class="ac-country">'+parts.slice(1,3).map(s=>s.trim()).join(', ')+'</span></div>';
+        }).join('');
+        dropdown.classList.add('open');
+        dropdown.querySelectorAll('.ac-item').forEach((el,i) => el.addEventListener('click', () => {
+          const r = data[i], name = r.display_name.split(',')[0].trim(), country = (r.address && r.address.country) || '';
+          input.value = name + (country ? ', ' + country : '');
+          dropdown.classList.remove('open');
+          onSelect({ n:name, c:country, lat:parseFloat(r.lat), lng:parseFloat(r.lon) });
+        }));
+      } catch (e) {}
+    }, 350);
+  });
+  input.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 250));
+}
+setupGeoAutocomplete('homeInput','homeDropdown',(loc)=>{selectedHome=loc;});
+setupGeoAutocomplete('visitInput','visitDropdown',(loc)=>{selectedVisit=loc;});
+setupGeoAutocomplete('placeLocInput','placeLocDropdown',(loc)=>{selectedPlaceLoc=loc;});
+
+// ═══════════════ MAP ═══════════════
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8, name: 'FR Light Globe', projection: { type: 'globe' },
+    sky: { 'atmosphere-blend': ['interpolate',['linear'],['zoom'],0,0.6,5,0.3,7,0] },
+    sources: {
+      'carto-base': { type:'raster', tiles:['https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png','https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png','https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png'], tileSize:256, maxzoom:20 },
+      'carto-labels': { type:'raster', tiles:['https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}@2x.png','https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}@2x.png','https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}@2x.png'], tileSize:256, maxzoom:20 }
+    },
+    layers: [
+      { id:'carto-base-layer', type:'raster', source:'carto-base', minzoom:0, maxzoom:20 },
+      { id:'carto-labels-layer', type:'raster', source:'carto-labels', minzoom:5, maxzoom:20, paint:{'raster-opacity':['interpolate',['linear'],['zoom'],5,0,7,0.8,10,1]} }
+    ],
+    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
+  },
+  center: [0,20], zoom: 1.5, minZoom: 1, maxZoom: 19, attributionControl: false
+});
+
+function membersToGeoJSON() {
+  return { type:'FeatureCollection', features: members.map((m,i)=>({ type:'Feature', geometry:{type:'Point',coordinates:[m.lng,m.lat]}, properties:{ id:i, city:m.city, ig:m.ig, status:m.status, avatar:m.avatar, igMedia: m.igMedia ? JSON.stringify(m.igMedia) : '' } })) };
+}
+function placesToGeoJSON() {
+  return { type:'FeatureCollection', features: places.map((p,i)=>({ type:'Feature', geometry:{type:'Point',coordinates:[p.lng,p.lat]}, properties:{ id:i, title:p.title, city:p.city, by:p.by||'', desc:p.desc||'' } })) };
+}
+
+let currentMode = 'people';
+
+map.on('load', () => {
+  map.addSource('members', { type:'geojson', data: membersToGeoJSON() });
+  map.addSource('places', { type:'geojson', data: placesToGeoJSON() });
+
+  map.addLayer({ id:'member-glow', type:'circle', source:'members', paint:{ 'circle-radius':10, 'circle-color':'#2D2C2F', 'circle-opacity':0.25, 'circle-blur':1 } });
+  map.addLayer({ id:'member-dots', type:'circle', source:'members', paint:{ 'circle-radius':6, 'circle-color':'#2D2C2F', 'circle-stroke-width':2, 'circle-stroke-color':'rgba(45,44,47,0.5)', 'circle-opacity':0.9 } });
+
+  map.addLayer({ id:'place-glow', type:'circle', source:'places', layout:{ visibility:'none' }, paint:{ 'circle-radius':11, 'circle-color':'#9A816B', 'circle-opacity':0.28, 'circle-blur':1 } });
+  map.addLayer({ id:'place-dots', type:'circle', source:'places', layout:{ visibility:'none' }, paint:{ 'circle-radius':6, 'circle-color':'#9A816B', 'circle-stroke-width':2, 'circle-stroke-color':'rgba(154,129,107,0.5)', 'circle-opacity':0.95 } });
+
+  map.on('click', 'member-dots', (e) => { if (e.features && e.features.length) { showTooltip(e.features[0].properties, e); pauseRotate(); } });
+  map.on('click', 'place-dots', (e) => { if (e.features && e.features.length) { showPlaceCard(e.features[0].properties, e); pauseRotate(); } });
+  ['member-dots','place-dots'].forEach(l => {
+    map.on('mouseenter', l, () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', l, () => { map.getCanvas().style.cursor = ''; });
+  });
+
+  startAutoRotate();
+});
+
+// ═══════════════ MODE TOGGLE ═══════════════
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  const people = mode === 'people';
+  const set = (id, v) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', v); };
+  set('member-dots', people ? 'visible' : 'none');
+  set('member-glow', people ? 'visible' : 'none');
+  set('place-dots', people ? 'none' : 'visible');
+  set('place-glow', people ? 'none' : 'visible');
+  document.getElementById('dotCount').textContent = people ? members.length : places.length;
+  document.getElementById('countLabel').textContent = people ? 'Community Members' : 'Places';
+  document.getElementById('joinBtn').textContent = people ? 'Join the Map' : 'Add a Place';
+  document.getElementById('heroTagline').innerHTML = people ? "Find your people,<br>wherever you go." : "Go where<br>few have been.";
+  document.getElementById('heroSub').textContent = people ? "Tap a dot. Discover who's there." : "Tap a pin. Get the guide.";
+  document.getElementById('tooltip').classList.remove('visible');
+  document.getElementById('placeCard').classList.remove('visible');
+}
+
+// primary CTA depends on mode
+function primaryAction() { if (currentMode === 'people') openAuth(); else openAddPlace(); }
+
+// ═══════════════ PERSON TOOLTIP ═══════════════
+const tip = document.getElementById('tooltip');
+function showTooltip(props, ev) {
+  const handle = props.ig.replace('@',''), igURL = 'https://instagram.com/' + handle;
+  document.getElementById('ttAvatar').src = props.avatar || '';
+  document.getElementById('ttIg').textContent = props.ig;
+  document.getElementById('ttIg').href = igURL;
+  document.getElementById('ttCity').textContent = props.city;
+  document.getElementById('ttStatus').textContent = props.status;
+  document.getElementById('ttProfileLink').href = igURL;
+  const grid = document.getElementById('ttGrid'); grid.innerHTML = '';
+  let mediaUrls = null; try { if (props.igMedia) mediaUrls = JSON.parse(props.igMedia); } catch(e) {}
+  for (let i=0;i<3;i++){ const img=document.createElement('img'); img.src=(mediaUrls&&mediaUrls[i])?mediaUrls[i]:'https://picsum.photos/seed/'+handle+(i+1)+'/200/200'; img.loading='lazy'; grid.appendChild(img); }
+  positionCard(tip, ev, 140);
+  document.getElementById('placeCard').classList.remove('visible');
+  tip.classList.add('visible');
+}
+
+// ═══════════════ PLACE CARD ═══════════════
+const placeCard = document.getElementById('placeCard');
+function showPlaceCard(props, ev) {
+  document.getElementById('pcTitle').textContent = props.title || '';
+  document.getElementById('pcCity').textContent = props.city || '';
+  document.getElementById('pcDesc').textContent = props.desc || '';
+  const by = document.getElementById('pcBy');
+  if (props.by) { const h = props.by.replace('@',''); by.innerHTML = 'Added by <a href="https://instagram.com/'+h+'" target="_blank">'+props.by+'</a>'; }
+  else by.innerHTML = '';
+  positionCard(placeCard, ev, 160);
+  tip.classList.remove('visible');
+  placeCard.classList.add('visible');
+}
+
+function positionCard(el, ev, offY) {
+  const x = ev.point ? ev.point.x : (ev.clientX || 300);
+  const y = ev.point ? ev.point.y : (ev.clientY || 300);
+  el.style.left = Math.min(x + 14, window.innerWidth - (el.offsetWidth + 20)) + 'px';
+  el.style.top = Math.max(y - offY, 10) + 'px';
+}
+
+document.addEventListener('mousedown', (e) => {
+  if (!e.target.closest('.dot-tooltip') && !e.target.closest('.place-card') && !e.target.closest('.modal') && !e.target.closest('.maplibregl-canvas')) {
+    tip.classList.remove('visible'); placeCard.classList.remove('visible');
+  }
+});
+
+// ═══════════════ AUTO ROTATE ═══════════════
+let isRotating = false, rotateResumeTimer, rotateRAF;
+function startAutoRotate(){ if(isRotating) return; isRotating=true; rotateStep(); }
+function stopAutoRotate(){ isRotating=false; if(rotateRAF) cancelAnimationFrame(rotateRAF); }
+function rotateStep(){ if(!isRotating) return; const c=map.getCenter(); c.lng+=0.03; map.setCenter(c); rotateRAF=requestAnimationFrame(rotateStep); }
+function pauseRotate(){ stopAutoRotate(); clearTimeout(rotateResumeTimer); rotateResumeTimer=setTimeout(startAutoRotate, 6000); }
+['mousedown','touchstart','wheel'].forEach(ev => map.on(ev, pauseRotate));
+map.on('zoom', () => { if (map.getZoom() > 3) document.getElementById('zoomHint').style.opacity = '0'; });
+
+// count-up
+let count=0; const countEl=document.getElementById('dotCount');
+const ci=setInterval(()=>{ count++; countEl.textContent=count; if(count>=members.length) clearInterval(ci); },40);
+
+// ═══════════════ MODALS ═══════════════
+function openAuth(){ document.getElementById('authModal').classList.add('active'); }
+function openSetup(){ document.getElementById('setupModal').classList.add('active'); }
+function openAddPlace(){ document.getElementById('placeModal').classList.add('active'); }
+function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active')); }
+function doLogin(){ document.getElementById('authModal').classList.remove('active'); if (igConfigured) startIGLogin(); else document.getElementById('setupModal').classList.add('active'); }
+
+function saveProfile() {
+  const ig = document.getElementById('igInput').value.trim();
+  if (!selectedHome || !ig) return;
+  closeModals();
+  const handle = ig.startsWith('@') ? ig : '@' + ig;
+  const avatarURL = (igUserData && igUserData.profilePic) ? igUserData.profilePic : makeAvatar(handle.replace('@',''));
+  document.getElementById('loginBtn').style.display='none';
+  document.getElementById('joinBtn').style.display='none';
+  document.getElementById('userIndicator').classList.add('active');
+  document.getElementById('userName').textContent = handle;
+  members.push({ lat:selectedHome.lat, lng:selectedHome.lng, city:selectedHome.n, ig:handle, status: selectedVisit ? 'Visiting ' + selectedVisit.n : 'Home', avatar:avatarURL, igMedia:(igUserData&&igUserData.media)||null });
+  const src = map.getSource('members'); if (src) src.setData(membersToGeoJSON());
+  if (currentMode === 'people') document.getElementById('dotCount').textContent = members.length;
+  // TODO: POST to the FR Worker -> Klaviyo profile with globe_opt_in=true, location, IG.
+  stopAutoRotate();
+  map.flyTo({ center:[selectedHome.lng,selectedHome.lat], zoom:10, duration:2000, essential:true });
+  clearTimeout(rotateResumeTimer); rotateResumeTimer=setTimeout(startAutoRotate,10000);
+}
+
+function savePlace() {
+  const title = document.getElementById('placeTitleInput').value.trim();
+  const desc = document.getElementById('placeDescInput').value.trim();
+  const by = document.getElementById('placeByInput').value.trim();
+  if (!title || !selectedPlaceLoc) return;
+  closeModals();
+  places.push({ lat:selectedPlaceLoc.lat, lng:selectedPlaceLoc.lng, title, city: selectedPlaceLoc.n + (selectedPlaceLoc.c ? ', ' + selectedPlaceLoc.c : ''), by: by ? (by.startsWith('@')?by:'@'+by) : '', desc });
+  const src = map.getSource('places'); if (src) src.setData(placesToGeoJSON());
+  if (currentMode !== 'places') setMode('places');
+  document.getElementById('dotCount').textContent = places.length;
+  // TODO: POST to the FR Worker -> persist place (KV/DB).
+  stopAutoRotate();
+  map.flyTo({ center:[selectedPlaceLoc.lng,selectedPlaceLoc.lat], zoom:8, duration:2000, essential:true });
+  clearTimeout(rotateResumeTimer); rotateResumeTimer=setTimeout(startAutoRotate,10000);
+}
+</script>
+</body>
+</html>

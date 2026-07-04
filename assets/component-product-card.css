@@ -6,9 +6,6 @@
 
 .product-card {
   position: relative;
-  /* Skip rendering offscreen cards — big win on long collection pages */
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
 }
 
 .product-card__link {
