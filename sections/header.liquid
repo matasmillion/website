@@ -160,35 +160,10 @@
           {%- render 'icon-close' -%}
         </button>
       </div>
+      {%- comment -%} Contents rendered by JS (initCartDrawer) on open {% endcomment -%}
       <div class="cart-drawer__content" id="cart-drawer-content">
-        {%- if cart.item_count > 0 -%}
-          {%- for item in cart.items -%}
-            <div class="cart-drawer__item">
-              <img src="{{ item.image | image_url: width: 120 }}" alt="{{ item.title | escape }}" width="60" height="75" loading="lazy">
-              <div class="cart-drawer__item-info">
-                <p class="cart-drawer__item-title">{{ item.product.title }}</p>
-                {%- if item.variant.title != 'Default Title' -%}
-                  <p class="cart-drawer__item-variant">{{ item.variant.title }}</p>
-                {%- endif -%}
-                <p class="cart-drawer__item-price">{{ item.final_line_price | money }}</p>
-              </div>
-            </div>
-          {%- endfor -%}
-        {%- else -%}
-          <p class="cart-drawer__empty">{{ 'cart.empty' | t }}</p>
-        {%- endif -%}
+        <p class="cart-drawer__empty">{{ 'cart.empty' | t }}</p>
       </div>
-      {%- if cart.item_count > 0 -%}
-        <div class="cart-drawer__footer">
-          <div class="cart-drawer__subtotal">
-            <span>{{ 'cart.subtotal' | t }}</span>
-            <span>{{ cart.total_price | money }}</span>
-          </div>
-          <p class="cart-drawer__note">{{ 'cart.shipping_note' | t }}</p>
-          <a href="/checkout" class="btn btn--primary btn--full">{{ 'cart.checkout' | t }}</a>
-          <a href="/cart" class="cart-drawer__view-cart">View Cart</a>
-        </div>
-      {%- endif -%}
     </div>
   </div>
 

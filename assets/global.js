@@ -346,7 +346,7 @@
             '</div>' +
           '</div>').join('') +
           '<div class="cart-drawer__footer"><div class="cart-drawer__subtotal"><span>Subtotal</span><span>' + money(cart.total_price) + '</span></div>' +
-          '<a href="/checkout" class="btn btn--primary btn--full">Checkout</a>' +
+          '<form action="/cart" method="post"><button type="submit" name="checkout" class="btn btn--primary btn--full">Checkout</button></form>' +
           '<a href="/cart" class="cart-drawer__view-cart">View cart</a></div>';
       } catch (e) {}
     };

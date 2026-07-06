@@ -108,10 +108,10 @@
       </div>
     </div>
 
-    {%- comment -%} Localization: country/currency + language {% endcomment -%}
-    {%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+    {%- comment -%} Localization: country/currency + language (always shown) {% endcomment -%}
+    {%- if localization.available_countries.size > 0 or localization.available_languages.size > 0 -%}
       <div class="footer__localization">
-        {%- if localization.available_countries.size > 1 -%}
+        {%- if localization.available_countries.size > 0 -%}
           {%- form 'localization', id: 'footer-country-form', class: 'footer__loc-form' -%}
             <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-country">Country</label>
@@ -124,7 +124,7 @@
             </select>
           {%- endform -%}
         {%- endif -%}
-        {%- if localization.available_languages.size > 1 -%}
+        {%- if localization.available_languages.size > 0 -%}
           {%- form 'localization', id: 'footer-language-form', class: 'footer__loc-form' -%}
             <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-language">Language</label>

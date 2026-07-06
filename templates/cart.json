@@ -1,10 +1,9 @@
 {
   "sections": {
     "main": {
-      "type": "placeholder-section",
+      "type": "main-cart",
       "settings": {
-        "heading": "Your Cart",
-        "text": "<p>Cart functionality is handled by the cart drawer. This page serves as a fallback.</p>"
+        "heading": "Your Cart"
       }
     }
   },
