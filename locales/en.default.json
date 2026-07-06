@@ -32,6 +32,28 @@
     "load_more": "Load More",
     "no_products": "No products found"
   },
+  "collections_list": {
+    "title": "Collections",
+    "empty": "No collections yet"
+  },
+  "blog": {
+    "empty": "No stories yet",
+    "back": "Back to {{ blog }}"
+  },
+  "gift_card": {
+    "title": "{{ shop }} gift card",
+    "subtitle": "Your gift card",
+    "expired": "Expired",
+    "initial_value": "Initial value {{ value }}",
+    "instructions": "Use this code at checkout to redeem your gift card.",
+    "shop_link": "Continue shopping",
+    "print": "Print"
+  },
+  "password_page": {
+    "placeholder": "Password",
+    "submit": "Enter",
+    "enter_password": "Enter using password"
+  },
   "search": {
     "title": "Search",
     "placeholder": "Search here",
