@@ -32,6 +32,15 @@
     "load_more": "Load More",
     "no_products": "No products found"
   },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search here",
+    "no_results": "No results for “{{ terms }}”",
+    "results_count": "{{ count }} results for “{{ terms }}”",
+    "pages_articles": "Pages & Journal",
+    "article": "Journal",
+    "page": "Page"
+  },
   "cart": {
     "title": "Your Cart",
     "empty": "Your cart is empty",

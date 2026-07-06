@@ -1,11 +1,8 @@
 {
   "sections": {
     "main": {
-      "type": "placeholder-section",
-      "settings": {
-        "heading": "Search",
-        "text": "<p>Search results will appear here.</p>"
-      }
+      "type": "main-search",
+      "settings": {}
     }
   },
   "order": ["main"]
