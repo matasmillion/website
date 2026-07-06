@@ -1,0 +1,37 @@
+{{ 'component-customer.css' | asset_url | stylesheet_tag }}
+
+<section class="customer">
+  <h1 class="customer__title">{{ 'customer.activate.title' | t }}</h1>
+  <p class="customer__intro">{{ 'customer.activate.intro' | t }}</p>
+
+  {%- form 'activate_customer_password', class: 'customer__form' -%}
+    {%- if form.errors -%}
+      <div class="customer__errors" role="alert">
+        {{ form.errors | default_errors }}
+      </div>
+    {%- endif -%}
+
+    <div class="customer__field">
+      <label for="ActivatePassword">{{ 'customer.fields.password' | t }}</label>
+      <input type="password" name="customer[password]" id="ActivatePassword" autocomplete="new-password" required>
+    </div>
+
+    <div class="customer__field">
+      <label for="ActivatePasswordConfirm">{{ 'customer.fields.confirm_password' | t }}</label>
+      <input type="password" name="customer[password_confirmation]" id="ActivatePasswordConfirm" autocomplete="new-password" required>
+    </div>
+
+    <div class="customer__actions">
+      <button type="submit" class="btn btn--primary btn--full">{{ 'customer.activate.submit' | t }}</button>
+      <button type="submit" name="decline" class="btn btn--secondary btn--full">{{ 'customer.activate.decline' | t }}</button>
+    </div>
+  {%- endform -%}
+</section>
+
+{% schema %}
+{
+  "name": "Customer Activate Account",
+  "class": "section-customer-activate",
+  "settings": []
+}
+{% endschema %}

@@ -50,6 +50,96 @@
     "remove": "Remove",
     "shipping_note": "Shipping & taxes calculated at checkout"
   },
+  "customer": {
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "new_password": "New password",
+      "confirm_password": "Confirm password",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "company": "Company (optional)",
+      "address1": "Address",
+      "address2": "Apartment, suite, etc. (optional)",
+      "city": "City",
+      "zip": "Postal / ZIP code",
+      "country": "Country/Region",
+      "province": "Province / State",
+      "phone": "Phone (optional)"
+    },
+    "login": {
+      "title": "Log in",
+      "intro": "Welcome back. Sign in to your Foreign Resource account.",
+      "submit": "Log in",
+      "forgot_password": "Forgot your password?",
+      "create_account": "Create an account"
+    },
+    "recover": {
+      "title": "Reset your password",
+      "intro": "Enter your email and we'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "success": "If that email address is in our system, you'll receive a link to reset your password shortly.",
+      "cancel": "Back to log in"
+    },
+    "register": {
+      "title": "Create account",
+      "intro": "Join Foreign Resource — faster checkout, order history, and early access.",
+      "submit": "Create account",
+      "have_account": "Already have an account? Log in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "intro": "Enter a new password for {{ email }}.",
+      "submit": "Reset password"
+    },
+    "activate": {
+      "title": "Activate your account",
+      "intro": "Create a password to activate your account.",
+      "submit": "Activate account",
+      "decline": "Decline invitation"
+    },
+    "account": {
+      "title": "Account",
+      "log_out": "Log out",
+      "welcome": "Welcome, {{ name }}.",
+      "order_history": "Order history",
+      "no_orders": "You haven't placed any orders yet",
+      "details": "Account details",
+      "view_addresses": "View addresses"
+    },
+    "orders": {
+      "order": "Order",
+      "date": "Date",
+      "payment": "Payment",
+      "fulfillment": "Fulfillment",
+      "total": "Total"
+    },
+    "order": {
+      "title": "Order {{ name }}",
+      "back": "Back to account",
+      "placed_on": "Placed on {{ date }}",
+      "cancelled": "Cancelled on {{ date }}",
+      "product": "Product",
+      "quantity": "Quantity",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "billing_address": "Billing address",
+      "shipping_address": "Shipping address"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "add_new": "Add a new address",
+      "save": "Save address",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete this address?",
+      "default": "Default address",
+      "none": "No addresses saved yet",
+      "set_default": "Set as default address"
+    }
+  },
   "newsletter": {
     "placeholder": "Enter your email",
     "submit": "Subscribe",
