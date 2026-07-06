@@ -435,12 +435,19 @@
         const btn = form.querySelector('[data-add-btn]');
         if (!btn || btn.disabled) return;
 
-        // Update only the text label so icon/price markup is preserved
-        const label = btn.querySelector('.pdp__add-text') || btn;
-        const original = label.textContent;
-        const setLabel = (txt) => { label.textContent = txt; };
+        // Feedback on both the desktop button and the mobile sticky band.
+        // Update only the text labels so icon/price markup is preserved.
+        const mobileBtn = document.querySelector('[data-mobile-submit]');
+        const labels = [btn.querySelector('.pdp__add-text') || btn];
+        if (mobileBtn) labels.push(mobileBtn.querySelector('span') || mobileBtn);
+        const originals = labels.map((el) => el.textContent);
+        const setLabel = (txt) => labels.forEach((el) => { el.textContent = txt; });
+        const setDisabled = (state) => {
+          btn.disabled = state;
+          if (mobileBtn) mobileBtn.disabled = state;
+        };
 
-        btn.disabled = true;
+        setDisabled(true);
         setLabel('Adding...');
 
         try {
@@ -452,18 +459,15 @@
 
           if (res.ok) {
             setLabel('Added');
-            // Update cart count
-            const cartRes = await fetch('/cart.js');
-            const cart = await cartRes.json();
-            document.querySelectorAll('[data-cart-count]').forEach(el => {
-              el.textContent = cart.item_count;
-              el.style.display = cart.item_count > 0 ? '' : 'none';
-            });
-            // Open cart drawer if present
-            const drawer = document.querySelector('[data-cart-drawer]');
-            if (drawer) {
-              drawer.classList.add('is-active');
-              document.body.style.overflow = 'hidden';
+            if (window.FROpenCart) {
+              // Re-renders drawer contents and cart count badge, then opens it
+              window.FROpenCart();
+            } else {
+              const cart = await (await fetch('/cart.js')).json();
+              document.querySelectorAll('[data-cart-count]').forEach((el) => {
+                el.textContent = cart.item_count;
+                el.classList.toggle('is-active', cart.item_count > 0);
+              });
             }
           } else {
             const data = await res.json();
@@ -474,8 +478,8 @@
         }
 
         setTimeout(() => {
-          setLabel(original);
-          btn.disabled = false;
+          labels.forEach((el, i) => { el.textContent = originals[i]; });
+          setDisabled(false);
         }, 2000);
       });
     });
