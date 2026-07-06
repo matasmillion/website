@@ -26,8 +26,11 @@
     "header": {
       "type": "header",
       "settings": {
-        "menu": "main-menu",
+        "menu": "menu-2-0",
         "shop_label": "Shop",
+        "show_foreign_resource": true,
+        "foreign_resource_label": "Foreign Resource",
+        "foreign_resource_link": "",
         "show_foreign_world": true,
         "foreign_world_label": "Foreign World",
         "foreign_world_link": "shopify://pages/sd",
