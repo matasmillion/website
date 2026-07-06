@@ -143,9 +143,9 @@
     {%- comment -%} Bottom: Copyright + centered brand + Legal {% endcomment -%}
     <div class="footer__bottom">
       <p class="footer__copyright">&copy; {{ shop.name | upcase }} {{ 'now' | date: '%Y' }}</p>
-      <a href="/" class="footer__bottom-logo" aria-label="{{ shop.name }}">
+      <a href="{{ routes.root_url }}" class="footer__bottom-logo" aria-label="{{ shop.name }}">
         {%- if settings.logo -%}
-          <img src="{{ settings.logo | image_url: width: 300 }}" alt="{{ shop.name }}" loading="lazy">
+          <img src="{{ settings.logo | image_url: width: 300 }}" alt="{{ shop.name }}" width="{{ settings.logo.width }}" height="{{ settings.logo.height }}" loading="lazy">
         {%- else -%}
           <span class="footer__bottom-logo-text">{{ shop.name }}</span>
         {%- endif -%}

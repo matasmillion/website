@@ -27,6 +27,8 @@
                       {{ block.settings.image | image_url: width: 1000 }} 1000w"
               sizes="(min-width: 769px) 45vw, 100vw"
               alt="{{ block.settings.store_name | escape }}"
+              width="{{ block.settings.image.width }}"
+              height="{{ block.settings.image.height }}"
               loading="lazy"
               class="stockist__img"
             >

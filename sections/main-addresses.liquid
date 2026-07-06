@@ -35,7 +35,7 @@
             {{ address | format_address }}
             <div class="customer__address-actions">
               <button type="button" data-address-toggle="AddressEdit_{{ address.id }}">{{ 'customer.addresses.edit' | t }}</button>
-              <form method="post" action="/account/addresses/{{ address.id }}" onsubmit="return confirm('{{ 'customer.addresses.delete_confirm' | t }}');">
+              <form method="post" action="{{ routes.account_addresses_url }}/{{ address.id }}" onsubmit="return confirm('{{ 'customer.addresses.delete_confirm' | t }}');">
                 <input type="hidden" name="_method" value="delete">
                 <button type="submit">{{ 'customer.addresses.delete' | t }}</button>
               </form>
