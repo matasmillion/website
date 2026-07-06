@@ -32,10 +32,22 @@
           "id": "icon",
           "label": "Icon",
           "options": [
-            { "value": "returns", "label": "Returns" },
-            { "value": "shipping", "label": "Shipping" },
-            { "value": "shield", "label": "Shield" },
-            { "value": "clock", "label": "Clock" }
+            {
+              "value": "returns",
+              "label": "Returns"
+            },
+            {
+              "value": "shipping",
+              "label": "Shipping"
+            },
+            {
+              "value": "shield",
+              "label": "Shield"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            }
           ],
           "default": "shield"
         },
@@ -49,21 +61,33 @@
     }
   ],
   "max_blocks": 5,
-  "default": {
-    "blocks": [
-      {
-        "type": "guarantee",
-        "settings": { "icon": "returns", "text": "Free Returns & Exchanges" }
-      },
-      {
-        "type": "guarantee",
-        "settings": { "icon": "clock", "text": "5-Day Delivery Guarantee" }
-      },
-      {
-        "type": "guarantee",
-        "settings": { "icon": "shipping", "text": "Complimentary Express Over $150" }
-      }
-    ]
-  }
+  "presets": [
+    {
+      "name": "Product Guarantees",
+      "blocks": [
+        {
+          "type": "guarantee",
+          "settings": {
+            "icon": "returns",
+            "text": "Free Returns & Exchanges"
+          }
+        },
+        {
+          "type": "guarantee",
+          "settings": {
+            "icon": "clock",
+            "text": "5-Day Delivery Guarantee"
+          }
+        },
+        {
+          "type": "guarantee",
+          "settings": {
+            "icon": "shipping",
+            "text": "Complimentary Express Over $150"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}
