@@ -181,6 +181,11 @@
         <p class="wl-drawer__empty" data-wishlist-empty>You haven't saved any items yet.</p>
         <div class="wl-drawer__grid" data-wishlist-grid></div>
       </div>
+      {%- if pages['wishlist'] != blank -%}
+        <div class="wl-drawer__footer">
+          <a href="{{ pages['wishlist'].url }}" class="wl-drawer__view-all">View all saved items</a>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 

@@ -68,13 +68,13 @@
           <p class="footer__contact-hours">{{ section.settings.contact_hours }}</p>
         {%- endif -%}
         <div class="footer__contact-links">
-          {%- if section.settings.contact_link_1_text != blank -%}
+          {%- if section.settings.contact_link_1_text != blank and section.settings.contact_link_1_url != blank -%}
             <a href="{{ section.settings.contact_link_1_url }}" class="footer__contact-link">{{ section.settings.contact_link_1_text }}</a>
           {%- endif -%}
-          {%- if section.settings.contact_link_2_text != blank -%}
+          {%- if section.settings.contact_link_2_text != blank and section.settings.contact_link_2_url != blank -%}
             <a href="{{ section.settings.contact_link_2_url }}" class="footer__contact-link">{{ section.settings.contact_link_2_text }}</a>
           {%- endif -%}
-          {%- if section.settings.contact_link_3_text != blank -%}
+          {%- if section.settings.contact_link_3_text != blank and section.settings.contact_link_3_url != blank -%}
             <a href="{{ section.settings.contact_link_3_url }}" class="footer__contact-link">{{ section.settings.contact_link_3_text }}</a>
           {%- endif -%}
         </div>

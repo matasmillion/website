@@ -354,6 +354,17 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--grid-gap);
 }
+.wl-drawer__footer {
+  padding: 0 1.25rem 1.25rem;
+}
+.wl-drawer__view-all {
+  display: block;
+  text-align: center;
+  font-size: var(--text-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.4;
+}
 .wl-item { position: relative; }
 .wl-item__link { display: block; text-decoration: none; color: inherit; }
 .wl-item__img {

@@ -20,7 +20,7 @@
         {%- if section.settings.heading != blank -%}
           <h2 class="product-editorial__heading">{{ section.settings.heading }}</h2>
         {%- endif -%}
-        {%- if section.settings.cta_text != blank -%}
+        {%- if section.settings.cta_text != blank and section.settings.cta_link != blank -%}
           <a href="{{ section.settings.cta_link }}" class="btn btn--secondary" style="color: {{ section.settings.text_color }}; border-color: {{ section.settings.text_color }};">
             {{ section.settings.cta_text }}
           </a>

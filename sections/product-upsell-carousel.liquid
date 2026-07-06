@@ -10,7 +10,7 @@
   <div class="product-upsell__carousel" data-carousel>
     <div class="product-upsell__track" data-carousel-track>
       {%- if section.settings.collection != blank -%}
-        {%- for product in collections[section.settings.collection].products limit: section.settings.products_count -%}
+        {%- for product in section.settings.collection.products limit: section.settings.products_count -%}
           <div class="product-upsell__slide">
             {%- render 'product-card', product: product -%}
           </div>
