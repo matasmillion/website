@@ -4,7 +4,7 @@
     <h1 class="cart-page__title">{{ section.settings.heading | default: 'Your Cart' }}</h1>
 
     {%- if cart.item_count > 0 -%}
-      {%- form 'cart', cart, class: 'cart-page__form' -%}
+      {%- form 'cart', class: 'cart-page__form' -%}
         <div class="cart-page__items">
           {%- for item in cart.items -%}
             <div class="cart-line">
