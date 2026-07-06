@@ -326,7 +326,7 @@
     const render = async () => {
       if (!content) return;
       try {
-        const cart = await (await fetch('/cart.js')).json();
+        const cart = await (await fetch('/cart.js', { cache: 'no-store' })).json();
         // keep header counts in sync
         document.querySelectorAll('[data-cart-count]').forEach((el) => {
           el.textContent = cart.item_count;
@@ -453,7 +453,7 @@
           if (res.ok) {
             setLabel('Added');
             // Update cart count
-            const cartRes = await fetch('/cart.js');
+            const cartRes = await fetch('/cart.js', { cache: 'no-store' });
             const cart = await cartRes.json();
             document.querySelectorAll('[data-cart-count]').forEach(el => {
               el.textContent = cart.item_count;
