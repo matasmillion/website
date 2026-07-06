@@ -39,13 +39,13 @@
         "type": "color",
         "id": "color_primary",
         "label": "Primary (text & UI)",
-        "default": "#0A0A0A"
+        "default": "#2D2C2F"
       },
       {
         "type": "color",
         "id": "color_secondary",
         "label": "Secondary (backgrounds)",
-        "default": "#FFFFFF"
+        "default": "#F1EEE6"
       },
       {
         "type": "color",
@@ -71,6 +71,16 @@
     "name": "Typography",
     "settings": [
       {
+        "type": "paragraph",
+        "content": "The brand defaults are Cormorant Garamond for headings and Inter for body text. Enable custom fonts to pick from the Shopify font library instead."
+      },
+      {
+        "type": "checkbox",
+        "id": "use_custom_fonts",
+        "label": "Use custom fonts",
+        "default": false
+      },
+      {
         "type": "font_picker",
         "id": "font_heading",
         "label": "Heading font",
@@ -86,10 +96,10 @@
         "type": "range",
         "id": "font_body_size",
         "label": "Base font size",
-        "min": 14,
+        "min": 12,
         "max": 20,
         "step": 1,
-        "default": 16,
+        "default": 13,
         "unit": "px"
       }
     ]

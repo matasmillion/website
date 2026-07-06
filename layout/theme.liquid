@@ -28,12 +28,20 @@
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
 
   {%- comment -%}
-    Fonts — Cormorant Garamond is the signature/brand + heading font,
-    Inter is the body/UI font. Loaded from Google Fonts.
+    Fonts — Cormorant Garamond (headings) + Inter (body) are the brand
+    defaults, loaded from Google Fonts. Enable "Use custom fonts" in theme
+    settings to pick fonts from the Shopify font library instead.
   {%- endcomment -%}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  {%- if settings.use_custom_fonts -%}
+    <style>
+      {{ settings.font_heading | font_face: font_display: 'swap' }}
+      {{ settings.font_body | font_face: font_display: 'swap' }}
+    </style>
+  {%- else -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  {%- endif -%}
 
   {%- comment -%} Base CSS — always loaded {% endcomment -%}
   {{ 'base.css' | asset_url | stylesheet_tag }}
@@ -45,16 +53,28 @@
   {%- endcomment -%}
   <style>
     :root {
-      /* Brand palette (hardcoded for now — background #F1EEE6, text #2D2C2F) */
-      --color-primary: #2D2C2F;
-      --color-secondary: #F1EEE6;
+      --color-primary: {{ settings.color_primary | default: '#2D2C2F' }};
+      --color-secondary: {{ settings.color_secondary | default: '#F1EEE6' }};
       --color-accent: {{ settings.color_accent | default: '#C4632A' }};
       --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
       --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};
+      {%- if settings.use_custom_fonts %}
+      --font-heading: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+      --font-body: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+      {%- else %}
       --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      {%- endif %}
+      --text-base: {{ settings.font_body_size | default: 13 }}px;
     }
   </style>
+
+  <script>
+    window.FRTheme = {
+      cartType: {{ settings.cart_type | json }},
+      freeShippingThreshold: {{ settings.free_shipping_threshold | default: 0 | times: 100 }}
+    };
+  </script>
 
   {%- comment -%} Shopify essentials {% endcomment -%}
   {{ content_for_header }}
