@@ -4,10 +4,10 @@
     <h1 class="cart-page__title">{{ section.settings.heading | default: 'Your Cart' }}</h1>
 
     {%- if cart.item_count > 0 -%}
-      {%- form 'cart', class: 'cart-page__form' -%}
+      {%- form 'cart', cart, class: 'cart-page__form' -%}
         <div class="cart-page__items">
           {%- for item in cart.items -%}
-            <div class="cart-line">
+            <div class="cart-line" data-cart-line="{{ forloop.index }}">
               <a href="{{ item.url }}" class="cart-line__media">
                 {%- if item.image -%}
                   <img src="{{ item.image | image_url: width: 240 }}" alt="{{ item.title | escape }}" width="120" height="150" loading="lazy">
@@ -37,7 +37,7 @@
                   <a href="{{ item.url_to_remove }}" class="cart-line__remove">Remove</a>
                 </div>
               </div>
-              <div class="cart-line__total">{{ item.final_line_price | money }}</div>
+              <div class="cart-line__total" data-line-total>{{ item.final_line_price | money }}</div>
             </div>
           {%- endfor -%}
         </div>
@@ -45,7 +45,7 @@
         <div class="cart-page__summary">
           <div class="cart-page__subtotal">
             <span>Subtotal</span>
-            <span>{{ cart.total_price | money }}</span>
+            <span data-cart-subtotal>{{ cart.total_price | money }}</span>
           </div>
           <p class="cart-page__note">Shipping &amp; taxes calculated at checkout.</p>
           <button type="submit" name="update" class="cart-page__update">Update cart</button>
@@ -122,16 +122,54 @@
 
 <script>
   (function () {
-    document.querySelectorAll('.cart-line__qty').forEach(function (wrap) {
-      var input = wrap.querySelector('.cart-line__qty-input');
-      var form = input && input.closest('form');
-      wrap.querySelector('[data-qty-minus]').addEventListener('click', function () {
-        input.value = Math.max(0, (parseInt(input.value, 10) || 0) - 1);
-        if (form) form.submit();
+    var currency = (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD';
+    var money = function (c) { return (c / 100).toLocaleString(undefined, { style: 'currency', currency: currency }); };
+
+    var change = function (line, qty) {
+      return fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ line: line, quantity: qty })
+      }).then(function (r) { return r.json(); });
+    };
+
+    var applyCart = function (cart) {
+      // header badge
+      document.querySelectorAll('[data-cart-count]').forEach(function (el) {
+        el.textContent = cart.item_count;
+        el.classList.toggle('is-active', cart.item_count > 0);
       });
-      wrap.querySelector('[data-qty-plus]').addEventListener('click', function () {
-        input.value = (parseInt(input.value, 10) || 0) + 1;
-        if (form) form.submit();
+      // subtotal
+      var sub = document.querySelector('[data-cart-subtotal]');
+      if (sub) sub.textContent = money(cart.total_price);
+      // per-line totals + inputs
+      cart.items.forEach(function (item, i) {
+        var row = document.querySelector('.cart-line[data-cart-line="' + (i + 1) + '"]');
+        if (!row) return;
+        var total = row.querySelector('[data-line-total]');
+        if (total) total.textContent = money(item.final_line_price);
+        var input = row.querySelector('.cart-line__qty-input');
+        if (input) input.value = item.quantity;
+      });
+      // if a line was removed, or cart emptied, reload to re-render cleanly
+      if (cart.items.length !== document.querySelectorAll('.cart-line').length || cart.item_count === 0) {
+        window.location.reload();
+      }
+    };
+
+    document.querySelectorAll('.cart-line').forEach(function (row) {
+      var line = parseInt(row.getAttribute('data-cart-line'), 10);
+      var input = row.querySelector('.cart-line__qty-input');
+      if (!input) return;
+      var set = function (q) { change(line, Math.max(0, q)).then(applyCart); };
+      row.querySelector('[data-qty-minus]').addEventListener('click', function () {
+        set((parseInt(input.value, 10) || 0) - 1);
+      });
+      row.querySelector('[data-qty-plus]').addEventListener('click', function () {
+        set((parseInt(input.value, 10) || 0) + 1);
+      });
+      input.addEventListener('change', function () {
+        set(parseInt(input.value, 10) || 0);
       });
     });
   })();
