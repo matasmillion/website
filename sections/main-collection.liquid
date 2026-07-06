@@ -157,7 +157,7 @@
                   class="collection-grid__load-more-btn"
                   data-load-more
                 >
-                  {{ 'collections.general.load_more' | t | default: 'Load More' }}
+                  {{ 'collections.load_more' | t }}
                 </a>
               {%- endif -%}
             </div>
@@ -191,7 +191,7 @@
         {%- endif -%}
       {%- else -%}
         <div class="collection-grid__empty">
-          <p>{{ 'collections.general.no_matches' | t | default: 'No products found in this collection.' }}</p>
+          <p>{{ 'collections.no_products' | t }}</p>
         </div>
       {%- endif -%}
     {%- endpaginate -%}
