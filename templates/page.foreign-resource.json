@@ -2,6 +2,10 @@
   "sections": {
     "elements": {
       "type": "foreign-resource",
+      "settings": {
+        "eyebrow": "The Elements",
+        "heading": "Foreign Resource"
+      },
       "blocks": {
         "e1": { "type": "element", "settings": { "name": "Element One" } },
         "e2": { "type": "element", "settings": { "name": "Element Two" } },
