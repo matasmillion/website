@@ -1,0 +1,410 @@
+{{ 'component-globe.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cities.js' | asset_url }}" defer></script>
+<script src="{{ 'globe-land.js' | asset_url }}" defer></script>
+<script src="{{ 'globe.js' | asset_url }}" defer></script>
+<script src="{{ 'foreign-world.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign people_count = 0
+  assign places_count = 0
+  assign properties_count = 0
+  for block in section.blocks
+    case block.type
+      when 'person'
+        assign people_count = people_count | plus: 1
+      when 'place'
+        assign places_count = places_count | plus: 1
+      when 'property'
+        assign properties_count = properties_count | plus: 1
+    endcase
+  endfor
+-%}
+
+<section
+  class="foreign-world color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+  data-foreign-world
+  data-auto-rotate="{{ section.settings.auto_rotate }}"
+  data-show-customer-pin="{{ section.settings.show_customer_pin }}"
+>
+  <div class="page-width">
+    <header class="foreign-world__header" data-fade-in>
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h2 class="foreign-world__heading h1">{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.subtext != blank -%}
+        <p class="foreign-world__subtext text-soft">{{ section.settings.subtext | escape }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="foreign-world__filters" role="group" aria-label="{{ 'globe.index_heading' | t }}">
+      <button type="button" class="foreign-world__filter is-active" data-globe-filter="all" aria-pressed="true">
+        {{ 'globe.filter_all' | t }}
+      </button>
+      {%- if people_count > 0 -%}
+        <button type="button" class="foreign-world__filter foreign-world__filter--person" data-globe-filter="person" aria-pressed="false">
+          {{ 'globe.legend_people' | t }} <span class="foreign-world__filter-count">{{ people_count }}</span>
+        </button>
+      {%- endif -%}
+      {%- if places_count > 0 -%}
+        <button type="button" class="foreign-world__filter foreign-world__filter--place" data-globe-filter="place" aria-pressed="false">
+          {{ 'globe.legend_places' | t }} <span class="foreign-world__filter-count">{{ places_count }}</span>
+        </button>
+      {%- endif -%}
+      {%- if properties_count > 0 -%}
+        <button type="button" class="foreign-world__filter foreign-world__filter--property" data-globe-filter="property" aria-pressed="false">
+          {{ 'globe.legend_properties' | t }} <span class="foreign-world__filter-count">{{ properties_count }}</span>
+        </button>
+      {%- endif -%}
+    </div>
+
+    <div class="foreign-world__stage">
+      <div class="foreign-world__globe-frame">
+        <canvas data-globe-canvas aria-label="{{ 'globe.canvas_label' | t }}" role="img"></canvas>
+        <p class="foreign-world__hint text-soft" data-globe-hint>{{ 'globe.drag_hint' | t }}</p>
+      </div>
+
+      <aside class="foreign-world__card" data-globe-card hidden aria-live="polite">
+        <button type="button" class="foreign-world__card-close" data-globe-card-close aria-label="{{ 'globe.close_card' | t }}">
+          {% render 'icon', name: 'close', size: 18 %}
+        </button>
+        <div class="foreign-world__card-media" data-globe-card-media hidden>
+          <img data-globe-card-image alt="" loading="lazy" width="720" height="450">
+        </div>
+        <div class="foreign-world__card-body">
+          <p class="eyebrow" data-globe-card-eyebrow></p>
+          <h3 class="foreign-world__card-title h3" data-globe-card-title></h3>
+          <p class="foreign-world__card-location text-soft">
+            {% render 'icon', name: 'pin', size: 14 %}
+            <span data-globe-card-location></span>
+          </p>
+          <p class="foreign-world__card-text" data-globe-card-text></p>
+          <ul class="portal-profile__chips foreign-world__card-chips" data-globe-card-chips role="list" hidden></ul>
+          <a href="#" class="button button--outline button--small" data-globe-card-link hidden>
+            {{ 'globe.visit_link' | t }}
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    <ul class="globe-legend" role="list">
+      {%- if people_count > 0 -%}
+        <li class="globe-legend__item globe-legend__item--person">{{ 'globe.legend_people' | t }}</li>
+      {%- endif -%}
+      {%- if places_count > 0 -%}
+        <li class="globe-legend__item globe-legend__item--place">{{ 'globe.legend_places' | t }}</li>
+      {%- endif -%}
+      {%- if properties_count > 0 -%}
+        <li class="globe-legend__item globe-legend__item--property">{{ 'globe.legend_properties' | t }}</li>
+      {%- endif -%}
+      <li class="globe-legend__item globe-legend__item--you" data-globe-you-legend hidden>{{ 'globe.your_pin' | t }}</li>
+    </ul>
+
+    {%- comment -%} Accessible, crawlable index of everything on the globe {%- endcomment -%}
+    <div class="foreign-world__index" data-globe-index>
+      <h3 class="visually-hidden">{{ 'globe.index_heading' | t }}</h3>
+
+      {%- assign group_types = 'person,place,property' | split: ',' -%}
+      {%- for group_type in group_types -%}
+        {%- liquid
+          assign group_count = 0
+          if group_type == 'person'
+            assign group_count = people_count
+            assign group_label_key = 'globe.legend_people'
+          elsif group_type == 'place'
+            assign group_count = places_count
+            assign group_label_key = 'globe.legend_places'
+          else
+            assign group_count = properties_count
+            assign group_label_key = 'globe.legend_properties'
+          endif
+        -%}
+        {%- if group_count > 0 -%}
+          <div class="foreign-world__index-group" data-globe-index-group="{{ group_type }}">
+            <p class="eyebrow foreign-world__index-label">{{ group_label_key | t }}</p>
+            <ul class="foreign-world__index-list" role="list">
+              {%- for block in section.blocks -%}
+                {%- if block.type == group_type -%}
+                  <li {{ block.shopify_attributes }}>
+                    <button type="button" class="foreign-world__index-item" data-globe-goto="{{ block.id }}">
+                      <span class="foreign-world__index-name">{{ block.settings.name | escape }}</span>
+                      <span class="foreign-world__index-location text-soft">{{ block.settings.location | escape }}</span>
+                    </button>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.show_join -%}
+      <div class="foreign-world__join" data-fade-in>
+        <div>
+          <h3 class="h3">{{ section.settings.join_heading | escape }}</h3>
+          <p class="text-soft">{{ section.settings.join_text | escape }}</p>
+        </div>
+        <a
+          href="{% if customer %}{{ routes.account_url }}#foreign-world{% else %}{{ routes.account_register_url }}{% endif %}"
+          class="button"
+        >
+          {%- if customer -%}{{ 'globe.view_profile_cta' | t }}{%- else -%}{{ section.settings.join_cta | escape }}{%- endif -%}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <script type="application/json" data-globe-markers>
+    [
+      {%- for block in section.blocks -%}
+        {
+          "id": {{ block.id | json }},
+          "type": {{ block.type | json }},
+          "name": {{ block.settings.name | json }},
+          "lat": {{ block.settings.lat | json }},
+          "lng": {{ block.settings.lng | json }},
+          "location": {{ block.settings.location | json }},
+          "eyebrow": {{ block.settings.eyebrow | json }},
+          "description": {{ block.settings.description | json }},
+          "image": {% if block.settings.image != blank %}{{ block.settings.image | image_url: width: 720 | json }}{% else %}null{% endif %},
+          "link": {% if block.settings.link != blank %}{{ block.settings.link | json }}{% else %}null{% endif %},
+          "linkLabel": {{ block.settings.link_label | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  </script>
+  <script type="application/json" data-globe-strings>
+    {
+      "you": {{ 'globe.your_pin' | t | json }},
+      "homeBase": {{ 'globe.home_base' | t | json }},
+      "visited": {{ 'globe.visited' | t | json }},
+      "people": {{ 'globe.legend_people' | t | json }},
+      "places": {{ 'globe.legend_places' | t | json }},
+      "properties": {{ 'globe.legend_properties' | t | json }},
+      "discover": {{ 'globe.visit_link' | t | json }}
+    }
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Foreign World globe",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The living atlas" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The Foreign World" },
+    {
+      "type": "text",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "People, places and properties from the Foreign Resource community — mapped."
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_rotate",
+      "label": "Auto-rotate globe",
+      "info": "Pauses while visitors interact, and switches off for visitors who prefer reduced motion.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_customer_pin",
+      "label": "Show the visitor's own pin",
+      "info": "Shows the profile a signed-in customer saved in their account portal (stored in their browser).",
+      "default": true
+    },
+    { "type": "header", "content": "Join callout" },
+    {
+      "type": "checkbox",
+      "id": "show_join",
+      "label": "Show join callout",
+      "default": true
+    },
+    { "type": "text", "id": "join_heading", "label": "Heading", "default": "Put yourself on the map" },
+    {
+      "type": "text",
+      "id": "join_text",
+      "label": "Text",
+      "default": "Create your Foreigner profile and take your place among the community."
+    },
+    { "type": "text", "id": "join_cta", "label": "Button label", "default": "Create your profile" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "person",
+      "name": "Person",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Name", "default": "Amara O." },
+        { "type": "text", "id": "eyebrow", "label": "Label", "default": "Foreigner N°001 · Photographer", "info": "Shown above the name on their card." },
+        { "type": "image_picker", "id": "image", "label": "Portrait" },
+        { "type": "text", "id": "location", "label": "Location name", "default": "Lagos, Nigeria" },
+        { "type": "text", "id": "lat", "label": "Latitude", "default": "6.52", "info": "Decimal degrees, e.g. 6.52. Find coordinates at latlong.net." },
+        { "type": "text", "id": "lng", "label": "Longitude", "default": "3.38" },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Story",
+          "default": "Shoots the city at golden hour and packs one bag, always. Wears the Technical Traveler set from Lagos to London."
+        },
+        { "type": "url", "id": "link", "label": "Link (story, interview, Instagram…)" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Read their story" }
+      ]
+    },
+    {
+      "type": "place",
+      "name": "Place",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Place name", "default": "Lisbon" },
+        { "type": "text", "id": "eyebrow", "label": "Label", "default": "City guide", "info": "Shown above the name on its card." },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "location", "label": "Location name", "default": "Portugal" },
+        { "type": "text", "id": "lat", "label": "Latitude", "default": "38.72", "info": "Decimal degrees. Find coordinates at latlong.net." },
+        { "type": "text", "id": "lng", "label": "Longitude", "default": "-9.14" },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Hills, Atlantic light and slow mornings. The city that taught us to travel lighter."
+        },
+        { "type": "url", "id": "link", "label": "Link (city guide article…)" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Read the city guide" }
+      ]
+    },
+    {
+      "type": "property",
+      "name": "Property",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Property name", "default": "Casa Cielo" },
+        { "type": "text", "id": "eyebrow", "label": "Label", "default": "Where we stay", "info": "Shown above the name on its card." },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "location", "label": "Location name", "default": "Tulum, Mexico" },
+        { "type": "text", "id": "lat", "label": "Latitude", "default": "20.21", "info": "Decimal degrees. Find coordinates at latlong.net." },
+        { "type": "text", "id": "lng", "label": "Longitude", "default": "-87.46" },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "A palm-shaded hideaway between jungle and sea. Pack the Staples capsule and very little else."
+        },
+        { "type": "url", "id": "link", "label": "Link (booking page, feature…)" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Explore the stay" }
+      ]
+    }
+  ],
+  "max_blocks": 50,
+  "presets": [
+    {
+      "name": "Foreign World globe",
+      "blocks": [
+        { "type": "person" },
+        {
+          "type": "person",
+          "settings": {
+            "name": "Jonas K.",
+            "eyebrow": "Foreigner N°014 · Architect",
+            "location": "Copenhagen, Denmark",
+            "lat": "55.68",
+            "lng": "12.57",
+            "description": "Designs quiet buildings and takes loud trips. Six countries a year, one carry-on, zero compromises."
+          }
+        },
+        {
+          "type": "person",
+          "settings": {
+            "name": "Mia T.",
+            "eyebrow": "Foreigner N°032 · Chef",
+            "location": "Mexico City, Mexico",
+            "lat": "19.43",
+            "lng": "-99.13",
+            "description": "Collects recipes the way others collect stamps. Currently eating her way down the Pacific coast."
+          }
+        },
+        { "type": "place" },
+        {
+          "type": "place",
+          "settings": {
+            "name": "Kyoto",
+            "location": "Japan",
+            "lat": "35.01",
+            "lng": "135.77",
+            "description": "Temples at dawn, coffee at noon, quiet by design. Go in November when the maples turn."
+          }
+        },
+        {
+          "type": "place",
+          "settings": {
+            "name": "Marrakech",
+            "location": "Morocco",
+            "lat": "31.63",
+            "lng": "-7.99",
+            "description": "A city that rewards the curious. Get lost in the medina, then find yourself on a rooftop at sunset."
+          }
+        },
+        {
+          "type": "place",
+          "settings": {
+            "name": "Cartagena",
+            "location": "Colombia",
+            "lat": "10.39",
+            "lng": "-75.51",
+            "description": "Color, heat and sea air. The old town asks you to slow down — listen to it."
+          }
+        },
+        { "type": "property" },
+        {
+          "type": "property",
+          "settings": {
+            "name": "Riad Amara",
+            "location": "Marrakech, Morocco",
+            "lat": "31.64",
+            "lng": "-8.01",
+            "description": "Eight rooms around a courtyard pool, ten minutes from the souks and a world away from them."
+          }
+        },
+        {
+          "type": "property",
+          "settings": {
+            "name": "Villa Sel",
+            "location": "Paros, Greece",
+            "lat": "37.08",
+            "lng": "25.15",
+            "description": "Whitewashed walls, salt on the breeze. The Aegean does the decorating."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

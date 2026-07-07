@@ -1,0 +1,146 @@
+{
+  "sections": {
+    "globe": {
+      "type": "foreign-world-globe",
+      "blocks": {
+        "person_1": {
+          "type": "person",
+          "settings": {
+            "name": "Amara O.",
+            "eyebrow": "Foreigner N°001 · Photographer",
+            "location": "Lagos, Nigeria",
+            "lat": "6.52",
+            "lng": "3.38",
+            "description": "Shoots the city at golden hour and packs one bag, always. Wears the Technical Traveler set from Lagos to London."
+          }
+        },
+        "person_2": {
+          "type": "person",
+          "settings": {
+            "name": "Jonas K.",
+            "eyebrow": "Foreigner N°014 · Architect",
+            "location": "Copenhagen, Denmark",
+            "lat": "55.68",
+            "lng": "12.57",
+            "description": "Designs quiet buildings and takes loud trips. Six countries a year, one carry-on, zero compromises."
+          }
+        },
+        "person_3": {
+          "type": "person",
+          "settings": {
+            "name": "Mia T.",
+            "eyebrow": "Foreigner N°032 · Chef",
+            "location": "Mexico City, Mexico",
+            "lat": "19.43",
+            "lng": "-99.13",
+            "description": "Collects recipes the way others collect stamps. Currently eating her way down the Pacific coast."
+          }
+        },
+        "place_1": {
+          "type": "place",
+          "settings": {
+            "name": "Lisbon",
+            "eyebrow": "City guide",
+            "location": "Portugal",
+            "lat": "38.72",
+            "lng": "-9.14",
+            "description": "Hills, Atlantic light and slow mornings. The city that taught us to travel lighter."
+          }
+        },
+        "place_2": {
+          "type": "place",
+          "settings": {
+            "name": "Kyoto",
+            "eyebrow": "City guide",
+            "location": "Japan",
+            "lat": "35.01",
+            "lng": "135.77",
+            "description": "Temples at dawn, coffee at noon, quiet by design. Go in November when the maples turn."
+          }
+        },
+        "place_3": {
+          "type": "place",
+          "settings": {
+            "name": "Marrakech",
+            "eyebrow": "City guide",
+            "location": "Morocco",
+            "lat": "31.63",
+            "lng": "-7.99",
+            "description": "A city that rewards the curious. Get lost in the medina, then find yourself on a rooftop at sunset."
+          }
+        },
+        "place_4": {
+          "type": "place",
+          "settings": {
+            "name": "Cartagena",
+            "eyebrow": "City guide",
+            "location": "Colombia",
+            "lat": "10.39",
+            "lng": "-75.51",
+            "description": "Color, heat and sea air. The old town asks you to slow down — listen to it."
+          }
+        },
+        "property_1": {
+          "type": "property",
+          "settings": {
+            "name": "Casa Cielo",
+            "eyebrow": "Where we stay",
+            "location": "Tulum, Mexico",
+            "lat": "20.21",
+            "lng": "-87.46",
+            "description": "A palm-shaded hideaway between jungle and sea. Pack the Staples capsule and very little else."
+          }
+        },
+        "property_2": {
+          "type": "property",
+          "settings": {
+            "name": "Riad Amara",
+            "eyebrow": "Where we stay",
+            "location": "Marrakech, Morocco",
+            "lat": "31.64",
+            "lng": "-8.01",
+            "description": "Eight rooms around a courtyard pool, ten minutes from the souks and a world away from them."
+          }
+        },
+        "property_3": {
+          "type": "property",
+          "settings": {
+            "name": "Villa Sel",
+            "eyebrow": "Where we stay",
+            "location": "Paros, Greece",
+            "lat": "37.08",
+            "lng": "25.15",
+            "description": "Whitewashed walls, salt on the breeze. The Aegean does the decorating."
+          }
+        }
+      },
+      "block_order": [
+        "person_1",
+        "person_2",
+        "person_3",
+        "place_1",
+        "place_2",
+        "place_3",
+        "place_4",
+        "property_1",
+        "property_2",
+        "property_3"
+      ],
+      "settings": {
+        "eyebrow": "The living atlas",
+        "heading": "The Foreign World",
+        "subtext": "People, places and properties from the Foreign Resource community — mapped.",
+        "color_scheme": "cream",
+        "auto_rotate": true,
+        "show_customer_pin": true,
+        "show_join": true,
+        "join_heading": "Put yourself on the map",
+        "join_text": "Create your Foreigner profile and take your place among the community.",
+        "join_cta": "Create your profile",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    }
+  },
+  "order": ["globe"]
+}

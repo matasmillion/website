@@ -1,0 +1,32 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "menu": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Explore",
+            "menu": "footer"
+          }
+        },
+        "mission": {
+          "type": "text",
+          "settings": {
+            "heading": "Our mission",
+            "text": "<p>To inspire global travel. Every purchase contributes to the Foreign Fund — supporting displaced communities worldwide.</p>"
+          }
+        }
+      },
+      "block_order": ["menu", "mission"],
+      "settings": {
+        "color_scheme": "cream",
+        "tagline": "Designed for those who see the world differently.",
+        "show_social": true
+      }
+    }
+  },
+  "order": ["footer"]
+}

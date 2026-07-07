@@ -1,0 +1,428 @@
+/* ------------------------------------------------------------------
+   Foreign Resource — base.css
+   Tokens live in :root (layout/theme.liquid). Mobile-first.
+------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--body-size, 15px);
+  line-height: 1.6;
+  color: var(--color-ink);
+  background-color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1 0 auto;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ---------- Typography ---------- */
+
+h1, h2, h3, h4, h5, h6,
+.h0, .h1, .h2, .h3, .h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight, 500);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.h0 { font-size: calc(clamp(3.25rem, 9vw, 7.5rem) * var(--heading-scale, 1)); }
+h1, .h1 { font-size: calc(clamp(2.25rem, 5.5vw, 4.25rem) * var(--heading-scale, 1)); }
+h2, .h2 { font-size: calc(clamp(1.75rem, 3.8vw, 2.75rem) * var(--heading-scale, 1)); }
+h3, .h3 { font-size: calc(clamp(1.25rem, 2.4vw, 1.6rem) * var(--heading-scale, 1)); }
+h4, .h4 { font-size: 1.1rem; }
+h5, h6 { font-size: 1rem; }
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.text-soft {
+  color: var(--color-ink-soft);
+}
+
+.rte {
+  line-height: 1.7;
+}
+
+.rte > * + * {
+  margin-top: 1em;
+}
+
+.rte a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* ---------- Layout ---------- */
+
+.page-width {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.page-width--narrow {
+  max-width: 44rem;
+}
+
+/* ---------- Color schemes ---------- */
+
+.color-scheme--cream { background-color: var(--color-cream); color: var(--color-ink); }
+.color-scheme--sand { background-color: var(--color-sand); color: var(--color-ink); }
+.color-scheme--ink {
+  background-color: var(--color-ink);
+  color: var(--color-cream);
+  --color-ink-soft: color-mix(in srgb, var(--color-cream) 62%, var(--color-ink));
+  --color-line: color-mix(in srgb, var(--color-cream) 18%, var(--color-ink));
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.8rem 2.2rem;
+  background: var(--color-ink);
+  color: var(--color-cream);
+  border: 1px solid var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.button:hover {
+  background: var(--color-terracotta);
+  border-color: var(--color-terracotta);
+  color: var(--color-cream);
+}
+
+.button--outline {
+  background: transparent;
+  color: currentColor;
+  border-color: currentColor;
+}
+
+.button--outline:hover {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-cream);
+}
+
+.color-scheme--ink .button {
+  background: var(--color-cream);
+  border-color: var(--color-cream);
+  color: var(--color-ink);
+}
+
+.color-scheme--ink .button:hover {
+  background: var(--color-terracotta);
+  border-color: var(--color-terracotta);
+  color: var(--color-cream);
+}
+
+.button--small {
+  min-height: 40px;
+  padding: 0.5rem 1.4rem;
+}
+
+.button--full {
+  width: 100%;
+}
+
+.button[disabled],
+.button.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link-underline {
+  display: inline-block;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: text-underline-offset var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.link-underline:hover {
+  text-underline-offset: 0.4em;
+  color: var(--color-terracotta);
+}
+
+/* ---------- Forms ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field + .field {
+  margin-top: 1.1rem;
+}
+
+.field__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.field__input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--color-ink-soft);
+  border-radius: 0;
+  appearance: none;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.field__input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--color-ink);
+}
+
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230A0A0A' stroke-width='1.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.4rem;
+}
+
+.field__error,
+.form__message--error {
+  color: var(--color-terracotta);
+  font-size: 0.85rem;
+}
+
+.form__message {
+  margin-bottom: 1.25rem;
+}
+
+.form__message ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+/* ---------- Focus & accessibility ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-to-content {
+  position: absolute;
+  z-index: 100;
+  top: -100px;
+  left: var(--gutter);
+  background: var(--color-ink);
+  color: var(--color-cream);
+  padding: 0.75rem 1.25rem;
+}
+
+.skip-to-content:focus {
+  top: 0.75rem;
+}
+
+/* ---------- Motion ---------- */
+
+[data-fade-in] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+
+[data-fade-in].is-visible,
+.no-js [data-fade-in] {
+  opacity: 1;
+  transform: none;
+}
+
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--color-ink) 6%, var(--color-cream)) 40%,
+    color-mix(in srgb, var(--color-ink) 12%, var(--color-cream)) 50%,
+    color-mix(in srgb, var(--color-ink) 6%, var(--color-cream)) 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-fade-in] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Heart button (wishlist) ---------- */
+
+.heart-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: currentColor;
+  transition: color var(--dur) var(--ease), transform 0.2s var(--ease);
+}
+
+.heart-button svg {
+  transition: fill var(--dur) var(--ease);
+  fill: transparent;
+}
+
+.heart-button:hover {
+  color: var(--color-terracotta);
+}
+
+.heart-button.is-active {
+  color: var(--color-terracotta);
+}
+
+.heart-button.is-active svg {
+  fill: currentColor;
+}
+
+.heart-button:active {
+  transform: scale(0.88);
+}
+
+/* ---------- Empty states ---------- */
+
+.empty-state {
+  padding: clamp(2.5rem, 8vw, 5rem) 0;
+  text-align: center;
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+}
+
+.empty-state p {
+  color: var(--color-ink-soft);
+  max-width: 34ch;
+}
+
+/* ---------- Pagination ---------- */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pagination__current {
+  color: var(--color-ink-soft);
+}

@@ -1,0 +1,222 @@
+{{ 'component-collection.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="collection"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="collection__header">
+      {%- if section.settings.show_image and collection.image != blank -%}
+        <div class="collection__hero">
+          {{
+            collection.image
+            | image_url: width: 2400
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              widths: '750, 1100, 1600, 2000, 2400',
+              sizes: '100vw',
+              class: 'collection__hero-image',
+              alt: collection.title
+          }}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_title -%}
+        <h1 class="collection__title">{{ collection.title }}</h1>
+      {%- else -%}
+        <h1 class="visually-hidden">{{ collection.title }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.show_description and collection.description != blank -%}
+        <div class="collection__description rte text-soft">{{ collection.description }}</div>
+      {%- endif -%}
+    </header>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      <div class="collection__toolbar">
+        <p class="collection__count text-soft">
+          {{ collection.products_count }} {{ section.settings.count_label | escape }}
+        </p>
+
+        {%- if section.settings.show_sort -%}
+          <form class="collection__sort" method="get" action="{{ collection.url }}">
+            {%- for filter in collection.filters -%}
+              {%- case filter.type -%}
+                {%- when 'price_range' -%}
+                  {%- if filter.min_value.value -%}
+                    <input
+                      type="hidden"
+                      name="{{ filter.min_value.param_name }}"
+                      value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                    >
+                  {%- endif -%}
+                  {%- if filter.max_value.value -%}
+                    <input
+                      type="hidden"
+                      name="{{ filter.max_value.param_name }}"
+                      value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                    >
+                  {%- endif -%}
+                {%- else -%}
+                  {%- for value in filter.active_values -%}
+                    <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+                  {%- endfor -%}
+              {%- endcase -%}
+            {%- endfor -%}
+
+            <label class="field__label" for="SortBy-{{ section.id }}">{{ section.settings.sort_label | escape }}</label>
+            {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+            <select id="SortBy-{{ section.id }}" class="collection__sort-select" name="sort_by">
+              {%- for option in collection.sort_options -%}
+                <option
+                  value="{{ option.value | escape }}"
+                  {% if option.value == current_sort %}selected{% endif %}
+                >{{ option.name | escape }}</option>
+              {%- endfor -%}
+            </select>
+            <button type="submit" class="collection__sort-apply link-underline">
+              {{ section.settings.sort_apply_label | escape }}
+            </button>
+          </form>
+        {%- endif -%}
+      </div>
+
+      {%- if collection.products.size > 0 -%}
+        <ul
+          class="collection__grid"
+          role="list"
+          style="--columns-desktop: {{ section.settings.columns_desktop }};"
+        >
+          {%- for product in collection.products -%}
+            {%- liquid
+              assign card_loading = 'lazy'
+              if forloop.index <= 4 and paginate.current_page == 1
+                assign card_loading = 'eager'
+              endif
+            -%}
+            <li class="collection__grid-item">
+              {% render 'product-card', product: product, loading: card_loading %}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <div class="empty-state">
+          <p>{{ section.settings.empty_text | escape }}</p>
+          <a href="{{ routes.all_products_collection_url }}" class="button button--outline">
+            {{ 'general.404.cta' | t }}
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if paginate.pages > 1 -%}
+        {%- assign page_label = 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages -%}
+        <nav class="pagination" aria-label="{{ page_label | escape }}">
+          {%- if paginate.previous -%}
+            <a class="link-underline" href="{{ paginate.previous.url }}">{{ 'general.pagination.previous' | t }}</a>
+          {%- endif -%}
+          <span class="pagination__current">
+            {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+          </span>
+          {%- if paginate.next -%}
+            <a class="link-underline" href="{{ paginate.next.url }}">{{ 'general.pagination.next' | t }}</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection page",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show collection title",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show collection image",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Show sorting",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "sort_label",
+      "label": "Sort label",
+      "default": "Sort by"
+    },
+    {
+      "type": "text",
+      "id": "sort_apply_label",
+      "label": "Sort apply button label",
+      "default": "Apply"
+    },
+    {
+      "type": "text",
+      "id": "count_label",
+      "label": "Product count label",
+      "default": "pieces"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty collection text",
+      "default": "Nothing here yet — new pieces are on their way."
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 24,
+      "step": 4,
+      "label": "Products per page",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 3,
+      "max": 4,
+      "step": 1,
+      "label": "Columns on desktop",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,275 @@
+/* Foreign Resource — Foreign World globe section */
+
+.foreign-world__header {
+  text-align: center;
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.foreign-world__heading {
+  max-width: 16ch;
+}
+
+.foreign-world__subtext {
+  max-width: 52ch;
+}
+
+/* ---------- Filters ---------- */
+
+.foreign-world__filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+}
+
+.foreign-world__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 1.2rem;
+  background: transparent;
+  border: 1px solid var(--color-line);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+
+.foreign-world__filter:hover {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.foreign-world__filter.is-active {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-cream);
+}
+
+.foreign-world__filter-count {
+  font-size: 0.6875rem;
+  opacity: 0.65;
+}
+
+/* ---------- Stage: globe + card ---------- */
+
+.foreign-world__stage {
+  position: relative;
+}
+
+.foreign-world__globe-frame {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: min(720px, 92vw);
+  margin-inline: auto;
+}
+
+.foreign-world__globe-frame canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.foreign-world__hint {
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.foreign-world__hint.is-hidden {
+  opacity: 0;
+}
+
+/* ---------- Detail card ---------- */
+
+.foreign-world__card {
+  position: relative;
+  margin: 1.5rem auto 0;
+  max-width: 26rem;
+  background: var(--color-cream);
+  border: 1px solid var(--color-line);
+}
+
+.foreign-world__card-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+}
+
+.foreign-world__card-close:hover {
+  color: var(--color-terracotta);
+}
+
+.foreign-world__card-media {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-ink) 5%, var(--color-cream));
+}
+
+.foreign-world__card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foreign-world__card-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.4rem;
+}
+
+.foreign-world__card-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.foreign-world__card-text {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--color-ink-soft);
+}
+
+.foreign-world__card-text[hidden] {
+  display: none;
+}
+
+.foreign-world__card-chips {
+  margin-top: 0.25rem;
+}
+
+.foreign-world__chip-label {
+  border: none;
+  padding-left: 0;
+  color: var(--color-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.6875rem;
+}
+
+.foreign-world__card .button {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .foreign-world__card {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    margin: 0;
+    width: min(24rem, 32vw);
+    box-shadow: 0 24px 60px -30px rgb(10 10 10 / 0.25);
+  }
+}
+
+/* ---------- Index ---------- */
+
+.foreign-world__index {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  display: grid;
+  gap: 2rem;
+  border-top: 1px solid var(--color-line);
+  padding-top: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+@media (min-width: 768px) {
+  .foreign-world__index {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.foreign-world__index-group[hidden] {
+  display: none;
+}
+
+.foreign-world__index-label {
+  margin-bottom: 0.9rem;
+}
+
+.foreign-world__index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.foreign-world__index-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  width: 100%;
+  padding: 0.65rem 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  transition: color var(--dur) var(--ease);
+}
+
+.foreign-world__index-item:hover .foreign-world__index-name {
+  color: var(--color-terracotta);
+}
+
+.foreign-world__index-name {
+  font-weight: 500;
+  transition: color var(--dur) var(--ease);
+}
+
+.foreign-world__index-location {
+  font-size: 0.8rem;
+}
+
+/* ---------- Join callout ---------- */
+
+.foreign-world__join {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  padding: clamp(1.75rem, 4vw, 3rem);
+  border: 1px solid var(--color-line);
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+  justify-items: start;
+}
+
+.foreign-world__join h3 {
+  margin-bottom: 0.4rem;
+}
+
+.foreign-world__join p {
+  max-width: 44ch;
+}
+
+@media (min-width: 768px) {
+  .foreign-world__join {
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+  }
+}

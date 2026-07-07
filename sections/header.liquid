@@ -1,0 +1,154 @@
+{{ 'component-header.css' | asset_url | stylesheet_tag }}
+
+<header
+  class="header{% if section.settings.sticky %} header--sticky{% endif %} header--logo-{{ section.settings.logo_position }}"
+  data-header
+>
+  <div class="page-width header__inner">
+    <div class="header__left">
+      <button
+        type="button"
+        class="header__icon-button header__menu-toggle"
+        data-menu-open
+        aria-expanded="false"
+        aria-controls="MenuOverlay"
+        aria-label="{{ 'general.accessibility.open_menu' | t }}"
+      >
+        {% render 'icon', name: 'menu' %}
+      </button>
+
+      <nav class="header__nav" aria-label="{{ 'general.accessibility.main_menu' | t }}">
+        <ul class="header__nav-list">
+          {%- for link in section.settings.menu.links limit: 5 -%}
+            <li>
+              <a
+                href="{{ link.url }}"
+                class="header__nav-link{% if link.current %} is-current{% endif %}"
+                {% if link.current %}aria-current="page"{% endif %}
+              >
+                {{- link.title -}}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="header__logo">
+      <a href="{{ routes.root_url }}" class="header__logo-link">
+        {%- if settings.logo != blank -%}
+          {{
+            settings.logo
+            | image_url: width: 600
+            | image_tag:
+              loading: 'eager',
+              width: settings.logo_width,
+              class: 'header__logo-image',
+              style: 'width:' | append: settings.logo_width | append: 'px',
+              alt: shop.name
+          }}
+        {%- else -%}
+          <span class="header__wordmark">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <div class="header__right">
+      <a href="{{ routes.search_url }}" class="header__icon-button" aria-label="{{ 'general.accessibility.search' | t }}">
+        {% render 'icon', name: 'search' %}
+      </a>
+
+      {%- if settings.enable_wishlist -%}
+        <a
+          href="{% if customer %}{{ routes.account_url }}#wishlist{% else %}{{ routes.account_login_url }}{% endif %}"
+          class="header__icon-button header__icon-button--wishlist"
+          aria-label="{{ 'wishlist.header_label' | t }}"
+        >
+          {% render 'icon', name: 'heart' %}
+          <span class="header__badge is-empty" data-wishlist-count aria-hidden="true">0</span>
+        </a>
+      {%- endif -%}
+
+      <a
+        href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}"
+        class="header__icon-button"
+        aria-label="{{ 'general.accessibility.account' | t }}"
+      >
+        {% render 'icon', name: 'account' %}
+      </a>
+
+      <a href="{{ routes.cart_url }}" class="header__icon-button header__icon-button--cart" aria-label="{{ 'general.accessibility.cart' | t: count: cart.item_count }}">
+        {% render 'icon', name: 'cart' %}
+        <span class="header__badge{% if cart.item_count == 0 %} is-empty{% endif %}" aria-hidden="true">{{ cart.item_count }}</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="menu-overlay" id="MenuOverlay" data-menu-overlay hidden>
+  <div class="menu-overlay__top">
+    <button
+      type="button"
+      class="header__icon-button"
+      data-menu-close
+      aria-label="{{ 'general.accessibility.close_menu' | t }}"
+    >
+      {% render 'icon', name: 'close', size: 22 %}
+    </button>
+  </div>
+
+  <nav class="menu-overlay__nav" aria-label="{{ 'general.accessibility.main_menu' | t }}">
+    <ul class="menu-overlay__list">
+      {%- for link in section.settings.menu.links -%}
+        <li style="--index: {{ forloop.index }};">
+          <a href="{{ link.url }}" class="menu-overlay__link">{{ link.title }}</a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+
+  <div class="menu-overlay__footer">
+    <a href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" class="link-underline">
+      {%- if customer -%}{{ 'customer.account.title' | t }}{%- else -%}{{ 'customer.login.sign_in' | t }}{%- endif -%}
+    </a>
+    {%- if section.settings.menu_footer_text != blank -%}
+      <p class="menu-overlay__tagline">{{ section.settings.menu_footer_text | escape }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "Logo position (desktop)",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "left", "label": "Left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Sticky header",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "menu_footer_text",
+      "label": "Menu overlay tagline",
+      "default": "Freedom through confidence"
+    }
+  ]
+}
+{% endschema %}

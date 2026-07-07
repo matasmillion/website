@@ -1,0 +1,409 @@
+{{ 'component-portal.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cities.js' | asset_url }}" defer></script>
+<script src="{{ 'globe-land.js' | asset_url }}" defer></script>
+<script src="{{ 'globe.js' | asset_url }}" defer></script>
+<script src="{{ 'customer.js' | asset_url }}" defer></script>
+
+<div class="portal page-width" style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <header class="portal__header">
+    <div>
+      <p class="eyebrow">{{ 'customer.account.title' | t }}</p>
+      <h1 class="portal__heading h1">
+        {%- if customer.first_name != blank -%}
+          {{ 'customer.account.welcome' | t: name: customer.first_name }}
+        {%- else -%}
+          {{ 'customer.account.welcome_generic' | t }}
+        {%- endif -%}
+      </h1>
+      <p class="portal__subtext text-soft">
+        {%- if section.settings.subtext != blank -%}
+          {{ section.settings.subtext | escape }}
+        {%- else -%}
+          {{ 'customer.account.subtext' | t }}
+        {%- endif -%}
+      </p>
+    </div>
+    <div class="portal__header-aside">
+      <p class="portal__identity">
+        {{ customer.name }}<br>
+        <span class="text-soft">{{ customer.email }}</span>
+      </p>
+      <a href="{{ routes.account_logout_url }}" class="link-underline" data-no-instant>{{ 'customer.account.log_out' | t }}</a>
+    </div>
+  </header>
+
+  <nav class="portal__nav" aria-label="{{ 'customer.account.title' | t }}">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'orders' -%}
+          <a href="#orders" class="portal__nav-link">{{ 'customer.account.nav_orders' | t }}</a>
+        {%- when 'addresses' -%}
+          <a href="#addresses" class="portal__nav-link">{{ 'customer.account.nav_addresses' | t }}</a>
+        {%- when 'wishlist' -%}
+          <a href="#wishlist" class="portal__nav-link">{{ 'customer.account.nav_wishlist' | t }}</a>
+        {%- when 'profile' -%}
+          <a href="#foreign-world" class="portal__nav-link">{{ 'customer.account.nav_globe' | t }}</a>
+      {%- endcase -%}
+    {%- endfor -%}
+  </nav>
+
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'orders' -%}
+        <section id="orders" class="portal__panel" aria-labelledby="PortalOrdersHeading" {{ block.shopify_attributes }}>
+          <div class="portal__panel-header">
+            <h2 id="PortalOrdersHeading" class="h3">{{ block.settings.heading | default: 'Orders' }}</h2>
+            <p class="portal__panel-meta text-soft">
+              {{ 'customer.orders.count' | t: count: customer.orders_count }}
+            </p>
+          </div>
+
+          {%- paginate customer.orders by block.settings.orders_per_page -%}
+            {%- if customer.orders.size > 0 -%}
+              <table class="portal-orders" data-portal-table>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'customer.orders.order_number' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.date' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.payment_status' | t }}</th>
+                    <th scope="col">{{ 'customer.orders.fulfillment_status' | t }}</th>
+                    <th scope="col" class="portal-orders__total">{{ 'customer.orders.total' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- for order in customer.orders -%}
+                    <tr>
+                      <td data-label="{{ 'customer.orders.order_number' | t }}">
+                        <a href="{{ order.customer_url }}" class="portal-orders__link" aria-label="{{ 'customer.order.title' | t: name: order.name }}">
+                          {{ order.name }}
+                        </a>
+                      </td>
+                      <td data-label="{{ 'customer.orders.date' | t }}">{{ order.created_at | date: '%b %-d, %Y' }}</td>
+                      <td data-label="{{ 'customer.orders.payment_status' | t }}">{{ order.financial_status_label }}</td>
+                      <td data-label="{{ 'customer.orders.fulfillment_status' | t }}">{{ order.fulfillment_status_label }}</td>
+                      <td data-label="{{ 'customer.orders.total' | t }}" class="portal-orders__total">{{ order.total_price | money }}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+
+              {%- if paginate.pages > 1 -%}
+                <nav class="pagination" aria-label="{{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}">
+                  {%- if paginate.previous -%}
+                    <a href="{{ paginate.previous.url }}" class="link-underline">{{ 'general.pagination.previous' | t }}</a>
+                  {%- endif -%}
+                  <span class="pagination__current">
+                    {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+                  </span>
+                  {%- if paginate.next -%}
+                    <a href="{{ paginate.next.url }}" class="link-underline">{{ 'general.pagination.next' | t }}</a>
+                  {%- endif -%}
+                </nav>
+              {%- endif -%}
+            {%- else -%}
+              <div class="empty-state">
+                {% render 'icon', name: 'package', size: 26 %}
+                <p>{{ 'customer.orders.none' | t }}</p>
+                <a href="{{ routes.all_products_collection_url }}" class="button button--outline button--small">
+                  {{ 'customer.orders.none_cta' | t }}
+                </a>
+              </div>
+            {%- endif -%}
+          {%- endpaginate -%}
+        </section>
+
+      {%- when 'addresses' -%}
+        <section id="addresses" class="portal__panel" aria-labelledby="PortalAddressesHeading" {{ block.shopify_attributes }}>
+          <div class="portal__panel-header">
+            <h2 id="PortalAddressesHeading" class="h3">{{ block.settings.heading | default: 'Addresses' }}</h2>
+            <p class="portal__panel-meta text-soft">
+              {{ 'customer.addresses.count' | t: count: customer.addresses_count }}
+            </p>
+          </div>
+
+          {%- if customer.default_address -%}
+            <div class="portal-address-card">
+              <p class="eyebrow">{{ 'customer.addresses.default' | t }}</p>
+              <address class="portal-address-card__body">
+                {{ customer.default_address | format_address }}
+              </address>
+            </div>
+          {%- else -%}
+            <div class="empty-state">
+              <p>{{ 'customer.addresses.none' | t }}</p>
+            </div>
+          {%- endif -%}
+
+          <a href="{{ routes.account_addresses_url }}" class="button button--outline button--small">
+            {{ 'customer.account.nav_addresses' | t }} {% render 'icon', name: 'arrow-right', size: 16 %}
+          </a>
+        </section>
+
+      {%- when 'wishlist' -%}
+        {%- if settings.enable_wishlist -%}
+          <section id="wishlist" class="portal__panel" aria-labelledby="PortalWishlistHeading" {{ block.shopify_attributes }}>
+            <div class="portal__panel-header">
+              <h2 id="PortalWishlistHeading" class="h3">{{ block.settings.heading | default: 'Hearted' }}</h2>
+              <p class="portal__panel-meta text-soft" data-wishlist-meta hidden>
+                <span
+                  data-wishlist-meta-count
+                  data-label-one="{{ 'wishlist.count_label.one' | t: count: 'COUNT' | escape }}"
+                  data-label-other="{{ 'wishlist.count_label.other' | t: count: 'COUNT' | escape }}"
+                ></span>
+                · {{ 'wishlist.saved_on_device' | t }}
+              </p>
+            </div>
+
+            <div class="portal-wishlist__grid" data-wishlist-grid aria-live="polite"></div>
+
+            <div class="empty-state" data-wishlist-empty hidden>
+              {% render 'icon', name: 'heart', size: 26 %}
+              <p>{{ 'wishlist.empty' | t }}</p>
+              <a href="{{ routes.all_products_collection_url }}" class="button button--outline button--small">
+                {{ 'wishlist.empty_cta' | t }}
+              </a>
+            </div>
+
+            <template data-wishlist-card-template>
+              <article class="product-card">
+                <a href="#" class="product-card__media" data-card-link>
+                  <img class="product-card__image product-card__image--primary" data-card-image alt="" loading="lazy" width="540" height="720">
+                </a>
+                <div class="product-card__details">
+                  <div class="product-card__text">
+                    <h3 class="product-card__title"><a href="#" data-card-link data-card-title></a></h3>
+                    <p class="product-card__price" data-card-price></p>
+                  </div>
+                  <button
+                    type="button"
+                    class="heart-button is-active"
+                    data-heart-button
+                    aria-pressed="true"
+                    aria-label="{{ 'wishlist.remove_label' | t }}"
+                  >
+                    {% render 'icon', name: 'heart', size: 20 %}
+                  </button>
+                </div>
+              </article>
+            </template>
+          </section>
+        {%- endif -%}
+
+      {%- when 'profile' -%}
+        <section id="foreign-world" class="portal__panel" aria-labelledby="PortalProfileHeading" {{ block.shopify_attributes }}>
+          <div class="portal__panel-header">
+            <h2 id="PortalProfileHeading" class="h3">{{ block.settings.heading | default: 'Your place in the Foreign World' }}</h2>
+            <p class="portal__panel-meta text-soft">{{ 'customer.profile.device_note' | t }}</p>
+          </div>
+
+          <div class="portal-profile">
+            <form
+              class="portal-profile__form"
+              data-profile-form
+              data-saved-message="{{ 'customer.profile.saved' | t | escape }}"
+              data-removed-message="{{ 'customer.profile.removed' | t | escape }}"
+              data-unknown-city="{{ 'customer.profile.unknown_city' | t | escape }}"
+              novalidate
+            >
+              <p class="portal-profile__lede text-soft">
+                {%- if block.settings.subtext != blank -%}
+                  {{ block.settings.subtext | escape }}
+                {%- else -%}
+                  {{ 'customer.profile.subtext' | t }}
+                {%- endif -%}
+              </p>
+
+              <div class="field">
+                <label class="field__label" for="ProfileName">{{ 'customer.profile.display_name' | t }}</label>
+                <input
+                  id="ProfileName"
+                  class="field__input"
+                  type="text"
+                  name="name"
+                  maxlength="40"
+                  value="{{ customer.first_name | escape }}"
+                  data-profile-name
+                >
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="ProfileBio">{{ 'customer.profile.bio' | t }}</label>
+                <input
+                  id="ProfileBio"
+                  class="field__input"
+                  type="text"
+                  name="bio"
+                  maxlength="90"
+                  placeholder="{{ 'customer.profile.bio_placeholder' | t }}"
+                  data-profile-bio
+                >
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="ProfileHome">{{ 'customer.profile.home_base' | t }}</label>
+                <input
+                  id="ProfileHome"
+                  class="field__input"
+                  type="text"
+                  list="FRCityList"
+                  placeholder="{{ 'customer.profile.home_placeholder' | t }}"
+                  autocomplete="off"
+                  data-profile-home
+                >
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="ProfileVisited">{{ 'customer.profile.visited' | t }}</label>
+                <div class="portal-profile__visited-input">
+                  <input
+                    id="ProfileVisited"
+                    class="field__input"
+                    type="text"
+                    list="FRCityList"
+                    placeholder="{{ 'customer.profile.visited_placeholder' | t }}"
+                    autocomplete="off"
+                    data-profile-visited-input
+                  >
+                  <button type="button" class="button button--outline button--small" data-profile-visited-add>
+                    {{ 'customer.profile.visited_add' | t }}
+                  </button>
+                </div>
+                <ul class="portal-profile__chips" data-visited-list role="list"></ul>
+              </div>
+
+              <datalist id="FRCityList" data-city-datalist></datalist>
+
+              <p class="portal-profile__status" data-profile-status role="status" aria-live="polite"></p>
+
+              <div class="portal-profile__actions">
+                <button type="submit" class="button">{{ 'customer.profile.save' | t }}</button>
+                {%- if block.settings.globe_page != blank -%}
+                  <a href="{{ block.settings.globe_page }}" class="button button--outline" data-profile-view>
+                    {{ 'customer.profile.view_on_globe' | t }}
+                  </a>
+                {%- endif -%}
+                <button type="button" class="link-underline portal-profile__remove" data-profile-remove hidden>
+                  {{ 'customer.profile.remove' | t }}
+                </button>
+              </div>
+            </form>
+
+            <div class="portal-profile__globe">
+              <div class="portal-profile__globe-frame">
+                <canvas
+                  data-profile-globe
+                  role="img"
+                  aria-label="{{ 'globe.canvas_label' | t }}"
+                ></canvas>
+                <div class="portal-profile__globe-empty" data-profile-globe-empty>
+                  <p class="eyebrow">{{ 'customer.profile.empty_title' | t }}</p>
+                  <p class="text-soft">{{ 'customer.profile.empty_text' | t }}</p>
+                </div>
+              </div>
+              <ul class="globe-legend" role="list">
+                <li class="globe-legend__item globe-legend__item--you">{{ 'globe.your_pin' | t }} · {{ 'globe.home_base' | t }}</li>
+                <li class="globe-legend__item globe-legend__item--place">{{ 'globe.visited' | t }}</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+    {%- endcase -%}
+  {%- endfor -%}
+</div>
+
+{% schema %}
+{
+  "name": "Customer portal",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtext",
+      "label": "Intro text",
+      "info": "Leave empty to use the default."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "orders",
+      "name": "Orders",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Orders" },
+        {
+          "type": "range",
+          "id": "orders_per_page",
+          "min": 4,
+          "max": 40,
+          "step": 2,
+          "label": "Orders per page",
+          "default": 10
+        }
+      ]
+    },
+    {
+      "type": "addresses",
+      "name": "Addresses",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Addresses" }
+      ]
+    },
+    {
+      "type": "wishlist",
+      "name": "Hearted products",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Hearted" }
+      ]
+    },
+    {
+      "type": "profile",
+      "name": "Foreign World profile",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Your place in the Foreign World" },
+        { "type": "text", "id": "subtext", "label": "Intro text", "info": "Leave empty to use the default." },
+        {
+          "type": "url",
+          "id": "globe_page",
+          "label": "Foreign World page",
+          "info": "Link to the page that contains the Foreign World globe section."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer portal",
+      "blocks": [
+        { "type": "orders" },
+        { "type": "addresses" },
+        { "type": "wishlist" },
+        { "type": "profile" }
+      ]
+    }
+  ]
+}
+{% endschema %}

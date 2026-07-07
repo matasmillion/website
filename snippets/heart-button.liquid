@@ -1,0 +1,16 @@
+{%- comment -%}
+  Usage: {% render 'heart-button', handle: product.handle, title: product.title %}
+  Wired by assets/wishlist.js via [data-heart-button]. No inline JS.
+{%- endcomment -%}
+{%- if settings.enable_wishlist and handle != blank -%}
+  <button
+    type="button"
+    class="heart-button"
+    data-heart-button
+    data-product-handle="{{ handle }}"
+    aria-pressed="false"
+    aria-label="{{ 'wishlist.heart_label' | t: title: title | escape }}"
+  >
+    {% render 'icon', name: 'heart', size: 20 %}
+  </button>
+{%- endif -%}

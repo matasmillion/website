@@ -1,0 +1,130 @@
+{{ 'component-portal.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'customer.js' | asset_url }}" defer></script>
+
+<div class="portal page-width" style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <header class="portal__header portal__header--sub">
+    <div>
+      <p class="eyebrow">
+        <a href="{{ routes.account_url }}" class="portal__breadcrumb">{{ 'customer.account.title' | t }}</a>
+      </p>
+      <h1 class="portal__heading h1">{{ 'customer.addresses.title' | t }}</h1>
+    </div>
+    <button type="button" class="button button--outline button--small" data-address-toggle="AddressNew" aria-expanded="false" aria-controls="AddressNew">
+      {{ 'customer.addresses.add_new' | t }}
+    </button>
+  </header>
+
+  <div id="AddressNew" class="portal-address-form" hidden data-address-form-wrap>
+    <h2 class="h3">{{ 'customer.addresses.add_title' | t }}</h2>
+    {%- form 'customer_address', customer.new_address -%}
+      {% render 'address-form-fields', form: form, id_prefix: 'AddressNew' %}
+      <div class="portal-profile__actions">
+        <button type="submit" class="button">{{ 'customer.addresses.save' | t }}</button>
+        <button type="button" class="button button--outline" data-address-toggle="AddressNew">
+          {{ 'customer.addresses.cancel' | t }}
+        </button>
+      </div>
+    {%- endform -%}
+  </div>
+
+  {%- paginate customer.addresses by 12 -%}
+    {%- if customer.addresses.size > 0 -%}
+      <ul class="portal-addresses" role="list">
+        {%- for address in customer.addresses -%}
+          <li class="portal-address-card">
+            {%- if address == customer.default_address -%}
+              <p class="eyebrow">{{ 'customer.addresses.default' | t }}</p>
+            {%- endif -%}
+            <address class="portal-address-card__body">
+              {{ address | format_address }}
+            </address>
+
+            <div class="portal-address-card__actions">
+              <button
+                type="button"
+                class="link-underline"
+                data-address-toggle="AddressEdit{{ address.id }}"
+                aria-expanded="false"
+                aria-controls="AddressEdit{{ address.id }}"
+              >
+                {{ 'customer.addresses.edit' | t }}
+              </button>
+
+              {%- form 'customer_address', address -%}
+                <input type="hidden" name="_method" value="delete">
+                <button
+                  type="submit"
+                  class="link-underline portal-address-card__delete"
+                  data-address-delete
+                  data-confirm-message="{{ 'customer.addresses.delete_confirm' | t | escape }}"
+                >
+                  {{ 'customer.addresses.delete' | t }}
+                </button>
+              {%- endform -%}
+            </div>
+
+            <div id="AddressEdit{{ address.id }}" class="portal-address-form" hidden data-address-form-wrap>
+              <h2 class="h3">{{ 'customer.addresses.edit_title' | t }}</h2>
+              {%- form 'customer_address', address -%}
+                {% render 'address-form-fields', form: form, address: address, id_prefix: address.id %}
+                <div class="portal-profile__actions">
+                  <button type="submit" class="button">{{ 'customer.addresses.save' | t }}</button>
+                  <button type="button" class="button button--outline" data-address-toggle="AddressEdit{{ address.id }}">
+                    {{ 'customer.addresses.cancel' | t }}
+                  </button>
+                </div>
+              {%- endform -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if paginate.pages > 1 -%}
+        <nav class="pagination" aria-label="{{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}">
+          {%- if paginate.previous -%}
+            <a href="{{ paginate.previous.url }}" class="link-underline">{{ 'general.pagination.previous' | t }}</a>
+          {%- endif -%}
+          <span class="pagination__current">
+            {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+          </span>
+          {%- if paginate.next -%}
+            <a href="{{ paginate.next.url }}" class="link-underline">{{ 'general.pagination.next' | t }}</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- else -%}
+      <div class="empty-state">
+        {% render 'icon', name: 'pin', size: 26 %}
+        <p>{{ 'customer.addresses.none' | t }}</p>
+      </div>
+    {%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Addresses",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

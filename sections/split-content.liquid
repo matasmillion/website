@@ -1,0 +1,101 @@
+{{ 'component-split.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="split color-scheme--{{ section.settings.color_scheme }} split--image-{{ section.settings.image_side }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width split__inner">
+    <div class="split__media" data-fade-in>
+      {%- if section.settings.image != blank -%}
+        {{
+          section.settings.image
+          | image_url: width: 1400
+          | image_tag:
+            loading: 'lazy',
+            widths: '600, 900, 1200, 1400',
+            sizes: '(min-width: 768px) 50vw, 100vw',
+            class: 'split__image',
+            alt: section.settings.image.alt
+        }}
+      {%- else -%}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'split__image split__placeholder' }}
+      {%- endif -%}
+    </div>
+
+    <div class="split__content" data-fade-in>
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="split__heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <div class="split__text rte">{{ section.settings.text }}</div>
+      {%- endif -%}
+      {%- if section.settings.cta_label != blank -%}
+        <a href="{{ section.settings.cta_link }}" class="button button--outline">{{ section.settings.cta_label | escape }}</a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Split content",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "select",
+      "id": "image_side",
+      "label": "Image side (desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Foreign World" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "People, places and properties — mapped" },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>The Foreign World is our living atlas: the Foreigners who wear the brand, the cities that shape it, and the places we call home along the way.</p>"
+    },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Explore the globe" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ],
+  "presets": [{ "name": "Split content" }]
+}
+{% endschema %}

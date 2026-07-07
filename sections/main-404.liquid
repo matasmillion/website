@@ -1,0 +1,84 @@
+<section
+  class="four-oh-four color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width four-oh-four__inner" data-fade-in>
+    <span class="four-oh-four__icon">{% render 'icon', name: 'globe', size: 28 %}</span>
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+    <h1 class="h0">{{ 'general.404.title' | t }}</h1>
+    <p class="four-oh-four__text">{{ 'general.404.subtext' | t }}</p>
+    <a href="{{ routes.root_url }}" class="button">{{ 'general.404.cta' | t }}</a>
+  </div>
+</section>
+
+<style>
+  .four-oh-four__inner {
+    min-height: min(72vh, 44rem);
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1.25rem;
+    text-align: center;
+  }
+
+  .four-oh-four__icon {
+    display: inline-flex;
+    color: var(--color-terracotta);
+  }
+
+  .four-oh-four__text {
+    max-width: 38ch;
+    color: var(--color-ink-soft);
+  }
+
+  .four-oh-four__inner .button {
+    margin-top: 0.75rem;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "404",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "404"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

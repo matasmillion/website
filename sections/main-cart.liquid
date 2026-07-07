@@ -1,0 +1,173 @@
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="cart color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="cart__header">
+      <h1>{{ 'cart.title' | t }}</h1>
+    </header>
+
+    {%- if cart == empty -%}
+      <div class="empty-state">
+        <p>{{ 'cart.empty' | t }}</p>
+        <a href="{{ routes.all_products_collection_url }}" class="button">{{ 'cart.continue_shopping' | t }}</a>
+      </div>
+    {%- else -%}
+      {%- form 'cart', cart, class: 'cart__form' -%}
+        <ul class="cart-items" role="list">
+          {%- for item in cart.items -%}
+            <li class="cart-item">
+              <a href="{{ item.url }}" class="cart-item__media" tabindex="-1" aria-hidden="true">
+                {%- if item.image -%}
+                  {{
+                    item.image
+                    | image_url: width: 192
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '96, 192',
+                      sizes: '96px',
+                      class: 'cart-item__image',
+                      alt: item.image.alt
+                  }}
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'cart-item__image cart-item__placeholder' }}
+                {%- endif -%}
+              </a>
+
+              <div class="cart-item__details">
+                <h2 class="cart-item__title">
+                  <a href="{{ item.url }}">{{ item.product.title }}</a>
+                </h2>
+
+                {%- unless item.product.has_only_default_variant -%}
+                  <p class="cart-item__options">
+                    {%- for option in item.options_with_values -%}
+                      {{ option.value }}{% unless forloop.last %} &middot; {% endunless %}
+                    {%- endfor -%}
+                  </p>
+                {%- endunless -%}
+
+                {%- if item.selling_plan_allocation -%}
+                  <p class="cart-item__options">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                {%- endif -%}
+
+                <div class="cart-item__controls">
+                  <div class="cart-item__qty" data-qty>
+                    <label class="visually-hidden" for="Quantity-{{ item.index | plus: 1 }}">
+                      {{ 'cart.quantity' | t }}
+                    </label>
+                    <button
+                      type="button"
+                      class="cart-item__qty-button"
+                      data-qty-minus
+                      aria-label="{{ 'products.product.decrease_quantity' | t }}"
+                    >
+                      &minus;
+                    </button>
+                    <input
+                      class="cart-item__qty-input"
+                      type="number"
+                      name="updates[]"
+                      id="Quantity-{{ item.index | plus: 1 }}"
+                      value="{{ item.quantity }}"
+                      min="0"
+                      inputmode="numeric"
+                      data-qty-input
+                    >
+                    <button
+                      type="button"
+                      class="cart-item__qty-button"
+                      data-qty-plus
+                      aria-label="{{ 'products.product.increase_quantity' | t }}"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <a href="{{ item.url_to_remove }}" class="cart-item__remove link-underline">
+                    {{ 'cart.remove' | t }}
+                  </a>
+                </div>
+              </div>
+
+              <p class="cart-item__price">
+                {%- if item.original_line_price > item.final_line_price -%}
+                  <span class="cart-item__price-final">{{ item.final_line_price | money }}</span>
+                  <s class="cart-item__price-compare">{{ item.original_line_price | money }}</s>
+                {%- else -%}
+                  {{ item.original_line_price | money }}
+                {%- endif -%}
+              </p>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        <div class="cart-footer">
+          {%- if settings.cart_notes_enable -%}
+            <div class="cart-footer__note field">
+              <label class="field__label" for="CartNote">{{ 'cart.note_label' | t }}</label>
+              <textarea id="CartNote" name="note" class="field__input">{{ cart.note }}</textarea>
+            </div>
+          {%- endif -%}
+
+          <div class="cart-footer__summary">
+            <div class="cart-footer__subtotal">
+              <span class="cart-footer__subtotal-label">{{ 'cart.subtotal' | t }}</span>
+              <span class="cart-footer__subtotal-amount">{{ cart.total_price | money }}</span>
+            </div>
+            <p class="cart-footer__taxes">{{ 'cart.taxes_and_shipping' | t }}</p>
+            <div class="cart-footer__actions">
+              <button type="submit" name="update" class="button button--outline button--full">
+                {{ 'cart.update' | t }}
+              </button>
+              <button type="submit" name="checkout" class="button button--full">
+                {{ 'cart.checkout' | t }}
+              </button>
+            </div>
+          </div>
+        </div>
+      {%- endform -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cart",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

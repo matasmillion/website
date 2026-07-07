@@ -1,0 +1,60 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "guarantee_returns": {
+          "type": "guarantee",
+          "settings": {
+            "text": "Free returns & exchanges"
+          }
+        },
+        "guarantee_delivery": {
+          "type": "guarantee",
+          "settings": {
+            "text": "5-day delivery guarantee"
+          }
+        },
+        "guarantee_express": {
+          "type": "guarantee",
+          "settings": {
+            "text": "Complimentary express over $150"
+          }
+        },
+        "accordion_description": {
+          "type": "accordion_row",
+          "settings": {
+            "title": "Description"
+          }
+        },
+        "accordion_materials": {
+          "type": "accordion_row",
+          "settings": {
+            "title": "Materials & Care",
+            "content": "<p>Crafted from responsibly sourced materials, made to travel well. Machine wash cold with like colors, lay flat to dry and iron on low if needed.</p>"
+          }
+        },
+        "accordion_shipping": {
+          "type": "accordion_row",
+          "settings": {
+            "title": "Shipping & Returns",
+            "content": "<p>Complimentary express shipping on orders over $150, delivered within five days. Returns and exchanges are free within 30 days of delivery.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "guarantee_returns",
+        "guarantee_delivery",
+        "guarantee_express",
+        "accordion_description",
+        "accordion_materials",
+        "accordion_shipping"
+      ],
+      "settings": {
+        "show_vendor": false,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": ["main"]
+}

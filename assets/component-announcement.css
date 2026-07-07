@@ -1,0 +1,18 @@
+.announcement-bar__inner {
+  display: flex;
+  justify-content: center;
+  padding-block: 0.55rem;
+}
+
+.announcement-bar__text {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+a.announcement-bar__text:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}

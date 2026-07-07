@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_cream }}">
+
+    <title>
+      {{- page_title -}}
+      {%- if current_tags -%}
+        {%- assign tag_list = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: tag_list }}
+      {%- endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    {%- liquid
+      assign body_font = settings.type_body_font
+      assign heading_font = settings.type_heading_font
+      assign body_font_bold = body_font | font_modify: 'weight', 'bold'
+      assign body_font_medium = body_font | font_modify: 'weight', '500'
+    -%}
+    <style>
+      {{ body_font | font_face: font_display: 'swap' }}
+      {{ body_font_medium | font_face: font_display: 'swap' }}
+      {{ body_font_bold | font_face: font_display: 'swap' }}
+      {{ heading_font | font_face: font_display: 'swap' }}
+
+      :root {
+        --color-ink: {{ settings.color_ink }};
+        --color-cream: {{ settings.color_cream }};
+        --color-terracotta: {{ settings.color_terracotta }};
+        --color-sage: {{ settings.color_sage }};
+        --color-sand: {{ settings.color_sand }};
+        --color-ink-soft: color-mix(in srgb, {{ settings.color_ink }} 58%, {{ settings.color_cream }});
+        --color-line: color-mix(in srgb, {{ settings.color_ink }} 14%, {{ settings.color_cream }});
+
+        --font-heading: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+        --font-body: {{ body_font.family }}, {{ body_font.fallback_families }};
+        --font-heading-weight: {{ heading_font.weight | default: 500 }};
+        --heading-scale: {{ settings.heading_scale | divided_by: 100.0 }};
+        --body-size: {{ settings.body_size }}px;
+
+        --page-width: {{ settings.page_width }}px;
+        --gutter: clamp(1.25rem, 4vw, 3rem);
+        --section-space: clamp(4rem, 10vw, 9rem);
+
+        --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+        --dur: 0.45s;
+      }
+    </style>
+
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'global.js' | asset_url }}" defer></script>
+    <script src="{{ 'wishlist.js' | asset_url }}" defer></script>
+
+    <script>
+      window.routes = {
+        root: {{ routes.root_url | json }},
+        cart: {{ routes.cart_url | json }},
+        account: {{ routes.account_url | json }},
+        search: {{ routes.search_url | json }}
+      };
+      window.FR = {
+        customer: {% if customer %}{ firstName: {{ customer.first_name | json }} }{% else %}null{% endif %},
+        moneyFormat: {{ shop.money_format | json }}
+      };
+      document.documentElement.classList.remove('no-js');
+    </script>
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="template-{{ request.page_type | handle }}">
+    <a class="skip-to-content link-underline" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" class="main-content" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+  </body>
+</html>

@@ -1,0 +1,241 @@
+{
+  "general": {
+    "meta": {
+      "tags": "Tagged \"{{ tags }}\"",
+      "page": "Page {{ page }}"
+    },
+    "accessibility": {
+      "skip_to_content": "Skip to content",
+      "open_menu": "Open menu",
+      "close_menu": "Close menu",
+      "main_menu": "Main menu",
+      "search": "Search",
+      "account": "Account",
+      "cart": "Cart, {{ count }} items",
+      "announcement": "Announcement"
+    },
+    "footer": {
+      "follow": "Follow"
+    },
+    "search": {
+      "title": "Search",
+      "placeholder": "Search",
+      "submit": "Search",
+      "no_results": "No results for \"{{ terms }}\". Try a different search.",
+      "results_with_count": {
+        "one": "{{ count }} result for \"{{ terms }}\"",
+        "other": "{{ count }} results for \"{{ terms }}\""
+      }
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page_of": "Page {{ current }} of {{ total }}"
+    },
+    "404": {
+      "title": "Off the map",
+      "subtext": "The page you're looking for doesn't exist — but the world is big.",
+      "cta": "Continue exploring"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "decrease_quantity": "Decrease quantity",
+      "increase_quantity": "Increase quantity",
+      "size_guide": "Size guide",
+      "vendor": "Vendor",
+      "on_sale": "Sale",
+      "view_details": "View details"
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty — for now.",
+    "continue_shopping": "Continue shopping",
+    "checkout": "Checkout",
+    "update": "Update cart",
+    "remove": "Remove",
+    "note_label": "Order note",
+    "subtotal": "Subtotal",
+    "taxes_and_shipping": "Taxes and shipping calculated at checkout",
+    "quantity": "Quantity"
+  },
+  "wishlist": {
+    "title": "Hearted",
+    "heart_label": "Heart {{ title }}",
+    "header_label": "Hearted products",
+    "empty": "Nothing hearted yet. Tap the heart on any piece you love and it will wait for you here.",
+    "empty_cta": "Explore the collection",
+    "saved_on_device": "Hearts are saved in this browser.",
+    "remove_label": "Remove from hearted",
+    "count_label": {
+      "one": "{{ count }} piece",
+      "other": "{{ count }} pieces"
+    }
+  },
+  "globe": {
+    "title": "The Foreign World",
+    "legend_people": "People",
+    "legend_places": "Places",
+    "legend_properties": "Properties",
+    "filter_all": "All",
+    "your_pin": "You",
+    "index_heading": "On the map",
+    "drag_hint": "Drag to spin the globe",
+    "close_card": "Close",
+    "visit_link": "Discover",
+    "home_base": "Home base",
+    "visited": "Been to",
+    "join_heading": "Put yourself on the map",
+    "join_text": "Create your Foreigner profile and see yourself among the community.",
+    "join_cta": "Create your profile",
+    "view_profile_cta": "Edit your profile",
+    "canvas_label": "Interactive globe showing people, places and properties. Use the list below to browse them."
+  },
+  "customer": {
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "sign_in": "Sign in",
+      "forgot_password": "Forgot your password?",
+      "new_customer": "New to Foreign Resource?",
+      "create_account": "Create an account",
+      "guest_title": "Continue as guest",
+      "guest_continue": "Continue"
+    },
+    "recover": {
+      "title": "Reset your password",
+      "subtext": "Enter your email and we'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "success": "If that email is registered, a reset link is on its way.",
+      "cancel": "Back to sign in"
+    },
+    "register": {
+      "title": "Become a Foreigner",
+      "subtext": "Create an account to follow your orders, keep your hearted pieces and take your place on the Foreign World map.",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "have_account": "Already have an account?",
+      "sign_in": "Sign in"
+    },
+    "reset_password": {
+      "title": "Choose a new password",
+      "subtext": "Set a new password for {{ email }}",
+      "password": "New password",
+      "password_confirm": "Confirm password",
+      "submit": "Save password"
+    },
+    "activate_account": {
+      "title": "Activate your account",
+      "subtext": "Choose a password to activate your account.",
+      "password": "Password",
+      "password_confirm": "Confirm password",
+      "submit": "Activate",
+      "decline": "Decline invitation"
+    },
+    "account": {
+      "title": "Account",
+      "welcome": "Welcome back, {{ name }}",
+      "welcome_generic": "Welcome back",
+      "subtext": "Your orders, addresses, hearted pieces and your place in the Foreign World.",
+      "log_out": "Log out",
+      "nav_overview": "Overview",
+      "nav_orders": "Orders",
+      "nav_addresses": "Addresses",
+      "nav_wishlist": "Hearted",
+      "nav_globe": "Foreign World",
+      "details": "Account details",
+      "view_all_orders": "View all orders"
+    },
+    "orders": {
+      "title": "Orders",
+      "order_number": "Order",
+      "date": "Date",
+      "payment_status": "Payment",
+      "fulfillment_status": "Fulfillment",
+      "total": "Total",
+      "none": "No orders yet. Your first journey starts with a single piece.",
+      "none_cta": "Shop the collection",
+      "count": {
+        "one": "{{ count }} order",
+        "other": "{{ count }} orders"
+      }
+    },
+    "order": {
+      "title": "Order {{ name }}",
+      "placed_on": "Placed {{ date }}",
+      "cancelled_on": "Cancelled {{ date }}",
+      "product": "Product",
+      "price": "Price",
+      "quantity": "Quantity",
+      "total": "Total",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "discount": "Discount",
+      "billing_address": "Billing address",
+      "shipping_address": "Shipping address",
+      "fulfillment_html": "Shipped {{ date }}",
+      "tracking": "Track shipment",
+      "back": "Back to account"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "default": "Default",
+      "none": "No addresses saved yet.",
+      "add_new": "Add a new address",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete this address?",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "company": "Company",
+      "address1": "Address",
+      "address2": "Apartment, suite, etc.",
+      "city": "City",
+      "country": "Country/region",
+      "province": "Province/State",
+      "zip": "Postal/ZIP code",
+      "phone": "Phone",
+      "set_default": "Set as default address",
+      "save": "Save address",
+      "cancel": "Cancel",
+      "edit_title": "Edit address",
+      "add_title": "New address",
+      "count": {
+        "one": "{{ count }} address",
+        "other": "{{ count }} addresses"
+      }
+    },
+    "profile": {
+      "title": "Your place in the Foreign World",
+      "subtext": "Pin yourself to the map — where you're based, and where you've been.",
+      "display_name": "Display name",
+      "bio": "One-line bio",
+      "bio_placeholder": "Photographer chasing winter light",
+      "home_base": "Home base",
+      "home_placeholder": "Start typing a city…",
+      "visited": "Places you've been",
+      "visited_placeholder": "Add a city…",
+      "visited_add": "Add",
+      "visited_remove": "Remove {{ city }}",
+      "save": "Save profile",
+      "saved": "Profile saved. See you on the map.",
+      "view_on_globe": "View on the globe",
+      "remove": "Remove my pin",
+      "removed": "Profile removed from this browser.",
+      "device_note": "Your profile is saved in this browser.",
+      "empty_title": "You're not on the map yet",
+      "empty_text": "Set your home base and the places you've been — then find yourself on the Foreign World globe.",
+      "unknown_city": "Pick a city from the suggestions so we can pin it."
+    }
+  }
+}

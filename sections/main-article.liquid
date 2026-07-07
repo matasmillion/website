@@ -1,0 +1,109 @@
+{{ 'component-blog.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="article color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if section.settings.show_hero and article.image -%}
+    <div class="page-width article__hero" data-fade-in>
+      {{
+        article.image
+        | image_url: width: 2200
+        | image_tag:
+          loading: 'eager',
+          widths: '750, 1100, 1500, 1800, 2200',
+          sizes: '100vw',
+          class: 'article__hero-image',
+          alt: article.image.alt
+      }}
+    </div>
+  {%- endif -%}
+
+  <div class="page-width page-width--narrow">
+    <header class="article__header" data-fade-in>
+      {%- if section.settings.show_date or section.settings.show_author -%}
+        <p class="eyebrow">
+          {%- if section.settings.show_date -%}
+            {{ article.published_at | date: '%B %d, %Y' }}
+          {%- endif -%}
+          {%- if section.settings.show_date and section.settings.show_author %} &middot; {% endif -%}
+          {%- if section.settings.show_author -%}
+            {{ article.author }}
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+      <h1 class="article__title">{{ article.title }}</h1>
+    </header>
+
+    <div class="article__content rte" data-fade-in>
+      {{ article.content }}
+    </div>
+
+    <footer class="article__footer">
+      <a href="{{ blog.url }}" class="link-underline">{{ section.settings.back_label | escape }}</a>
+    </footer>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Article",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_hero",
+      "label": "Show featured image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "back_label",
+      "label": "Back link label",
+      "default": "Back to all stories"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

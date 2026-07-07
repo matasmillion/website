@@ -1,0 +1,82 @@
+/* Foreign Resource — hero banner */
+
+.hero {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  color: #fff;
+}
+
+.hero--full { min-height: 100svh; }
+.hero--large { min-height: 78svh; }
+.hero--medium { min-height: 56svh; }
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / var(--hero-overlay, 0.2));
+}
+
+.hero__image,
+.hero__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero__placeholder {
+  background: var(--color-sand);
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1.4rem;
+  width: 100%;
+  justify-items: start;
+  align-self: end;
+  padding-block: clamp(2.5rem, 7vw, 5rem);
+}
+
+.hero--text-center .hero__content {
+  align-self: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.hero__eyebrow {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.hero__heading {
+  max-width: 14ch;
+}
+
+.hero--text-center .hero__heading {
+  max-width: 18ch;
+}
+
+.hero__subheading {
+  font-size: 1.05rem;
+  max-width: 44ch;
+  opacity: 0.9;
+}
+
+.hero .button--outline {
+  color: #fff;
+  border-color: #fff;
+}
+
+.hero .button--outline:hover {
+  background: #fff;
+  border-color: #fff;
+  color: var(--color-ink);
+}

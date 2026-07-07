@@ -1,0 +1,52 @@
+/* Foreign Resource — split content */
+
+.split__inner {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.split__media {
+  overflow: hidden;
+}
+
+.split__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4 / 5;
+}
+
+.split__placeholder {
+  background: var(--color-sand);
+}
+
+.split__content {
+  display: grid;
+  gap: 1.4rem;
+  justify-items: start;
+  max-width: 34rem;
+}
+
+.split__heading {
+  max-width: 16ch;
+}
+
+.split__text {
+  color: var(--color-ink-soft);
+}
+
+@media (min-width: 768px) {
+  .split__inner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(2.5rem, 6vw, 6rem);
+  }
+
+  .split--image-right .split__media {
+    order: 2;
+  }
+
+  .split__content {
+    padding-block: 2rem;
+  }
+}

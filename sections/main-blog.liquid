@@ -1,0 +1,154 @@
+{{ 'component-blog.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="blog color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="blog__header" data-fade-in>
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="blog__title">{{ blog.title }}</h1>
+    </header>
+
+    {%- if blog.articles_count == 0 -%}
+      <div class="empty-state">
+        <p>{{ section.settings.empty_text | escape }}</p>
+      </div>
+    {%- else -%}
+      {%- paginate blog.articles by 12 -%}
+        <div class="blog-list">
+          {%- for article in blog.articles -%}
+            {%- liquid
+              assign has_image = false
+              if section.settings.show_images and article.image
+                assign has_image = true
+              endif
+            -%}
+            <article class="blog-row{% if has_image %} blog-row--with-image{% endif %}" data-fade-in>
+              <div class="blog-row__text">
+                <p class="eyebrow">{{ article.published_at | date: '%B %d, %Y' }}</p>
+                <h2 class="blog-row__title">
+                  <a href="{{ article.url }}">{{ article.title }}</a>
+                </h2>
+                {%- if section.settings.show_excerpts -%}
+                  {%- assign excerpt = article.excerpt_or_content | strip_html | truncate: 200 -%}
+                  {%- if excerpt != blank -%}
+                    <p class="blog-row__excerpt">{{ excerpt }}</p>
+                  {%- endif -%}
+                {%- endif -%}
+                {%- if section.settings.read_label != blank -%}
+                  <a href="{{ article.url }}" class="blog-row__more link-underline">
+                    {{ section.settings.read_label | escape }}
+                  </a>
+                {%- endif -%}
+              </div>
+
+              {%- if has_image -%}
+                <a href="{{ article.url }}" class="blog-row__media" tabindex="-1" aria-hidden="true">
+                  {{
+                    article.image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '360, 540, 720, 900',
+                      sizes: '(min-width: 768px) 340px, 100vw',
+                      class: 'blog-row__image',
+                      alt: article.image.alt
+                  }}
+                </a>
+              {%- endif -%}
+            </article>
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav
+            class="pagination"
+            aria-label="{{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}"
+          >
+            {%- if paginate.previous -%}
+              <a href="{{ paginate.previous.url }}" class="link-underline">{{ 'general.pagination.previous' | t }}</a>
+            {%- endif -%}
+            <span class="pagination__current">
+              {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+            </span>
+            {%- if paginate.next -%}
+              <a href="{{ paginate.next.url }}" class="link-underline">{{ 'general.pagination.next' | t }}</a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "City guides & stories"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_images",
+      "label": "Show featured images",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpts",
+      "label": "Show excerpts",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "read_label",
+      "label": "Read link label",
+      "default": "Read story"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty blog text",
+      "default": "New stories are on the way."
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

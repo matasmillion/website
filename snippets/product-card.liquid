@@ -1,0 +1,57 @@
+{%- comment -%}
+  Usage: {% render 'product-card', product: product, show_heart: true, loading: 'lazy' %}
+  Minimal lookbook card: image (hover swaps to second image), name, price, heart.
+{%- endcomment -%}
+{%- liquid
+  assign card_loading = loading | default: 'lazy'
+  assign show_heart = show_heart | default: true, allow_false: true
+-%}
+<article class="product-card">
+  <a href="{{ product.url }}" class="product-card__media" aria-label="{{ product.title | escape }}">
+    {%- if product.featured_media -%}
+      {{
+        product.featured_media
+        | image_url: width: 900
+        | image_tag:
+          loading: card_loading,
+          widths: '360, 540, 720, 900',
+          sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw',
+          class: 'product-card__image product-card__image--primary',
+          alt: product.featured_media.alt
+      }}
+      {%- if product.media[1] -%}
+        {{
+          product.media[1]
+          | image_url: width: 900
+          | image_tag:
+            loading: 'lazy',
+            widths: '360, 540, 720, 900',
+            sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw',
+            class: 'product-card__image product-card__image--secondary',
+            alt: product.media[1].alt
+        }}
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'product-card__image product-card__placeholder' }}
+    {%- endif -%}
+  </a>
+
+  <div class="product-card__details">
+    <div class="product-card__text">
+      <h3 class="product-card__title">
+        <a href="{{ product.url }}">{{ product.title }}</a>
+      </h3>
+      <p class="product-card__price">
+        {%- if product.compare_at_price > product.price -%}
+          <span class="product-card__price-sale">{{ product.price | money }}</span>
+          <s class="product-card__price-compare">{{ product.compare_at_price | money }}</s>
+        {%- else -%}
+          {{ product.price | money }}
+        {%- endif -%}
+      </p>
+    </div>
+    {%- if show_heart -%}
+      {% render 'heart-button', handle: product.handle, title: product.title %}
+    {%- endif -%}
+  </div>
+</article>

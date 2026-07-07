@@ -1,0 +1,148 @@
+{{ 'component-collection.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="collection list-collections"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <header class="collection__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="collection__title">{{ section.settings.title | escape }}</h1>
+    </header>
+
+    {%- paginate collections by section.settings.collections_per_page -%}
+      <ul
+        class="collection__grid"
+        role="list"
+        style="--columns-desktop: {{ section.settings.columns_desktop }};"
+      >
+        {%- for collection in collections -%}
+          {%- liquid
+            assign card_loading = 'lazy'
+            if forloop.index <= 3 and paginate.current_page == 1
+              assign card_loading = 'eager'
+            endif
+            assign card_alt = collection.featured_image.alt | default: collection.title
+          -%}
+          <li class="collection__grid-item">
+            <article class="collection-card">
+              <a href="{{ collection.url }}" class="collection-card__media" aria-label="{{ collection.title | escape }}">
+                {%- if collection.featured_image -%}
+                  {{
+                    collection.featured_image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: card_loading,
+                      widths: '360, 540, 720, 900',
+                      sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 50vw',
+                      class: 'collection-card__image',
+                      alt: card_alt
+                  }}
+                {%- else -%}
+                  {{ 'collection-1' | placeholder_svg_tag: 'collection-card__image collection-card__placeholder' }}
+                {%- endif -%}
+              </a>
+              <div class="collection-card__text">
+                <h2 class="collection-card__title">
+                  <a href="{{ collection.url }}">{{ collection.title }}</a>
+                </h2>
+                {%- if section.settings.show_count -%}
+                  <p class="collection-card__count">
+                    {{ collection.all_products_count }} {{ section.settings.count_label | escape }}
+                  </p>
+                {%- endif -%}
+              </div>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if paginate.pages > 1 -%}
+        {%- assign page_label = 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages -%}
+        <nav class="pagination" aria-label="{{ page_label | escape }}">
+          {%- if paginate.previous -%}
+            <a class="link-underline" href="{{ paginate.previous.url }}">{{ 'general.pagination.previous' | t }}</a>
+          {%- endif -%}
+          <span class="pagination__current">
+            {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+          </span>
+          {%- if paginate.next -%}
+            <a class="link-underline" href="{{ paginate.next.url }}">{{ 'general.pagination.next' | t }}</a>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Foreign Resource"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show product count",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "count_label",
+      "label": "Product count label",
+      "default": "pieces"
+    },
+    {
+      "type": "range",
+      "id": "collections_per_page",
+      "min": 6,
+      "max": 24,
+      "step": 3,
+      "label": "Collections per page",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Columns on desktop",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

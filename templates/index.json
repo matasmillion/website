@@ -1,0 +1,32 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-banner",
+      "settings": {
+        "height": "full",
+        "eyebrow": "Foreign Resource",
+        "heading": "Travel is the only thing you buy that makes you richer",
+        "text_position": "bottom-left",
+        "cta_label": "Shop collection",
+        "cta_link": "shopify://collections/all",
+        "cta_style": "outline",
+        "overlay_opacity": 20
+      }
+    },
+    "foreign_world_teaser": {
+      "type": "split-content",
+      "settings": {
+        "image_side": "left",
+        "color_scheme": "cream",
+        "eyebrow": "The Foreign World",
+        "heading": "People, places and properties — mapped",
+        "text": "<p>The Foreign World is our living atlas: the Foreigners who wear the brand, the cities that shape it, and the places we call home along the way.</p>",
+        "cta_label": "Explore the globe",
+        "cta_link": "shopify://pages/foreign-world",
+        "padding_top": 96,
+        "padding_bottom": 96
+      }
+    }
+  },
+  "order": ["hero", "foreign_world_teaser"]
+}

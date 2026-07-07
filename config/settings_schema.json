@@ -1,0 +1,172 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Foreign Resource",
+    "theme_version": "0.2.0",
+    "theme_author": "Foreign Resource",
+    "theme_documentation_url": "https://foreignresource.com",
+    "theme_support_url": "https://foreignresource.com"
+  },
+  {
+    "name": "Logo & favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image",
+        "info": "Shown in the header. Leave empty to use the store name as a wordmark."
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 60,
+        "max": 300,
+        "step": 10,
+        "unit": "px",
+        "label": "Logo width",
+        "default": 140
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Will be scaled to 32 × 32 px"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_ink",
+        "label": "Ink (text & key UI)",
+        "default": "#0A0A0A"
+      },
+      {
+        "type": "color",
+        "id": "color_cream",
+        "label": "Cream (backgrounds)",
+        "default": "#F5F0EB"
+      },
+      {
+        "type": "color",
+        "id": "color_terracotta",
+        "label": "Terracotta (accents & CTAs)",
+        "default": "#C4632A"
+      },
+      {
+        "type": "color",
+        "id": "color_sage",
+        "label": "Sage (secondary accent)",
+        "default": "#7A8B6F"
+      },
+      {
+        "type": "color",
+        "id": "color_sand",
+        "label": "Sand (alternate backgrounds)",
+        "default": "#D4C5A9"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "type_heading_font",
+        "label": "Headline font",
+        "default": "archivo_n5"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "label": "Body font",
+        "default": "inter_n4"
+      },
+      {
+        "type": "range",
+        "id": "heading_scale",
+        "min": 80,
+        "max": 130,
+        "step": 5,
+        "unit": "%",
+        "label": "Headline scale",
+        "default": 100
+      },
+      {
+        "type": "range",
+        "id": "body_size",
+        "min": 13,
+        "max": 18,
+        "step": 1,
+        "unit": "px",
+        "label": "Body size",
+        "default": 15
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "min": 1000,
+        "max": 1800,
+        "step": 40,
+        "unit": "px",
+        "label": "Page width",
+        "default": 1440
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok",
+        "label": "TikTok URL"
+      },
+      {
+        "type": "url",
+        "id": "social_youtube",
+        "label": "YouTube URL"
+      },
+      {
+        "type": "url",
+        "id": "social_x",
+        "label": "X (Twitter) URL"
+      }
+    ]
+  },
+  {
+    "name": "Wishlist",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_wishlist",
+        "label": "Enable hearted products",
+        "info": "Shows heart buttons on product cards and product pages. Hearts are saved in the customer's browser and shown in their account portal.",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "cart_notes_enable",
+        "label": "Enable order notes",
+        "default": false
+      }
+    ]
+  }
+]

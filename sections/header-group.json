@@ -1,0 +1,24 @@
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement": {
+      "type": "announcement-bar",
+      "settings": {
+        "show_bar": true,
+        "text": "Complimentary shipping on orders over $150",
+        "background": "#0A0A0A",
+        "text_color": "#F5F0EB"
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "logo_position": "center",
+        "sticky": true,
+        "menu_footer_text": "Freedom through confidence"
+      }
+    }
+  },
+  "order": ["announcement", "header"]
+}

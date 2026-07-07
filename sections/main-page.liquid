@@ -1,0 +1,59 @@
+<section
+  class="main-page color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width page-width--narrow">
+    <header class="main-page__header" data-fade-in>
+      <h1>{{ page.title }}</h1>
+    </header>
+
+    <div class="main-page__content rte" data-fade-in>
+      {{ page.content }}
+    </div>
+  </div>
+</section>
+
+<style>
+  .main-page__header {
+    margin-bottom: clamp(1.75rem, 5vw, 3rem);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Page",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

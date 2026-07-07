@@ -1,0 +1,149 @@
+{{ 'component-search.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="search color-scheme--{{ section.settings.color_scheme }}"
+  style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="page-width">
+    <div class="search-hero" data-fade-in>
+      <h1 class="search-hero__heading">{{ 'general.search.title' | t }}</h1>
+
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-hero__form">
+        <label class="visually-hidden" for="SearchInput">{{ 'general.search.placeholder' | t }}</label>
+        <input
+          id="SearchInput"
+          class="search-hero__input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'general.search.placeholder' | t }}"
+          autocomplete="off"
+          autocorrect="off"
+        >
+        <button type="submit" class="search-hero__submit" aria-label="{{ 'general.search.submit' | t }}">
+          {% render 'icon', name: 'search', size: 24 %}
+        </button>
+      </form>
+    </div>
+
+    {%- if search.performed -%}
+      {%- paginate search.results by 24 -%}
+        {%- if search.results_count == 0 -%}
+          <div class="empty-state">
+            <p>{{ 'general.search.no_results' | t: terms: search.terms }}</p>
+          </div>
+        {%- else -%}
+          <div class="search-results">
+            <p class="search-results__count">
+              {{ 'general.search.results_with_count' | t: count: search.results_count, terms: search.terms }}
+            </p>
+
+            {%- liquid
+              assign has_products = false
+              assign has_other = false
+              for item in search.results
+                if item.object_type == 'product'
+                  assign has_products = true
+                else
+                  assign has_other = true
+                endif
+              endfor
+            -%}
+
+            {%- if has_products -%}
+              <div class="search-grid">
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'product' -%}
+                    {% render 'product-card', product: item %}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {%- if has_other -%}
+              <div class="search-rows">
+                {%- for item in search.results -%}
+                  {%- unless item.object_type == 'product' -%}
+                    {%- liquid
+                      if item.object_type == 'article'
+                        assign summary = item.excerpt_or_content | strip_html | truncate: 140
+                      else
+                        assign summary = item.content | strip_html | truncate: 140
+                      endif
+                    -%}
+                    <a href="{{ item.url }}" class="search-row">
+                      <span class="search-row__text">
+                        <span class="search-row__type eyebrow">{{ item.object_type | capitalize }}</span>
+                        <span class="search-row__title">{{ item.title }}</span>
+                        {%- if summary != blank -%}
+                          <span class="search-row__excerpt">{{ summary }}</span>
+                        {%- endif -%}
+                      </span>
+                      <span class="search-row__arrow">{% render 'icon', name: 'arrow-right' %}</span>
+                    </a>
+                  {%- endunless -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- if paginate.pages > 1 -%}
+            <nav
+              class="pagination"
+              aria-label="{{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}"
+            >
+              {%- if paginate.previous -%}
+                <a href="{{ paginate.previous.url }}" class="link-underline">{{ 'general.pagination.previous' | t }}</a>
+              {%- endif -%}
+              <span class="pagination__current">
+                {{ 'general.pagination.page_of' | t: current: paginate.current_page, total: paginate.pages }}
+              </span>
+              {%- if paginate.next -%}
+                <a href="{{ paginate.next.url }}" class="link-underline">{{ 'general.pagination.next' | t }}</a>
+              {%- endif -%}
+            </nav>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Search",
+  "settings": [
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "cream", "label": "Cream" },
+        { "value": "sand", "label": "Sand" },
+        { "value": "ink", "label": "Ink" }
+      ],
+      "default": "cream"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,230 @@
+/* Foreign Resource — header + full-screen menu overlay */
+
+.header {
+  background: var(--color-cream);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur) var(--ease);
+}
+
+.header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header.is-scrolled {
+  border-bottom-color: var(--color-line);
+}
+
+.header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 64px;
+  gap: 0.5rem;
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  justify-self: end;
+}
+
+.header__icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+  transition: color var(--dur) var(--ease);
+}
+
+.header__icon-button:hover {
+  color: var(--color-terracotta);
+}
+
+.header__badge {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  min-width: 15px;
+  height: 15px;
+  padding-inline: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-terracotta);
+  color: var(--color-cream);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+.header__badge.is-empty {
+  display: none;
+}
+
+.header__logo {
+  justify-self: center;
+}
+
+.header__logo-image {
+  height: auto;
+}
+
+.header__wordmark {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Desktop nav */
+.header__nav {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .header__nav {
+    display: block;
+    margin-left: 0.4rem;
+  }
+
+  .header__nav-list {
+    display: flex;
+    gap: 1.6rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__nav-link {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding-block: 0.4rem;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .header__nav-link:hover,
+  .header__nav-link.is-current {
+    border-bottom-color: currentColor;
+  }
+
+  /* Left logo variant: nav sits after logo */
+  .header--logo-left .header__inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .header--logo-left .header__logo {
+    order: -1;
+    justify-self: start;
+    margin-right: 2rem;
+  }
+}
+
+/* Full-screen menu overlay */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.menu-overlay.is-open {
+  opacity: 1;
+}
+
+.menu-overlay__top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.6rem var(--gutter);
+}
+
+.menu-overlay__nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--gutter);
+  overflow-y: auto;
+}
+
+.menu-overlay__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.menu-overlay__link {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight, 500);
+  font-size: clamp(2.2rem, 8vw, 4.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  transition: color var(--dur) var(--ease);
+}
+
+.menu-overlay__link:hover {
+  color: var(--color-terracotta);
+}
+
+.menu-overlay.is-open .menu-overlay__list li {
+  animation: menu-link-in 0.6s var(--ease) both;
+  animation-delay: calc(var(--index, 0) * 60ms);
+}
+
+@keyframes menu-link-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.menu-overlay__footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem var(--gutter) 2rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.menu-overlay__tagline {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+@media (min-width: 1024px) {
+  .header__menu-toggle {
+    display: none;
+  }
+}

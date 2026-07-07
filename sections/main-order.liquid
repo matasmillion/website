@@ -1,0 +1,139 @@
+{{ 'component-portal.css' | asset_url | stylesheet_tag }}
+
+<div class="portal page-width" style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <header class="portal__header portal__header--sub">
+    <div>
+      <p class="eyebrow">
+        <a href="{{ routes.account_url }}" class="portal__breadcrumb">{{ 'customer.order.back' | t }}</a>
+      </p>
+      <h1 class="portal__heading h1">{{ 'customer.order.title' | t: name: order.name }}</h1>
+      <p class="portal__subtext text-soft">
+        {%- assign order_date = order.created_at | date: '%B %-d, %Y' -%}
+        {{ 'customer.order.placed_on' | t: date: order_date }}
+        {%- if order.cancelled -%}
+          {%- assign cancelled_date = order.cancelled_at | date: '%B %-d, %Y' %} ·
+          {{ 'customer.order.cancelled_on' | t: date: cancelled_date }}
+        {%- endif -%}
+      </p>
+    </div>
+    <div class="portal__header-aside">
+      <p class="portal__identity">
+        {{ order.financial_status_label }}<br>
+        <span class="text-soft">{{ order.fulfillment_status_label }}</span>
+      </p>
+    </div>
+  </header>
+
+  <section class="portal__panel" aria-label="{{ 'customer.order.product' | t }}">
+    <ul class="portal-order__lines" role="list">
+      {%- for line_item in order.line_items -%}
+        <li class="portal-order__line">
+          <div class="portal-order__line-media">
+            {%- if line_item.image -%}
+              {{
+                line_item.image
+                | image_url: width: 240
+                | image_tag: loading: 'lazy', widths: '120, 240', class: 'portal-order__line-image', alt: line_item.title
+              }}
+            {%- endif -%}
+          </div>
+          <div class="portal-order__line-info">
+            <p class="portal-order__line-title">
+              {%- if line_item.product.url != blank -%}
+                <a href="{{ line_item.product.url }}" class="portal-orders__link">{{ line_item.title }}</a>
+              {%- else -%}
+                {{ line_item.title }}
+              {%- endif -%}
+            </p>
+            {%- unless line_item.variant.title == 'Default Title' or line_item.variant == blank -%}
+              <p class="text-soft">{{ line_item.variant.title }}</p>
+            {%- endunless -%}
+            <p class="text-soft">{{ 'customer.order.quantity' | t }}: {{ line_item.quantity }}</p>
+            {%- if line_item.fulfillment -%}
+              <p class="portal-order__fulfillment text-soft">
+                {%- assign shipped_date = line_item.fulfillment.created_at | date: '%b %-d, %Y' -%}
+                {{ 'customer.order.fulfillment_html' | t: date: shipped_date }}
+                {%- if line_item.fulfillment.tracking_url -%}
+                  · <a href="{{ line_item.fulfillment.tracking_url }}" class="link-underline">{{ 'customer.order.tracking' | t }}</a>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+          </div>
+          <p class="portal-order__line-price">{{ line_item.final_line_price | money }}</p>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    <dl class="portal-order__totals">
+      <div class="portal-order__totals-row">
+        <dt>{{ 'customer.order.subtotal' | t }}</dt>
+        <dd>{{ order.line_items_subtotal_price | money }}</dd>
+      </div>
+      {%- for discount_application in order.discount_applications -%}
+        <div class="portal-order__totals-row portal-order__totals-row--discount">
+          <dt>{{ 'customer.order.discount' | t }} ({{ discount_application.title }})</dt>
+          <dd>&minus;{{ discount_application.total_allocated_amount | money }}</dd>
+        </div>
+      {%- endfor -%}
+      {%- for shipping_method in order.shipping_methods -%}
+        <div class="portal-order__totals-row">
+          <dt>{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</dt>
+          <dd>{{ shipping_method.price | money }}</dd>
+        </div>
+      {%- endfor -%}
+      {%- for tax_line in order.tax_lines -%}
+        <div class="portal-order__totals-row">
+          <dt>{{ 'customer.order.tax' | t }} ({{ tax_line.title }} {{ tax_line.rate | times: 100 | round: 1 }}%)</dt>
+          <dd>{{ tax_line.price | money }}</dd>
+        </div>
+      {%- endfor -%}
+      <div class="portal-order__totals-row portal-order__totals-row--grand">
+        <dt>{{ 'customer.order.total' | t }}</dt>
+        <dd>{{ order.total_price | money }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <div class="portal-order__addresses">
+    <section class="portal-address-card" aria-label="{{ 'customer.order.shipping_address' | t }}">
+      <p class="eyebrow">{{ 'customer.order.shipping_address' | t }}</p>
+      {%- if order.shipping_address -%}
+        <address class="portal-address-card__body">{{ order.shipping_address | format_address }}</address>
+      {%- endif -%}
+    </section>
+    <section class="portal-address-card" aria-label="{{ 'customer.order.billing_address' | t }}">
+      <p class="eyebrow">{{ 'customer.order.billing_address' | t }}</p>
+      {%- if order.billing_address -%}
+        <address class="portal-address-card__body">{{ order.billing_address | format_address }}</address>
+      {%- endif -%}
+    </section>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Order details",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 64
+    }
+  ]
+}
+{% endschema %}
