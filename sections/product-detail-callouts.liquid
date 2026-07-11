@@ -33,6 +33,8 @@
                   srcset="{{ c.image.value | image_url: width: 500 }} 500w, {{ c.image.value | image_url: width: 900 }} 900w"
                   sizes="(min-width: 769px) 32vw, 80vw"
                   alt="{{ c.title.value | escape }}"
+                  width="{{ c.image.value.width }}"
+                  height="{{ c.image.value.height }}"
                   loading="lazy"
                   class="pdc__img"
                 >

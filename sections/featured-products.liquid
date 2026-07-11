@@ -1,7 +1,7 @@
 {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign collection_handle = section.settings.collection
+  assign feature_collection = section.settings.collection
   assign limit = section.settings.products_count
 -%}
 
@@ -11,7 +11,7 @@
       <div class="featured-products__header">
         <h2 class="featured-products__heading">{{ section.settings.heading }}</h2>
         {%- if section.settings.link_text != blank -%}
-          <a href="{{ section.settings.link_url | default: collections[collection_handle].url }}" class="featured-products__link">
+          <a href="{{ section.settings.link_url | default: feature_collection.url }}" class="featured-products__link">
             {{ section.settings.link_text }}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
@@ -22,8 +22,8 @@
 
   <div class="featured-products__carousel" data-carousel>
     <div class="featured-products__track" data-carousel-track>
-      {%- if collection_handle != blank -%}
-        {%- for product in collections[collection_handle].products limit: limit -%}
+      {%- if feature_collection != blank -%}
+        {%- for product in feature_collection.products limit: limit -%}
           <div class="featured-products__slide">
             {%- render 'product-card', product: product -%}
           </div>

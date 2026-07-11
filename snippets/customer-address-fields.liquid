@@ -1,0 +1,70 @@
+{%- comment -%}
+  Shared fields for the customer_address form.
+  Accepts: form (the customer_address form object), id_prefix (unique string).
+{%- endcomment -%}
+
+<div class="customer__form-row">
+  <div class="customer__field">
+    <label for="AddressFirstName_{{ id_prefix }}">{{ 'customer.fields.first_name' | t }}</label>
+    <input type="text" name="address[first_name]" id="AddressFirstName_{{ id_prefix }}" value="{{ form.first_name }}" autocomplete="given-name">
+  </div>
+  <div class="customer__field">
+    <label for="AddressLastName_{{ id_prefix }}">{{ 'customer.fields.last_name' | t }}</label>
+    <input type="text" name="address[last_name]" id="AddressLastName_{{ id_prefix }}" value="{{ form.last_name }}" autocomplete="family-name">
+  </div>
+</div>
+
+<div class="customer__field">
+  <label for="AddressCompany_{{ id_prefix }}">{{ 'customer.fields.company' | t }}</label>
+  <input type="text" name="address[company]" id="AddressCompany_{{ id_prefix }}" value="{{ form.company }}" autocomplete="organization">
+</div>
+
+<div class="customer__field">
+  <label for="AddressAddress1_{{ id_prefix }}">{{ 'customer.fields.address1' | t }}</label>
+  <input type="text" name="address[address1]" id="AddressAddress1_{{ id_prefix }}" value="{{ form.address1 }}" autocomplete="address-line1">
+</div>
+
+<div class="customer__field">
+  <label for="AddressAddress2_{{ id_prefix }}">{{ 'customer.fields.address2' | t }}</label>
+  <input type="text" name="address[address2]" id="AddressAddress2_{{ id_prefix }}" value="{{ form.address2 }}" autocomplete="address-line2">
+</div>
+
+<div class="customer__form-row">
+  <div class="customer__field">
+    <label for="AddressCity_{{ id_prefix }}">{{ 'customer.fields.city' | t }}</label>
+    <input type="text" name="address[city]" id="AddressCity_{{ id_prefix }}" value="{{ form.city }}" autocomplete="address-level2">
+  </div>
+  <div class="customer__field">
+    <label for="AddressZip_{{ id_prefix }}">{{ 'customer.fields.zip' | t }}</label>
+    <input type="text" name="address[zip]" id="AddressZip_{{ id_prefix }}" value="{{ form.zip }}" autocomplete="postal-code">
+  </div>
+</div>
+
+<div class="customer__field">
+  <label for="AddressCountry_{{ id_prefix }}">{{ 'customer.fields.country' | t }}</label>
+  <select
+    name="address[country]"
+    id="AddressCountry_{{ id_prefix }}"
+    data-address-country
+    data-province-wrap="AddressProvinceWrap_{{ id_prefix }}"
+    data-selected="{{ form.country }}"
+    autocomplete="country"
+  >
+    {{ all_country_option_tags }}
+  </select>
+</div>
+
+<div class="customer__field" id="AddressProvinceWrap_{{ id_prefix }}" hidden>
+  <label for="AddressProvince_{{ id_prefix }}">{{ 'customer.fields.province' | t }}</label>
+  <select name="address[province]" id="AddressProvince_{{ id_prefix }}" data-selected="{{ form.province }}" autocomplete="address-level1"></select>
+</div>
+
+<div class="customer__field">
+  <label for="AddressPhone_{{ id_prefix }}">{{ 'customer.fields.phone' | t }}</label>
+  <input type="tel" name="address[phone]" id="AddressPhone_{{ id_prefix }}" value="{{ form.phone }}" autocomplete="tel">
+</div>
+
+<label class="customer__checkbox">
+  {{ form.set_as_default_checkbox }}
+  {{ 'customer.addresses.set_default' | t }}
+</label>

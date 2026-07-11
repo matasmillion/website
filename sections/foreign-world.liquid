@@ -11,9 +11,14 @@
     <p class="fw__intro">{{ section.settings.intro }}</p>
   </div>
 
-  {%- comment -%} Live globe: external URL if set, else the bundled theme asset {% endcomment -%}
+  {%- comment -%}
+    Live globe: external URL if set, else the bundled globe page (a page
+    using the page.globe-embed template — see SHOPIFY_SETUP.md). Must be a
+    directly embeddable URL: github.com file links send X-Frame-Options: deny
+    and render blank.
+  {%- endcomment -%}
   {%- assign globe_src = section.settings.globe_embed_url | default: '' -%}
-  {%- if globe_src == blank -%}{%- assign globe_src = 'fr-globe.html' | asset_url -%}{%- endif -%}
+  {%- if globe_src == blank and pages['globe-embed'] != blank -%}{%- assign globe_src = pages['globe-embed'].url -%}{%- endif -%}
   {%- if globe_src != blank -%}
     <div class="fw__embed">
       <iframe
@@ -263,7 +268,7 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Foreign Resource" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Foreign World" },
     { "type": "textarea", "id": "intro", "label": "Intro", "default": "An atlas of the extraordinary. Discover places few have been, follow the people going there now, and add your own journeys to the map." },
-    { "type": "text", "id": "globe_embed_url", "label": "Globe embed URL", "info": "Hosted URL of fr-globe.html (e.g. Cloudflare Pages or GitHub Pages). Leave blank to show the placeholder." }
+    { "type": "text", "id": "globe_embed_url", "label": "Globe embed URL", "info": "Optional external embed URL. Leave blank to use the built-in globe page (create a page with handle 'globe-embed' using the page.globe-embed template). GitHub file links cannot be embedded." }
   ],
   "presets": [{ "name": "Foreign World" }]
 }

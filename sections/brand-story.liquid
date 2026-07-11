@@ -24,7 +24,7 @@
         {%- if section.settings.text != blank -%}
           <div class="brand-story__body">{{ section.settings.text }}</div>
         {%- endif -%}
-        {%- if section.settings.cta_text != blank -%}
+        {%- if section.settings.cta_text != blank and section.settings.cta_link != blank -%}
           <a href="{{ section.settings.cta_link }}" class="btn {{ section.settings.cta_style }}">
             {{ section.settings.cta_text }}
           </a>

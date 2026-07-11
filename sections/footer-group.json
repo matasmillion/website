@@ -49,11 +49,11 @@
         "contact_heading": "Need help? Contact us",
         "contact_hours": "Monday to Friday from 9:00am to 5:00pm EST.",
         "contact_link_1_text": "Contact form",
-        "contact_link_1_url": "",
+        "contact_link_1_url": "shopify://pages/contact",
         "contact_link_2_text": "Track an order",
-        "contact_link_2_url": "",
+        "contact_link_2_url": "shopify://pages/track-order",
         "contact_link_3_text": "Register a return",
-        "contact_link_3_url": "",
+        "contact_link_3_url": "shopify://pages/returns",
         "legal_menu": ""
       }
     }

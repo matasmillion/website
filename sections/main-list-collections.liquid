@@ -1,0 +1,128 @@
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+<style>
+  .list-collections {
+    padding: var(--space-xl) 0 var(--space-section);
+  }
+  .list-collections__title {
+    font-size: var(--text-4xl);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+  .list-collections__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--grid-gap);
+  }
+  @media (min-width: 768px) {
+    .list-collections__grid {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+    }
+  }
+  .list-collections__item {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+  }
+  .list-collections__image {
+    aspect-ratio: 4 / 5;
+    background: #EAE5DB;
+    overflow: hidden;
+  }
+  .list-collections__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+  .list-collections__item:hover .list-collections__image img {
+    transform: scale(1.03);
+  }
+  .list-collections__name {
+    position: absolute;
+    left: var(--space-md);
+    bottom: var(--space-md);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-weight: var(--font-weight-normal);
+    font-size: var(--text-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 0 24px rgba(0, 0, 0, 0.35);
+  }
+  .list-collections__empty {
+    text-align: center;
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    padding: var(--space-2xl) 0;
+  }
+  .list-collections__pagination {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: var(--space-xl);
+  }
+  .list-collections__pagination a {
+    font-size: var(--text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.125rem;
+  }
+</style>
+
+<section class="list-collections">
+  <div class="container">
+    <h1 class="list-collections__title">{{ 'collections_list.title' | t }}</h1>
+
+    {%- paginate collections by 12 -%}
+      {%- if collections.size > 0 -%}
+        <div class="list-collections__grid">
+          {%- for collection in collections -%}
+            <a href="{{ collection.url }}" class="list-collections__item">
+              <div class="list-collections__image">
+                {%- assign col_image = collection.featured_image | default: collection.products.first.featured_image -%}
+                {%- if col_image != blank -%}
+                  {%- render 'responsive-image', image: col_image, sizes: '(max-width: 768px) 100vw, 33vw', max_width: 900 -%}
+                {%- endif -%}
+              </div>
+              <span class="list-collections__name">{{ collection.title }}</span>
+            </a>
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <div class="list-collections__pagination">
+            {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}">{{ 'accessibility.previous' | t }}</a>{%- endif -%}
+            {%- if paginate.next -%}<a href="{{ paginate.next.url }}">{{ 'accessibility.next' | t }}</a>{%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        <p class="list-collections__empty">{{ 'collections_list.empty' | t }}</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collections List",
+  "tag": "section",
+  "class": "section-list-collections",
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    }
+  ]
+}
+{% endschema %}

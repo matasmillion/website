@@ -61,7 +61,7 @@
 
     {%- comment -%} ===== CENTER: LOGO ===== {% endcomment -%}
     <div class="header__center">
-      <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+      <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop.name }}">
         {%- if settings.logo -%}
           <img
             src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
@@ -87,11 +87,11 @@
         {%- render 'icon-search' -%}
       </button>
       {%- comment -%} Desktop: account {% endcomment -%}
-      <a href="/account" class="header__icon header__desktop-only" aria-label="{{ 'general.account' | t }}">
+      <a href="{{ routes.account_url }}" class="header__icon header__desktop-only" aria-label="{{ 'general.account' | t }}">
         {%- render 'icon-account' -%}
       </a>
       {%- comment -%} Both: cart (far right) — clean bag icon {% endcomment -%}
-      <a href="/cart" class="header__icon header__cart" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
+      <a href="{{ routes.cart_url }}" class="header__icon header__cart" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
         {%- render 'icon-cart' -%}
         <span class="header__cart-count{% if cart.item_count > 0 %} is-active{% endif %}" data-cart-count>{{ cart.item_count }}</span>
       </a>
@@ -102,9 +102,9 @@
   <div class="mobile-menu" data-menu-overlay aria-hidden="true">
     <div class="mobile-menu__inner">
       <div class="mobile-menu__header">
-        <a href="/" class="header__logo" aria-label="{{ shop.name }}">
+        <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop.name }}">
           {%- if settings.logo -%}
-            <img src="{{ settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="100" loading="lazy">
+            <img src="{{ settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="100" height="{{ 100 | divided_by: settings.logo.aspect_ratio | round }}" loading="lazy">
           {%- else -%}
             <span class="header__logo-text">{{ shop.name }}</span>
           {%- endif -%}
@@ -138,11 +138,11 @@
       </nav>
       <div class="mobile-menu__footer">
         {%- if customer -%}
-          <a href="/account" class="mobile-menu__link mobile-menu__link--small">My account</a>
-          <a href="/account/logout" class="mobile-menu__link mobile-menu__link--small">Log out</a>
+          <a href="{{ routes.account_url }}" class="mobile-menu__link mobile-menu__link--small">My account</a>
+          <a href="{{ routes.account_logout_url }}" class="mobile-menu__link mobile-menu__link--small">Log out</a>
         {%- else -%}
-          <a href="/account/login" class="mobile-menu__link mobile-menu__link--small">Log in</a>
-          <a href="/account/register" class="mobile-menu__link mobile-menu__link--small">Register</a>
+          <a href="{{ routes.account_login_url }}" class="mobile-menu__link mobile-menu__link--small">Log in</a>
+          <a href="{{ routes.account_register_url }}" class="mobile-menu__link mobile-menu__link--small">Register</a>
         {%- endif -%}
         <button type="button" class="mobile-menu__link mobile-menu__link--small" data-search-open style="background:none;border:none;cursor:pointer;text-align:left;">Search</button>
         {%- render 'social-icons' -%}
@@ -181,6 +181,11 @@
         <p class="wl-drawer__empty" data-wishlist-empty>You haven't saved any items yet.</p>
         <div class="wl-drawer__grid" data-wishlist-grid></div>
       </div>
+      {%- if pages['wishlist'] != blank -%}
+        <div class="wl-drawer__footer">
+          <a href="{{ pages['wishlist'].url }}" class="wl-drawer__view-all">View all saved items</a>
+        </div>
+      {%- endif -%}
     </div>
   </div>
 

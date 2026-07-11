@@ -9,14 +9,15 @@
  */
 {
   "current": {
-    "color_primary": "#0A0A0A",
-    "color_secondary": "#FFFFFF",
+    "color_primary": "#2D2C2F",
+    "color_secondary": "#F1EEE6",
     "color_accent": "#C4632A",
     "color_supporting_green": "#7A8B6F",
     "color_supporting_sand": "#D4C5A9",
+    "use_custom_fonts": false,
     "font_heading": "inter_n5",
     "font_body": "inter_n4",
-    "font_body_size": 16,
+    "font_body_size": 13,
     "cart_type": "drawer",
     "free_shipping_threshold": 150,
     "content_for_index": [],

@@ -68,13 +68,13 @@
           <p class="footer__contact-hours">{{ section.settings.contact_hours }}</p>
         {%- endif -%}
         <div class="footer__contact-links">
-          {%- if section.settings.contact_link_1_text != blank -%}
+          {%- if section.settings.contact_link_1_text != blank and section.settings.contact_link_1_url != blank -%}
             <a href="{{ section.settings.contact_link_1_url }}" class="footer__contact-link">{{ section.settings.contact_link_1_text }}</a>
           {%- endif -%}
-          {%- if section.settings.contact_link_2_text != blank -%}
+          {%- if section.settings.contact_link_2_text != blank and section.settings.contact_link_2_url != blank -%}
             <a href="{{ section.settings.contact_link_2_url }}" class="footer__contact-link">{{ section.settings.contact_link_2_text }}</a>
           {%- endif -%}
-          {%- if section.settings.contact_link_3_text != blank -%}
+          {%- if section.settings.contact_link_3_text != blank and section.settings.contact_link_3_url != blank -%}
             <a href="{{ section.settings.contact_link_3_url }}" class="footer__contact-link">{{ section.settings.contact_link_3_text }}</a>
           {%- endif -%}
         </div>
@@ -143,9 +143,9 @@
     {%- comment -%} Bottom: Copyright + centered brand + Legal {% endcomment -%}
     <div class="footer__bottom">
       <p class="footer__copyright">&copy; {{ shop.name | upcase }} {{ 'now' | date: '%Y' }}</p>
-      <a href="/" class="footer__bottom-logo" aria-label="{{ shop.name }}">
+      <a href="{{ routes.root_url }}" class="footer__bottom-logo" aria-label="{{ shop.name }}">
         {%- if settings.logo -%}
-          <img src="{{ settings.logo | image_url: width: 300 }}" alt="{{ shop.name }}" loading="lazy">
+          <img src="{{ settings.logo | image_url: width: 300 }}" alt="{{ shop.name }}" width="{{ settings.logo.width }}" height="{{ settings.logo.height }}" loading="lazy">
         {%- else -%}
           <span class="footer__bottom-logo-text">{{ shop.name }}</span>
         {%- endif -%}

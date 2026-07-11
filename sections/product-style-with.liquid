@@ -33,7 +33,7 @@
               <source src="{{ vid_url }}" type="video/mp4">
             </video>
           {%- elsif product.featured_image -%}
-            <img class="psw__video-el" src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.title | escape }}" loading="lazy">
+            <img class="psw__video-el" src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.title | escape }}" width="{{ product.featured_image.width }}" height="{{ product.featured_image.height }}" loading="lazy">
           {%- endif -%}
         </div>
       {%- endif -%}

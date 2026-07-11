@@ -1,0 +1,86 @@
+<style>
+  .article-page {
+    padding: var(--space-xl) 0 var(--space-section);
+  }
+  .article-page__inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .article-page__date {
+    display: block;
+    text-align: center;
+    font-size: var(--text-micro);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-sm);
+  }
+  .article-page__title {
+    font-size: var(--text-4xl);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+  .article-page__image {
+    margin: 0 0 var(--space-xl);
+  }
+  .article-page__image img {
+    width: 100%;
+    height: auto;
+  }
+  .article-page__content {
+    font-size: var(--text-base);
+    line-height: 1.8;
+  }
+  .article-page__content p {
+    margin-bottom: var(--space-md);
+  }
+  .article-page__content img {
+    max-width: 100%;
+    height: auto;
+  }
+  .article-page__back {
+    display: block;
+    text-align: center;
+    margin-top: var(--space-2xl);
+  }
+  .article-page__back a {
+    font-size: var(--text-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.125rem;
+  }
+</style>
+
+<article class="article-page">
+  <div class="container">
+    <div class="article-page__inner">
+      <span class="article-page__date">{{ article.published_at | date: '%B %-d, %Y' }}</span>
+      <h1 class="article-page__title">{{ article.title }}</h1>
+
+      {%- if article.image != blank -%}
+        <div class="article-page__image">
+          {%- render 'responsive-image', image: article.image, sizes: '(max-width: 768px) 100vw, 720px', max_width: 1440 -%}
+        </div>
+      {%- endif -%}
+
+      <div class="article-page__content rte">
+        {{ article.content }}
+      </div>
+
+      <div class="article-page__back">
+        <a href="{{ blog.url }}">{{ 'blog.back' | t: blog: blog.title }}</a>
+      </div>
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "class": "section-main-article",
+  "settings": []
+}
+{% endschema %}

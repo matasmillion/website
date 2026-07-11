@@ -147,6 +147,7 @@
         <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
         <script type="application/json" data-variant-json>{{ product.variants | json }}</script>
 
+        {%- unless product.has_only_default_variant -%}
         {%- for option in product.options_with_values -%}
           {%- unless option.name == 'Color' or option.name == 'Colour' -%}
             <div class="pdp__sizes">
@@ -169,6 +170,7 @@
             </div>
           {%- endunless -%}
         {%- endfor -%}
+        {%- endunless -%}
 
         <button
           type="submit"

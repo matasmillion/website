@@ -1,0 +1,90 @@
+{{ 'component-customer.css' | asset_url | stylesheet_tag }}
+
+<section class="customer customer--wide">
+  <div class="customer__header-row">
+    <h1 class="customer__title">{{ 'customer.order.title' | t: name: order.name }}</h1>
+    <a href="{{ routes.account_url }}" class="customer__link">{{ 'customer.order.back' | t }}</a>
+  </div>
+
+  {%- assign order_date = order.created_at | date: '%B %-d, %Y' -%}
+  <p class="customer__order-meta">
+    {{ 'customer.order.placed_on' | t: date: order_date }}
+    {%- if order.cancelled -%}
+      {%- assign cancelled_date = order.cancelled_at | date: '%B %-d, %Y' -%}
+      · {{ 'customer.order.cancelled' | t: date: cancelled_date }}
+    {%- endif -%}
+  </p>
+
+  <table class="customer__table">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'customer.order.product' | t }}</th>
+        <th scope="col">{{ 'customer.order.quantity' | t }}</th>
+        <th scope="col">{{ 'customer.order.total' | t }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for line_item in order.line_items -%}
+        <tr>
+          <td>
+            {%- if line_item.product.url != blank -%}
+              <a href="{{ line_item.product.url }}">{{ line_item.title }}</a>
+            {%- else -%}
+              {{ line_item.title }}
+            {%- endif -%}
+          </td>
+          <td>{{ line_item.quantity }}</td>
+          <td>{{ line_item.final_line_price | money }}</td>
+        </tr>
+      {%- endfor -%}
+    </tbody>
+  </table>
+
+  <div class="customer__totals">
+    <div class="customer__totals-row">
+      <span>{{ 'customer.order.subtotal' | t }}</span>
+      <span>{{ order.line_items_subtotal_price | money }}</span>
+    </div>
+    {%- for shipping_method in order.shipping_methods -%}
+      <div class="customer__totals-row">
+        <span>{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</span>
+        <span>{{ shipping_method.price | money }}</span>
+      </div>
+    {%- endfor -%}
+    {%- for tax_line in order.tax_lines -%}
+      <div class="customer__totals-row">
+        <span>{{ tax_line.title }} ({{ tax_line.rate | times: 100 }}%)</span>
+        <span>{{ tax_line.price | money }}</span>
+      </div>
+    {%- endfor -%}
+    <div class="customer__totals-row customer__totals-row--final">
+      <span>{{ 'customer.order.total' | t }}</span>
+      <span>{{ order.total_price | money }}</span>
+    </div>
+  </div>
+
+  <div class="customer__order-addresses">
+    {%- if order.billing_address != blank -%}
+      <div class="customer__address-card">
+        <h3>{{ 'customer.order.billing_address' | t }}</h3>
+        <p>{{ order.financial_status_label }}</p>
+        {{ order.billing_address | format_address }}
+      </div>
+    {%- endif -%}
+    {%- if order.shipping_address != blank -%}
+      <div class="customer__address-card">
+        <h3>{{ 'customer.order.shipping_address' | t }}</h3>
+        <p>{{ order.fulfillment_status_label }}</p>
+        {{ order.shipping_address | format_address }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Customer Order",
+  "class": "section-customer-order",
+  "settings": []
+}
+{% endschema %}

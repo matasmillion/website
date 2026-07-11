@@ -5,19 +5,20 @@
 
 /* --- CSS Custom Properties --- */
 :root {
-  /* Colors — mapped from theme settings */
-  --color-primary: {{ settings.color_primary | default: '#2D2C2F' }};
-  --color-secondary: {{ settings.color_secondary | default: '#FFFFFF' }};
-  --color-accent: {{ settings.color_accent | default: '#C4632A' }};
-  --color-supporting-green: {{ settings.color_supporting_green | default: '#7A8B6F' }};
-  --color-supporting-sand: {{ settings.color_supporting_sand | default: '#D4C5A9' }};
+  /* Colors — static defaults; the settings-driven values are emitted as an
+     overriding :root block in theme.liquid (Liquid is not processed in .css) */
+  --color-primary: #2D2C2F;
+  --color-secondary: #F1EEE6;
+  --color-accent: #C4632A;
+  --color-supporting-green: #7A8B6F;
+  --color-supporting-sand: #D4C5A9;
   --color-white: #FFFFFF;
   --color-border: rgba(164, 164, 164, 0.4);
   --color-text-light: #A4A4A4;
 
-  /* Typography */
-  --font-heading: {{ settings.font_heading.family | default: 'Inter' }}, {{ settings.font_heading.fallback_families | default: 'sans-serif' }};
-  --font-body: {{ settings.font_body.family | default: 'Inter' }}, {{ settings.font_body.fallback_families | default: 'sans-serif' }};
+  /* Typography — same pattern: overridden from theme.liquid */
+  --font-heading: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;

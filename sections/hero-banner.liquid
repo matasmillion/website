@@ -49,7 +49,7 @@
     {%- if section.settings.subheading != blank -%}
       <p class="hero__subheading">{{ section.settings.subheading }}</p>
     {%- endif -%}
-    {%- if section.settings.cta_text != blank -%}
+    {%- if section.settings.cta_text != blank and section.settings.cta_link != blank -%}
       <a href="{{ section.settings.cta_link }}" class="btn {{ section.settings.cta_style }}">
         {{ section.settings.cta_text }}
       </a>

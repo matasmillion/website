@@ -50,25 +50,40 @@
     }
   ],
   "max_blocks": 6,
-  "default": {
-    "blocks": [
-      {
-        "type": "accordion_item",
-        "settings": { "heading": "Description", "content": "<p>Premium travel essentials designed for the modern explorer. Each piece is crafted with intention — built to move with you from airport to city to coast.</p>" }
-      },
-      {
-        "type": "accordion_item",
-        "settings": { "heading": "Materials & Care", "content": "<p>Details about materials, fabric composition, and care instructions will appear here.</p>" }
-      },
-      {
-        "type": "accordion_item",
-        "settings": { "heading": "Shipping & Returns", "content": "<p>Complimentary shipping on orders over $150. Free returns and exchanges within 30 days. 5-day delivery guarantee on all domestic orders.</p>" }
-      },
-      {
-        "type": "accordion_item",
-        "settings": { "heading": "Features", "content": "<p>Product-specific features such as anti-odor treatment, hidden zip pockets, wrinkle resistance, and travel-friendly design details.</p>" }
-      }
-    ]
-  }
+  "presets": [
+    {
+      "name": "Product Details Accordion",
+      "blocks": [
+        {
+          "type": "accordion_item",
+          "settings": {
+            "heading": "Description",
+            "content": "<p>Premium travel essentials designed for the modern explorer. Each piece is crafted with intention — built to move with you from airport to city to coast.</p>"
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "heading": "Materials & Care",
+            "content": "<p>Details about materials, fabric composition, and care instructions will appear here.</p>"
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "heading": "Shipping & Returns",
+            "content": "<p>Complimentary shipping on orders over $150. Free returns and exchanges within 30 days. 5-day delivery guarantee on all domestic orders.</p>"
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "heading": "Features",
+            "content": "<p>Product-specific features such as anti-odor treatment, hidden zip pockets, wrinkle resistance, and travel-friendly design details.</p>"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

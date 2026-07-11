@@ -10,7 +10,11 @@
 
     <div class="collection-feature__grid collection-feature__grid--{{ layout }}">
       {%- for block in section.blocks -%}
-        <a href="{{ block.settings.link }}" class="collection-feature__item" {{ block.shopify_attributes }}>
+        {%- if block.settings.link != blank -%}
+          <a href="{{ block.settings.link }}" class="collection-feature__item" {{ block.shopify_attributes }}>
+        {%- else -%}
+          <div class="collection-feature__item" {{ block.shopify_attributes }}>
+        {%- endif -%}
           <div class="collection-feature__image-wrapper">
             {%- if block.settings.image != blank -%}
               {%- render 'responsive-image', image: block.settings.image, sizes: '(max-width: 768px) 100vw, 50vw', max_width: 1000 -%}
@@ -25,7 +29,11 @@
               <h3 class="collection-feature__title">{{ block.settings.title }}</h3>
             </div>
           {%- endif -%}
-        </a>
+        {%- if block.settings.link != blank -%}
+          </a>
+        {%- else -%}
+          </div>
+        {%- endif -%}
       {%- endfor -%}
     </div>
   </div>
