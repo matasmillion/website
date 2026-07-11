@@ -338,10 +338,17 @@ ul, ol {
 #tlanguav,
 .tlanguav,
 [id^="tlanguav"],
+[id*="tlab" i],
+[class*="tlab" i],
+[id*="tenlab" i],
+[class*="tenlab" i],
 [class*="tlab-switcher"],
 [class*="tlab_switcher"],
 .tlab-currency-switcher,
-.tlab-language-switcher {
+.tlab-language-switcher,
+.tlab-switcher-wrapper,
+#tlab-currency-language-switcher,
+.currency-language-switcher {
   display: none !important;
 }
 

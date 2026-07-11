@@ -10,14 +10,11 @@
 {
   "sections": {
     "main": {
-      "type": "placeholder-section",
+      "type": "main-page",
       "settings": {
-        "heading": "ERROR",
-        "text": "<p>Not sure how you got here... </p>"
+        "show_title": true
       }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }

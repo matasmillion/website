@@ -326,7 +326,7 @@
     const render = async () => {
       if (!content) return;
       try {
-        const cart = await (await fetch('/cart.js')).json();
+        const cart = await (await fetch('/cart.js', { cache: 'no-store' })).json();
         // keep header counts in sync
         document.querySelectorAll('[data-cart-count]').forEach((el) => {
           el.textContent = cart.item_count;
@@ -482,7 +482,7 @@
               // Re-renders drawer contents and cart count badge, then opens it
               window.FROpenCart();
             } else {
-              const cart = await (await fetch('/cart.js')).json();
+              const cart = await (await fetch('/cart.js', { cache: 'no-store' })).json();
               document.querySelectorAll('[data-cart-count]').forEach((el) => {
                 el.textContent = cart.item_count;
                 el.classList.toggle('is-active', cart.item_count > 0);

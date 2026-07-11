@@ -26,14 +26,17 @@
     "header": {
       "type": "header",
       "settings": {
-        "menu": "main-menu",
+        "menu": "menu-2-0",
         "shop_label": "Shop",
+        "show_foreign_resource": true,
+        "foreign_resource_label": "Foreign Resource",
+        "foreign_resource_link": "shopify://pages/foreign-resource",
         "show_foreign_world": true,
         "foreign_world_label": "Foreign World",
         "foreign_world_link": "shopify://pages/foreign-world",
         "show_foreign_fund": true,
         "foreign_fund_label": "Foreign Fund",
-        "foreign_fund_link": "",
+        "foreign_fund_link": "shopify://pages/foreign-fund",
         "sticky_header": true,
         "transparent_header": false
       }
