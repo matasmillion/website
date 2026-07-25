@@ -63,6 +63,74 @@ so the image's native width attribute stretched it out of proportion.
   }
 ```
 
+## 4. "Logo width" theme setting had no effect (logo stuck tiny)
+
+**Files:** `assets/component-header.css` + `sections/header.liquid`
+
+`.header__logo img` hard-capped the logo at `max-height: 24px`, so the
+`settings.logo_width` value was ignored. Now the center header logo is sized
+by the setting, and the header bar grows to fit it. The small mobile-menu
+logo is intentionally left on the old rule.
+
+```diff
+# component-header.css — header bar grows to fit the logo
+- .header__bar { ... height: 68px; ... }
++ .header__bar { ... min-height: 68px; ... }
+  @media (min-width: 769px) {
+-   .header__bar { height: 82px; ... }
++   .header__bar { min-height: 82px; ... }
+  }
+
+# component-header.css — center logo sized by the setting (new rule; general rule kept for the mobile-menu logo)
++ .header__center .header__logo img {
++   width: var(--header-logo-width, 140px);
++   height: auto;
++   max-height: none;
++   max-width: 100%;
++ }
+```
+
+```diff
+# header.liquid — feed the setting into the CSS variable
+  <img
+    src="{{ settings.logo | image_url: width: logo_width_2x }}"
+    ...
++   style="--header-logo-width: {{ settings.logo_width }}px;"
+    loading="eager"
+  >
+```
+
+## 5. Search results didn't show sale markdown (compare-at strikethrough)
+
+**Files:** `assets/global.js` + `assets/component-header.css`
+
+The collection grid shows `$147` (struck) → `$57`, but predictive search
+printed only the single price. Shopify's `/search/suggest.json` returns
+`compare_at_price_min/max`, so search results now render the same markdown.
+
+```diff
+# global.js — new priceHTML() helper renders compare-at + sale when on sale
++ const priceHTML = (p) => {
++   const price = parseFloat(p.price);
++   if (isNaN(price)) return '';
++   const cmpRaw = p.compare_at_price_max || p.compare_at_price_min || p.compare_at_price;
++   const cmp = cmpRaw != null ? parseFloat(cmpRaw) : NaN;
++   if (!isNaN(cmp) && cmp > price) {
++     return '<s class="sd-item__price-compare">' + money(Math.round(cmp * 100)) + '</s> ' +
++            '<span class="sd-item__price-sale">' + money(Math.round(price * 100)) + '</span>';
++   }
++   return money(Math.round(price * 100));
++ };
+- ...itemHTML(p.url, ..., p.price != null ? money(Math.round(parseFloat(p.price) * 100)) : '')
++ ...itemHTML(p.url, ..., priceHTML(p))
+```
+
+```diff
+# component-header.css — styling for the struck compare + sale price
++ .sd-item__price-compare { text-decoration: line-through; opacity: 0.6; margin-right: 0.3em; }
++ .sd-item__price-sale { color: var(--color-primary); }
+```
+
 ## To go live
 
 These changes are in the JACQUEMUS 1.1 **draft**. They appear on that theme's
