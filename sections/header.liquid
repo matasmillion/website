@@ -63,11 +63,12 @@
     <div class="header__center">
       <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop.name }}">
         {%- if settings.logo -%}
+          {%- assign logo_width_2x = settings.logo_width | times: 2 -%}
           <img
-            src="{{ settings.logo | image_url: width: settings.logo_width | times: 2 }}"
+            src="{{ settings.logo | image_url: width: logo_width_2x }}"
             alt="{{ shop.name }}"
             width="{{ settings.logo_width }}"
-            height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio }}"
+            height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio | round }}"
             loading="eager"
           >
         {%- else -%}
