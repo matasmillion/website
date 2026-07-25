@@ -649,6 +649,18 @@
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
 
+    const priceHTML = (p) => {
+      const price = parseFloat(p.price);
+      if (isNaN(price)) return '';
+      const cmpRaw = p.compare_at_price_max || p.compare_at_price_min || p.compare_at_price;
+      const cmp = cmpRaw != null ? parseFloat(cmpRaw) : NaN;
+      if (!isNaN(cmp) && cmp > price) {
+        return '<s class="sd-item__price-compare">' + money(Math.round(cmp * 100)) + '</s> ' +
+               '<span class="sd-item__price-sale">' + money(Math.round(price * 100)) + '</span>';
+      }
+      return money(Math.round(price * 100));
+    };
+
     const itemHTML = (url, image, title, priceStr) =>
       '<a href="' + url + '" class="sd-item">' +
         '<div class="sd-item__img">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + '</div>' +
@@ -713,7 +725,7 @@
           if (dflt) dflt.hidden = true;
           results.hidden = false;
           results.innerHTML = products.length
-            ? products.map((p) => itemHTML(p.url, p.image || p.featured_image, p.title, p.price != null ? money(Math.round(parseFloat(p.price) * 100)) : '')).join('')
+            ? products.map((p) => itemHTML(p.url, p.image || p.featured_image, p.title, priceHTML(p))).join('')
             : '<p class="search-drawer__label" style="grid-column:1/-1">No results — press enter to search.</p>';
         } catch (e) {}
       }, 250);
