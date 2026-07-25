@@ -9,7 +9,8 @@
  */
 {
   "current": {
-    "logo": "shopify://shop_images/Logo_transparent-01.png",
+    "logo": "shopify://shop_images/Logos_Slate.png",
+    "favicon": "shopify://shop_images/Logos_Slate.png",
     "color_primary": "#2D2C2F",
     "color_secondary": "#F1EEE6",
     "color_accent": "#C4632A",
