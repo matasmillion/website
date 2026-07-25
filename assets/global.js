@@ -713,7 +713,7 @@
           if (dflt) dflt.hidden = true;
           results.hidden = false;
           results.innerHTML = products.length
-            ? products.map((p) => itemHTML(p.url, p.image || p.featured_image, p.title, p.price)).join('')
+            ? products.map((p) => itemHTML(p.url, p.image || p.featured_image, p.title, p.price != null ? money(Math.round(parseFloat(p.price) * 100)) : '')).join('')
             : '<p class="search-drawer__label" style="grid-column:1/-1">No results — press enter to search.</p>';
         } catch (e) {}
       }, 250);
