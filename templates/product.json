@@ -24,22 +24,39 @@
       "blocks": {
         "guarantee_returns": {
           "type": "guarantee",
-          "settings": { "icon": "returns", "text": "Free Returns & Exchanges" }
+          "settings": {
+            "icon": "returns",
+            "text": "Free Returns & Exchanges"
+          }
         },
         "guarantee_delivery": {
           "type": "guarantee",
-          "settings": { "icon": "clock", "text": "5-Day Delivery Guarantee" }
+          "settings": {
+            "icon": "clock",
+            "text": "5-Day Delivery Guarantee"
+          }
         },
         "guarantee_shipping": {
           "type": "guarantee",
-          "settings": { "icon": "shipping", "text": "Complimentary Express Over $150" }
+          "settings": {
+            "icon": "shipping",
+            "text": "Complimentary Express Over $150"
+          }
         }
       },
-      "block_order": ["guarantee_returns", "guarantee_delivery", "guarantee_shipping"]
+      "block_order": [
+        "guarantee_returns",
+        "guarantee_delivery",
+        "guarantee_shipping"
+      ],
+      "disabled": true,
+      "settings": {}
     },
     "detail_callouts": {
       "type": "product-detail-callouts",
-      "settings": { "heading": "Details" }
+      "settings": {
+        "heading": "Details"
+      }
     },
     "details_accordion": {
       "type": "product-details-accordion",
@@ -73,11 +90,19 @@
           }
         }
       },
-      "block_order": ["acc_description", "acc_materials", "acc_shipping", "acc_features"]
+      "block_order": [
+        "acc_description",
+        "acc_materials",
+        "acc_shipping",
+        "acc_features"
+      ],
+      "settings": {}
     },
     "style_with": {
       "type": "product-style-with",
-      "settings": { "heading": "Style it with" }
+      "settings": {
+        "heading": "Style it with"
+      }
     },
     "brand_story_GAGwDD": {
       "type": "brand-story",
