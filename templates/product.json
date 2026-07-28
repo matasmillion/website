@@ -52,12 +52,6 @@
       "disabled": true,
       "settings": {}
     },
-    "detail_callouts": {
-      "type": "product-detail-callouts",
-      "settings": {
-        "heading": "Details"
-      }
-    },
     "details_accordion": {
       "type": "product-details-accordion",
       "blocks": {
@@ -98,6 +92,12 @@
       ],
       "settings": {}
     },
+    "detail_callouts": {
+      "type": "product-detail-callouts",
+      "settings": {
+        "heading": "Details"
+      }
+    },
     "style_with": {
       "type": "product-style-with",
       "settings": {
@@ -123,8 +123,8 @@
   "order": [
     "product_info",
     "guarantees",
-    "detail_callouts",
     "details_accordion",
+    "detail_callouts",
     "style_with",
     "brand_story_GAGwDD"
   ]

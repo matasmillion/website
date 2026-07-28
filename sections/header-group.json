@@ -18,14 +18,13 @@
           "type": "message",
           "settings": {
             "text": "Complimentary shipping on orders over $150",
-            "link": "shopify://collections"
+            "link": ""
           }
         }
       },
       "block_order": [
         "message_DBEn3X"
       ],
-      "disabled": true,
       "settings": {
         "show_announcement": false,
         "transparent": true,
