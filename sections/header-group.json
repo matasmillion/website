@@ -13,7 +13,18 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
-      "disabled": true,
+      "blocks": {
+        "message_DBEn3X": {
+          "type": "message",
+          "settings": {
+            "text": "Complimentary shipping on orders over $150",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "message_DBEn3X"
+      ],
       "settings": {
         "show_announcement": false,
         "transparent": true,
