@@ -52,12 +52,6 @@
       "disabled": true,
       "settings": {}
     },
-    "style_with": {
-      "type": "product-style-with",
-      "settings": {
-        "heading": "Style it with"
-      }
-    },
     "brand_story_GAGwDD": {
       "type": "brand-story",
       "disabled": true,
@@ -291,6 +285,14 @@
         "link_label": "More on our packaging",
         "link_url": "/pages/packaging"
       }
+    },
+    "complete_the_look": {
+      "type": "product-complete-the-look",
+      "settings": {
+        "heading": "Complete the look",
+        "max_products": 4,
+        "columns": 4
+      }
     }
   },
   "order": [
@@ -300,7 +302,7 @@
     "fabric",
     "color",
     "packaging",
-    "style_with",
+    "complete_the_look",
     "brand_story_GAGwDD"
   ]
 }

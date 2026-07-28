@@ -270,32 +270,11 @@
   </div>
 </div>
 
-{%- comment -%} ===== COMPLETE THE LOOK ===== {% endcomment -%}
-{%- if product.collections.size > 0 -%}
-  {%- assign related_collection = product.collections.first -%}
-  {%- if related_collection.products.size > 1 -%}
-    <section class="pdp-related reveal">
-      <h2 class="pdp-related__heading">Complete the look</h2>
-      <div class="pdp-related__carousel" data-carousel>
-        <div class="pdp-related__track" data-carousel-track>
-          {%- for related_product in related_collection.products limit: 8 -%}
-            {%- unless related_product.handle == product.handle -%}
-              <div class="pdp-related__slide">
-                {%- render 'product-card', product: related_product -%}
-              </div>
-            {%- endunless -%}
-          {%- endfor -%}
-        </div>
-        <button class="pdp-related__nav pdp-related__nav--prev" data-carousel-prev aria-label="Previous">
-          <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
-        </button>
-        <button class="pdp-related__nav pdp-related__nav--next" data-carousel-next aria-label="Next">
-          <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="1 1 7 6.5 1 12"/></svg>
-        </button>
-      </div>
-    </section>
-  {%- endif -%}
-{%- endif -%}
+{%- comment -%}
+  COMPLETE THE LOOK now lives in its own section
+  (sections/product-complete-the-look.liquid) so the products can be curated
+  per SKU via the custom.complete_the_look metafield.
+{%- endcomment -%}
 
 {%- comment -%} ===== RECENTLY VIEWED ===== {% endcomment -%}
 <section class="pdp-recent reveal" data-recently-viewed>

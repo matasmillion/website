@@ -655,14 +655,13 @@
 
 .pdp__tab-link:hover { opacity: 0.7; }
 
-/* ===== COMPLETE THE LOOK / RECENTLY VIEWED ===== */
-.pdp-related,
+/* ===== RECENTLY VIEWED =====
+   Complete the look moved to its own section and carries its own styles. */
 .pdp-recent {
   padding: 3rem 0;
   border-top: 1px solid var(--color-border);
 }
 
-.pdp-related__heading,
 .pdp-recent__heading {
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -674,57 +673,10 @@
 }
 
 @media (min-width: 769px) {
-  .pdp-related__heading,
   .pdp-recent__heading {
     padding: 0 3rem;
   }
 }
-
-.pdp-related__carousel {
-  position: relative;
-  padding: 0 3px;
-}
-
-.pdp-related__track {
-  display: flex;
-  gap: var(--grid-gap);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding: 0 0 3px;
-}
-.pdp-related__track::-webkit-scrollbar { display: none; }
-
-.pdp-related__slide {
-  flex: 0 0 calc(50% - 2px);
-  scroll-snap-align: start;
-}
-
-@media (min-width: 769px) {
-  .pdp-related__slide {
-    flex: 0 0 calc(25% - 3px);
-  }
-}
-
-.pdp-related__nav {
-  position: absolute;
-  top: 40%;
-  transform: translateY(-50%);
-  background: var(--color-secondary);
-  border: none;
-  cursor: pointer;
-  padding: 1rem;
-  z-index: 2;
-  display: none;
-}
-
-@media (min-width: 769px) {
-  .pdp-related__nav { display: block; opacity: 0.5; }
-  .pdp-related__nav:hover { opacity: 1; }
-}
-
-.pdp-related__nav--prev { left: 0; }
-.pdp-related__nav--next { right: 0; }
 
 /* Card text in PDP carousels */
 .pdp-related .product-card__title,

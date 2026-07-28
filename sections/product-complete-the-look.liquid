@@ -1,0 +1,117 @@
+{%- comment -%}
+  PDP — Complete the look.
+
+  Curated per product, in this order of preference:
+    1. product.metafields.custom.complete_the_look  (list.product_reference)
+    2. product.metafields.custom.styled_with        (legacy key, same type)
+    3. the product's first collection, as a fallback so the section is never
+       empty on products nobody has curated yet
+
+  Setting complementary products needs no metaobjects and no per-SKU pages —
+  create ONE metafield definition (Settings → Custom data → Products):
+      namespace.key : custom.complete_the_look
+      type          : Product (list of)
+  It then appears as a product picker on every product's admin page.
+{%- endcomment -%}
+
+{%- liquid
+  assign picks = product.metafields.custom.complete_the_look.value
+  if picks == blank
+    assign picks = product.metafields.custom.styled_with.value
+  endif
+
+  assign curated = true
+  if picks == blank and product.collections.size > 0
+    assign picks = product.collections.first.products
+    assign curated = false
+  endif
+
+  assign limit = section.settings.max_products | default: 4
+-%}
+
+{%- if picks != blank and picks.size > 0 -%}
+  <section class="ctl reveal">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="ctl__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="ctl__grid">
+      {%- assign shown = 0 -%}
+      {%- for item in picks -%}
+        {%- unless item.handle == product.handle -%}
+          {%- if shown < limit -%}
+            <div class="ctl__item">
+              {%- render 'product-card', product: item -%}
+            </div>
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+
+    {%- unless curated -%}
+      {%- comment -%}
+        Uncurated fallback — set custom.complete_the_look on this product to
+        control exactly what shows here.
+      {%- endcomment -%}
+    {%- endunless -%}
+  </section>
+
+  <style>
+    .ctl {
+      padding: var(--space-2xl) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .ctl__heading {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #2D2C2F;
+      margin-bottom: var(--space-lg);
+    }
+
+    .ctl__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--grid-gap);
+    }
+
+    @media (min-width: 769px) {
+      .ctl__grid {
+        grid-template-columns: repeat({{ section.settings.columns | default: 4 }}, 1fr);
+      }
+    }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "PDP Complete the Look",
+  "class": "section-pdp-complete-the-look",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Complete the look" },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Maximum products",
+      "min": 2, "max": 8, "step": 1, "default": 4
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns (desktop)",
+      "min": 2, "max": 4, "step": 1, "default": 4
+    },
+    {
+      "type": "paragraph",
+      "content": "Curate per product with the custom.complete_the_look metafield (type: Product, list of). Falls back to the product's first collection when unset."
+    }
+  ],
+  "presets": [
+    { "name": "PDP Complete the Look" }
+  ]
+}
+{% endschema %}
