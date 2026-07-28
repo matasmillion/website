@@ -59,7 +59,7 @@
       "settings": {
         "subheading": "Our Story",
         "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you \u2014 from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund \u2014 our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
         "layout": "text-center",
         "cta_text": "Our Mission",
         "cta_link": "",
@@ -117,7 +117,7 @@
           "settings": {
             "icon": "leaf",
             "title": "Organic cotton",
-            "text": "Grown with natural and renewable plant fibres \u2014 no synthetic pesticides, fertilisers or growth hormones."
+            "text": "Grown with natural and renewable plant fibres — no synthetic pesticides, fertilisers or growth hormones."
           }
         },
         "p_2": {
@@ -238,7 +238,7 @@
       ],
       "settings": {
         "heading": "Colour",
-        "intro": "<p>Six elemental colours we build everything around. They are chosen to work with each other, so anything you own layers with anything else \u2014 wherever you happen to be that morning.</p>",
+        "intro": "<p>Six elemental colours we build everything around. They are chosen to work with each other, so anything you own layers with anything else — wherever you happen to be that morning.</p>",
         "media_first": false,
         "link_label": "Explore the Colour Codex",
         "link_url": "/pages/color-codex"
@@ -293,6 +293,47 @@
         "max_products": 4,
         "columns": 4
       }
+    },
+    "ugc": {
+      "type": "product-ugc",
+      "blocks": {
+        "person_1": {
+          "type": "person",
+          "settings": {
+            "handle": "@handle",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_2": {
+          "type": "person",
+          "settings": {
+            "handle": "@handle",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_3": {
+          "type": "person",
+          "settings": {
+            "handle": "@handle",
+            "flag": "🇺🇸"
+          }
+        }
+      },
+      "block_order": [
+        "person_1",
+        "person_2",
+        "person_3"
+      ],
+      "settings": {
+        "heading": "See others wear em'"
+      }
+    },
+    "reviews": {
+      "type": "product-reviews-container",
+      "settings": {
+        "heading": "Reviews",
+        "provider": "klaviyo"
+      }
     }
   },
   "order": [
@@ -303,6 +344,8 @@
     "color",
     "packaging",
     "complete_the_look",
+    "ugc",
+    "reviews",
     "brand_story_GAGwDD"
   ]
 }

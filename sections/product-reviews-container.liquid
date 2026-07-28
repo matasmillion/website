@@ -1,69 +1,121 @@
-<section class="product-reviews reveal" id="product-reviews">
-  <div class="container">
-    {%- if section.settings.heading != blank -%}
-      <h2 class="product-reviews__heading">{{ section.settings.heading }}</h2>
-    {%- endif -%}
+{%- comment -%}
+  PDP — Reviews container.
 
-    <div class="product-reviews__container" id="judgeme-reviews-container">
-      {%- comment -%}
-        Judge.me reviews app will render here.
-        Install Judge.me and configure it to target #judgeme-reviews-container.
-        The surrounding styles ensure the reviews match the brand aesthetic.
-      {%- endcomment -%}
-      {%- if request.design_mode -%}
-        <div class="product-reviews__placeholder">
-          <p>Customer reviews will appear here once Judge.me is installed and configured.</p>
-        </div>
-      {%- endif -%}
-    </div>
+  Provider-agnostic on purpose: the Notion spec asks for Klaviyo Reviews, the
+  project board shortlists Judge.me, and the reference screenshot is a stock
+  widget. Pick the installed one in the theme editor and this renders the
+  target element that app looks for, wrapped in brand styling either way.
+
+  Both providers link reviews to the product whose page they render on, so no
+  per-product configuration is needed.
+{%- endcomment -%}
+
+{%- assign provider = section.settings.provider -%}
+
+<section class="prv reveal" id="product-reviews">
+  {%- if section.settings.heading != blank -%}
+    <h2 class="prv__heading">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+
+  <div class="prv__container">
+    {%- case provider -%}
+      {%- when 'klaviyo' -%}
+        {%- comment -%} Klaviyo Reviews mounts into these elements. {%- endcomment -%}
+        <div class="klaviyo-reviews-summary" data-product-id="{{ product.id }}"></div>
+        <div class="klaviyo-reviews-all-reviews" data-product-id="{{ product.id }}"></div>
+
+      {%- when 'judgeme' -%}
+        <div id="judgeme_product_reviews" class="jdgm-widget jdgm-review-widget" data-product-id="{{ product.id }}"></div>
+
+      {%- else -%}
+        {%- comment -%} Drag the review app's block in via the theme editor. {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          <div {{ block.shopify_attributes }}>{% render block %}</div>
+        {%- endfor -%}
+    {%- endcase -%}
+
+    {%- if request.design_mode -%}
+      <div class="prv__placeholder">
+        <p>Reviews render here once the selected app is installed. Current setting: {{ provider | default: 'app block' }}.</p>
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
 <style>
-  .product-reviews {
-    padding: var(--space-2xl) 0;
-    border-top: var(--border-thin);
+  .prv {
+    padding: var(--space-2xl) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+    border-top: 1px solid var(--color-border);
   }
-  .product-reviews__heading {
-    font-size: var(--text-xs);
+
+  .prv__heading {
+    font-family: var(--font-body);
+    font-size: 13px;
     font-weight: var(--font-weight-medium);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: var(--space-xl);
-    opacity: 0.5;
+    color: #2D2C2F;
+    margin-bottom: var(--space-lg);
   }
-  .product-reviews__placeholder {
+
+  .prv__placeholder {
     text-align: center;
     padding: var(--space-2xl);
     font-size: var(--text-sm);
     color: var(--color-text-light);
     border: 1px dashed var(--color-border);
   }
-  /* Judge.me override styles */
-  .product-reviews__container .jdgm-rev-widg {
+
+  /* Pull both widgets toward the brand: our type, our neutrals, square edges.
+     Stock blue buttons and pill filters are the main offenders. */
+  .prv__container { font-family: var(--font-body); }
+
+  .prv__container .jdgm-rev-widg,
+  .prv__container .jdgm-rev-widg__title,
+  .prv__container [class^="klaviyo-reviews"] {
     font-family: var(--font-body) !important;
   }
-  .product-reviews__container .jdgm-rev-widg__title {
-    font-family: var(--font-heading) !important;
+
+  .prv__container .jdgm-write-rev-link,
+  .prv__container .jdgm-ask-question-btn,
+  .prv__container .kl-reviews-button,
+  .prv__container button[class*="review"] {
+    background: #2D2C2F !important;
+    border: 1px solid #2D2C2F !important;
+    border-radius: 0 !important;
+    color: #FFFFFF !important;
+    font-family: var(--font-body) !important;
+    font-size: 10.7px !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
   }
+
+  .prv__container .jdgm-star { color: #2D2C2F !important; }
 </style>
 
 {% schema %}
 {
-  "name": "Reviews (Judge.me)",
+  "name": "PDP Reviews",
   "class": "section-product-reviews",
   "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Reviews" },
     {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Reviews"
+      "type": "select",
+      "id": "provider",
+      "label": "Reviews app",
+      "options": [
+        { "value": "klaviyo", "label": "Klaviyo Reviews" },
+        { "value": "judgeme", "label": "Judge.me" },
+        { "value": "app_block", "label": "App block (add below)" }
+      ],
+      "default": "klaviyo"
+    },
+    {
+      "type": "paragraph",
+      "content": "Both apps link reviews to the product automatically. If a widget still renders in its own styling, point the app at #product-reviews in its settings."
     }
   ],
-  "presets": [
-    {
-      "name": "Reviews Container"
-    }
-  ]
+  "blocks": [{ "type": "@app" }],
+  "presets": [{ "name": "PDP Reviews" }]
 }
 {% endschema %}
