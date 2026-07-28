@@ -16,7 +16,7 @@
           "type": "hero_image",
           "settings": {
             "image": "shopify://shop_images/IMG_0419.jpg",
-            "aspect_ratio": "fill",
+            "aspect_ratio": "2:3",
             "video": "",
             "label": "",
             "link": ""
