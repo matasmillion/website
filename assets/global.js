@@ -758,6 +758,23 @@
     });
   };
 
+  /* --- PDP Content panels (Engineering / Fabric / Colour / Packaging) --- */
+  const initContentPanels = () => {
+    document.querySelectorAll('[data-panel-media]').forEach(panel => {
+      const slides = panel.querySelectorAll('[data-panel-slide]');
+      const thumbs = panel.querySelectorAll('[data-panel-thumb]');
+      if (slides.length < 2) return;
+
+      thumbs.forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          const idx = thumb.dataset.panelThumb;
+          slides.forEach(s => s.classList.toggle('is-active', s.dataset.panelSlide === idx));
+          thumbs.forEach(t => t.classList.toggle('is-active', t === thumb));
+        });
+      });
+    });
+  };
+
   /* --- PDP Delivery estimator + rolling urgency --- */
   const ZIP_KEY = 'fr_delivery_zip';
 
@@ -991,7 +1008,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

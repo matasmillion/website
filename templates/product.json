@@ -52,52 +52,6 @@
       "disabled": true,
       "settings": {}
     },
-    "detail_callouts": {
-      "type": "product-detail-callouts",
-      "settings": {
-        "heading": "Details"
-      }
-    },
-    "details_accordion": {
-      "type": "product-details-accordion",
-      "blocks": {
-        "acc_description": {
-          "type": "accordion_item",
-          "settings": {
-            "heading": "Description",
-            "content": "<p>Premium travel essentials designed for the modern explorer. Each piece is crafted with intention — built to move with you from airport to city to coast.</p>"
-          }
-        },
-        "acc_materials": {
-          "type": "accordion_item",
-          "settings": {
-            "heading": "Materials & Care",
-            "content": "<p>Details about materials, fabric composition, and care instructions will appear here.</p>"
-          }
-        },
-        "acc_shipping": {
-          "type": "accordion_item",
-          "settings": {
-            "heading": "Shipping & Returns",
-            "content": "<p>Complimentary shipping on orders over $150. Free returns and exchanges within 30 days. 5-day delivery guarantee on all domestic orders.</p>"
-          }
-        },
-        "acc_features": {
-          "type": "accordion_item",
-          "settings": {
-            "heading": "Features",
-            "content": "<p>Product-specific features such as anti-odor treatment, hidden zip pockets, wrinkle resistance, and travel-friendly design details.</p>"
-          }
-        }
-      },
-      "block_order": [
-        "acc_description",
-        "acc_materials",
-        "acc_shipping",
-        "acc_features"
-      ],
-      "settings": {}
-    },
     "style_with": {
       "type": "product-style-with",
       "settings": {
@@ -111,20 +65,241 @@
       "settings": {
         "subheading": "Our Story",
         "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you \u2014 from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund \u2014 our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
         "layout": "text-center",
         "cta_text": "Our Mission",
         "cta_link": "",
         "cta_style": "btn--secondary",
         "bg_color": ""
       }
+    },
+    "engineering": {
+      "type": "product-content-panel",
+      "blocks": {
+        "p_1": {
+          "type": "point",
+          "settings": {
+            "icon": "thread",
+            "title": "Considered construction",
+            "text": "Every seam, zip and finish is chosen for how it wears over years, not seasons."
+          }
+        },
+        "p_2": {
+          "type": "point",
+          "settings": {
+            "icon": "shield",
+            "title": "Built to travel",
+            "text": "Reinforced at the points that take the most stress in transit."
+          }
+        },
+        "media_1": {
+          "type": "media",
+          "settings": {}
+        },
+        "media_2": {
+          "type": "media",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "media_1",
+        "media_2"
+      ],
+      "settings": {
+        "heading": "Engineering",
+        "intro": "<p>The details you only notice once you have lived in it.</p>",
+        "media_first": false,
+        "link_label": "",
+        "link_url": ""
+      }
+    },
+    "fabric": {
+      "type": "product-content-panel",
+      "blocks": {
+        "p_1": {
+          "type": "point",
+          "settings": {
+            "icon": "leaf",
+            "title": "Organic cotton",
+            "text": "Grown with natural and renewable plant fibres \u2014 no synthetic pesticides, fertilisers or growth hormones."
+          }
+        },
+        "p_2": {
+          "type": "point",
+          "settings": {
+            "icon": "drop",
+            "title": "Treated with peppermint oil",
+            "text": "A durable, plant-based odour-control finish so pieces stay fresher for longer between washes."
+          }
+        },
+        "p_3": {
+          "type": "point",
+          "settings": {
+            "icon": "clock",
+            "title": "Sherpa cotton",
+            "text": "Brushed for warmth without bulk, so it packs down and holds its loft."
+          }
+        },
+        "media_1": {
+          "type": "media",
+          "settings": {}
+        },
+        "media_2": {
+          "type": "media",
+          "settings": {}
+        },
+        "media_3": {
+          "type": "media",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "p_3",
+        "media_1",
+        "media_2",
+        "media_3"
+      ],
+      "settings": {
+        "heading": "Fabric",
+        "intro": "<p>What the piece is made of, and why it was chosen.</p>",
+        "media_first": true,
+        "link_label": "",
+        "link_url": ""
+      }
+    },
+    "color": {
+      "type": "product-content-panel",
+      "blocks": {
+        "c_1": {
+          "type": "color",
+          "settings": {
+            "name": "Slate",
+            "swatch": "#4A4E54",
+            "text": "The cool grey of wet stone. The anchor of the wardrobe.",
+            "pairing": "Salt, Sand"
+          }
+        },
+        "c_2": {
+          "type": "color",
+          "settings": {
+            "name": "Salt",
+            "swatch": "#F2EFE9",
+            "text": "Undyed, unbleached off-white. Reads clean against everything.",
+            "pairing": "Slate, Soil"
+          }
+        },
+        "c_3": {
+          "type": "color",
+          "settings": {
+            "name": "Sand",
+            "swatch": "#D4C5A9",
+            "text": "Warm neutral pulled from dry coastline. Softens a dark fit.",
+            "pairing": "Soil, Slate"
+          }
+        },
+        "c_4": {
+          "type": "color",
+          "settings": {
+            "name": "Sea",
+            "swatch": "#3B5566",
+            "text": "Deep and muted, closer to deep water than to navy.",
+            "pairing": "Salt, Sand"
+          }
+        },
+        "c_5": {
+          "type": "color",
+          "settings": {
+            "name": "Soil",
+            "swatch": "#6B5744",
+            "text": "Earth brown. Grounds a look without going black.",
+            "pairing": "Sand, Salt"
+          }
+        },
+        "c_6": {
+          "type": "color",
+          "settings": {
+            "name": "Sakura",
+            "swatch": "#D9B3B3",
+            "text": "The one signal colour. Used sparingly, on purpose.",
+            "pairing": "Slate, Salt"
+          }
+        },
+        "media_1": {
+          "type": "media",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "c_1",
+        "c_2",
+        "c_3",
+        "c_4",
+        "c_5",
+        "c_6",
+        "media_1"
+      ],
+      "settings": {
+        "heading": "Colour",
+        "intro": "<p>Six elemental colours we build everything around. They are chosen to work with each other, so anything you own layers with anything else \u2014 wherever you happen to be that morning.</p>",
+        "media_first": false,
+        "link_label": "Explore the Colour Codex",
+        "link_url": "/pages/color-codex"
+      }
+    },
+    "packaging": {
+      "type": "product-content-panel",
+      "blocks": {
+        "p_1": {
+          "type": "point",
+          "settings": {
+            "icon": "box",
+            "title": "Arrives in a box worth keeping",
+            "text": "Rigid, unbranded on the inside, sized so the piece does not need to be crushed to fit."
+          }
+        },
+        "p_2": {
+          "type": "point",
+          "settings": {
+            "icon": "recycle",
+            "title": "Biodegradable throughout",
+            "text": "Paper wrap, paper tape, no plastic. It breaks down instead of lingering."
+          }
+        },
+        "media_1": {
+          "type": "media",
+          "settings": {}
+        },
+        "media_2": {
+          "type": "media",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "p_1",
+        "p_2",
+        "media_1",
+        "media_2"
+      ],
+      "settings": {
+        "heading": "Packaging",
+        "intro": "<p>How it reaches you matters as much as what reaches you.</p>",
+        "media_first": true,
+        "link_label": "More on our packaging",
+        "link_url": "/pages/packaging"
+      }
     }
   },
   "order": [
     "product_info",
     "guarantees",
-    "detail_callouts",
-    "details_accordion",
+    "engineering",
+    "fabric",
+    "color",
+    "packaging",
     "style_with",
     "brand_story_GAGwDD"
   ]
