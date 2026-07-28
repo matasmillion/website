@@ -186,6 +186,12 @@
         </button>
       {%- endform -%}
 
+      {%- comment -%} Rolling urgency — same date engine as the estimator {% endcomment -%}
+      <p class="pdp__urgency" data-delivery-urgency hidden>
+        <span class="dest__pulse" aria-hidden="true"></span>
+        <span data-urgency-text></span>
+      </p>
+
       {%- if section.settings.show_appointment_link -%}
         <a href="{{ section.settings.appointment_link }}" class="pdp__appointment">
           See availability and book an appointment in store
@@ -241,11 +247,21 @@
 
         {%- comment -%} ===== DELIVERY & RETURNS ===== {% endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="delivery" role="tabpanel">
-          {%- if section.settings.delivery_text != blank -%}
-            <p class="pdp__tab-meta" style="margin-bottom:1rem">{{ section.settings.delivery_text }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-meta">Free delivery and easy returns within 14 days.</p>
-          <p class="pdp__tab-meta">Express delivery: 1-2 business days.</p>
+          {%- render 'delivery-estimator',
+            standard_min: section.settings.standard_min,
+            standard_max: section.settings.standard_max,
+            express_min: section.settings.express_min,
+            express_max: section.settings.express_max,
+            cutoff_hour: section.settings.cutoff_hour
+          -%}
+
+          <p class="dest__label">Free returns</p>
+          <p class="pdp__tab-meta">You have 14 days from the date of delivery of your order to return the items for free.</p>
+          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
+
+          <p class="dest__label">Secure payment</p>
+          <p class="pdp__tab-meta">Credit card, PayPal, Shop Pay</p>
+
           <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
           <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
         </div>
@@ -353,6 +369,44 @@
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Delivery estimator"
+    },
+    {
+      "type": "paragraph",
+      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime."
+    },
+    {
+      "type": "range",
+      "id": "standard_min",
+      "label": "Standard delivery — fastest (business days)",
+      "min": 1, "max": 14, "step": 1, "default": 3
+    },
+    {
+      "type": "range",
+      "id": "standard_max",
+      "label": "Standard delivery — slowest (business days)",
+      "min": 1, "max": 21, "step": 1, "default": 5
+    },
+    {
+      "type": "range",
+      "id": "express_min",
+      "label": "Express delivery — fastest (business days)",
+      "min": 1, "max": 7, "step": 1, "default": 1
+    },
+    {
+      "type": "range",
+      "id": "express_max",
+      "label": "Express delivery — slowest (business days)",
+      "min": 1, "max": 10, "step": 1, "default": 2
+    },
+    {
+      "type": "range",
+      "id": "cutoff_hour",
+      "label": "Same-day dispatch cutoff (hour, 24h)",
+      "min": 0, "max": 23, "step": 1, "default": 14
     },
     {
       "type": "richtext",

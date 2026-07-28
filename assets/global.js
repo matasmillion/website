@@ -758,6 +758,101 @@
     });
   };
 
+  /* --- PDP Delivery estimator + rolling urgency --- */
+  const ZIP_KEY = 'fr_delivery_zip';
+
+  // Adds whole business days, skipping weekends.
+  const addBusinessDays = (from, days) => {
+    const d = new Date(from.getTime());
+    let added = 0;
+    while (added < days) {
+      d.setDate(d.getDate() + 1);
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) added += 1;
+    }
+    return d;
+  };
+
+  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
+  const dispatchStart = (cutoffHour) => {
+    const now = new Date();
+    let start = new Date(now.getTime());
+    const day = start.getDay();
+    if (now.getHours() >= cutoffHour || day === 0 || day === 6) {
+      start = addBusinessDays(start, 1);
+    }
+    return start;
+  };
+
+  const fmtDate = (d) =>
+    d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+  const validZip = (zip, country) =>
+    country === 'US' ? /^\d{5}(-\d{4})?$/.test(zip) : /^[A-Za-z0-9 -]{3,10}$/.test(zip);
+
+  const initDeliveryEstimator = () => {
+    const root = document.querySelector('[data-delivery-estimator]');
+    const urgency = document.querySelector('[data-delivery-urgency]');
+    if (!root && !urgency) return;
+
+    const cfg = root ? root.dataset : {};
+    const cutoff = parseInt(cfg.cutoffHour, 10) || 14;
+    const country = cfg.country || 'US';
+    const start = dispatchStart(cutoff);
+
+    // Rolling urgency renders immediately — it needs no zip.
+    if (urgency) {
+      const by = addBusinessDays(start, parseInt(cfg.standardMax, 10) || 5);
+      const now = new Date();
+      const text = urgency.querySelector('[data-urgency-text]');
+      if (text) {
+        if (now.getHours() < cutoff) {
+          const hrs = cutoff - now.getHours() - 1;
+          const mins = 60 - now.getMinutes();
+          const within = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+          text.textContent = `Order within ${within} to receive by ${fmtDate(by)}`;
+        } else {
+          text.textContent = `Order today to receive by ${fmtDate(by)}`;
+        }
+        urgency.hidden = false;
+      }
+    }
+
+    if (!root) return;
+
+    const input = root.querySelector('[data-dest-zip]');
+    const apply = root.querySelector('[data-dest-apply]');
+    const results = root.querySelector('[data-dest-results]');
+    const error = root.querySelector('[data-dest-error]');
+    const stdOut = root.querySelector('[data-dest-standard]');
+    const expOut = root.querySelector('[data-dest-express]');
+
+    const render = (zip) => {
+      if (!validZip(zip, country)) {
+        results.hidden = true;
+        error.hidden = false;
+        return;
+      }
+      error.hidden = true;
+      stdOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.standardMin, 10) || 3));
+      expOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.expressMin, 10) || 1));
+      results.hidden = false;
+      try { localStorage.setItem(ZIP_KEY, zip); } catch (e) {}
+    };
+
+    if (apply) apply.addEventListener('click', () => render(input.value.trim()));
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); render(input.value.trim()); }
+      });
+      // Remembered zip resolves on load, so returning visitors see dates straight away.
+      try {
+        const saved = localStorage.getItem(ZIP_KEY);
+        if (saved) { input.value = saved; render(saved); }
+      } catch (e) {}
+    }
+  };
+
   /* --- PDP Gallery (swipe + dots + arrows) --- */
   const initPdpGallery = () => {
     const gallery = document.querySelector('[data-product-gallery]');
@@ -896,7 +991,8 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initFooterAccordions, initNewsletterForms, initLocalization,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator,
+      initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
     });
