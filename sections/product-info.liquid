@@ -5,7 +5,7 @@
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
 {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
-<div class="pdp" data-pdp>
+<div class="pdp" data-pdp data-low-stock-threshold="{{ section.settings.low_stock_threshold | default: 5 }}">
   {%- comment -%} ===== IMAGE GALLERY (LEFT ON DESKTOP) ===== {% endcomment -%}
   <div class="pdp__gallery" data-product-gallery>
     <div class="pdp__gallery-main" data-gallery-main>
@@ -146,6 +146,24 @@
       {%- form 'product', product, data-add-to-cart: true, class: 'pdp__form' -%}
         <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
         <script type="application/json" data-variant-json>{{ product.variants | json }}</script>
+        {%- comment -%}
+          product.variants JSON omits inventory, so remaining units are passed
+          separately for the low-stock indicator. Only tracked variants appear.
+        {%- endcomment -%}
+        {%- liquid
+          assign inv_pairs = ''
+          for v in product.variants
+            if v.inventory_management != blank
+              assign pair = v.id | append: '":' | prepend: '"' | append: v.inventory_quantity
+              if inv_pairs == ''
+                assign inv_pairs = pair
+              else
+                assign inv_pairs = inv_pairs | append: ',' | append: pair
+              endif
+            endif
+          endfor
+        -%}
+        <script type="application/json" data-inventory-json>{ {{- inv_pairs -}} }</script>
 
         {%- unless product.has_only_default_variant -%}
         {%- for option in product.options_with_values -%}
@@ -157,6 +175,10 @@
                   <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">SIZE GUIDE</button>
                 {%- endif -%}
               </div>
+              {%- comment -%} Low stock — only meaningful when inventory is tracked {% endcomment -%}
+              {%- if option.name == 'Size' -%}
+                <p class="pdp__low-stock" data-low-stock hidden></p>
+              {%- endif -%}
               <div class="pdp__size-buttons" data-variant-select data-option-position="{{ option.position }}">
                 {%- for value in option.values -%}
                   <button
@@ -184,7 +206,32 @@
           </span>
           <span class="pdp__add-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
         </button>
+
+        {%- comment -%} Pay in 4 — native Shop Pay Installments {% endcomment -%}
+        {%- if section.settings.show_payment_terms -%}
+          <div class="pdp__terms">{{ form | payment_terms }}</div>
+        {%- endif -%}
       {%- endform -%}
+
+      {%- comment -%}
+        Back in stock — shown only when the selected variant is unavailable.
+        Klaviyo's Back in Stock is opened from here; see global.js.
+      {%- endcomment -%}
+      <button
+        type="button"
+        class="pdp__notify"
+        data-notify-btn
+        data-variant="{{ current_variant.id }}"
+        data-product="{{ product.id }}"
+        {% if current_variant.available %}hidden{% endif %}
+      >{{ section.settings.notify_label | default: 'Notify me when available' }}</button>
+
+      {%- comment -%} Pre-order — PreProduct renders into this slot {% endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          <div class="pdp__app-slot" {{ block.shopify_attributes }}>{% render block %}</div>
+        {%- endfor -%}
+      {%- endif -%}
 
       {%- comment -%} Rolling urgency — same date engine as the estimator {% endcomment -%}
       <p class="pdp__urgency" data-delivery-urgency hidden>
@@ -351,6 +398,28 @@
     },
     {
       "type": "header",
+      "content": "Conversion"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_terms",
+      "label": "Show Shop Pay Installments (pay in 4)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "low_stock_threshold",
+      "label": "Low stock indicator appears at or below",
+      "min": 1, "max": 20, "step": 1, "default": 5
+    },
+    {
+      "type": "text",
+      "id": "notify_label",
+      "label": "Back-in-stock button label",
+      "default": "Notify me when available"
+    },
+    {
+      "type": "header",
       "content": "Delivery estimator"
     },
     {
@@ -392,6 +461,7 @@
       "id": "size_chart_content",
       "label": "Size chart content"
     }
-  ]
+  ],
+  "blocks": [{ "type": "@app" }]
 }
 {% endschema %}

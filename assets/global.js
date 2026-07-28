@@ -181,6 +181,31 @@
     const mobileBtn = pdp.querySelector('[data-mobile-submit]');
     const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
     const swatchLabel = pdp.querySelector('.pdp__swatch-label');
+    const lowStockEl = pdp.querySelector('[data-low-stock]');
+    const notifyBtn = pdp.querySelector('[data-notify-btn]');
+    const threshold = parseInt(pdp.dataset.lowStockThreshold, 10) || 5;
+
+    let inventory = {};
+    const invEl = pdp.querySelector('[data-inventory-json]');
+    if (invEl) {
+      try { inventory = JSON.parse(invEl.textContent); } catch (e) { inventory = {}; }
+    }
+
+    // Klaviyo Back in Stock. If the app isn't loaded the button stays inert
+    // rather than throwing, so a missing integration degrades quietly.
+    if (notifyBtn) {
+      notifyBtn.addEventListener('click', () => {
+        const variantId = notifyBtn.dataset.variant;
+        const productId = notifyBtn.dataset.product;
+        if (window.klaviyo && typeof window.klaviyo.push === 'function') {
+          window.klaviyo.push(['openBackInStock', { variant: variantId, product: productId }]);
+        } else if (window._klOnsite) {
+          window._klOnsite.push(['openBackInStock', { variant: variantId, product: productId }]);
+        } else {
+          console.warn('[FR] Klaviyo Back in Stock not loaded');
+        }
+      });
+    }
 
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
@@ -221,6 +246,24 @@
       };
       setState(addBtn, addText, '[data-price]');
       setState(mobileBtn, mobileText, '[data-mobile-price]');
+
+      // Low stock — only for variants Shopify actually tracks
+      if (lowStockEl) {
+        const left = variant ? inventory[variant.id] : undefined;
+        if (variant && variant.available && typeof left === 'number' && left > 0 && left <= threshold) {
+          lowStockEl.textContent = left === 1 ? 'Last one left' : `Only ${left} left`;
+          lowStockEl.hidden = false;
+        } else {
+          lowStockEl.hidden = true;
+        }
+      }
+
+      // Back in stock replaces the disabled button when a variant is sold out
+      if (notifyBtn) {
+        const soldOut = variant && !variant.available;
+        notifyBtn.hidden = !soldOut;
+        if (soldOut) notifyBtn.dataset.variant = variant.id;
+      }
     };
 
     groups.forEach((g) => g.addEventListener('variant:change', resolve));
