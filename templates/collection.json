@@ -12,7 +12,8 @@
     "collection_hero": {
       "type": "collection-hero",
       "settings": {
-        "show_hero": false,
+        "show_hero": true,
+        "image": "shopify://shop_images/PANTS_5_1_-7.jpg",
         "heading": "",
         "subtext": "",
         "show_description": true,
