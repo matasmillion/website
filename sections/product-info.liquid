@@ -193,40 +193,60 @@
       {%- endif -%}
 
       {%- comment -%} ===== TABS ===== {% endcomment -%}
+      {%- comment -%}
+        Panels start closed — clicking a tab slides its panel in, clicking the
+        active tab again closes it.
+      {%- endcomment -%}
       <div class="pdp__tabs" data-pdp-tabs>
         <div class="pdp__tab-list" role="tablist">
-          <button class="pdp__tab is-active" role="tab" data-tab="details" aria-selected="true">Details</button>
-          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false">Delivery &amp; Returns</button>
-          <button class="pdp__tab" role="tab" data-tab="assistance" aria-selected="false">Assistance</button>
+          <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
+          <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
+          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false" aria-expanded="false">Delivery &amp; Returns</button>
         </div>
 
-        <div class="pdp__tab-panel is-active" data-tab-panel="details" role="tabpanel">
+        {%- comment -%} ===== STORY ===== {% endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="story" role="tabpanel">
           {%- if product.collections.size > 0 -%}
             <p class="pdp__tab-collection">{{ product.collections.first.title | upcase }}</p>
           {%- endif -%}
           <p class="pdp__tab-subtitle">{{ product.title }}</p>
-          {%- if product.description != blank -%}
-            <div class="pdp__tab-description">{{ product.description }}</div>
-          {%- endif -%}
-          {%- if product.metafields.custom.material != blank -%}
-            <p class="pdp__tab-meta">{{ product.metafields.custom.material }}</p>
-          {%- endif -%}
-          {%- if product.metafields.custom.made_in != blank -%}
-            <p class="pdp__tab-meta">Made in {{ product.metafields.custom.made_in }}</p>
+          {%- liquid
+            assign story = product.metafields.custom.product_story
+            if story == blank
+              assign story = product.description
+            endif
+          -%}
+          {%- if story != blank -%}
+            <div class="pdp__tab-description">{{ story }}</div>
           {%- endif -%}
           <p class="pdp__tab-meta">Ref. {{ product.variants.first.sku | default: product.id }}</p>
         </div>
 
+        {%- comment -%} ===== SIZING ===== {% endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="sizing" role="tabpanel">
+          {%- if product.metafields.custom.sizing != blank -%}
+            <div class="pdp__tab-description">{{ product.metafields.custom.sizing }}</div>
+          {%- endif -%}
+
+          {%- if product.metafields.custom.model_stats != blank -%}
+            <p class="pdp__tab-meta">{{ product.metafields.custom.model_stats }}</p>
+          {%- endif -%}
+
+          <button type="button" class="pdp__tab-link" data-modal-open="size-chart-modal">Size guide</button>
+
+          {%- if section.settings.size_calculator_url != blank -%}
+            <a href="{{ section.settings.size_calculator_url }}" class="pdp__tab-link">Find my size</a>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} ===== DELIVERY & RETURNS ===== {% endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="delivery" role="tabpanel">
           {%- if section.settings.delivery_text != blank -%}
             <p class="pdp__tab-meta" style="margin-bottom:1rem">{{ section.settings.delivery_text }}</p>
           {%- endif -%}
           <p class="pdp__tab-meta">Free delivery and easy returns within 14 days.</p>
           <p class="pdp__tab-meta">Express delivery: 1-2 business days.</p>
-        </div>
-
-        <div class="pdp__tab-panel" data-tab-panel="assistance" role="tabpanel">
-          <p class="pdp__tab-meta" style="margin-bottom:1rem">Monday to Friday from 10:00 am to 6:00pm CET.</p>
+          <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
           <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
         </div>
       </div>
@@ -328,6 +348,11 @@
       "id": "delivery_text",
       "label": "Delivery estimate text",
       "default": "Order today for delivery within 5 business days"
+    },
+    {
+      "type": "url",
+      "id": "size_calculator_url",
+      "label": "Size calculator link"
     },
     {
       "type": "richtext",

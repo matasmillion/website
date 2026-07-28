@@ -739,10 +739,18 @@
       const panels = container.querySelectorAll('[data-tab-panel]');
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-          tabs.forEach(t => { t.classList.remove('is-active'); t.setAttribute('aria-selected', 'false'); });
+          // Clicking the open tab closes it, so the panels stay hidden by default.
+          const wasOpen = tab.classList.contains('is-active');
+          tabs.forEach(t => {
+            t.classList.remove('is-active');
+            t.setAttribute('aria-selected', 'false');
+            t.setAttribute('aria-expanded', 'false');
+          });
           panels.forEach(p => p.classList.remove('is-active'));
+          if (wasOpen) return;
           tab.classList.add('is-active');
           tab.setAttribute('aria-selected', 'true');
+          tab.setAttribute('aria-expanded', 'true');
           const panel = container.querySelector(`[data-tab-panel="${tab.dataset.tab}"]`);
           if (panel) panel.classList.add('is-active');
         });
