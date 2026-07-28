@@ -51,8 +51,14 @@
     height: 100vh;
     overflow: hidden;
   }
+  /* Desktop: scroll the image column vertically instead of clicking through it */
   .pdp__gallery-main {
     height: 100%;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
   }
   .pdp__gallery-slide {
     height: 100%;
@@ -72,31 +78,35 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 0.5rem;
+  gap: 0.3rem;
   z-index: 2;
 }
 
+/* Desktop: slim vertical rail down the left edge of the image */
 @media (min-width: 769px) {
   .pdp__gallery-dots {
-    bottom: 5rem;
-    left: 1.5rem;
-    transform: none;
+    flex-direction: column;
+    top: 50%;
+    bottom: auto;
+    left: 1.25rem;
+    transform: translateY(-50%);
+    gap: 0.4rem;
   }
 }
 
 .pdp__gallery-dot {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.2);
+  background: rgba(45,44,47,0.2);
   cursor: pointer;
   padding: 0;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
 .pdp__gallery-dot.is-active {
-  background: var(--color-primary);
+  background: rgba(45,44,47,0.7);
 }
 
 /* Gallery nav arrows */
@@ -123,6 +133,11 @@
 
 .pdp__gallery-nav--prev { left: 0; }
 .pdp__gallery-nav--next { right: 0; }
+
+/* Desktop navigates by scrolling, so the arrows are dead weight */
+@media (min-width: 769px) {
+  .pdp__gallery-nav { display: none; }
+}
 
 /* Wishlist on image — desktop only */
 .pdp__wishlist-img {
@@ -329,7 +344,7 @@
 
 .pdp__swatch-list {
   display: flex;
-  gap: 0.375rem;
+  gap: 0.5rem;
   justify-content: center;
 }
 
@@ -339,22 +354,30 @@
   }
 }
 
+/* Box swatches — square, with a rule under the selected colour */
 .pdp__swatch {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 0;
   border: 1px solid transparent;
   cursor: pointer;
   padding: 0;
-  transition: box-shadow var(--duration-fast) var(--ease-out);
+  position: relative;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.pdp__swatch.is-selected {
-  box-shadow: 0 0 0 1px var(--color-secondary), 0 0 0 2px var(--color-primary);
+.pdp__swatch.is-selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background: #2D2C2F;
 }
 
 .pdp__swatch:hover {
-  box-shadow: 0 0 0 1px var(--color-secondary), 0 0 0 2px rgba(0,0,0,0.3);
+  opacity: 0.75;
 }
 
 /* ===== SIZE SELECTOR ===== */
@@ -444,8 +467,9 @@
     gap: 0.75rem;
     width: 100%;
     padding: 0 1.25rem;
-    background: var(--color-secondary);
-    color: #2D2C2F;
+    /* Matches the mobile ATC: dark filled, white text */
+    background: #2D2C2F;
+    color: #FFFFFF;
     border: 1px solid #2D2C2F;
     font-family: var(--font-body);
     font-size: 10.7px;
@@ -453,14 +477,13 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: all var(--duration-base) var(--ease-out);
+    transition: opacity var(--duration-base) var(--ease-out);
     margin-bottom: 1rem;
     height: 50px;
   }
 
   .pdp__add-btn:hover {
-    background: #2D2C2F;
-    color: #FFFFFF;
+    opacity: 0.88;
   }
 
   .pdp__add-btn:disabled {
@@ -521,6 +544,7 @@
   font-size: 11.2px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
+  text-transform: uppercase;
   background: none;
   border: none;
   cursor: pointer;

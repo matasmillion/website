@@ -764,9 +764,16 @@
     let current = 0;
     const total = slides.length;
 
+    // Desktop stacks the images and scrolls vertically; mobile swipes horizontally.
+    const isVertical = () => window.matchMedia('(min-width: 769px)').matches;
+
     const goTo = (idx) => {
       current = Math.max(0, Math.min(total - 1, idx));
-      main.scrollTo({ left: main.offsetWidth * current, behavior: 'smooth' });
+      main.scrollTo(
+        isVertical()
+          ? { top: main.offsetHeight * current, behavior: 'smooth' }
+          : { left: main.offsetWidth * current, behavior: 'smooth' }
+      );
       dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
     };
 
@@ -779,7 +786,9 @@
     main.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        const idx = Math.round(main.scrollLeft / main.offsetWidth);
+        const idx = isVertical()
+          ? Math.round(main.scrollTop / main.offsetHeight)
+          : Math.round(main.scrollLeft / main.offsetWidth);
         if (idx !== current) {
           current = idx;
           dots.forEach((d, i) => d.classList.toggle('is-active', i === current));

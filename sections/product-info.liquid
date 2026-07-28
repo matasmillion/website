@@ -152,9 +152,9 @@
           {%- unless option.name == 'Color' or option.name == 'Colour' -%}
             <div class="pdp__sizes">
               <div class="pdp__size-header">
-                <span class="pdp__size-label">{{ option.name }}</span>
+                <span class="pdp__size-label">{{ option.name | upcase }}</span>
                 {%- if option.name == 'Size' -%}
-                  <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">Size guide</button>
+                  <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">SIZE GUIDE</button>
                 {%- endif -%}
               </div>
               <div class="pdp__size-buttons" data-variant-select data-option-position="{{ option.position }}">
@@ -196,7 +196,7 @@
       <div class="pdp__tabs" data-pdp-tabs>
         <div class="pdp__tab-list" role="tablist">
           <button class="pdp__tab is-active" role="tab" data-tab="details" aria-selected="true">Details</button>
-          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false">Delivery and returns</button>
+          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false">Delivery &amp; Returns</button>
           <button class="pdp__tab" role="tab" data-tab="assistance" aria-selected="false">Assistance</button>
         </div>
 
