@@ -35,11 +35,23 @@
         "show_description": false,
         "description_position": "below"
       }
+    },
+    "email_signup_LceN9N": {
+      "type": "email-signup",
+      "name": "Email Signup",
+      "settings": {
+        "heading": "Join the Journey",
+        "subtext": "First access to new collections, travel stories, and exclusive offers.",
+        "placeholder": "Enter your email",
+        "button_text": "Subscribe",
+        "bg_color": "#D4C5A9"
+      }
     }
   },
   "order": [
     "collection_hero",
     "filter_bar",
-    "product_grid"
+    "product_grid",
+    "email_signup_LceN9N"
   ]
 }
