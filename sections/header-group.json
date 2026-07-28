@@ -28,7 +28,7 @@
       "settings": {
         "menu": "menu-2-0",
         "shop_label": "Shop",
-        "show_foreign_resource": true,
+        "show_foreign_resource": false,
         "foreign_resource_label": "Foreign Resource",
         "foreign_resource_link": "shopify://pages/foreign-resource",
         "show_foreign_world": true,
