@@ -678,19 +678,19 @@
   }
 }
 
-/* Card text in PDP carousels */
-.pdp-related .product-card__title,
+/* Card text in the PDP's product rows */
+.ctl .product-card__title,
 .pdp-recent .product-card__title {
   font-size: 10px;
 }
-.pdp-related .product-card__price,
+.ctl .product-card__price,
 .pdp-recent .product-card__price {
   font-size: 10px;
 }
 @media (max-width: 768px) {
-  .pdp-related .product-card__title,
+  .ctl .product-card__title,
   .pdp-recent .product-card__title,
-  .pdp-related .product-card__price,
+  .ctl .product-card__price,
   .pdp-recent .product-card__price {
     font-size: 9px;
   }
