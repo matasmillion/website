@@ -16,7 +16,7 @@
           "type": "hero_image",
           "settings": {
             "image": "shopify://shop_images/IMG_0419.jpg",
-            "aspect_ratio": "3:4",
+            "aspect_ratio": "4:5",
             "video": "",
             "label": "",
             "link": ""
@@ -26,7 +26,7 @@
           "type": "hero_image",
           "settings": {
             "image": "shopify://shop_images/IMG_0421.jpg",
-            "aspect_ratio": "3:4",
+            "aspect_ratio": "4:5",
             "video": "",
             "label": "",
             "link": ""
