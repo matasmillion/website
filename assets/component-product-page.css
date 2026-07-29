@@ -412,6 +412,9 @@
 .pdp__swatch {
   width: 26px;
   height: 26px;
+  /* Colour metaobjects carry a real swatch texture; the hex is the fallback */
+  background-size: cover;
+  background-position: center;
   border-radius: 0;
   border: 1px solid transparent;
   cursor: pointer;
@@ -1287,3 +1290,24 @@
 @media (prefers-reduced-motion: reduce) {
   .pdp-zoom { transition: none; }
 }
+
+/* ===== Sale pricing on the add-to-cart buttons =====
+   Matches the product cards' sale red so the treatment reads as one system. */
+.price-was {
+  text-decoration: line-through;
+  margin-right: 0.45em;
+  opacity: 0.75;
+}
+
+.price-now { font-weight: var(--font-weight-medium); }
+
+/* On the dark buttons the red has to lift off slate, so it runs lighter there */
+.pdp__add-price .price-was,
+[data-mobile-price] .price-was { color: #F0A79B; }
+
+.pdp__add-price .price-now,
+[data-mobile-price] .price-now { color: #FFFFFF; }
+
+/* Anywhere on the page background, use the card's sale red */
+.pdp__row-copy .price-was,
+.ctl .price-was { color: #B23A2E; }

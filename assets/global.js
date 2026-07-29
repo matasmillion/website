@@ -223,7 +223,17 @@
         const priceEl = pdp.querySelector(priceSel);
         if (variant) {
           if (idInput) idInput.value = variant.id;
-          if (priceEl) priceEl.textContent = money(variant.price);
+          if (priceEl) {
+            // Rebuild the sale markup so a variant with a different compare-at
+            // shows (or drops) the struck-through original.
+            if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+              priceEl.innerHTML =
+                '<s class="price-was">' + money(variant.compare_at_price) + '</s>' +
+                '<span class="price-now">' + money(variant.price) + '</span>';
+            } else {
+              priceEl.textContent = money(variant.price);
+            }
+          }
           if (variant.available) { btn.disabled = false; if (textEl) textEl.textContent = 'Add to cart'; }
           else { btn.disabled = true; if (textEl) textEl.textContent = 'Sold out'; }
         } else {

@@ -8,6 +8,12 @@
   assign inst_cents = current_variant.price | divided_by: 4
   assign inst_dollars = inst_cents | divided_by: 100
   assign inst_rem = inst_cents | modulo: 100
+
+  # Sale state drives both add-to-cart buttons
+  assign on_sale = false
+  if current_variant.compare_at_price > current_variant.price
+    assign on_sale = true
+  endif
 -%}
 
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
@@ -135,7 +141,14 @@
     </div>
     <button type="button" class="pdp-band__atc" data-mobile-submit {% unless current_variant.available %}disabled{% endunless %}>
       <span>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
-      <span data-mobile-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
+      <span data-mobile-price>
+        {%- if on_sale -%}
+          <s class="price-was">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</s>
+          <span class="price-now">{{ current_variant.price | money_without_trailing_zeros }}</span>
+        {%- else -%}
+          {{ current_variant.price | money_without_trailing_zeros }}
+        {%- endif -%}
+      </span>
     </button>
   </div>
 
@@ -161,34 +174,56 @@
             <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
                 {%- liquid
-                  assign color_lower = value | downcase | replace: ' ', ''
-                  assign swatch_color = '#000000'
-                  if color_lower contains 'black'
+                  # Prefer Shopify's colour metaobject: it carries the real
+                  # swatch image and hex, so a stone wash reads as stone rather
+                  # than a flat guess. The name map below is only a fallback for
+                  # colours that have no metaobject yet.
+                  assign swatch_img = blank
+                  assign swatch_color = blank
+                  assign value_down = value | downcase
+
+                  for entry in product.metafields.shopify['color-pattern'].value
+                    assign entry_label = entry.label | downcase
+                    if entry_label == value_down
+                      assign swatch_color = entry.color
+                      if entry.image != blank
+                        assign swatch_img = entry.image
+                      endif
+                    endif
+                  endfor
+
+                  if swatch_color == blank
+                    assign color_lower = value | downcase | replace: ' ', ''
                     assign swatch_color = '#000000'
-                  elsif color_lower contains 'white' or color_lower contains 'ivory'
-                    assign swatch_color = '#FFFFFF'
-                  elsif color_lower contains 'navy'
-                    assign swatch_color = '#1B2A4A'
-                  elsif color_lower contains 'brown' or color_lower contains 'tan'
-                    assign swatch_color = '#8B6914'
-                  elsif color_lower contains 'green' or color_lower contains 'khaki' or color_lower contains 'olive'
-                    assign swatch_color = '#556B2F'
-                  elsif color_lower contains 'blue'
-                    assign swatch_color = '#3B5998'
-                  elsif color_lower contains 'red' or color_lower contains 'burgundy'
-                    assign swatch_color = '#8B0000'
-                  elsif color_lower contains 'grey' or color_lower contains 'gray'
-                    assign swatch_color = '#808080'
-                  elsif color_lower contains 'beige' or color_lower contains 'sand' or color_lower contains 'cream'
-                    assign swatch_color = '#D4C5A9'
-                  elsif color_lower contains 'pink'
-                    assign swatch_color = '#D4A0A0'
-                  elsif color_lower contains 'orange'
-                    assign swatch_color = '#C4632A'
-                  elsif color_lower contains 'yellow'
-                    assign swatch_color = '#D4B44A'
-                  elsif color_lower contains 'purple'
-                    assign swatch_color = '#663399'
+                    if color_lower contains 'black'
+                      assign swatch_color = '#000000'
+                    elsif color_lower contains 'white' or color_lower contains 'ivory'
+                      assign swatch_color = '#FFFFFF'
+                    elsif color_lower contains 'navy'
+                      assign swatch_color = '#1B2A4A'
+                    elsif color_lower contains 'stone'
+                      assign swatch_color = '#716F71'
+                    elsif color_lower contains 'brown' or color_lower contains 'tan'
+                      assign swatch_color = '#8B6914'
+                    elsif color_lower contains 'green' or color_lower contains 'khaki' or color_lower contains 'olive'
+                      assign swatch_color = '#556B2F'
+                    elsif color_lower contains 'blue'
+                      assign swatch_color = '#3B5998'
+                    elsif color_lower contains 'red' or color_lower contains 'burgundy'
+                      assign swatch_color = '#8B0000'
+                    elsif color_lower contains 'grey' or color_lower contains 'gray'
+                      assign swatch_color = '#808080'
+                    elsif color_lower contains 'beige' or color_lower contains 'sand' or color_lower contains 'cream'
+                      assign swatch_color = '#D4C5A9'
+                    elsif color_lower contains 'pink'
+                      assign swatch_color = '#D4A0A0'
+                    elsif color_lower contains 'orange'
+                      assign swatch_color = '#C4632A'
+                    elsif color_lower contains 'yellow'
+                      assign swatch_color = '#D4B44A'
+                    elsif color_lower contains 'purple'
+                      assign swatch_color = '#663399'
+                    endif
                   endif
                 -%}
                 <button
@@ -197,7 +232,7 @@
                   data-variant-option="{{ value }}"
                   aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
-                  style="background-color: {{ swatch_color }};{% if color_lower contains 'white' or color_lower contains 'ivory' or color_lower contains 'cream' %} border-color: rgba(0,0,0,0.2);{% endif %}"
+                  style="background-color: {{ swatch_color }};{% if swatch_img != blank %} background-image: url('{{ swatch_img | image_url: width: 120 }}');{% endif %}{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
                   title="{{ value }}"
                 ></button>
               {%- endfor -%}
@@ -288,7 +323,14 @@
           <span class="pdp__add-text">
             {%- if current_variant.available -%}Add to cart{%- else -%}Sold out{%- endif -%}
           </span>
-          <span class="pdp__add-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
+          <span class="pdp__add-price" data-price>
+            {%- if on_sale -%}
+              <s class="price-was">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</s>
+              <span class="price-now">{{ current_variant.price | money_without_trailing_zeros }}</span>
+            {%- else -%}
+              {{ current_variant.price | money_without_trailing_zeros }}
+            {%- endif -%}
+          </span>
         </button>
 
         {%- comment -%}
