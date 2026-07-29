@@ -219,9 +219,11 @@
     right: 0;
     bottom: 0;
     z-index: 90;
-    height: var(--pdp-band-h, 126px);
+    min-height: var(--pdp-band-h, 126px);
     padding: 10px 0.75rem;
     background: var(--color-secondary);
+    /* Separates the band from whatever it parks over */
+    border-top: 1px solid var(--color-border);
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
@@ -577,9 +579,14 @@
 
 .pdp__tab-list {
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.9rem 1rem;
   margin-bottom: 1.5rem;
   justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .pdp__tab-list { gap: 1.25rem; }
 }
 
 @media (min-width: 769px) {
@@ -876,6 +883,8 @@
    Klaviyo injects this button client-side and its class names are not stable,
    so global.js tags whatever it injects with .fr-bis and we style that.
    The literal klaviyo-bis-trigger is kept as a belt-and-braces match. */
+.pdp-band .fr-bis { margin: 10px 0 0 !important; }
+
 .fr-bis,
 .klaviyo-bis-trigger {
   display: block !important;

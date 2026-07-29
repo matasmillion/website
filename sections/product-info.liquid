@@ -26,6 +26,12 @@
 <style>
   :root { --pdp-band-h: 126px; }
   html { scroll-padding-bottom: var(--pdp-band-h); }
+
+  /* iOS Safari keeps scrolling <html> even when <body> clips, which is what
+     leaves a strip of background down the right-hand side. `clip` rather than
+     `hidden`: hidden would make html a scroll container and kill the sticky
+     gallery. */
+  html, body { overflow-x: clip; }
 </style>
 
 <div class="pdp" data-pdp data-low-stock-threshold="{{ section.settings.low_stock_threshold | default: 5 }}">
@@ -392,7 +398,8 @@
         <div class="pdp__tab-list" role="tablist">
           <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
           <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
-          <button class="pdp__tab" role="tab" data-tab="delivery" aria-selected="false" aria-expanded="false">Delivery &amp; Returns</button>
+          <button class="pdp__tab" role="tab" data-tab="shipping" aria-selected="false" aria-expanded="false">Shipping</button>
+          <button class="pdp__tab" role="tab" data-tab="returns" aria-selected="false" aria-expanded="false">Returns</button>
         </div>
 
         {%- comment -%} ===== STORY ===== {% endcomment -%}
@@ -432,8 +439,8 @@
           {%- endif -%}
         </div>
 
-        {%- comment -%} ===== DELIVERY & RETURNS ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="delivery" role="tabpanel">
+        {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
           {%- render 'delivery-estimator',
             standard_min: section.settings.standard_min,
             standard_max: section.settings.standard_max,
@@ -442,12 +449,21 @@
             cutoff_hour: section.settings.cutoff_hour
           -%}
 
-          <p class="dest__label">Free returns</p>
-          <p class="pdp__tab-meta">You have 14 days from the date of delivery of your order to return the items for free.</p>
-          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
+          {%- if section.settings.delivery_text != blank -%}
+            <p class="pdp__tab-meta">{{ section.settings.delivery_text }}</p>
+          {%- endif -%}
+          <p class="pdp__tab-meta">Complimentary shipping on orders over $150.</p>
 
           <p class="dest__label">Secure payment</p>
           <p class="pdp__tab-meta">Credit card, PayPal, Shop Pay</p>
+        </div>
+
+        {%- comment -%} ===== RETURNS ===== {% endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="returns" role="tabpanel">
+          <p class="pdp__tab-meta">You have 14 days from the date of delivery to return your order for free.</p>
+          <p class="pdp__tab-meta">Exchanges are free both ways. Items must be unworn with tags attached.</p>
+          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
+          <a href="/pages/track-order" class="pdp__tab-link">Start a return</a>
 
           <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
           <a href="/pages/contact" class="pdp__tab-link">Contact form</a>

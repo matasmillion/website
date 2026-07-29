@@ -986,15 +986,20 @@
     const pdp = document.querySelector('[data-pdp]');
     if (!pdp) return;
 
+    const band = document.querySelector('[data-sticky-band]');
+
     const tag = () => {
       pdp.querySelectorAll('button, a, input[type="button"], input[type="submit"]').forEach((el) => {
-        if (el.classList.contains('fr-bis')) return;
         if (el.closest('[data-sticky-band]')) return;
         const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
         const txt = (el.textContent || el.value || '').trim().toLowerCase();
         const isBis = /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
                       /^notify me/.test(txt);
-        if (isBis) el.classList.add('fr-bis');
+        if (!isBis) return;
+        el.classList.add('fr-bis');
+        // Belongs with the buy controls, directly under the sold-out bar —
+        // not stranded below the size selector where Klaviyo drops it.
+        if (band && el.parentElement !== band) band.appendChild(el);
       });
     };
 
@@ -1014,6 +1019,12 @@
     // viewport pins the band's base to that section's top edge.
     const boundary = document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;
+
+    const syncHeight = () => {
+      document.documentElement.style.setProperty('--pdp-band-h', band.offsetHeight + 'px');
+    };
+    syncHeight();
+    if (window.ResizeObserver) new ResizeObserver(syncHeight).observe(band);
 
     let ticking = false;
     const place = () => {
