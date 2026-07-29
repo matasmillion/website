@@ -871,120 +871,74 @@
   margin-bottom: 0.5rem;
 }
 
-/* ----- Back in stock ----- */
-.pdp__notify-wrap { margin-bottom: 1rem; }
-
-.pdp__notify {
-  display: block;
-  width: 100%;
-  height: 50px;
-  background: none;
-  border: 1px solid #2D2C2F;
-  color: #2D2C2F;
-  font-family: var(--font-body);
-  font-size: 10.7px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background var(--duration-base) var(--ease-out),
-              color var(--duration-base) var(--ease-out);
+/* ----- Back in stock: Klaviyo's injected button -----
+   Klaviyo renders .klaviyo-bis-trigger itself, so it is restyled here rather
+   than configured in Klaviyo. Matches the add-to-cart button. */
+.klaviyo-bis-trigger {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 50px !important;
+  margin: 0 0 1rem !important;
+  padding: 0 1.25rem !important;
+  background: #2D2C2F !important;
+  border: 1px solid #2D2C2F !important;
+  border-radius: 0 !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-body) !important;
+  font-size: 10.7px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  line-height: 50px !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transition: opacity var(--duration-base) var(--ease-out) !important;
 }
 
-.pdp__notify:hover {
-  background: #2D2C2F;
-  color: #FFFFFF;
-}
+.klaviyo-bis-trigger:hover { opacity: 0.88 !important; }
 
-.pdp__notify-hint {
-  display: block;
-  font-size: 10.5px;
-  color: #A4A4A4;
-  margin-bottom: 0.6rem;
-  text-align: left;
-}
-
-.pdp__notify-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  border-bottom: 1px solid #2D2C2F;
-  padding-bottom: 0.5rem;
-}
-
-.pdp__notify-input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: none;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: #2D2C2F;
-  padding: 0;
-}
-
-.pdp__notify-input:focus { outline: none; }
-.pdp__notify-input::placeholder { color: #C9C9C9; }
-
-.pdp__notify-submit {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-size: 10.7px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-decoration: underline;
-  color: #2D2C2F;
-  flex-shrink: 0;
-}
-
-.pdp__notify-submit:disabled { opacity: 0.4; cursor: wait; }
-
-.pdp__notify-msg {
-  font-size: 10.5px;
-  color: #3FA34D;
-  margin-top: 0.6rem;
-  text-align: left;
-}
-
-.pdp__notify-msg.is-error { color: #A8442A; }
-
-/* ----- Size guide (SmartSize app block) ----- */
+/* ----- Size guide (SmartSize app block) -----
+   Sized and centred to sit with the pay-in-4 line. */
 .pdp__size-header {
   display: flex;
   justify-content: center;
   margin-bottom: 0.75rem;
 }
 
-@media (min-width: 769px) {
-  .pdp__size-header { justify-content: flex-end; }
+[class*="smartsize"],
+[id*="smartsize"] {
+  text-align: center !important;
+  justify-content: center !important;
 }
 
-/* Pull the app's button back to our type instead of its own */
 .pdp__size-guide-slot a,
-.pdp__size-guide-slot button {
+.pdp__size-guide-slot button,
+[class*="smartsize"] a,
+[class*="smartsize"] button {
   font-family: var(--font-body) !important;
-  font-size: 9.1px !important;
+  font-size: 11px !important;
   font-weight: var(--font-weight-medium) !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
-  color: #A4A4A4 !important;
+  color: #2D2C2F !important;
   background: none !important;
   border: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
+  margin: 0 auto !important;
   text-decoration: underline !important;
   box-shadow: none !important;
   min-height: 0 !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+  display: inline-block !important;
 }
 
 .pdp__size-guide-slot a:hover,
-.pdp__size-guide-slot button:hover { color: #2D2C2F !important; }
-
-.pdp__app-slot:not(:empty) { margin-bottom: 1rem; }
+[class*="smartsize"] a:hover,
+[class*="smartsize"] button:hover { opacity: 0.7 !important; }
 
 /* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
 .pdp__rows {

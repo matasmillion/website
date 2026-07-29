@@ -19,7 +19,6 @@
         "size_calculator_url": "",
         "show_payment_terms": true,
         "low_stock_threshold": 5,
-        "notify_label": "Notify me when available",
         "hide_shop_promise": true,
         "standard_min": 3,
         "standard_max": 5,
@@ -107,18 +106,18 @@
           "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
           "settings": {
             "style_source": "inherit",
-            "button_label": "",
+            "button_label": "SIZE GUIDE",
             "button_style": "link",
             "button_icon": "sizenone",
             "button_color": "#000000",
             "button_background_color": "",
-            "button_corner_radius_px": 5,
+            "button_corner_radius_px": 0,
             "button_margin_top_px": 0,
             "button_margin_right_px": 0,
             "button_margin_bottom_px": 0,
             "button_margin_left_px": 0,
-            "button_alignment": "flex-end",
-            "button_alignment_mobile": "flex-end",
+            "button_alignment": "center",
+            "button_alignment_mobile": "center",
             "display_mode": "combined"
           }
         }

@@ -182,88 +182,12 @@
     const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
     const swatchLabel = pdp.querySelector('.pdp__swatch-label');
     const lowStockEl = pdp.querySelector('[data-low-stock]');
-    const notifyBtn = pdp.querySelector('[data-notify]');
     const threshold = parseInt(pdp.dataset.lowStockThreshold, 10) || 5;
 
     let inventory = {};
     const invEl = pdp.querySelector('[data-inventory-json]');
     if (invEl) {
       try { inventory = JSON.parse(invEl.textContent); } catch (e) { inventory = {}; }
-    }
-
-    // Back in stock — posts straight to Klaviyo's client API, so it needs no
-    // app UI and the form can be styled like the rest of the page.
-    if (notifyBtn) {
-      const openBtn = notifyBtn.querySelector('[data-notify-open]');
-      const form = notifyBtn.querySelector('[data-notify-form]');
-      const email = notifyBtn.querySelector('[data-notify-email]');
-      const submit = notifyBtn.querySelector('[data-notify-submit]');
-      const msg = notifyBtn.querySelector('[data-notify-msg]');
-
-      const say = (text, ok) => {
-        if (!msg) return;
-        msg.textContent = text;
-        msg.classList.toggle('is-error', !ok);
-        msg.hidden = false;
-      };
-
-      if (openBtn && form) {
-        openBtn.addEventListener('click', () => {
-          form.hidden = false;
-          openBtn.hidden = true;
-          if (email) email.focus();
-        });
-      }
-
-      const subscribe = async () => {
-        const company = notifyBtn.dataset.klaviyoCompany;
-        const variantId = notifyBtn.dataset.variant;
-        const address = (email && email.value || '').trim();
-
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) return say('Enter a valid email address.', false);
-        if (!company) return say('Back-in-stock is not configured yet.', false);
-
-        submit.disabled = true;
-        try {
-          const res = await fetch(
-            `https://a.klaviyo.com/client/back-in-stock-subscriptions/?company_id=${encodeURIComponent(company)}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', revision: '2024-10-15' },
-              body: JSON.stringify({
-                data: {
-                  type: 'back-in-stock-subscription',
-                  attributes: {
-                    channels: ['EMAIL'],
-                    profile: { data: { type: 'profile', attributes: { email: address } } },
-                  },
-                  relationships: {
-                    variant: {
-                      // Klaviyo's Shopify catalogue keys variants in this shape.
-                      data: { type: 'catalog-variant', id: `$shopify:::$default:::${variantId}` },
-                    },
-                  },
-                },
-              }),
-            }
-          );
-          if (res.ok || res.status === 202) {
-            say("You're on the list. We'll email you when it's back.", true);
-            if (form) form.querySelector('.pdp__notify-row').hidden = true;
-          } else {
-            say('Something went wrong. Try again shortly.', false);
-          }
-        } catch (e) {
-          say('Something went wrong. Try again shortly.', false);
-        } finally {
-          submit.disabled = false;
-        }
-      };
-
-      if (submit) submit.addEventListener('click', subscribe);
-      if (email) email.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); subscribe(); }
-      });
     }
 
     // Instalments keep their cents; prices drop a trailing .00
@@ -322,12 +246,6 @@
       }
 
       // Back in stock replaces the disabled button when a variant is sold out
-      if (notifyBtn) {
-        const soldOut = variant && !variant.available;
-        notifyBtn.hidden = !soldOut;
-        if (soldOut) notifyBtn.dataset.variant = variant.id;
-      }
-
       // Pay-in-4 figure follows the variant price
       const inst = pdp.querySelector('[data-installment]');
       if (inst && variant) inst.textContent = moneyExact(variant.price / 4);

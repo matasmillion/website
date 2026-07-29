@@ -229,7 +229,7 @@
         {%- endcomment -%}
         {%- if section.settings.show_payment_terms -%}
           <p class="pdp__terms">
-            Pay in four interest-free installments of <span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span>.
+            Pay in four interest-free installments of&nbsp;<span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span>.
             <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
                class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
           </p>
@@ -240,35 +240,11 @@
         Back in stock — shown only when the selected variant is unavailable.
         Klaviyo's Back in Stock is opened from here; see global.js.
       {%- endcomment -%}
-      <div
-        class="pdp__notify-wrap"
-        data-notify
-        data-variant="{{ current_variant.id }}"
-        data-klaviyo-company="{{ section.settings.klaviyo_company_id }}"
-        {% if current_variant.available %}hidden{% endif %}
-      >
-        <button type="button" class="pdp__notify" data-notify-open>
-          {{ section.settings.notify_label | default: 'Notify me when available' }}
-        </button>
+      {%- comment -%}
+        Back in stock is handled entirely by Klaviyo's injected
+        .klaviyo-bis-trigger button; the theme only restyles it.
+      {%- endcomment -%}
 
-        <div class="pdp__notify-form" data-notify-form hidden>
-          <label class="pdp__notify-hint" for="notify-email">
-            We'll email you the moment this size is back.
-          </label>
-          <div class="pdp__notify-row">
-            <input
-              type="email"
-              id="notify-email"
-              class="pdp__notify-input"
-              placeholder="you@email.com"
-              autocomplete="email"
-              data-notify-email
-            >
-            <button type="button" class="pdp__notify-submit" data-notify-submit>Notify me</button>
-          </div>
-          <p class="pdp__notify-msg" data-notify-msg hidden></p>
-        </div>
-      </div>
 
 
 
@@ -535,19 +511,6 @@
       "id": "low_stock_threshold",
       "label": "Low stock indicator appears at or below",
       "min": 1, "max": 20, "step": 1, "default": 5
-    },
-    {
-      "type": "text",
-      "id": "notify_label",
-      "label": "Back-in-stock button label",
-      "default": "Notify me when available"
-    },
-    {
-      "type": "text",
-      "id": "klaviyo_company_id",
-      "label": "Klaviyo public API key",
-      "info": "Klaviyo → Settings → API keys. Used for back-in-stock signups.",
-      "default": "WuWz5B"
     },
     {
       "type": "url",
