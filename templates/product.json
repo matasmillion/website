@@ -69,6 +69,7 @@
         "row_packaging",
         "smartsize_smartsize_sizechart_azcYpH"
       ],
+      "disabled": true,
       "settings": {
         "show_short_description": false,
         "show_appointment_link": false,
@@ -176,7 +177,7 @@
       "type": "product-complete-the-look",
       "settings": {
         "heading": "Complete the look",
-        "lookbook_ratio_mobile": "4/5",
+        "lookbook_ratio_mobile": "3/4",
         "lookbook_ratio_desktop": "4/5"
       }
     },
