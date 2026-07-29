@@ -1,0 +1,25 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "foreign_world": {
+      "type": "foreign-world",
+      "settings": {
+        "eyebrow": "Foreign Resource",
+        "heading": "Foreign World",
+        "intro": "An atlas of the extraordinary. Discover places few have been, follow the people going there now, and add your own journeys to the map.",
+        "globe_embed_url": ""
+      }
+    }
+  },
+  "order": [
+    "foreign_world"
+  ]
+}

@@ -1,0 +1,114 @@
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+<section class="product-upsell reveal">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="product-upsell__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+  </div>
+
+  <div class="product-upsell__carousel" data-carousel>
+    <div class="product-upsell__track" data-carousel-track>
+      {%- if section.settings.collection != blank -%}
+        {%- for product in section.settings.collection.products limit: section.settings.products_count -%}
+          <div class="product-upsell__slide">
+            {%- render 'product-card', product: product -%}
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="product-upsell__slide">
+            <article class="product-card">
+              <div class="product-card__image-wrapper product-card__image-wrapper--portrait">
+                <div class="product-card__placeholder">
+                  {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
+                </div>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">Suggested Product {{ i }}</h3>
+                <div class="product-card__price">{{ 9500 | money }}</div>
+              </div>
+            </article>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <button class="featured-products__arrow featured-products__arrow--prev" data-carousel-prev aria-label="{{ 'accessibility.previous' | t }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="featured-products__arrow featured-products__arrow--next" data-carousel-next aria-label="{{ 'accessibility.next' | t }}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<style>
+  .product-upsell {
+    padding: var(--space-2xl) 0;
+    border-top: var(--border-thin);
+  }
+  .product-upsell__heading {
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+  }
+  .product-upsell__carousel {
+    position: relative;
+    padding: 0 var(--space-md);
+  }
+  .product-upsell__track {
+    display: flex;
+    gap: var(--grid-gap);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .product-upsell__track::-webkit-scrollbar { display: none; }
+  .product-upsell__slide {
+    flex: 0 0 240px;
+    scroll-snap-align: start;
+  }
+  @media (max-width: 768px) {
+    .product-upsell__slide { flex: 0 0 200px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Complete the Look",
+  "class": "section-product-upsell",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pairs with"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Select a collection or leave blank for automatic recommendations"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "Number of products",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Complete the Look"
+    }
+  ]
+}
+{% endschema %}

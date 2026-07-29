@@ -1,0 +1,162 @@
+{%- comment -%}
+  Product Card — Jacquemus-style overlay
+
+  Layout (over the image):
+    - tag        : top-left      — show_badge
+    - colors     : top-right
+    - name       : bottom-left   — always shown
+    - price      : bottom-right  — show_price
+    - heart      : below price   — show_wishlist
+  Mobile: info always visible. Desktop: revealed on hover.
+
+  HOMEPAGE RULE — the homepage displays products, it does not sell them.
+  Homepage sections must render a name-only card:
+
+    {% render 'product-card', product: product, show_price: false, show_wishlist: false, show_badge: false %}
+
+  Price belongs on the collection page and the PDP, which use the defaults.
+
+  Accepts:
+    product              (required)
+    context              'overlay' (default) | 'below'
+    show_price           default true
+    show_wishlist        default true
+    show_badge           default true
+    show_secondary_image default true
+    image_aspect_ratio   default 'portrait'
+{%- endcomment -%}
+
+{%- liquid
+  assign show_secondary = show_secondary_image | default: true
+  assign image_ratio = image_aspect_ratio | default: 'portrait'
+
+  assign card_context = context | default: 'overlay'
+
+  # Explicit nil checks. The `default` filter treats false as "missing", so
+  # `show_price | default: true` would silently switch the price back on.
+  if show_price == nil
+    assign show_price = true
+  endif
+  if show_wishlist == nil
+    assign show_wishlist = true
+  endif
+  if show_badge == nil
+    assign show_badge = true
+  endif
+
+  assign show_meta = false
+  if show_price or show_wishlist
+    assign show_meta = true
+  endif
+-%}
+{%- comment -%} Badge logic is shared with the PDP gallery {%- endcomment -%}
+{%- capture badge %}{% if show_badge %}{% render 'product-badge-label', product: product %}{% endif %}{% endcapture -%}
+{%- assign badge = badge | strip -%}
+
+<article class="product-card product-card--{{ card_context }}">
+  <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
+    <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
+      {%- if product.featured_image -%}
+        <img
+          src="{{ product.featured_image | image_url: width: 600 }}"
+          srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
+                  {{ product.featured_image | image_url: width: 600 }} 600w,
+                  {{ product.featured_image | image_url: width: 800 }} 800w"
+          sizes="(max-width: 768px) 50vw, 25vw"
+          alt="{{ product.featured_image.alt | escape }}"
+          loading="lazy"
+          width="{{ product.featured_image.width }}"
+          height="{{ product.featured_image.height }}"
+          class="product-card__image product-card__image--primary"
+        >
+        {%- if show_secondary and product.images.size > 1 -%}
+          <img
+            src="{{ product.images[1] | image_url: width: 600 }}"
+            srcset="{{ product.images[1] | image_url: width: 400 }} 400w,
+                    {{ product.images[1] | image_url: width: 600 }} 600w,
+                    {{ product.images[1] | image_url: width: 800 }} 800w"
+            sizes="(max-width: 768px) 50vw, 25vw"
+            alt="{{ product.images[1].alt | escape }}"
+            loading="lazy"
+            width="{{ product.images[1].width }}"
+            height="{{ product.images[1].height }}"
+            class="product-card__image product-card__image--secondary"
+          >
+        {%- endif -%}
+      {%- else -%}
+        <div class="product-card__placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Tag — top-left, plain text {% endcomment -%}
+      {%- if badge != blank -%}
+        <span class="product-card__badge">{{ badge | upcase }}</span>
+      {%- endif -%}
+
+      {%- comment -%} Variant colors — top-right {% endcomment -%}
+      {%- if product.options_by_name['Color'].values.size > 1 -%}
+        <div class="product-card__colors">
+          {%- for color in product.options_by_name['Color'].values limit: 5 -%}
+            {%- liquid
+              assign cl = color | downcase | replace: ' ', ''
+              assign sc = '#000'
+              if cl contains 'white' or cl contains 'ivory' or cl contains 'cream'
+                assign sc = '#FFFFFF'
+              elsif cl contains 'black'
+                assign sc = '#000000'
+              elsif cl contains 'navy'
+                assign sc = '#1B2A4A'
+              elsif cl contains 'brown' or cl contains 'tan'
+                assign sc = '#8B6914'
+              elsif cl contains 'green' or cl contains 'olive'
+                assign sc = '#556B2F'
+              elsif cl contains 'blue'
+                assign sc = '#3B5998'
+              elsif cl contains 'red' or cl contains 'burgundy'
+                assign sc = '#8B0000'
+              elsif cl contains 'grey' or cl contains 'gray'
+                assign sc = '#808080'
+              elsif cl contains 'beige' or cl contains 'sand'
+                assign sc = '#D4C5A9'
+              elsif cl contains 'yellow' or cl contains 'mimosa'
+                assign sc = '#D4B44A'
+              endif
+            -%}
+            <span class="product-card__color-dot" style="background:{{ sc }};{% if cl contains 'white' or cl contains 'ivory' %}border-color:rgba(0,0,0,0.15);{% endif %}"></span>
+          {%- endfor -%}
+          {%- if product.options_by_name['Color'].values.size > 5 -%}
+            <span class="product-card__color-more">+ {{ product.options_by_name['Color'].values.size | minus: 5 }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </a>
+
+  {%- comment -%} Info overlay — name (BL) + optional price/heart (BR) {% endcomment -%}
+  <div class="product-card__info{% unless show_meta %} product-card__info--name-only{% endunless %}">
+    <a href="{{ product.url }}" class="product-card__title-link">
+      <h3 class="product-card__title">{{ product.title }}</h3>
+    </a>
+    {%- if show_price -%}
+      <span class="product-card__price">
+        {%- if product.compare_at_price > product.price -%}
+          <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+          <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
+        {%- else -%}
+          {{ product.price | money_without_trailing_zeros }}
+        {%- endif -%}
+      </span>
+    {%- endif -%}
+    {%- if show_wishlist -%}
+      <button
+        class="product-card__wishlist"
+        data-wishlist-toggle="{{ product.handle }}"
+        aria-label="Save {{ product.title }}"
+        aria-pressed="false"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    {%- endif -%}
+  </div>
+</article>

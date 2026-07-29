@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Color Codex",
+        "text": "<p>Every color in our palette has a name and a story. The Color Codex is your guide to the signature hues of Foreign Resource, each one drawn from a specific place, moment, or material encountered on our travels. From sun-bleached terracotta to deep coastal indigo, our naming system connects what you wear to where it came from. Explore the full spectrum and discover the world through color.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

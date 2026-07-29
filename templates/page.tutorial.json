@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Product Guide",
+        "text": "<p>Built to last, made to travel. Our Product Guide covers everything you need to know about caring for your Foreign Resource pieces, from washing and storage tips to the technical features woven into every garment. Learn about the fabrics we source, the construction details that set our work apart, and how to keep your favorites looking their best for years to come.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

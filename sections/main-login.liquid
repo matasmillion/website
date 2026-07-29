@@ -1,0 +1,92 @@
+{{ 'component-customer.css' | asset_url | stylesheet_tag }}
+
+<section class="customer">
+  <div id="login-view">
+    <h1 class="customer__title">{{ 'customer.login.title' | t }}</h1>
+    <p class="customer__intro">{{ 'customer.login.intro' | t }}</p>
+
+    {%- form 'customer_login', class: 'customer__form' -%}
+      {%- if form.errors -%}
+        <div class="customer__errors" role="alert">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div class="customer__field">
+        <label for="CustomerEmail">{{ 'customer.fields.email' | t }}</label>
+        <input type="email" name="customer[email]" id="CustomerEmail" autocomplete="email" required>
+      </div>
+
+      <div class="customer__field">
+        <label for="CustomerPassword">{{ 'customer.fields.password' | t }}</label>
+        <input type="password" name="customer[password]" id="CustomerPassword" autocomplete="current-password" required>
+      </div>
+
+      <div class="customer__actions">
+        <button type="submit" class="btn btn--primary btn--full">{{ 'customer.login.submit' | t }}</button>
+      </div>
+    {%- endform -%}
+
+    <div class="customer__links">
+      <a href="#recover" data-show-recover>{{ 'customer.login.forgot_password' | t }}</a>
+      <a href="{{ routes.account_register_url }}">{{ 'customer.login.create_account' | t }}</a>
+    </div>
+  </div>
+
+  <div id="recover-view" hidden>
+    <h1 class="customer__title">{{ 'customer.recover.title' | t }}</h1>
+    <p class="customer__intro">{{ 'customer.recover.intro' | t }}</p>
+
+    {%- form 'recover_customer_password', class: 'customer__form' -%}
+      {%- if form.posted_successfully? -%}
+        <div class="customer__success" role="status">{{ 'customer.recover.success' | t }}</div>
+      {%- endif -%}
+      {%- if form.errors -%}
+        <div class="customer__errors" role="alert">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div class="customer__field">
+        <label for="RecoverEmail">{{ 'customer.fields.email' | t }}</label>
+        <input type="email" name="email" id="RecoverEmail" autocomplete="email" required>
+      </div>
+
+      <div class="customer__actions">
+        <button type="submit" class="btn btn--primary btn--full">{{ 'customer.recover.submit' | t }}</button>
+      </div>
+    {%- endform -%}
+
+    <div class="customer__links">
+      <a href="#login" data-show-login>{{ 'customer.recover.cancel' | t }}</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var login = document.getElementById('login-view');
+    var recover = document.getElementById('recover-view');
+    if (!login || !recover) return;
+    var show = function (recoverMode) {
+      login.hidden = recoverMode;
+      recover.hidden = !recoverMode;
+    };
+    document.querySelectorAll('[data-show-recover]').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); show(true); });
+    });
+    document.querySelectorAll('[data-show-login]').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); show(false); });
+    });
+    // Shopify redirects back with #recover after a recover-password submit
+    if (window.location.hash === '#recover') show(true);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Customer Login",
+  "class": "section-customer-login",
+  "settings": []
+}
+{% endschema %}

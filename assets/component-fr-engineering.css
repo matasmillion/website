@@ -1,0 +1,114 @@
+/* ============================================
+   PDP — FOREIGN ENGINEERING
+   Full-bleed image cards with overlay copy.
+   Mobile: horizontal snap carousel. Desktop: flush side-by-side.
+   ============================================ */
+
+.fre {
+  /* Edge to edge — no section padding, the images ARE the section */
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.fre__track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fre__track::-webkit-scrollbar { display: none; }
+
+.fre__card {
+  position: relative;
+  flex: 0 0 86%;
+  scroll-snap-align: start;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #E4DED2;
+}
+
+@media (min-width: 769px) {
+  /* All cards visible at once, flush, filling the row */
+  .fre__track {
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .fre__card {
+    flex: 1 1 0;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+.fre__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Label sits on the first card only, top-left. No plate — it reads directly
+   off the image, in salt or slate depending on how light that corner is. */
+.fre__label {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 2;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.fre__copy {
+  position: absolute;
+  z-index: 2;
+  padding: 1.25rem;
+  max-width: 82%;
+}
+
+/* Salt (light) on dark images, slate (dark) on light ones */
+.fre__card { color: #F2EFE9; }
+.fre__card.is-light-bg { color: #4A4E54; }
+
+.fre__label,
+.fre__copy { color: inherit; }
+
+.fre__title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  margin: 0 0 0.2rem;
+}
+
+.fre__subtitle {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0;
+  opacity: 0.95;
+}
+
+/* Overlay placement */
+.fre__card--top-left      .fre__copy { top: 0; left: 0; }
+.fre__card--top-center    .fre__copy { top: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+.fre__card--top-right     .fre__copy { top: 0; right: 0; text-align: right; }
+.fre__card--middle-left   .fre__copy { top: 50%; left: 0; transform: translateY(-50%); }
+.fre__card--middle-center .fre__copy { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.fre__card--middle-right  .fre__copy { top: 50%; right: 0; transform: translateY(-50%); text-align: right; }
+.fre__card--bottom-left   .fre__copy { bottom: 0; left: 0; }
+.fre__card--bottom-center .fre__copy { bottom: 0; left: 50%; transform: translateX(-50%); text-align: center; }
+.fre__card--bottom-right  .fre__copy { bottom: 0; right: 0; text-align: right; }
+
+/* The label occupies the top-left corner on card one, so nudge copy clear of it */
+.fre__card--top-left:first-child .fre__copy { top: 3rem; }

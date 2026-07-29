@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Lookbook",
+        "text": "<p>See the collection in motion. Our lookbook captures each season's campaign imagery, shot on location in the cities that inspired the work. These are not just product photos. They are portraits of a lifestyle shaped by movement, culture, and intention. Browse the latest editorial and archive campaigns to see how Foreign Resource lives in the real world.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

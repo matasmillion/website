@@ -1,0 +1,30 @@
+{%- comment -%}
+  Resolves a product's tag badge to a single label and OUTPUTS it.
+
+  {% render %} is variable-isolated in Liquid — an assign in here cannot reach
+  the caller — so the label is printed and callers capture it:
+
+    {%- capture badge_label %}{% render 'product-badge-label', product: product %}{% endcapture -%}
+    {%- assign badge_label = badge_label | strip -%}
+
+  The strip matters: without it the captured value carries whitespace and
+  `!= blank` is always true.
+
+  Accepts: product
+{%- endcomment -%}
+{%- liquid
+  assign tags_down = product.tags | join: ',' | downcase
+  assign badge = ''
+  if product.available == false or tags_down contains 'sold out' or tags_down contains 'sold-out'
+    assign badge = 'Sold out'
+  elsif tags_down contains 'restocking soon' or tags_down contains 'restocking-soon'
+    assign badge = 'Restocking soon'
+  elsif tags_down contains 'exclusive'
+    assign badge = 'Exclusive'
+  elsif tags_down contains 'personalizable'
+    assign badge = 'Personalizable'
+  elsif tags_down contains 'new'
+    assign badge = 'New'
+  endif
+-%}
+{{- badge -}}

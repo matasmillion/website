@@ -1,0 +1,84 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "stockists": {
+      "type": "stockists",
+      "blocks": {
+        "s_ny": {
+          "type": "stockist",
+          "settings": {
+            "city": "New York",
+            "store_name": "Bergdorf Goodman",
+            "address": "754 5th Ave, New York, NY 10019",
+            "hours": "Mon–Sat 10–7, Sun 11–6"
+          }
+        },
+        "s_la": {
+          "type": "stockist",
+          "settings": {
+            "city": "Los Angeles",
+            "store_name": "Maxfield",
+            "address": "8825 Melrose Ave, West Hollywood, CA 90069",
+            "hours": "Mon–Sat 11–6, Sun 12–5"
+          }
+        },
+        "s_paris": {
+          "type": "stockist",
+          "settings": {
+            "city": "Paris",
+            "store_name": "Le Bon Marché",
+            "address": "24 Rue de Sèvres, 75007 Paris",
+            "hours": "Mon–Sat 10–7:45, Sun 11–7:45"
+          }
+        },
+        "s_london": {
+          "type": "stockist",
+          "settings": {
+            "city": "London",
+            "store_name": "Dover Street Market",
+            "address": "18–22 Haymarket, London SW1Y 4DG",
+            "hours": "Mon–Sat 11–7, Sun 12–6"
+          }
+        },
+        "s_tokyo": {
+          "type": "stockist",
+          "settings": {
+            "city": "Tokyo",
+            "store_name": "Isetan Shinjuku",
+            "address": "3-14-1 Shinjuku, Tokyo 160-0022",
+            "hours": "Daily 10–8"
+          }
+        },
+        "s_melbourne": {
+          "type": "stockist",
+          "settings": {
+            "city": "Melbourne",
+            "store_name": "Harrolds",
+            "address": "Collins St, Melbourne VIC 3000",
+            "hours": "Mon–Sat 10–6, Sun 11–5"
+          }
+        }
+      },
+      "block_order": [
+        "s_ny",
+        "s_la",
+        "s_paris",
+        "s_london",
+        "s_tokyo",
+        "s_melbourne"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "stockists"
+  ]
+}

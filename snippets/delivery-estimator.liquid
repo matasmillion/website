@@ -1,0 +1,61 @@
+{%- comment -%}
+  PDP — Zip code delivery date estimator.
+
+  Renders the zip input plus a Standard and Express estimated delivery date.
+
+  NOTE ON DATA SOURCE
+  A theme cannot read Shopify shipping settings at runtime. The only storefront
+  endpoint for live rates is /cart/shipping_rates.json, which requires a
+  non-empty cart — a PDP visitor usually has none. So the transit windows below
+  are theme settings, seeded from the store's real delivery profile
+  (USA DOMESTIC: Standard, Standard free, Express). Keep them in sync with
+  Settings → Shipping and delivery, or move to an app if live rates are needed.
+
+  Accepts:
+    standard_min / standard_max  — business days
+    express_min  / express_max   — business days
+    cutoff_hour                  — 0-23, store local time
+    free_threshold               — money amount for complimentary standard
+{%- endcomment -%}
+
+<div
+  class="dest"
+  data-delivery-estimator
+  data-standard-min="{{ standard_min | default: 3 }}"
+  data-standard-max="{{ standard_max | default: 5 }}"
+  data-express-min="{{ express_min | default: 1 }}"
+  data-express-max="{{ express_max | default: 2 }}"
+  data-cutoff-hour="{{ cutoff_hour | default: 14 }}"
+  data-country="{{ localization.country.iso_code | default: 'US' }}"
+>
+  <p class="dest__label">
+    <span class="dest__pulse" aria-hidden="true"></span>
+    Delivery time
+  </p>
+
+  <div class="dest__entry">
+    <label class="dest__hint" for="dest-zip">Enter your zip code here to estimate delivery date</label>
+    <div class="dest__row">
+      <input
+        type="text"
+        id="dest-zip"
+        class="dest__input"
+        inputmode="numeric"
+        autocomplete="postal-code"
+        maxlength="10"
+        placeholder="00000"
+        data-dest-zip
+      >
+      <button type="button" class="dest__apply" data-dest-apply>Apply</button>
+    </div>
+  </div>
+
+  <div class="dest__results" data-dest-results hidden>
+    <p class="dest__method">Standard delivery — Complimentary</p>
+    <p class="dest__date">Estimated delivery date: from <span data-dest-standard></span></p>
+    <p class="dest__method">Express delivery (if available)</p>
+    <p class="dest__date">Estimated delivery date: from <span data-dest-express></span></p>
+  </div>
+
+  <p class="dest__error" data-dest-error hidden>Enter a valid zip code to see delivery dates.</p>
+</div>

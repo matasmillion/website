@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Page Not Found",
+        "text": "<p>The page you're looking for doesn't exist. Perhaps you'd like to continue exploring.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

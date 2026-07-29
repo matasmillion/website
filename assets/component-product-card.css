@@ -1,0 +1,209 @@
+/* ============================================
+   PRODUCT CARD — Jacquemus overlay
+   tag TL · colors TR · name BL · price BR · heart under price
+   Homepage cards are name-only — see .product-card__info--name-only
+   Mobile: always visible. Desktop: revealed on hover.
+   ============================================ */
+
+.product-card {
+  position: relative;
+}
+
+.product-card__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.product-card__link:hover { opacity: 1; }
+
+.product-card__image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: #F5F5F3;
+}
+
+/* Aspect ratios — Jacquemus product tiles are 3:4 */
+.product-card__image-wrapper--portrait { aspect-ratio: 3 / 4; }
+.product-card__image-wrapper--portrait-45 { aspect-ratio: 4 / 5; }
+.product-card__image-wrapper--portrait-23 { aspect-ratio: 2 / 3; }
+.product-card__image-wrapper--square { aspect-ratio: 1 / 1; }
+.product-card__image-wrapper--landscape { aspect-ratio: 4 / 3; }
+
+.product-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.product-card__image--secondary { opacity: 0; }
+.product-card__link:hover .product-card__image--secondary { opacity: 1; }
+
+.product-card__placeholder {
+  position: absolute;
+  inset: 0;
+  background-color: #F5F5F3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-card__placeholder-svg { width: 40%; height: auto; opacity: 0.15; }
+
+/* ===== OVERLAY ELEMENTS ===== */
+.product-card__badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+}
+
+.product-card__colors {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+.product-card__color-dot {
+  width: 13px;
+  height: 13px;
+  border: 1px solid transparent;
+  display: block;
+}
+.product-card__color-more {
+  font-size: 10px;
+  opacity: 0.5;
+  white-space: nowrap;
+  margin-left: 0.125rem;
+}
+
+/* Info — shared grid; contexts place the 3 items differently */
+.product-card__info {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.5rem;
+  z-index: 2;
+}
+
+.product-card__title-link { grid-area: title; text-decoration: none; color: inherit; min-width: 0; }
+.product-card__title-link:hover { opacity: 0.6; }
+
+.product-card__title {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+}
+
+.product-card__price {
+  grid-area: price;
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  color: #2D2C2F;
+  white-space: nowrap;
+}
+.product-card__price-compare {
+  color: #A4A4A4;
+  text-decoration: line-through;
+  margin-right: 0.4em;
+}
+.product-card__price-sale { color: #B23A2E; }
+
+.product-card__wishlist {
+  grid-area: heart;
+  align-self: start;
+  justify-self: end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #2D2C2F;
+  line-height: 0;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.product-card__wishlist.is-saved svg { fill: currentColor; }
+
+/* ---- OVERLAY context (homepage): info over image bottom ---- */
+.product-card--overlay .product-card__info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: end;
+  padding: 0.75rem 0.875rem;
+  grid-template-areas:
+    "title price"
+    "title heart";
+}
+.product-card--overlay .product-card__price { justify-self: end; }
+.product-card--overlay .product-card__wishlist { align-self: end; }
+
+/* ---- BELOW context (collection): info under image, always visible ---- */
+.product-card--below .product-card__info {
+  position: static;
+  align-items: start;
+  padding: 0.6rem 0.25rem 0;
+  grid-template-areas:
+    "title heart"
+    "price heart";
+}
+.product-card--below .product-card__title { line-height: 1.35; }
+.product-card--below .product-card__price { color: var(--color-text-light); margin-top: 0.1rem; }
+
+/* ---- NAME-ONLY (homepage): no price, no heart — the title owns the row ----
+   The homepage displays products, it does not sell them. These rules must stay
+   below both context blocks above so they win on source order. */
+.product-card__info--name-only {
+  grid-template-columns: 1fr;
+}
+.product-card--overlay .product-card__info--name-only,
+.product-card--below .product-card__info--name-only {
+  grid-template-areas: "title";
+}
+
+/* ===== VISIBILITY ===== */
+/* Mobile: everything visible */
+.product-card__badge,
+.product-card__colors,
+.product-card__info {
+  opacity: 1;
+}
+
+@media (min-width: 769px) {
+  /* Overlay: reveal all on hover */
+  .product-card--overlay .product-card__badge,
+  .product-card--overlay .product-card__colors,
+  .product-card--overlay .product-card__info {
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  .product-card--overlay:hover .product-card__badge,
+  .product-card--overlay:hover .product-card__colors,
+  .product-card--overlay:hover .product-card__info {
+    opacity: 1;
+  }
+
+  /* Below: badge + info always visible; colors reveal on hover */
+  .product-card--below .product-card__colors {
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  .product-card--below:hover .product-card__colors { opacity: 1; }
+
+  .product-card__title { font-size: 12px; }
+  .product-card__price { font-size: 12px; }
+}

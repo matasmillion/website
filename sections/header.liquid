@@ -1,0 +1,335 @@
+{%- comment -%} Component CSS {% endcomment -%}
+{{ 'component-header.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign sticky = section.settings.sticky_header
+  assign transparent = section.settings.transparent_header
+-%}
+
+<header
+  class="header{% if transparent %} header--transparent{% endif %}"
+  data-header
+  {% if sticky %}data-sticky="true"{% endif %}
+  role="banner"
+>
+  <div class="header__bar">
+    {%- comment -%} ===== LEFT ===== {% endcomment -%}
+    <div class="header__left">
+      {%- comment -%} Mobile: hamburger + wishlist {% endcomment -%}
+      <div class="header__mobile-cluster header__mobile-only">
+        <button class="header__icon header__menu-toggle" data-menu-toggle aria-label="{{ 'accessibility.open_menu' | t }}" aria-expanded="false">
+          {%- render 'icon-menu' -%}
+        </button>
+        <button type="button" class="header__icon header__wishlist" data-wishlist-open aria-label="Saved items">
+          {%- render 'icon-heart' -%}
+        </button>
+      </div>
+
+      {%- comment -%} Desktop: Shop dropdown + Foreign World + Foreign Fund {% endcomment -%}
+      <nav class="header__nav header__desktop-only" role="navigation" aria-label="Main navigation">
+        <div class="header__shop" data-shop-menu>
+          <button type="button" class="header__nav-link header__shop-trigger" aria-expanded="false" aria-haspopup="true">
+            {{ section.settings.shop_label | default: 'Shop' }}
+            <svg class="header__shop-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          {%- if section.settings.menu != blank -%}
+            <div class="header__dropdown">
+              {%- for link in section.settings.menu.links -%}
+                <a href="{{ link.url }}" class="header__dropdown-link">{{ link.title }}</a>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.show_foreign_resource -%}
+          <a href="{{ section.settings.foreign_resource_link | default: pages['foreign-resource'].url | default: '/pages/foreign-resource' }}" class="header__nav-link">
+            {{ section.settings.foreign_resource_label | default: 'Foreign Resource' }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_world -%}
+          <a href="{{ section.settings.foreign_world_link | default: pages['foreign-world'].url | default: '/pages/foreign-world' }}" class="header__nav-link">
+            {{ section.settings.foreign_world_label | default: 'Foreign World' }}
+          </a>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_fund -%}
+          <a href="{{ section.settings.foreign_fund_link | default: pages['foreign-fund'].url | default: '/pages/foreign-fund' }}" class="header__nav-link">
+            {{ section.settings.foreign_fund_label | default: 'Foreign Fund' }}
+          </a>
+        {%- endif -%}
+      </nav>
+    </div>
+
+    {%- comment -%} ===== CENTER: LOGO ===== {% endcomment -%}
+    <div class="header__center">
+      <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop.name }}">
+        {%- if settings.logo -%}
+          {%- assign logo_width_2x = settings.logo_width | times: 2 -%}
+          <img
+            src="{{ settings.logo | image_url: width: logo_width_2x }}"
+            alt="{{ shop.name }}"
+            width="{{ settings.logo_width }}"
+            height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio | round }}"
+            style="--header-logo-width: {{ settings.logo_width }}px;"
+            loading="eager"
+          >
+        {%- else -%}
+          <span class="header__logo-text">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+
+    {%- comment -%} ===== RIGHT ===== {% endcomment -%}
+    <div class="header__right">
+      {%- comment -%} Desktop: wishlist {% endcomment -%}
+      <button type="button" class="header__icon header__wishlist header__desktop-only" data-wishlist-open aria-label="Saved items">
+        {%- render 'icon-heart' -%}
+      </button>
+      {%- comment -%} Both: search (opens swipe-up drawer) {% endcomment -%}
+      <button type="button" class="header__icon" data-search-open aria-label="{{ 'general.search' | t }}">
+        {%- render 'icon-search' -%}
+      </button>
+      {%- comment -%} Desktop: account {% endcomment -%}
+      <a href="{{ routes.account_url }}" class="header__icon header__desktop-only" aria-label="{{ 'general.account' | t }}">
+        {%- render 'icon-account' -%}
+      </a>
+      {%- comment -%} Both: cart (far right) — clean bag icon {% endcomment -%}
+      <a href="{{ routes.cart_url }}" class="header__icon header__cart" aria-label="{{ 'general.cart' | t }}" data-cart-toggle>
+        {%- render 'icon-cart' -%}
+        <span class="header__cart-count{% if cart.item_count > 0 %} is-active{% endif %}" data-cart-count>{{ cart.item_count }}</span>
+      </a>
+    </div>
+  </div>
+
+  {%- comment -%} Mobile Menu Overlay {% endcomment -%}
+  <div class="mobile-menu" data-menu-overlay aria-hidden="true">
+    <div class="mobile-menu__inner">
+      <div class="mobile-menu__header">
+        <a href="{{ routes.root_url }}" class="header__logo" aria-label="{{ shop.name }}">
+          {%- if settings.logo -%}
+            <img src="{{ settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="100" height="{{ 100 | divided_by: settings.logo.aspect_ratio | round }}" loading="lazy">
+          {%- else -%}
+            <span class="header__logo-text">{{ shop.name }}</span>
+          {%- endif -%}
+        </a>
+        <button class="header__icon" data-menu-close aria-label="{{ 'accessibility.close_menu' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <nav class="mobile-menu__nav" role="navigation" aria-label="Mobile navigation">
+        {%- comment -%} Shop — tap to reveal collections {% endcomment -%}
+        <button type="button" class="mobile-menu__link mobile-menu__shop" data-mm-shop aria-expanded="false">
+          {{ section.settings.shop_label | default: 'Shop' }}
+          <svg class="mobile-menu__shop-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        {%- if section.settings.menu != blank -%}
+          <div class="mobile-menu__sub" data-mm-shop-panel hidden>
+            {%- for link in section.settings.menu.links -%}
+              <a href="{{ link.url }}" class="mobile-menu__sublink">{{ link.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_resource -%}
+          <a href="{{ section.settings.foreign_resource_link | default: pages['foreign-resource'].url | default: '/pages/foreign-resource' }}" class="mobile-menu__link">{{ section.settings.foreign_resource_label | default: 'Foreign Resource' }}</a>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_world -%}
+          <a href="{{ section.settings.foreign_world_link | default: pages['foreign-world'].url | default: '/pages/foreign-world' }}" class="mobile-menu__link">{{ section.settings.foreign_world_label | default: 'Foreign World' }}</a>
+        {%- endif -%}
+        {%- if section.settings.show_foreign_fund -%}
+          <a href="{{ section.settings.foreign_fund_link | default: pages['foreign-fund'].url | default: '/pages/foreign-fund' }}" class="mobile-menu__link">{{ section.settings.foreign_fund_label | default: 'Foreign Fund' }}</a>
+        {%- endif -%}
+      </nav>
+      <div class="mobile-menu__footer">
+        {%- if customer -%}
+          <a href="{{ routes.account_url }}" class="mobile-menu__link mobile-menu__link--small">My account</a>
+          <a href="{{ routes.account_logout_url }}" class="mobile-menu__link mobile-menu__link--small">Log out</a>
+        {%- else -%}
+          <a href="{{ routes.account_login_url }}" class="mobile-menu__link mobile-menu__link--small">Log in</a>
+          <a href="{{ routes.account_register_url }}" class="mobile-menu__link mobile-menu__link--small">Register</a>
+        {%- endif -%}
+        <button type="button" class="mobile-menu__link mobile-menu__link--small" data-search-open style="background:none;border:none;cursor:pointer;text-align:left;">Search</button>
+        {%- render 'social-icons' -%}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Cart Drawer {% endcomment -%}
+  <div class="cart-drawer" data-cart-drawer aria-hidden="true">
+    <div class="cart-drawer__overlay"></div>
+    <div class="cart-drawer__panel">
+      <div class="cart-drawer__header">
+        <h2 class="cart-drawer__title">{{ 'cart.title' | t }}</h2>
+        <button class="header__icon" data-cart-drawer-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      {%- comment -%} Contents rendered by JS (initCartDrawer) on open {% endcomment -%}
+      <div class="cart-drawer__content" id="cart-drawer-content">
+        <p class="cart-drawer__empty">{{ 'cart.empty' | t }}</p>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Wishlist Drawer (client-side, localStorage) {% endcomment -%}
+  <div class="wl-drawer" data-wishlist-drawer aria-hidden="true">
+    <div class="wl-drawer__overlay" data-wishlist-close></div>
+    <div class="wl-drawer__panel">
+      <div class="wl-drawer__header">
+        <h2 class="wl-drawer__title">Saved items</h2>
+        <button class="header__icon" data-wishlist-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <div class="wl-drawer__content" data-wishlist-content>
+        <p class="wl-drawer__empty" data-wishlist-empty>You haven't saved any items yet.</p>
+        <div class="wl-drawer__grid" data-wishlist-grid></div>
+      </div>
+      {%- if pages['wishlist'] != blank -%}
+        <div class="wl-drawer__footer">
+          <a href="{{ pages['wishlist'].url }}" class="wl-drawer__view-all">View all saved items</a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} Search Drawer (swipe up from bottom) {% endcomment -%}
+  <div class="search-drawer" data-search-drawer aria-hidden="true">
+    <div class="search-drawer__overlay" data-search-close></div>
+    <div class="search-drawer__panel">
+      <div class="search-drawer__head">
+        <h2 class="search-drawer__title">Search</h2>
+        <button class="header__icon" data-search-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon-close' -%}
+        </button>
+      </div>
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-drawer__form">
+        <input
+          type="search"
+          name="q"
+          class="search-drawer__input"
+          placeholder="Search here"
+          autocomplete="off"
+          data-search-input
+          aria-label="Search"
+        >
+      </form>
+
+      {%- comment -%} Live results (predictive) {% endcomment -%}
+      <div class="search-drawer__results" data-search-results hidden></div>
+
+      {%- comment -%} Default state: suggestions + most viewed {% endcomment -%}
+      <div class="search-drawer__default" data-search-default>
+        {%- if section.settings.menu != blank -%}
+          <p class="search-drawer__label">Suggestions</p>
+          <div class="search-drawer__suggest">
+            {%- for link in section.settings.menu.links limit: 5 -%}
+              <a href="{{ link.url }}" class="search-drawer__suggest-link">{{ link.title }}</a>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        <p class="search-drawer__label">Most viewed items</p>
+        <div class="search-drawer__mv" data-search-mostviewed></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Shop dropdown menu",
+      "default": "main-menu",
+      "info": "Shown under 'Shop' on desktop and as the full-screen menu on mobile."
+    },
+    {
+      "type": "text",
+      "id": "shop_label",
+      "label": "Shop label",
+      "default": "Shop"
+    },
+    {
+      "type": "header",
+      "content": "Foreign Resource link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_resource",
+      "label": "Show Foreign Resource",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_resource_label",
+      "label": "Foreign Resource label",
+      "default": "Foreign Resource"
+    },
+    {
+      "type": "url",
+      "id": "foreign_resource_link",
+      "label": "Foreign Resource link"
+    },
+    {
+      "type": "header",
+      "content": "Foreign World link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_world",
+      "label": "Show Foreign World",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_world_label",
+      "label": "Foreign World label",
+      "default": "Foreign World"
+    },
+    {
+      "type": "url",
+      "id": "foreign_world_link",
+      "label": "Foreign World link"
+    },
+    {
+      "type": "header",
+      "content": "Foreign Fund link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_foreign_fund",
+      "label": "Show Foreign Fund",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "foreign_fund_label",
+      "label": "Foreign Fund label",
+      "default": "Foreign Fund"
+    },
+    {
+      "type": "url",
+      "id": "foreign_fund_link",
+      "label": "Foreign Fund link"
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "Sticky header",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_header",
+      "label": "Transparent header over hero",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
