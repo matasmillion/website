@@ -125,6 +125,15 @@
     "engineering": {
       "type": "fr-engineering",
       "blocks": {
+        "card_mCKrBc": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/FW25AL006_CRESCENTSHOULDERBAG_JETBLACK-ESPRESSO_1_3200x_5dfaf4fd-b26d-47b1-803e-8e053a59c7cd.webp",
+            "title": "Embroidered belt loop",
+            "subtitle": "The details that matter.",
+            "text_position": "bottom-left"
+          }
+        },
         "card_1": {
           "type": "card",
           "settings": {
@@ -146,6 +155,7 @@
         "card_3": {
           "type": "card",
           "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-07-24_at_9.34.40_PM.png",
             "title": "Zip-off shorts",
             "subtitle": "Any weather, any time.",
             "text_position": "bottom-left"
@@ -153,6 +163,7 @@
         }
       },
       "block_order": [
+        "card_mCKrBc",
         "card_1",
         "card_2",
         "card_3"
