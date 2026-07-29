@@ -88,12 +88,15 @@
   </section>
 
   <style>
+    /* Full-bleed: the images touch both edges of the viewport on every
+       breakpoint. Only the heading keeps the page inset. */
     .ctl {
-      padding: var(--space-2xl) clamp(1.25rem, 0.5rem + 3vw, 4rem);
+      padding: var(--space-2xl) 0;
       border-top: 1px solid var(--color-border);
     }
 
     .ctl__heading {
+      padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem);
       font-family: var(--font-heading);
       font-size: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
       font-weight: var(--font-weight-medium);

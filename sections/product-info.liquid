@@ -174,11 +174,11 @@
             <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
                 {%- liquid
-                  # Prefer Shopify's colour metaobject: it carries the real
-                  # swatch image and hex, so a stone wash reads as stone rather
-                  # than a flat guess. The name map below is only a fallback for
-                  # colours that have no metaobject yet.
-                  assign swatch_img = blank
+                  # Takes the hex from Shopify's colour metaobject so the chip
+                  # is the true colour rather than a guess. The metaobject's
+                  # texture image is deliberately not used — a flat chip reads
+                  # cleaner at this size. The name map is the fallback for
+                  # colours with no metaobject yet.
                   assign swatch_color = blank
                   assign value_down = value | downcase
 
@@ -186,9 +186,6 @@
                     assign entry_label = entry.label | downcase
                     if entry_label == value_down
                       assign swatch_color = entry.color
-                      if entry.image != blank
-                        assign swatch_img = entry.image
-                      endif
                     endif
                   endfor
 
@@ -232,7 +229,7 @@
                   data-variant-option="{{ value }}"
                   aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
-                  style="background-color: {{ swatch_color }};{% if swatch_img != blank %} background-image: url('{{ swatch_img | image_url: width: 120 }}');{% endif %}{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
+                  style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
                   title="{{ value }}"
                 ></button>
               {%- endfor -%}

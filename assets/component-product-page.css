@@ -225,10 +225,6 @@
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
-
-  /* Class + transform, never the hidden attribute — keeps the slide and
-     avoids the [hidden]{display:none !important} reset. */
-  .pdp-band.is-hidden { transform: translateY(100%); }
 }
 
 .pdp-band__top {
@@ -412,9 +408,7 @@
 .pdp__swatch {
   width: 26px;
   height: 26px;
-  /* Colour metaobjects carry a real swatch texture; the hex is the fallback */
-  background-size: cover;
-  background-position: center;
+  background-clip: padding-box;
   border-radius: 0;
   border: 1px solid transparent;
   cursor: pointer;

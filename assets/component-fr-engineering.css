@@ -51,15 +51,13 @@
   display: block;
 }
 
-/* Label sits on the first card only, top-left, on a dark plate */
+/* Label sits on the first card only, top-left. No plate — it reads directly
+   off the image, in salt or slate depending on how light that corner is. */
 .fre__label {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 1.25rem;
+  left: 1.25rem;
   z-index: 2;
-  padding: 0.85rem 1.1rem;
-  background: #2D2C2F;
-  color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: var(--font-weight-medium);
@@ -73,9 +71,14 @@
   z-index: 2;
   padding: 1.25rem;
   max-width: 82%;
-  color: #FFFFFF;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
 }
+
+/* Salt (light) on dark images, slate (dark) on light ones */
+.fre__card { color: #F2EFE9; }
+.fre__card.is-light-bg { color: #4A4E54; }
+
+.fre__label,
+.fre__copy { color: inherit; }
 
 .fre__title {
   font-family: var(--font-body);

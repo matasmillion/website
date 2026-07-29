@@ -940,6 +940,47 @@
     }
   };
 
+  /* --- Foreign Engineering: pick salt or slate per card from the image --- */
+  const initFreContrast = () => {
+    const cards = document.querySelectorAll('.fre__card');
+    if (!cards.length) return;
+
+    // Sample the corner the copy sits over and measure its luminance, so the
+    // text flips to slate on pale imagery and stays salt on dark.
+    const measure = (card) => {
+      const img = card.querySelector('.fre__img');
+      if (!img) return;
+
+      const sample = () => {
+        try {
+          const c = document.createElement('canvas');
+          const w = 24, h = 24;
+          c.width = w; c.height = h;
+          const ctx = c.getContext('2d');
+          // Bottom-left region — where the title and subtitle sit
+          const sx = 0;
+          const sy = Math.max(0, img.naturalHeight - img.naturalHeight * 0.3);
+          ctx.drawImage(img, sx, sy, img.naturalWidth * 0.5, img.naturalHeight * 0.3, 0, 0, w, h);
+          const d = ctx.getImageData(0, 0, w, h).data;
+          let sum = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+          }
+          const avg = sum / (d.length / 4);
+          card.classList.toggle('is-light-bg', avg > 140);
+        } catch (e) {
+          // Tainted canvas or a blocked image: keep the salt default
+        }
+      };
+
+      img.crossOrigin = 'anonymous';
+      if (img.complete && img.naturalWidth) sample();
+      else img.addEventListener('load', sample, { once: true });
+    };
+
+    cards.forEach(measure);
+  };
+
   /* --- Klaviyo back-in-stock: tag whatever it injects so CSS can reach it --- */
   const initKlaviyoBisSkin = () => {
     const pdp = document.querySelector('[data-pdp]');
@@ -967,21 +1008,30 @@
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // The band rides along until Complete the Look appears, then stops just
-    // above it — so it is observed directly rather than inferring the point
-    // from where the engineering section ends.
+    // The band rides the viewport bottom, then comes to rest exactly on top of
+    // Complete the Look and scrolls away with the page — rather than vanishing.
+    // Raising `bottom` by however far Complete the Look has entered the
+    // viewport pins the band's base to that section's top edge.
     const boundary = document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        // Hide the moment any part of Complete the Look is on screen, and
-        // bring it back when scrolling up above it again.
-        band.classList.toggle('is-hidden', entry.isIntersecting || entry.boundingClientRect.top < 0);
-      });
-    }, { threshold: 0 });
+    let ticking = false;
+    const place = () => {
+      ticking = false;
+      const top = boundary.getBoundingClientRect().top;
+      const overlap = window.innerHeight - top;
+      band.style.bottom = overlap > 0 ? overlap + 'px' : '0px';
+    };
 
-    observer.observe(boundary);
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(place);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    place();
   };
 
   /* --- PDP zoom lightbox + cursor-following affordance --- */
@@ -1210,7 +1260,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initFreContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
