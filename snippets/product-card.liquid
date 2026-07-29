@@ -14,21 +14,11 @@
   assign show_secondary = show_secondary_image | default: true
   assign image_ratio = image_aspect_ratio | default: 'portrait'
 
-  assign tags_down = product.tags | join: ',' | downcase
-  assign badge = ''
-  if product.available == false or tags_down contains 'sold out' or tags_down contains 'sold-out'
-    assign badge = 'Sold out'
-  elsif tags_down contains 'restocking soon' or tags_down contains 'restocking-soon'
-    assign badge = 'Restocking soon'
-  elsif tags_down contains 'exclusive'
-    assign badge = 'Exclusive'
-  elsif tags_down contains 'personalizable'
-    assign badge = 'Personalizable'
-  elsif tags_down contains 'new'
-    assign badge = 'New'
-  endif
   assign card_context = context | default: 'overlay'
 -%}
+{%- comment -%} Badge logic is shared with the PDP gallery {%- endcomment -%}
+{%- capture badge %}{% render 'product-badge-label', product: product %}{% endcapture -%}
+{%- assign badge = badge | strip -%}
 
 <article class="product-card product-card--{{ card_context }}">
   <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">

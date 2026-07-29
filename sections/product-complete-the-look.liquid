@@ -1,60 +1,96 @@
 {%- comment -%}
   PDP — Complete the look.
 
-  Curated per product, in this order of preference:
-    1. product.metafields.custom.complete_the_look  (list.product_reference)
-    2. product.metafields.custom.styled_with        (legacy key, same type)
-    3. the product's first collection, as a fallback so the section is never
-       empty on products nobody has curated yet
+  A per-SKU lookbook shot beside the four products curated for it.
 
-  Setting complementary products needs no metaobjects and no per-SKU pages —
-  create ONE metafield definition (Settings → Custom data → Products):
-      namespace.key : custom.complete_the_look
-      type          : Product (list of)
-  It then appears as a product picker on every product's admin page.
+  Mobile  — lookbook full width, then a 2x2 grid beneath.
+  Desktop — lookbook left, 2x2 grid right, sized so the whole section reads in
+            one viewport rather than being scrolled through.
+
+  Sources, in order of preference:
+    lookbook  product.metafields.custom.lookbook_image   (file_reference)
+              falling back to the product's featured image
+    products  product.metafields.custom.complete_the_look (list.product_reference)
+              falling back to custom.styled_with, then the first collection
+
+  The lookbook frame's aspect ratio is set per breakpoint in the theme editor,
+  so the shot can be planned around the frame rather than cropped to fit.
+
+  Setting complementary products needs no metaobjects — create one metafield
+  definition (Settings > Custom data > Products):
+      custom.complete_the_look : Product (list of)
+      custom.lookbook_image    : File
 {%- endcomment -%}
 
 {%- liquid
+  assign lookbook = product.metafields.custom.lookbook_image.value
+  if lookbook == blank
+    assign lookbook = product.featured_image
+  endif
+
   assign picks = product.metafields.custom.complete_the_look.value
   if picks == blank
     assign picks = product.metafields.custom.styled_with.value
   endif
-
-  assign curated = true
   if picks == blank and product.collections.size > 0
     assign picks = product.collections.first.products
-    assign curated = false
   endif
 
-  assign limit = section.settings.max_products | default: 4
+  assign ratio_m = section.settings.lookbook_ratio_mobile | default: '4/5'
+  assign ratio_d = section.settings.lookbook_ratio_desktop | default: '4/5'
 -%}
 
 {%- if picks != blank and picks.size > 0 -%}
-  <section class="ctl reveal">
+  <section
+    class="ctl reveal"
+    style="--ctl-ratio-m: {{ ratio_m }}; --ctl-ratio-d: {{ ratio_d }};"
+  >
     {%- if section.settings.heading != blank -%}
       <h2 class="ctl__heading">{{ section.settings.heading }}</h2>
     {%- endif -%}
 
-    <div class="ctl__grid">
-      {%- assign shown = 0 -%}
-      {%- for item in picks -%}
-        {%- unless item.handle == product.handle -%}
-          {%- if shown < limit -%}
-            <div class="ctl__item">
-              {%- render 'product-card', product: item -%}
-            </div>
-            {%- assign shown = shown | plus: 1 -%}
-          {%- endif -%}
-        {%- endunless -%}
-      {%- endfor -%}
-    </div>
+    <div class="ctl__layout">
+      {%- if lookbook != blank -%}
+        <div class="ctl__lookbook">
+          <img
+            class="ctl__lookbook-img"
+            src="{{ lookbook | image_url: width: 1400 }}"
+            srcset="{{ lookbook | image_url: width: 700 }} 700w,
+                    {{ lookbook | image_url: width: 1400 }} 1400w"
+            sizes="(min-width: 769px) 46vw, 100vw"
+            alt="{{ product.title | escape }}"
+            loading="lazy"
+          >
+        </div>
+      {%- endif -%}
 
-    {%- unless curated -%}
-      {%- comment -%}
-        Uncurated fallback — set custom.complete_the_look on this product to
-        control exactly what shows here.
-      {%- endcomment -%}
-    {%- endunless -%}
+      <div class="ctl__grid">
+        {%- assign shown = 0 -%}
+        {%- for item in picks -%}
+          {%- unless item.handle == product.handle -%}
+            {%- if shown < 4 -%}
+              <a class="ctl__item" href="{{ item.url }}">
+                <div class="ctl__item-media">
+                  {%- if item.featured_image -%}
+                    <img
+                      class="ctl__item-img"
+                      src="{{ item.featured_image | image_url: width: 600 }}"
+                      alt="{{ item.title | escape }}"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                </div>
+                <div class="ctl__item-info">
+                  <span class="ctl__item-title">{{ item.title }}</span>
+                  <span class="ctl__item-price">{{ item.price | money_without_trailing_zeros }}</span>
+                </div>
+              </a>
+              {%- assign shown = shown | plus: 1 -%}
+            {%- endif -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      </div>
+    </div>
   </section>
 
   <style>
@@ -64,13 +100,32 @@
     }
 
     .ctl__heading {
-      font-family: var(--font-body);
-      font-size: 13px;
+      font-family: var(--font-heading);
+      font-size: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
       font-weight: var(--font-weight-medium);
-      letter-spacing: 0.12em;
+      letter-spacing: 0.01em;
       text-transform: uppercase;
       color: #2D2C2F;
       margin-bottom: var(--space-lg);
+    }
+
+    .ctl__layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--grid-gap);
+    }
+
+    .ctl__lookbook {
+      aspect-ratio: var(--ctl-ratio-m, 4/5);
+      overflow: hidden;
+      background: #E4DED2;
+    }
+
+    .ctl__lookbook-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .ctl__grid {
@@ -79,10 +134,62 @@
       gap: var(--grid-gap);
     }
 
+    .ctl__item { display: block; }
+
+    .ctl__item-media {
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #E4DED2;
+    }
+
+    .ctl__item-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform var(--duration-slow) var(--ease-out);
+    }
+
+    .ctl__item:hover .ctl__item-img { transform: scale(1.03); }
+
+    .ctl__item-info {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .ctl__item-title {
+      font-family: var(--font-body);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #2D2C2F;
+    }
+
+    .ctl__item-price {
+      font-family: var(--font-body);
+      font-size: 10px;
+      color: #A4A4A4;
+      flex-shrink: 0;
+    }
+
     @media (min-width: 769px) {
-      .ctl__grid {
-        grid-template-columns: repeat({{ section.settings.columns | default: 4 }}, 1fr);
+      /* Lookbook left, grid right. The lookbook drives the height and the whole
+         section is capped to a viewport so it reads as one composition. */
+      .ctl__layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
       }
+
+      .ctl__lookbook {
+        aspect-ratio: var(--ctl-ratio-d, 4/5);
+        max-height: 78vh;
+      }
+
+      .ctl__item-title,
+      .ctl__item-price { font-size: 11px; }
     }
   </style>
 {%- endif -%}
@@ -94,24 +201,45 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Complete the look" },
     {
-      "type": "range",
-      "id": "max_products",
-      "label": "Maximum products",
-      "min": 2, "max": 8, "step": 1, "default": 4
+      "type": "select",
+      "id": "lookbook_ratio_mobile",
+      "label": "Lookbook frame — mobile",
+      "options": [
+        { "value": "9/16", "label": "9:16 (tall)" },
+        { "value": "2/3", "label": "2:3" },
+        { "value": "3/4", "label": "3:4" },
+        { "value": "4/5", "label": "4:5" },
+        { "value": "1/1", "label": "1:1 (square)" },
+        { "value": "5/4", "label": "5:4" },
+        { "value": "4/3", "label": "4:3" },
+        { "value": "3/2", "label": "3:2" },
+        { "value": "16/9", "label": "16:9 (wide)" }
+      ],
+      "default": "4/5"
     },
     {
-      "type": "range",
-      "id": "columns",
-      "label": "Columns (desktop)",
-      "min": 2, "max": 4, "step": 1, "default": 4
+      "type": "select",
+      "id": "lookbook_ratio_desktop",
+      "label": "Lookbook frame — desktop",
+      "info": "Wider ratios keep the whole section in one screen. Shoot to match.",
+      "options": [
+        { "value": "9/16", "label": "9:16 (tall)" },
+        { "value": "2/3", "label": "2:3" },
+        { "value": "3/4", "label": "3:4" },
+        { "value": "4/5", "label": "4:5" },
+        { "value": "1/1", "label": "1:1 (square)" },
+        { "value": "5/4", "label": "5:4" },
+        { "value": "4/3", "label": "4:3" },
+        { "value": "3/2", "label": "3:2" },
+        { "value": "16/9", "label": "16:9 (wide)" }
+      ],
+      "default": "4/5"
     },
     {
       "type": "paragraph",
-      "content": "Curate per product with the custom.complete_the_look metafield (type: Product, list of). Falls back to the product's first collection when unset."
+      "content": "Lookbook comes from the custom.lookbook_image metafield (type: File), falling back to the product's featured image. Products come from custom.complete_the_look (type: Product, list of)."
     }
   ],
-  "presets": [
-    { "name": "PDP Complete the Look" }
-  ]
+  "presets": [{ "name": "PDP Complete the Look" }]
 }
 {% endschema %}

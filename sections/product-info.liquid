@@ -13,12 +13,40 @@
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
 {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
+{%- comment -%}
+  Band height drives the mobile image height, the fixed band, and scroll
+  padding. Declared on :root so html-level rules can resolve it.
+{%- endcomment -%}
+<style>
+  :root { --pdp-band-h: 126px; }
+  html { scroll-padding-bottom: var(--pdp-band-h); }
+</style>
+
 <div class="pdp" data-pdp data-low-stock-threshold="{{ section.settings.low_stock_threshold | default: 5 }}">
   {%- comment -%} ===== IMAGE GALLERY (LEFT ON DESKTOP) ===== {% endcomment -%}
-  <div class="pdp__gallery" data-product-gallery>
+  {%- liquid
+    assign focal_map = 'top:12%,upper:25%,center:50%,lower:75%,bottom:88%' | split: ','
+    assign focal_y = '25%'
+    for pair in focal_map
+      assign kv = pair | split: ':'
+      if kv[0] == section.settings.desktop_focal_y
+        assign focal_y = kv[1]
+      endif
+    endfor
+  -%}
+  <div
+    class="pdp__gallery"
+    data-product-gallery
+    style="--pdp-fit: {{ section.settings.desktop_image_fit | default: 'cover' }}; --pdp-focal-y: {{ focal_y }};"
+  >
     <div class="pdp__gallery-main" data-gallery-main>
       {%- for image in product.images -%}
-        <div class="pdp__gallery-slide{% if forloop.first %} is-active{% endif %}" data-gallery-slide="{{ forloop.index0 }}">
+        <div
+          class="pdp__gallery-slide{% if forloop.first %} is-active{% endif %}"
+          data-gallery-slide="{{ forloop.index0 }}"
+          data-zoom-src="{{ image | image_url: width: 2048 }}"
+          data-zoom-alt="{{ image.alt | default: product.title | escape }}"
+        >
           <img
             src="{{ image | image_url: width: 1200 }}"
             srcset="{{ image | image_url: width: 600 }} 600w,
@@ -35,16 +63,30 @@
       {%- endfor -%}
     </div>
 
+    <div class="pdp__gallery-rail">
+      {%- if product.images.size > 1 -%}
+        <div class="pdp__gallery-dots">
+          {%- for image in product.images -%}
+            <button
+              class="pdp__gallery-dot{% if forloop.first %} is-active{% endif %}"
+              data-gallery-dot="{{ forloop.index0 }}"
+              aria-label="View image {{ forloop.index }}"
+            ></button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+      {%- comment -%} Wishlist sits directly beneath the dots {% endcomment -%}
+      <button
+        class="pdp__wishlist-img"
+        data-wishlist-toggle="{{ product.handle }}"
+        aria-label="Save {{ product.title }}"
+        aria-pressed="false"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+
     {%- if product.images.size > 1 -%}
-      <div class="pdp__gallery-dots">
-        {%- for image in product.images -%}
-          <button
-            class="pdp__gallery-dot{% if forloop.first %} is-active{% endif %}"
-            data-gallery-dot="{{ forloop.index0 }}"
-            aria-label="View image {{ forloop.index }}"
-          ></button>
-        {%- endfor -%}
-      </div>
       <button class="pdp__gallery-nav pdp__gallery-nav--prev" data-gallery-prev aria-label="Previous image">
         <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
       </button>
@@ -53,23 +95,37 @@
       </button>
     {%- endif -%}
 
-    {%- comment -%} Wishlist on image — desktop only {% endcomment -%}
-    <button
-      class="pdp__wishlist-img"
-      data-wishlist-toggle="{{ product.handle }}"
-      aria-label="Save {{ product.title }}"
-      aria-pressed="false"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-    </button>
+    {%- comment -%} Tag badge, bottom-left (desktop) {% endcomment -%}
+    {%- capture badge_label %}{% render 'product-badge-label', product: product %}{% endcapture -%}
+    {%- assign badge_label = badge_label | strip -%}
+    {%- if badge_label != blank -%}
+      <span class="pdp__gallery-badge">{{ badge_label | upcase }}</span>
+    {%- endif -%}
+
+    {%- comment -%}
+      Cursor-following zoom affordance (desktop): a round white +/- that tracks
+      the pointer over the gallery, as in the reference. Hidden on touch.
+    {%- endcomment -%}
+    <span class="pdp__zoom-cursor" data-zoom-cursor aria-hidden="true">+</span>
+
+    {%- comment -%} Mobile: flat progress bar flush to the image's bottom edge {% endcomment -%}
+    <div class="pdp__gallery-progress" aria-hidden="true">
+      <span class="pdp__gallery-progress-fill" data-gallery-progress></span>
+    </div>
   </div>
 
-  {%- comment -%} ===== MOBILE BAND: title + heart + ATC (mobile only, below image) ===== {% endcomment -%}
-  <div class="pdp__mobile-band">
-    <div class="pdp__mobile-top">
-      <h1 class="pdp__mobile-title">{{ product.title }}</h1>
+  {%- comment -%}
+    ===== STICKY BAND (mobile only) =====
+    Replaces the old in-flow mobile band — never duplicates it. global.js wires
+    [data-mobile-submit] with singular querySelector in three places, so a
+    second copy would silently break variant sync and add-to-cart feedback.
+    Must stay inside [data-pdp]: initPdpVariants scopes its lookup to it.
+  {%- endcomment -%}
+  <div class="pdp-band" data-sticky-band>
+    <div class="pdp-band__top">
+      <h1 class="pdp-band__title">{{ product.title }}</h1>
       <button
-        class="pdp__mobile-heart"
+        class="pdp-band__heart"
         data-wishlist-toggle="{{ product.handle }}"
         aria-label="Save {{ product.title }}"
         aria-pressed="false"
@@ -77,7 +133,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>
-    <button type="button" class="pdp__mobile-atc" data-mobile-submit {% unless current_variant.available %}disabled{% endunless %}>
+    <button type="button" class="pdp-band__atc" data-mobile-submit {% unless current_variant.available %}disabled{% endunless %}>
       <span>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
       <span data-mobile-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
     </button>
@@ -183,6 +239,7 @@
                 sits where the old button did.
               {%- endcomment -%}
               {%- if option.name == 'Size' and app_blocks.size > 0 -%}
+                {%- assign size_guide_rendered = true -%}
                 <div class="pdp__size-header">
                   {%- for block in app_blocks -%}
                     <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
@@ -208,13 +265,26 @@
         {%- endfor -%}
         {%- endunless -%}
 
+        {%- comment -%}
+          Products with no Size option (one-size, accessories) never enter the
+          loop above, so the size guide is rendered here instead of vanishing.
+        {%- endcomment -%}
+        {%- unless size_guide_rendered -%}
+          {%- if app_blocks.size > 0 -%}
+            <div class="pdp__size-header">
+              {%- for block in app_blocks -%}
+                <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        {%- endunless -%}
+
         <button
           type="submit"
           class="pdp__add-btn"
           data-add-btn
           {% unless current_variant.available %}disabled{% endunless %}
         >
-          <svg class="pdp__add-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           <span class="pdp__add-text">
             {%- if current_variant.available -%}Add to cart{%- else -%}Sold out{%- endif -%}
           </span>
@@ -423,11 +493,20 @@
   per SKU via the custom.complete_the_look metafield.
 {%- endcomment -%}
 
-{%- comment -%} ===== RECENTLY VIEWED ===== {% endcomment -%}
-<section class="pdp-recent reveal" data-recently-viewed>
-  <h2 class="pdp-recent__heading">Recently viewed</h2>
-  <div class="pdp-recent__grid" data-recently-viewed-grid></div>
-</section>
+
+{%- comment -%} ===== ZOOM LIGHTBOX ===== {% endcomment -%}
+<div class="pdp-zoom" data-pdp-zoom aria-hidden="true" role="dialog" aria-label="Zoom image">
+  <div class="pdp-zoom__stage" data-zoom-stage>
+    <img class="pdp-zoom__img" data-zoom-img alt="">
+  </div>
+  <button class="pdp-zoom__close" data-zoom-close aria-label="Close">
+    {%- render 'icon-close' -%}
+  </button>
+  <div class="pdp-zoom__ctrls">
+    <button class="pdp-zoom__ctrl" data-zoom-in aria-label="Zoom in">+</button>
+    <button class="pdp-zoom__ctrl" data-zoom-out aria-label="Zoom out">&minus;</button>
+  </div>
+</div>
 
 {{ 'component-modal.css' | asset_url | stylesheet_tag }}
 <div class="modal" id="size-chart-modal" aria-hidden="true">
@@ -449,19 +528,6 @@
   </div>
 </div>
 
-<script>
-  (function() {
-    const handle = '{{ product.handle }}';
-    const key = 'fr_recently_viewed';
-    try {
-      let items = JSON.parse(localStorage.getItem(key)) || [];
-      items = items.filter(h => h !== handle);
-      items.unshift(handle);
-      items = items.slice(0, 8);
-      localStorage.setItem(key, JSON.stringify(items));
-    } catch(e) {}
-  })();
-</script>
 
 {% schema %}
 {
@@ -495,6 +561,35 @@
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Desktop image framing"
+    },
+    {
+      "type": "select",
+      "id": "desktop_image_fit",
+      "label": "Desktop image fit",
+      "info": "Cover fills the frame and crops; contain shows the whole image with padding.",
+      "options": [
+        { "value": "cover", "label": "Cover (crop to fill)" },
+        { "value": "contain", "label": "Contain (show whole image)" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "desktop_focal_y",
+      "label": "Desktop crop focal point",
+      "info": "Which part of the image to keep when cropping. Upper keeps heads in frame.",
+      "options": [
+        { "value": "top", "label": "Top" },
+        { "value": "upper", "label": "Upper (recommended)" },
+        { "value": "center", "label": "Centre" },
+        { "value": "lower", "label": "Lower" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "upper"
     },
     {
       "type": "header",

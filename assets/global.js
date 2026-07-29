@@ -930,6 +930,103 @@
     }
   };
 
+  /* --- PDP sticky band (mobile): hide once past Foreign Engineering --- */
+  const initPdpStickyBand = () => {
+    const band = document.querySelector('[data-sticky-band]');
+    if (!band) return;
+
+    // Mobile-only, so the band is visible from load; the sole job here is
+    // retracting it after the engineering section, before Complete the Look.
+    const boundary =
+      document.querySelector('.section-fr-engineering') ||
+      document.querySelector('.section-pdp-complete-the-look');
+    if (!boundary) return;
+
+    const usingFallback = !document.querySelector('.section-fr-engineering');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        // On the engineering section, hide once its bottom clears the viewport
+        // top. On the Complete the Look fallback, hide when its TOP arrives —
+        // using its bottom would keep the band up across that whole section,
+        // which is exactly where it must not be.
+        const past = usingFallback
+          ? entry.boundingClientRect.top < 0
+          : !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+        band.classList.toggle('is-hidden', past);
+      });
+    }, { threshold: 0 });
+
+    observer.observe(boundary);
+  };
+
+  /* --- PDP zoom lightbox + cursor-following affordance --- */
+  const initPdpZoom = () => {
+    const gallery = document.querySelector('[data-product-gallery]');
+    const zoom = document.querySelector('[data-pdp-zoom]');
+    if (!gallery || !zoom) return;
+
+    const img = zoom.querySelector('[data-zoom-img]');
+    const stage = zoom.querySelector('[data-zoom-stage]');
+    const cursor = gallery.querySelector('[data-zoom-cursor]');
+
+    // Cursor-following +/- over the gallery (desktop, fine pointers only)
+    if (cursor && window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) {
+      gallery.addEventListener('pointermove', (e) => {
+        const r = gallery.getBoundingClientRect();
+        cursor.style.transform = 'translate(' + (e.clientX - r.left) + 'px,' + (e.clientY - r.top) + 'px)';
+      }, { passive: true });
+    }
+
+    const open = (slide) => {
+      if (!slide || !img) return;
+      img.src = slide.dataset.zoomSrc || '';
+      img.alt = slide.dataset.zoomAlt || '';
+      zoom.classList.add('is-active');
+      zoom.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => {
+      zoom.classList.remove('is-active', 'is-zoomed');
+      zoom.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+
+    // Mobile swipes share this surface, so a drag must not count as a click.
+    let downX = 0, downY = 0;
+    gallery.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; }, { passive: true });
+    gallery.addEventListener('click', (e) => {
+      const slide = e.target.closest('[data-gallery-slide]');
+      if (!slide) return;
+      if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) return;
+      open(slide);
+    });
+
+    const setZoomed = (on) => {
+      zoom.classList.toggle('is-zoomed', on);
+      if (cursor) cursor.textContent = on ? '\u2212' : '+';
+      if (on && stage) {
+        // Centre the pan on the point that was zoomed into
+        stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
+        stage.scrollTop = (stage.scrollHeight - stage.clientHeight) / 2;
+      }
+    };
+
+    const zin = zoom.querySelector('[data-zoom-in]');
+    const zout = zoom.querySelector('[data-zoom-out]');
+    if (zin) zin.addEventListener('click', () => setZoomed(true));
+    if (zout) zout.addEventListener('click', () => setZoomed(false));
+    if (stage) stage.addEventListener('click', (e) => {
+      if (e.target === img) setZoomed(!zoom.classList.contains('is-zoomed'));
+    });
+
+    zoom.querySelectorAll('[data-zoom-close]').forEach(b => b.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && zoom.classList.contains('is-active')) close();
+    });
+  };
+
   /* --- PDP Gallery (swipe + dots + arrows) --- */
   const initPdpGallery = () => {
     const gallery = document.querySelector('[data-product-gallery]');
@@ -939,6 +1036,7 @@
     const prev = gallery.querySelector('[data-gallery-prev]');
     const next = gallery.querySelector('[data-gallery-next]');
     const slides = gallery.querySelectorAll('[data-gallery-slide]');
+    const fill = gallery.querySelector('[data-gallery-progress]');
     if (!main || !slides.length) return;
 
     let current = 0;
@@ -947,6 +1045,13 @@
     // Desktop stacks the images and scrolls vertically; mobile swipes horizontally.
     const isVertical = () => window.matchMedia('(min-width: 769px)').matches;
 
+    // Desktop shows discrete dots, mobile a continuous bar. Both are updated
+    // unconditionally — writing to a display:none node costs nothing.
+    const syncUI = (idx) => {
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+      if (fill) fill.style.transform = 'scaleX(' + ((idx + 1) / total) + ')';
+    };
+
     const goTo = (idx) => {
       current = Math.max(0, Math.min(total - 1, idx));
       main.scrollTo(
@@ -954,12 +1059,25 @@
           ? { top: main.offsetHeight * current, behavior: 'smooth' }
           : { left: main.offsetWidth * current, behavior: 'smooth' }
       );
-      dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+      syncUI(current);
     };
 
     dots.forEach(dot => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.galleryDot))));
     if (prev) prev.addEventListener('click', () => goTo(current - 1));
     if (next) next.addEventListener('click', () => goTo(current + 1));
+
+    // The bar tracks the swipe continuously, so it gets its own undebounced
+    // listener rather than waiting on the 100ms dot settle.
+    if (fill) {
+      main.addEventListener('scroll', () => {
+        if (isVertical()) return;
+        const frac = (main.scrollLeft + main.offsetWidth) / main.scrollWidth;
+        fill.style.transform = 'scaleX(' + Math.min(1, Math.max(0, frac)) + ')';
+      }, { passive: true });
+    }
+
+    // Reflect position 1 of n at load rather than an empty bar.
+    syncUI(0);
 
     // Sync dots on scroll
     let scrollTimeout;
@@ -971,7 +1089,7 @@
           : Math.round(main.scrollLeft / main.offsetWidth);
         if (idx !== current) {
           current = idx;
-          dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+          syncUI(current);
         }
       }, 100);
     }, { passive: true });
@@ -1068,7 +1186,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

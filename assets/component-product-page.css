@@ -35,12 +35,13 @@
   scroll-snap-align: start;
 }
 
-/* Mobile: image fills the screen (immersive, header overlays transparently) */
+/* Mobile: image fills the screen minus the fixed band, giving the 390x718
+   photo area inside a 390x844 frame from the reference measurements. */
 .pdp__gallery-img {
   width: 100%;
   display: block;
-  height: 100vh;
-  height: 100svh;
+  height: calc(100vh - var(--pdp-band-h, 126px));
+  height: calc(100svh - var(--pdp-band-h, 126px));
   object-fit: cover;
 }
 
@@ -63,50 +64,100 @@
   .pdp__gallery-slide {
     height: 100%;
   }
+  /* Crop is merchant-tunable: cover with a top-biased focal point keeps heads
+     in frame (a centred cover crops heads AND feet); contain letterboxes. */
   .pdp__gallery-img {
     aspect-ratio: unset;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: var(--pdp-fit, cover);
+    object-position: 50% var(--pdp-focal-y, 25%);
+    background: #F5F4F2;
   }
 }
 
-/* Gallery dots */
-.pdp__gallery-dots {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.3rem;
-  z-index: 2;
-}
+/* Gallery rail — desktop only: tiny dot column bottom-right, heart beneath.
+   Mobile uses the progress bar instead, so the whole rail is hidden there. */
+.pdp__gallery-rail { display: none; }
 
-/* Desktop: slim vertical rail down the left edge of the image */
 @media (min-width: 769px) {
-  .pdp__gallery-dots {
+  .pdp__gallery-rail {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 2;
+    display: flex;
     flex-direction: column;
-    top: 50%;
-    bottom: auto;
-    left: 1.25rem;
-    transform: translateY(-50%);
-    gap: 0.4rem;
+    align-items: center;
+    gap: 0.9rem;
   }
+}
+
+/* Flex doesn't skip a level — the dot wrapper needs its own column flow. */
+.pdp__gallery-dots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .pdp__gallery-dot {
-  width: 5px;
-  height: 5px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   border: none;
-  background: rgba(45,44,47,0.2);
+  background: rgba(45,44,47,0.25);
   cursor: pointer;
   padding: 0;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
 .pdp__gallery-dot.is-active {
-  background: rgba(45,44,47,0.7);
+  background: rgba(45,44,47,0.85);
+}
+
+/* Shopify product tag, bottom-left (desktop) */
+.pdp__gallery-badge {
+  display: none;
+  position: absolute;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2;
+  font-family: var(--font-body);
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+}
+
+@media (min-width: 769px) {
+  .pdp__gallery-badge { display: block; }
+}
+
+/* Mobile progress bar — flat, flush to the image's bottom edge */
+.pdp__gallery-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(45,44,47,0.12);
+  z-index: 2;
+}
+
+.pdp__gallery-progress-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #2D2C2F;
+  transform-origin: left;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+@media (min-width: 769px) {
+  .pdp__gallery-progress { display: none; }
 }
 
 /* Gallery nav arrows */
@@ -139,54 +190,55 @@
   .pdp__gallery-nav { display: none; }
 }
 
-/* Wishlist on image — desktop only */
+/* Wishlist — flows inside the rail, so no absolute positioning of its own */
 .pdp__wishlist-img {
-  position: absolute;
-  bottom: 5rem;
-  right: 1.5rem;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
   color: var(--color-primary);
   opacity: 0.4;
   transition: opacity var(--duration-fast) var(--ease-out);
-  z-index: 2;
-  display: none;
-}
-
-@media (min-width: 769px) {
-  .pdp__wishlist-img {
-    display: block;
-  }
+  display: block;
 }
 
 .pdp__wishlist-img:hover { opacity: 0.7; }
 .pdp__wishlist-img.is-saved { opacity: 1; }
 .pdp__wishlist-img.is-saved svg { fill: currentColor; }
 
-/* ===== MOBILE BAND: title + heart + ATC (below image, mobile only) ===== */
-.pdp__mobile-band {
-  display: none;
-}
+/* ===== STICKY BAND (mobile only) =====
+   Fixed bottom band: white title/heart row over a slate add-to-cart bar.
+   Heights sum to --pdp-band-h so the gallery math stays truthful. */
+.pdp-band { display: none; }
 
 @media (max-width: 768px) {
-  .pdp__mobile-band {
+  .pdp-band {
     display: block;
-    padding: 0.75rem 0.75rem 0;
-    border-bottom: 1px solid var(--color-border);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    height: var(--pdp-band-h, 126px);
+    padding: 10px 0.75rem;
+    background: #FFFFFF;
+    transform: translateY(0);
+    transition: transform var(--duration-base) var(--ease-out);
   }
+
+  /* Class + transform, never the hidden attribute — keeps the slide and
+     avoids the [hidden]{display:none !important} reset. */
+  .pdp-band.is-hidden { transform: translateY(100%); }
 }
 
-.pdp__mobile-top {
+.pdp-band__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.375rem;
+  height: 46px;
 }
 
-/* Figma: 12.8px, tracking 0.05em */
-.pdp__mobile-title {
+.pdp-band__title {
   font-family: var(--font-body);
   font-size: 12.8px;
   font-weight: var(--font-weight-medium);
@@ -197,7 +249,7 @@
   margin: 0;
 }
 
-.pdp__mobile-heart {
+.pdp-band__heart {
   background: none;
   border: none;
   cursor: pointer;
@@ -208,20 +260,19 @@
   flex-shrink: 0;
 }
 
-.pdp__mobile-heart:hover { opacity: 0.7; }
-.pdp__mobile-heart.is-saved { opacity: 1; }
-.pdp__mobile-heart.is-saved svg { fill: currentColor; }
+.pdp-band__heart:hover { opacity: 0.7; }
+.pdp-band__heart.is-saved { opacity: 1; }
+.pdp-band__heart.is-saved svg { fill: currentColor; }
 
-/* Mobile ATC — Figma: DARK filled (#2D2C2F), white text, no icon */
-.pdp__mobile-atc {
+.pdp-band__atc {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   height: 50px;
   padding: 0 1.25rem;
-  background: #2D2C2F;
-  border: 1px solid #2D2C2F;
+  background: #4A4E54;
+  border: 1px solid #4A4E54;
   color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 10.7px;
@@ -229,20 +280,22 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 0;
-  transition: opacity var(--duration-base) var(--ease-out);
+  transition: background var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out);
 }
 
-.pdp__mobile-atc:hover {
-  opacity: 0.88;
+.pdp-band__atc:hover,
+.pdp-band__atc:active {
+  background: #000000;
+  border-color: #000000;
 }
 
-.pdp__mobile-atc:disabled {
+.pdp-band__atc:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.pdp__mobile-atc [data-mobile-price] {
+.pdp-band__atc [data-mobile-price] {
   font-size: 10.3px;
   letter-spacing: 0.07em;
 }
@@ -251,14 +304,15 @@
 .pdp__details {
   display: flex;
   align-items: flex-start;
-  padding: 1.5rem 0.75rem 4rem;
+  /* Bottom padding clears the fixed band so the packaging row stays reachable */
+  padding: 1.5rem 0.75rem calc(1.5rem + var(--pdp-band-h, 126px));
 }
 
 @media (min-width: 769px) {
   .pdp__details {
     /* Clear the fixed chrome so details aren't hidden, while the left image
        stays full-frame behind the transparent header. */
-    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem 5rem;
+    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem 2.5rem;
     align-items: flex-start;
     min-height: 100vh;
   }
@@ -393,11 +447,6 @@
   margin-bottom: 0.75rem;
 }
 
-@media (min-width: 769px) {
-  .pdp__size-header {
-    justify-content: space-between;
-  }
-}
 
 .pdp__size-label {
   font-size: 8.4px;
@@ -467,23 +516,26 @@
     gap: 0.75rem;
     width: 100%;
     padding: 0 1.25rem;
-    /* Matches the mobile ATC: dark filled, white text */
-    background: #2D2C2F;
+    /* Identical to the mobile ATC: slate filled, white text, no icon */
+    justify-content: space-between;
+    background: #4A4E54;
     color: #FFFFFF;
-    border: 1px solid #2D2C2F;
+    border: 1px solid #4A4E54;
     font-family: var(--font-body);
     font-size: 10.7px;
     font-weight: var(--font-weight-medium);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: opacity var(--duration-base) var(--ease-out);
+    transition: background var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
     margin-bottom: 1rem;
     height: 50px;
   }
 
   .pdp__add-btn:hover {
-    opacity: 0.88;
+    background: #000000;
+    border-color: #000000;
   }
 
   .pdp__add-btn:disabled {
@@ -655,63 +707,15 @@
 
 .pdp__tab-link:hover { opacity: 0.7; }
 
-/* ===== RECENTLY VIEWED =====
-   Complete the look moved to its own section and carries its own styles. */
-.pdp-recent {
-  padding: 3rem 0;
-  border-top: 1px solid var(--color-border);
-}
-
-.pdp-recent__heading {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: 0.01em;
-  line-height: 1.4;
-  padding: 0 1rem;
-  margin-bottom: 1.25rem;
-}
-
-@media (min-width: 769px) {
-  .pdp-recent__heading {
-    padding: 0 3rem;
-  }
-}
-
 /* Card text in the PDP's product rows */
 .ctl .product-card__title,
-.pdp-recent .product-card__title {
-  font-size: 10px;
-}
-.ctl .product-card__price,
-.pdp-recent .product-card__price {
+.ctl .product-card__price {
   font-size: 10px;
 }
 @media (max-width: 768px) {
   .ctl .product-card__title,
-  .pdp-recent .product-card__title,
-  .ctl .product-card__price,
-  .pdp-recent .product-card__price {
+  .ctl .product-card__price {
     font-size: 9px;
-  }
-}
-
-.pdp-recent__grid {
-  display: flex;
-  gap: var(--grid-gap);
-  overflow-x: auto;
-  padding: 0 3px 3px;
-  scrollbar-width: none;
-}
-.pdp-recent__grid::-webkit-scrollbar { display: none; }
-
-.pdp-recent__grid .product-card {
-  flex: 0 0 calc(50% - 2px);
-}
-
-@media (min-width: 769px) {
-  .pdp-recent__grid .product-card {
-    flex: 0 0 calc(25% - 3px);
   }
 }
 
@@ -881,8 +885,8 @@
   height: 50px !important;
   margin: 0 0 1rem !important;
   padding: 0 1.25rem !important;
-  background: #2D2C2F !important;
-  border: 1px solid #2D2C2F !important;
+  background: #4A4E54 !important;
+  border: 1px solid #4A4E54 !important;
   border-radius: 0 !important;
   color: #FFFFFF !important;
   font-family: var(--font-body) !important;
@@ -897,48 +901,51 @@
   transition: opacity var(--duration-base) var(--ease-out) !important;
 }
 
-.klaviyo-bis-trigger:hover { opacity: 0.88 !important; }
+.klaviyo-bis-trigger:hover { background: #000000 !important; border-color: #000000 !important; }
 
 /* ----- Size guide (SmartSize app block) -----
-   Sized and centred to sit with the pay-in-4 line. */
-.pdp__size-header {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0.75rem;
-}
-
-[class*="smartsize"],
-[id*="smartsize"] {
+   Centred, and matched to the STORY / SIZING / DELIVERY & RETURNS tab tone
+   (.pdp__tab: 11.2px, .05em, uppercase, #A4A4A4, hover #2D2C2F).
+   !important is required: the app ships its own high-specificity styles. */
+.pdp__size-guide-slot,
+.pdp__size-guide-slot [class*="smartsize"],
+.pdp__size-guide-slot [id*="smartsize"] {
   text-align: center !important;
   justify-content: center !important;
+  width: 100%;
 }
 
 .pdp__size-guide-slot a,
 .pdp__size-guide-slot button,
-[class*="smartsize"] a,
-[class*="smartsize"] button {
+.pdp__size-guide-slot [class*="smartsize"] a,
+.pdp__size-guide-slot [class*="smartsize"] button {
   font-family: var(--font-body) !important;
-  font-size: 11px !important;
+  font-size: 11.2px !important;
   font-weight: var(--font-weight-medium) !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
-  color: #2D2C2F !important;
+  color: #A4A4A4 !important;
+  text-decoration: none !important;
   background: none !important;
   border: none !important;
   border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 auto !important;
-  text-decoration: underline !important;
   box-shadow: none !important;
   min-height: 0 !important;
   height: auto !important;
   line-height: 1.5 !important;
   display: inline-block !important;
+  transition: color var(--duration-fast) var(--ease-out) !important;
 }
 
 .pdp__size-guide-slot a:hover,
-[class*="smartsize"] a:hover,
-[class*="smartsize"] button:hover { opacity: 0.7 !important; }
+.pdp__size-guide-slot button:hover,
+.pdp__size-guide-slot [class*="smartsize"] a:hover,
+.pdp__size-guide-slot [class*="smartsize"] button:hover {
+  color: #2D2C2F !important;
+  opacity: 1 !important;
+}
 
 /* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
 .pdp__rows {
@@ -1138,4 +1145,134 @@
   border-radius: 0 !important;
   box-shadow: none !important;
   border-color: var(--color-border) !important;
+}
+
+/* ============================================
+   PDP — Zoom lightbox
+   Visibility uses opacity+visibility (not the hidden attribute) so it dodges
+   the [hidden]{display:none !important} reset above and keeps its transition.
+   ============================================ */
+
+.pdp-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 410;
+  background: #FFFFFF;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-base) var(--ease-out),
+              visibility var(--duration-base) var(--ease-out);
+}
+
+.pdp-zoom.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pdp-zoom__stage {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  display: grid;
+  place-items: center;
+  cursor: zoom-in;
+}
+
+.pdp-zoom__img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  transition: none;
+}
+
+/* Zoomed: image overflows the stage and is panned by native scroll */
+.pdp-zoom.is-zoomed .pdp-zoom__stage { cursor: zoom-out; }
+
+.pdp-zoom.is-zoomed .pdp-zoom__img {
+  max-width: none;
+  max-height: none;
+  width: 200%;
+}
+
+.pdp-zoom__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  /* Slate, per the brand colour system */
+  color: #4A4E54;
+}
+
+.pdp-zoom__close:hover { color: #000000; }
+
+.pdp-zoom__ctrls {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 769px) {
+  .pdp-zoom__ctrls { display: flex; }
+}
+
+.pdp-zoom__ctrl {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  color: #2D2C2F;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pdp-zoom__ctrl:hover { border-color: #2D2C2F; }
+
+/* Cursor-following affordance over the gallery (desktop, fine pointers only) */
+.pdp__zoom-cursor {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #2D2C2F;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 40px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  will-change: transform;
+}
+
+@media (min-width: 769px) and (pointer: fine) {
+  .pdp__zoom-cursor { display: block; }
+  .pdp__gallery:hover .pdp__zoom-cursor { opacity: 1; }
+  /* The custom cursor replaces the native one */
+  .pdp__gallery-slide { cursor: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp-zoom { transition: none; }
 }

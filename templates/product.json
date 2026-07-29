@@ -42,12 +42,32 @@
             "link_label": "More on our packaging",
             "link_url": "/pages/packaging"
           }
+        },
+        "smartsize_smartsize_sizechart_azcYpH": {
+          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
+          "settings": {
+            "style_source": "customize",
+            "button_label": "SIZE GUIDE",
+            "button_style": "link",
+            "button_icon": "sizenone",
+            "button_color": "#2D2C2F",
+            "button_background_color": "",
+            "button_corner_radius_px": 0,
+            "button_margin_top_px": 0,
+            "button_margin_right_px": 0,
+            "button_margin_bottom_px": 0,
+            "button_margin_left_px": 0,
+            "button_alignment": "center",
+            "button_alignment_mobile": "center",
+            "display_mode": "combined"
+          }
         }
       },
       "block_order": [
         "row_fabric",
         "row_color",
-        "row_packaging"
+        "row_packaging",
+        "smartsize_smartsize_sizechart_azcYpH"
       ],
       "settings": {
         "show_short_description": false,
@@ -100,87 +120,52 @@
       "disabled": true,
       "settings": {}
     },
-    "178530931009134dc8": {
-      "type": "apps",
-      "blocks": {
-        "smartsize_smartsize_sizechart_azcYpH": {
-          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
-          "settings": {
-            "style_source": "customize",
-            "button_label": "SIZE GUIDE",
-            "button_style": "link",
-            "button_icon": "sizenone",
-            "button_color": "#2D2C2F",
-            "button_background_color": "",
-            "button_corner_radius_px": 0,
-            "button_margin_top_px": 0,
-            "button_margin_right_px": 0,
-            "button_margin_bottom_px": 0,
-            "button_margin_left_px": 0,
-            "button_alignment": "center",
-            "button_alignment_mobile": "center",
-            "display_mode": "combined"
-          }
-        }
-      },
-      "block_order": [
-        "smartsize_smartsize_sizechart_azcYpH"
-      ],
-      "settings": {}
-    },
     "engineering": {
-      "type": "product-content-panel",
+      "type": "fr-engineering",
       "blocks": {
-        "p_1": {
-          "type": "point",
-          "settings": {
-            "icon": "thread",
-            "title": "Considered construction",
-            "text": "Every seam, zip and finish is chosen for how it wears over years, not seasons."
-          }
-        },
-        "p_2": {
-          "type": "point",
-          "settings": {
-            "icon": "shield",
-            "title": "Built to travel",
-            "text": "Reinforced at the points that take the most stress in transit."
-          }
-        },
-        "media_1": {
-          "type": "media",
+        "card_1": {
+          "type": "card",
           "settings": {
             "image": "shopify://shop_images/salt_cand_0.jpg",
-            "video_url": ""
+            "title": "Embroidered belt loop",
+            "subtitle": "The details that matter.",
+            "text_position": "bottom-left"
           }
         },
-        "media_2": {
-          "type": "media",
+        "card_2": {
+          "type": "card",
           "settings": {
-            "video_url": ""
+            "image": "",
+            "title": "Branded zipper puller",
+            "subtitle": "A little bling never hurt.",
+            "text_position": "bottom-left"
+          }
+        },
+        "card_3": {
+          "type": "card",
+          "settings": {
+            "image": "",
+            "title": "Zip-off shorts",
+            "subtitle": "Any weather, any time.",
+            "text_position": "bottom-left"
           }
         }
       },
       "block_order": [
-        "p_1",
-        "p_2",
-        "media_1",
-        "media_2"
+        "card_1",
+        "card_2",
+        "card_3"
       ],
       "settings": {
-        "heading": "FOREIGN ENGINEERING",
-        "intro": "<p>The details you only notice once you have lived in it.</p>",
-        "media_first": false,
-        "link_label": "",
-        "link_url": ""
+        "label": "Foreign Engineering"
       }
     },
     "complete_the_look": {
       "type": "product-complete-the-look",
       "settings": {
         "heading": "Complete the look",
-        "max_products": 4,
-        "columns": 4
+        "lookbook_ratio_mobile": "4/5",
+        "lookbook_ratio_desktop": "4/5"
       }
     },
     "ugc": {
@@ -262,7 +247,6 @@
   "order": [
     "product_info",
     "guarantees",
-    "178530931009134dc8",
     "engineering",
     "complete_the_look",
     "ugc",
