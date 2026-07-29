@@ -169,6 +169,7 @@
         "info_2",
         "info_3"
       ],
+      "disabled": true,
       "settings": {}
     }
   },
