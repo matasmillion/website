@@ -182,7 +182,7 @@
     const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
     const swatchLabel = pdp.querySelector('.pdp__swatch-label');
     const lowStockEl = pdp.querySelector('[data-low-stock]');
-    const notifyBtn = pdp.querySelector('[data-notify-btn]');
+    const notifyBtn = pdp.querySelector('[data-notify]');
     const threshold = parseInt(pdp.dataset.lowStockThreshold, 10) || 5;
 
     let inventory = {};
@@ -191,19 +191,78 @@
       try { inventory = JSON.parse(invEl.textContent); } catch (e) { inventory = {}; }
     }
 
-    // Klaviyo Back in Stock. If the app isn't loaded the button stays inert
-    // rather than throwing, so a missing integration degrades quietly.
+    // Back in stock — posts straight to Klaviyo's client API, so it needs no
+    // app UI and the form can be styled like the rest of the page.
     if (notifyBtn) {
-      notifyBtn.addEventListener('click', () => {
+      const openBtn = notifyBtn.querySelector('[data-notify-open]');
+      const form = notifyBtn.querySelector('[data-notify-form]');
+      const email = notifyBtn.querySelector('[data-notify-email]');
+      const submit = notifyBtn.querySelector('[data-notify-submit]');
+      const msg = notifyBtn.querySelector('[data-notify-msg]');
+
+      const say = (text, ok) => {
+        if (!msg) return;
+        msg.textContent = text;
+        msg.classList.toggle('is-error', !ok);
+        msg.hidden = false;
+      };
+
+      if (openBtn && form) {
+        openBtn.addEventListener('click', () => {
+          form.hidden = false;
+          openBtn.hidden = true;
+          if (email) email.focus();
+        });
+      }
+
+      const subscribe = async () => {
+        const company = notifyBtn.dataset.klaviyoCompany;
         const variantId = notifyBtn.dataset.variant;
-        const productId = notifyBtn.dataset.product;
-        if (window.klaviyo && typeof window.klaviyo.push === 'function') {
-          window.klaviyo.push(['openBackInStock', { variant: variantId, product: productId }]);
-        } else if (window._klOnsite) {
-          window._klOnsite.push(['openBackInStock', { variant: variantId, product: productId }]);
-        } else {
-          console.warn('[FR] Klaviyo Back in Stock not loaded');
+        const address = (email && email.value || '').trim();
+
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) return say('Enter a valid email address.', false);
+        if (!company) return say('Back-in-stock is not configured yet.', false);
+
+        submit.disabled = true;
+        try {
+          const res = await fetch(
+            `https://a.klaviyo.com/client/back-in-stock-subscriptions/?company_id=${encodeURIComponent(company)}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', revision: '2024-10-15' },
+              body: JSON.stringify({
+                data: {
+                  type: 'back-in-stock-subscription',
+                  attributes: {
+                    channels: ['EMAIL'],
+                    profile: { data: { type: 'profile', attributes: { email: address } } },
+                  },
+                  relationships: {
+                    variant: {
+                      // Klaviyo's Shopify catalogue keys variants in this shape.
+                      data: { type: 'catalog-variant', id: `$shopify:::$default:::${variantId}` },
+                    },
+                  },
+                },
+              }),
+            }
+          );
+          if (res.ok || res.status === 202) {
+            say("You're on the list. We'll email you when it's back.", true);
+            if (form) form.querySelector('.pdp__notify-row').hidden = true;
+          } else {
+            say('Something went wrong. Try again shortly.', false);
+          }
+        } catch (e) {
+          say('Something went wrong. Try again shortly.', false);
+        } finally {
+          submit.disabled = false;
         }
+      };
+
+      if (submit) submit.addEventListener('click', subscribe);
+      if (email) email.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); subscribe(); }
       });
     }
 
@@ -264,6 +323,10 @@
         notifyBtn.hidden = !soldOut;
         if (soldOut) notifyBtn.dataset.variant = variant.id;
       }
+
+      // Pay-in-4 figure follows the variant price
+      const inst = pdp.querySelector('[data-installment]');
+      if (inst && variant) inst.textContent = money(Math.round(variant.price / 4));
     };
 
     groups.forEach((g) => g.addEventListener('variant:change', resolve));
@@ -801,6 +864,26 @@
     });
   };
 
+  /* --- PDP detail rows (Fabric / Colour / Packaging dropdowns) --- */
+  const initPdpRows = () => {
+    document.querySelectorAll('[data-pdp-rows]').forEach(group => {
+      group.querySelectorAll('[data-row-trigger]').forEach(trigger => {
+        const panel = trigger.parentElement.querySelector('[data-row-panel]');
+        if (!panel) return;
+        trigger.addEventListener('click', () => {
+          const open = trigger.getAttribute('aria-expanded') === 'true';
+          // One row open at a time keeps the column from running away
+          group.querySelectorAll('[data-row-trigger]').forEach(t => t.setAttribute('aria-expanded', 'false'));
+          group.querySelectorAll('[data-row-panel]').forEach(p => { p.hidden = true; });
+          if (!open) {
+            trigger.setAttribute('aria-expanded', 'true');
+            panel.hidden = false;
+          }
+        });
+      });
+    });
+  };
+
   /* --- PDP Content panels (Engineering / Fabric / Colour / Packaging) --- */
   const initContentPanels = () => {
     document.querySelectorAll('[data-panel-media]').forEach(panel => {
@@ -1051,7 +1134,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

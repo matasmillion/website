@@ -1,5 +1,7 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
+  assign app_blocks = section.blocks | where: 'type', '@app'
+  assign detail_rows = section.blocks | where: 'type', 'detail_row'
 -%}
 
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
@@ -169,12 +171,18 @@
         {%- for option in product.options_with_values -%}
           {%- unless option.name == 'Color' or option.name == 'Colour' -%}
             <div class="pdp__sizes">
-              <div class="pdp__size-header">
-                <span class="pdp__size-label">{{ option.name | upcase }}</span>
-                {%- if option.name == 'Size' -%}
-                  <button type="button" class="pdp__size-guide" data-modal-open="size-chart-modal">SIZE GUIDE</button>
-                {%- endif -%}
-              </div>
+              {%- comment -%}
+                No "SIZE" label — the numbers read as sizes on their own. The
+                size-guide link is the SmartSize app block, rendered here so it
+                sits where the old button did.
+              {%- endcomment -%}
+              {%- if option.name == 'Size' and app_blocks.size > 0 -%}
+                <div class="pdp__size-header">
+                  {%- for block in app_blocks -%}
+                    <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
               {%- comment -%} Low stock — only meaningful when inventory is tracked {% endcomment -%}
               {%- if option.name == 'Size' -%}
                 <p class="pdp__low-stock" data-low-stock hidden></p>
@@ -207,9 +215,19 @@
           <span class="pdp__add-price" data-price>{{ current_variant.price | money_without_trailing_zeros }}</span>
         </button>
 
-        {%- comment -%} Pay in 4 — native Shop Pay Installments {% endcomment -%}
+        {%- comment -%}
+          Pay in 4. Shopify's {{ form | payment_terms }} renders a locked-down
+          web component — its Shop Pay lockup and wording can't be restyled or
+          reworded. So the line is written here instead, with the instalment
+          figure derived from the variant price and kept in sync by JS.
+        {%- endcomment -%}
         {%- if section.settings.show_payment_terms -%}
-          <div class="pdp__terms">{{ form | payment_terms }}</div>
+          <p class="pdp__terms">
+            Pay in four interest-free installments of
+            <span data-installment>{{ current_variant.price | divided_by: 4 | money_without_trailing_zeros }}</span>.
+            <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
+               class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
+          </p>
         {%- endif -%}
       {%- endform -%}
 
@@ -217,21 +235,37 @@
         Back in stock — shown only when the selected variant is unavailable.
         Klaviyo's Back in Stock is opened from here; see global.js.
       {%- endcomment -%}
-      <button
-        type="button"
-        class="pdp__notify"
-        data-notify-btn
+      <div
+        class="pdp__notify-wrap"
+        data-notify
         data-variant="{{ current_variant.id }}"
-        data-product="{{ product.id }}"
+        data-klaviyo-company="{{ section.settings.klaviyo_company_id }}"
         {% if current_variant.available %}hidden{% endif %}
-      >{{ section.settings.notify_label | default: 'Notify me when available' }}</button>
+      >
+        <button type="button" class="pdp__notify" data-notify-open>
+          {{ section.settings.notify_label | default: 'Notify me when available' }}
+        </button>
 
-      {%- comment -%} Pre-order — PreProduct renders into this slot {% endcomment -%}
-      {%- if section.blocks.size > 0 -%}
-        {%- for block in section.blocks -%}
-          <div class="pdp__app-slot" {{ block.shopify_attributes }}>{% render block %}</div>
-        {%- endfor -%}
-      {%- endif -%}
+        <div class="pdp__notify-form" data-notify-form hidden>
+          <label class="pdp__notify-hint" for="notify-email">
+            We'll email you the moment this size is back.
+          </label>
+          <div class="pdp__notify-row">
+            <input
+              type="email"
+              id="notify-email"
+              class="pdp__notify-input"
+              placeholder="you@email.com"
+              autocomplete="email"
+              data-notify-email
+            >
+            <button type="button" class="pdp__notify-submit" data-notify-submit>Notify me</button>
+          </div>
+          <p class="pdp__notify-msg" data-notify-msg hidden></p>
+        </div>
+      </div>
+
+
 
       {%- comment -%}
         Shopify injects its Shop Promise box next to the buy button via
@@ -327,6 +361,75 @@
           <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
         </div>
       </div>
+
+      {%- comment -%}
+        ===== DETAIL ROWS (Fabric / Colour / Packaging) =====
+        Clickable dropdown rows sitting directly below the tabs.
+      {%- endcomment -%}
+      {%- if detail_rows.size > 0 -%}
+        <div class="pdp__rows" data-pdp-rows>
+          {%- for block in detail_rows -%}
+            <div class="pdp__row" {{ block.shopify_attributes }}>
+              <button
+                type="button"
+                class="pdp__row-trigger"
+                data-row-trigger
+                aria-expanded="false"
+              >
+                <span>{{ block.settings.heading }}</span>
+                <span class="pdp__row-icon" aria-hidden="true"></span>
+              </button>
+
+              <div class="pdp__row-panel" data-row-panel hidden>
+                {%- if block.settings.content != blank -%}
+                  <div class="pdp__row-copy">{{ block.settings.content }}</div>
+                {%- endif -%}
+
+                {%- comment -%}
+                  Optional swatch list, one per line: Name|#hex|Description
+                  Used by the Colour row to show the full system.
+                {%- endcomment -%}
+                {%- if block.settings.swatches != blank -%}
+                  <ul class="pdp__row-swatches">
+                    {%- assign lines = block.settings.swatches | newline_to_br | split: '<br />' -%}
+                    {%- for line in lines -%}
+                      {%- assign parts = line | strip | split: '|' -%}
+                      {%- if parts.size > 1 -%}
+                        <li class="pdp__row-swatch">
+                          <span class="pdp__row-chip" style="background: {{ parts[1] | strip }};" aria-hidden="true"></span>
+                          <span class="pdp__row-swatch-body">
+                            <span class="pdp__row-swatch-name">{{ parts[0] | strip }}</span>
+                            {%- if parts.size > 2 -%}
+                              <span class="pdp__row-swatch-text">{{ parts[2] | strip }}</span>
+                            {%- endif -%}
+                          </span>
+                        </li>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+
+                {%- if block.settings.image != blank -%}
+                  <img
+                    class="pdp__row-media"
+                    src="{{ block.settings.image | image_url: width: 900 }}"
+                    alt="{{ block.settings.heading | escape }}"
+                    width="{{ block.settings.image.width }}"
+                    height="{{ block.settings.image.height }}"
+                    loading="lazy"
+                  >
+                {%- elsif block.settings.video != blank -%}
+                  {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pdp__row-media' }}
+                {%- endif -%}
+
+                {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
+                  <a class="pdp__tab-link" href="{{ block.settings.link_url }}">{{ block.settings.link_label }}</a>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </div>
@@ -433,6 +536,18 @@
       "default": "Notify me when available"
     },
     {
+      "type": "text",
+      "id": "klaviyo_company_id",
+      "label": "Klaviyo public API key",
+      "info": "Klaviyo → Settings → API keys. Used for back-in-stock signups.",
+      "default": "WuWz5B"
+    },
+    {
+      "type": "url",
+      "id": "installments_url",
+      "label": "Pay-in-4 'Learn more' link"
+    },
+    {
       "type": "checkbox",
       "id": "hide_shop_promise",
       "label": "Hide Shopify's Shop Promise box",
@@ -483,6 +598,26 @@
       "label": "Size chart content"
     }
   ],
-  "blocks": [{ "type": "@app" }]
+  "blocks": [
+    {
+      "type": "detail_row",
+      "name": "Detail row",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Fabric" },
+        { "type": "richtext", "id": "content", "label": "Content" },
+        {
+          "type": "textarea",
+          "id": "swatches",
+          "label": "Swatches (one per line)",
+          "info": "Format: Name|#hex|Description — used for the colour system."
+        },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "video", "id": "video", "label": "Video" },
+        { "type": "text", "id": "link_label", "label": "Link label" },
+        { "type": "url", "id": "link_url", "label": "Link URL" }
+      ]
+    },
+    { "type": "@app" }
+  ]
 }
 {% endschema %}

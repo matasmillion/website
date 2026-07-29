@@ -17,7 +17,44 @@
         "appointment_link": "",
         "delivery_text": "Order today for delivery within 5 business days",
         "size_chart_content": ""
-      }
+      },
+      "blocks": {
+        "row_fabric": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Fabric",
+            "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
+            "swatches": "",
+            "link_label": "",
+            "link_url": ""
+          }
+        },
+        "row_color": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Colour",
+            "content": "<p>Six elemental colours we build everything around, chosen to work with each other — so anything you own layers with anything else, wherever you happen to be that morning.</p>",
+            "swatches": "Slate|#4A4E54|The cool grey of wet stone. The anchor of the wardrobe.\nSalt|#F2EFE9|Undyed, unbleached off-white. Reads clean against everything.\nSand|#D4C5A9|Warm neutral pulled from dry coastline. Softens a dark fit.\nSea|#3B5566|Deep and muted, closer to deep water than to navy.\nSoil|#6B5744|Earth brown. Grounds a look without going black.\nSakura|#D9B3B3|The one signal colour. Used sparingly, on purpose.",
+            "link_label": "Explore the Colour Codex",
+            "link_url": "/pages/color-codex"
+          }
+        },
+        "row_packaging": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Packaging",
+            "content": "<p>Arrives in a rigid box worth keeping, wrapped in biodegradable paper with paper tape. No plastic — it breaks down instead of lingering.</p>",
+            "swatches": "",
+            "link_label": "More on our packaging",
+            "link_url": "/pages/packaging"
+          }
+        }
+      },
+      "block_order": [
+        "row_fabric",
+        "row_color",
+        "row_packaging"
+      ]
     },
     "guarantees": {
       "type": "product-guarantees",
@@ -109,183 +146,6 @@
         "link_url": ""
       }
     },
-    "fabric": {
-      "type": "product-content-panel",
-      "blocks": {
-        "p_1": {
-          "type": "point",
-          "settings": {
-            "icon": "leaf",
-            "title": "Organic cotton",
-            "text": "Grown with natural and renewable plant fibres — no synthetic pesticides, fertilisers or growth hormones."
-          }
-        },
-        "p_2": {
-          "type": "point",
-          "settings": {
-            "icon": "drop",
-            "title": "Treated with peppermint oil",
-            "text": "A durable, plant-based odour-control finish so pieces stay fresher for longer between washes."
-          }
-        },
-        "p_3": {
-          "type": "point",
-          "settings": {
-            "icon": "clock",
-            "title": "Sherpa cotton",
-            "text": "Brushed for warmth without bulk, so it packs down and holds its loft."
-          }
-        },
-        "media_1": {
-          "type": "media",
-          "settings": {}
-        },
-        "media_2": {
-          "type": "media",
-          "settings": {}
-        },
-        "media_3": {
-          "type": "media",
-          "settings": {}
-        }
-      },
-      "block_order": [
-        "p_1",
-        "p_2",
-        "p_3",
-        "media_1",
-        "media_2",
-        "media_3"
-      ],
-      "settings": {
-        "heading": "Fabric",
-        "intro": "<p>What the piece is made of, and why it was chosen.</p>",
-        "media_first": true,
-        "link_label": "",
-        "link_url": ""
-      }
-    },
-    "color": {
-      "type": "product-content-panel",
-      "blocks": {
-        "c_1": {
-          "type": "color",
-          "settings": {
-            "name": "Slate",
-            "swatch": "#4A4E54",
-            "text": "The cool grey of wet stone. The anchor of the wardrobe.",
-            "pairing": "Salt, Sand"
-          }
-        },
-        "c_2": {
-          "type": "color",
-          "settings": {
-            "name": "Salt",
-            "swatch": "#F2EFE9",
-            "text": "Undyed, unbleached off-white. Reads clean against everything.",
-            "pairing": "Slate, Soil"
-          }
-        },
-        "c_3": {
-          "type": "color",
-          "settings": {
-            "name": "Sand",
-            "swatch": "#D4C5A9",
-            "text": "Warm neutral pulled from dry coastline. Softens a dark fit.",
-            "pairing": "Soil, Slate"
-          }
-        },
-        "c_4": {
-          "type": "color",
-          "settings": {
-            "name": "Sea",
-            "swatch": "#3B5566",
-            "text": "Deep and muted, closer to deep water than to navy.",
-            "pairing": "Salt, Sand"
-          }
-        },
-        "c_5": {
-          "type": "color",
-          "settings": {
-            "name": "Soil",
-            "swatch": "#6B5744",
-            "text": "Earth brown. Grounds a look without going black.",
-            "pairing": "Sand, Salt"
-          }
-        },
-        "c_6": {
-          "type": "color",
-          "settings": {
-            "name": "Sakura",
-            "swatch": "#D9B3B3",
-            "text": "The one signal colour. Used sparingly, on purpose.",
-            "pairing": "Slate, Salt"
-          }
-        },
-        "media_1": {
-          "type": "media",
-          "settings": {}
-        }
-      },
-      "block_order": [
-        "c_1",
-        "c_2",
-        "c_3",
-        "c_4",
-        "c_5",
-        "c_6",
-        "media_1"
-      ],
-      "settings": {
-        "heading": "Colour",
-        "intro": "<p>Six elemental colours we build everything around. They are chosen to work with each other, so anything you own layers with anything else — wherever you happen to be that morning.</p>",
-        "media_first": false,
-        "link_label": "Explore the Colour Codex",
-        "link_url": "/pages/color-codex"
-      }
-    },
-    "packaging": {
-      "type": "product-content-panel",
-      "blocks": {
-        "p_1": {
-          "type": "point",
-          "settings": {
-            "icon": "box",
-            "title": "Arrives in a box worth keeping",
-            "text": "Rigid, unbranded on the inside, sized so the piece does not need to be crushed to fit."
-          }
-        },
-        "p_2": {
-          "type": "point",
-          "settings": {
-            "icon": "recycle",
-            "title": "Biodegradable throughout",
-            "text": "Paper wrap, paper tape, no plastic. It breaks down instead of lingering."
-          }
-        },
-        "media_1": {
-          "type": "media",
-          "settings": {}
-        },
-        "media_2": {
-          "type": "media",
-          "settings": {}
-        }
-      },
-      "block_order": [
-        "p_1",
-        "p_2",
-        "media_1",
-        "media_2"
-      ],
-      "settings": {
-        "heading": "Packaging",
-        "intro": "<p>How it reaches you matters as much as what reaches you.</p>",
-        "media_first": true,
-        "link_label": "More on our packaging",
-        "link_url": "/pages/packaging"
-      }
-    },
     "complete_the_look": {
       "type": "product-complete-the-look",
       "settings": {
@@ -340,9 +200,6 @@
     "product_info",
     "guarantees",
     "engineering",
-    "fabric",
-    "color",
-    "packaging",
     "complete_the_look",
     "ugc",
     "reviews",

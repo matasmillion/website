@@ -844,13 +844,23 @@
 
 /* ===== Conversion: installments, low stock, back in stock ===== */
 
+/* A class selector beats the UA [hidden] rule, so anything given an explicit
+   display below must opt back out when hidden. */
+[hidden] { display: none !important; }
+
 .pdp__terms {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6E6E6E;
   margin-bottom: 1rem;
 }
 
-.pdp__terms shopify-payment-terms {
-  font-size: 11px;
+.pdp__terms-link {
+  color: #2D2C2F;
+  text-decoration: underline;
 }
+
+.pdp__terms-link:hover { opacity: 0.7; }
 
 .pdp__low-stock {
   font-size: 10px;
@@ -860,6 +870,9 @@
   color: #A8442A;
   margin-bottom: 0.5rem;
 }
+
+/* ----- Back in stock ----- */
+.pdp__notify-wrap { margin-bottom: 1rem; }
 
 .pdp__notify {
   display: block;
@@ -874,7 +887,6 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
-  margin-bottom: 1rem;
   transition: background var(--duration-base) var(--ease-out),
               color var(--duration-base) var(--ease-out);
 }
@@ -884,6 +896,292 @@
   color: #FFFFFF;
 }
 
-.pdp__app-slot:not(:empty) {
-  margin-bottom: 1rem;
+.pdp__notify-hint {
+  display: block;
+  font-size: 10.5px;
+  color: #A4A4A4;
+  margin-bottom: 0.6rem;
+  text-align: left;
+}
+
+.pdp__notify-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #2D2C2F;
+  padding-bottom: 0.5rem;
+}
+
+.pdp__notify-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #2D2C2F;
+  padding: 0;
+}
+
+.pdp__notify-input:focus { outline: none; }
+.pdp__notify-input::placeholder { color: #C9C9C9; }
+
+.pdp__notify-submit {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 10.7px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  color: #2D2C2F;
+  flex-shrink: 0;
+}
+
+.pdp__notify-submit:disabled { opacity: 0.4; cursor: wait; }
+
+.pdp__notify-msg {
+  font-size: 10.5px;
+  color: #3FA34D;
+  margin-top: 0.6rem;
+  text-align: left;
+}
+
+.pdp__notify-msg.is-error { color: #A8442A; }
+
+/* ----- Size guide (SmartSize app block) ----- */
+.pdp__size-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 769px) {
+  .pdp__size-header { justify-content: flex-end; }
+}
+
+/* Pull the app's button back to our type instead of its own */
+.pdp__size-guide-slot a,
+.pdp__size-guide-slot button {
+  font-family: var(--font-body) !important;
+  font-size: 9.1px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #A4A4A4 !important;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  text-decoration: underline !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+}
+
+.pdp__size-guide-slot a:hover,
+.pdp__size-guide-slot button:hover { color: #2D2C2F !important; }
+
+.pdp__app-slot:not(:empty) { margin-bottom: 1rem; }
+
+/* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
+.pdp__rows {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.pdp__row { border-bottom: 1px solid var(--color-border); }
+
+.pdp__row-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 11.2px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+  text-align: left;
+}
+
+.pdp__row-trigger:hover { opacity: 0.65; }
+
+/* Plus that becomes a minus when open */
+.pdp__row-icon {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.pdp__row-icon::before,
+.pdp__row-icon::after {
+  content: '';
+  position: absolute;
+  background: #2D2C2F;
+  transition: transform var(--duration-base) var(--ease-out),
+              opacity var(--duration-base) var(--ease-out);
+}
+
+.pdp__row-icon::before { top: 50%; left: 0; width: 10px; height: 1px; margin-top: -0.5px; }
+.pdp__row-icon::after  { left: 50%; top: 0; width: 1px; height: 10px; margin-left: -0.5px; }
+
+.pdp__row-trigger[aria-expanded="true"] .pdp__row-icon::after {
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.pdp__row-panel {
+  padding: 0 0 1.25rem;
+  animation: pdp-panel-in var(--duration-base) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__row-panel { animation: none; }
+}
+
+.pdp__row-copy {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #6E6E6E;
+  text-align: left;
+}
+
+.pdp__row-copy p + p { margin-top: 0.75rem; }
+
+/* Colour system inside the dropdown */
+.pdp__row-swatches {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.pdp__row-swatch {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.pdp__row-chip {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(45, 44, 47, 0.12);
+}
+
+.pdp__row-swatch-body { display: block; }
+
+.pdp__row-swatch-name {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+  margin-bottom: 0.2rem;
+}
+
+.pdp__row-swatch-text {
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6E6E6E;
+}
+
+.pdp__row-media {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 1rem;
+  object-fit: cover;
+}
+
+/* ============================================
+   Klaviyo Reviews — brand overrides
+
+   The widget is rendered client-side by klaviyo.js and its inner class names
+   are not in the server HTML, so these target the stable kl-* prefixes and
+   generic elements rather than exact hooks. Unscoped on purpose: the review
+   app block can be placed in any section.
+   ============================================ */
+
+[class*="klaviyo-reviews"],
+[class^="kl-reviews"],
+[id^="kl-reviews"] {
+  font-family: var(--font-body) !important;
+  color: #2D2C2F !important;
+}
+
+/* Headings in our type, not theirs */
+[class*="klaviyo-reviews"] h1,
+[class*="klaviyo-reviews"] h2,
+[class*="klaviyo-reviews"] h3 {
+  font-family: var(--font-body) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+/* Stock blue pill buttons are the worst offender — square and dark them */
+[class*="klaviyo-reviews"] button,
+[class*="klaviyo-reviews"] a[role="button"],
+[class^="kl-reviews"] button {
+  border-radius: 0 !important;
+  background: #2D2C2F !important;
+  border: 1px solid #2D2C2F !important;
+  color: #FFFFFF !important;
+  font-family: var(--font-body) !important;
+  font-size: 10.7px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
+
+/* Filter/sort chips read as secondary, not as primary actions */
+[class*="klaviyo-reviews"] select,
+[class*="klaviyo-reviews"] input[type="search"],
+[class*="klaviyo-reviews"] input[type="text"] {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid #2D2C2F !important;
+  background: none !important;
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
+}
+
+/* Stars in ink rather than gold */
+[class*="klaviyo-reviews"] svg[class*="star"],
+[class*="klaviyo-reviews"] [class*="star"] svg,
+[class*="klaviyo-reviews"] [class*="Star"] {
+  color: #2D2C2F !important;
+  fill: #2D2C2F !important;
+}
+
+/* Rating distribution bars */
+[class*="klaviyo-reviews"] [class*="bar"],
+[class*="klaviyo-reviews"] progress {
+  border-radius: 0 !important;
+  accent-color: #2D2C2F !important;
+}
+
+/* Kill the rounded cards and heavy dividers */
+[class*="klaviyo-reviews"] [class*="card"],
+[class*="klaviyo-reviews"] [class*="Card"] {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border-color: var(--color-border) !important;
 }
