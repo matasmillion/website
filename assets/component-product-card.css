@@ -1,6 +1,7 @@
 /* ============================================
    PRODUCT CARD — Jacquemus overlay
    tag TL · colors TR · name BL · price BR · heart under price
+   Homepage cards are name-only — see .product-card__info--name-only
    Mobile: always visible. Desktop: revealed on hover.
    ============================================ */
 
@@ -162,6 +163,17 @@
 }
 .product-card--below .product-card__title { line-height: 1.35; }
 .product-card--below .product-card__price { color: var(--color-text-light); margin-top: 0.1rem; }
+
+/* ---- NAME-ONLY (homepage): no price, no heart — the title owns the row ----
+   The homepage displays products, it does not sell them. These rules must stay
+   below both context blocks above so they win on source order. */
+.product-card__info--name-only {
+  grid-template-columns: 1fr;
+}
+.product-card--overlay .product-card__info--name-only,
+.product-card--below .product-card__info--name-only {
+  grid-template-areas: "title";
+}
 
 /* ===== VISIBILITY ===== */
 /* Mobile: everything visible */

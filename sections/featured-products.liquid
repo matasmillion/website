@@ -25,7 +25,11 @@
       {%- if feature_collection != blank -%}
         {%- for product in feature_collection.products limit: limit -%}
           <div class="featured-products__slide">
-            {%- render 'product-card', product: product -%}
+            {%- comment -%}
+              HOMEPAGE RULE: display-only card — image + name, nothing else.
+              No price, no compare-at, no sale badge, no wishlist heart.
+            {%- endcomment -%}
+            {%- render 'product-card', product: product, show_price: false, show_wishlist: false, show_badge: false -%}
           </div>
         {%- endfor -%}
       {%- else -%}
@@ -37,9 +41,9 @@
                   {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
                 </div>
               </div>
-              <div class="product-card__info">
+              {%- comment -%} Empty state matches the live card: name only, no price {%- endcomment -%}
+              <div class="product-card__info product-card__info--name-only">
                 <h3 class="product-card__title">Product {{ i }}</h3>
-                <div class="product-card__price">{{ 8500 | money }}</div>
               </div>
             </article>
           </div>
