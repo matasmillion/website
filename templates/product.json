@@ -16,6 +16,16 @@
         "show_appointment_link": false,
         "appointment_link": "",
         "delivery_text": "Order today for delivery within 5 business days",
+        "size_calculator_url": "",
+        "show_payment_terms": true,
+        "low_stock_threshold": 5,
+        "notify_label": "Notify me when available",
+        "hide_shop_promise": true,
+        "standard_min": 3,
+        "standard_max": 5,
+        "express_min": 1,
+        "express_max": 2,
+        "cutoff_hour": 14,
         "size_chart_content": ""
       },
       "blocks": {
@@ -25,6 +35,7 @@
             "heading": "Fabric",
             "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
             "swatches": "",
+            "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
             "link_label": "",
             "link_url": ""
           }
@@ -89,20 +100,33 @@
       "disabled": true,
       "settings": {}
     },
-    "brand_story_GAGwDD": {
-      "type": "brand-story",
-      "disabled": true,
-      "name": "Brand Story",
-      "settings": {
-        "subheading": "Our Story",
-        "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
-        "layout": "text-center",
-        "cta_text": "Our Mission",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "bg_color": ""
-      }
+    "178530931009134dc8": {
+      "type": "apps",
+      "blocks": {
+        "smartsize_smartsize_sizechart_azcYpH": {
+          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
+          "settings": {
+            "style_source": "inherit",
+            "button_label": "",
+            "button_style": "link",
+            "button_icon": "sizenone",
+            "button_color": "#000000",
+            "button_background_color": "",
+            "button_corner_radius_px": 5,
+            "button_margin_top_px": 0,
+            "button_margin_right_px": 0,
+            "button_margin_bottom_px": 0,
+            "button_margin_left_px": 0,
+            "button_alignment": "flex-end",
+            "button_alignment_mobile": "flex-end",
+            "display_mode": "combined"
+          }
+        }
+      },
+      "block_order": [
+        "smartsize_smartsize_sizechart_azcYpH"
+      ],
+      "settings": {}
     },
     "engineering": {
       "type": "product-content-panel",
@@ -125,11 +149,16 @@
         },
         "media_1": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/salt_cand_0.jpg",
+            "video_url": ""
+          }
         },
         "media_2": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         }
       },
       "block_order": [
@@ -160,21 +189,27 @@
         "person_1": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         },
         "person_2": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         },
         "person_3": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         }
@@ -194,15 +229,45 @@
         "heading": "Reviews",
         "provider": "klaviyo"
       }
+    },
+    "brand_story_GAGwDD": {
+      "type": "brand-story",
+      "disabled": true,
+      "name": "Brand Story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
+      }
+    },
+    "1785308970a4db4de4": {
+      "type": "apps",
+      "blocks": {
+        "klaviyo_reviews_product_reviews_YtPaQF": {
+          "type": "shopify://apps/klaviyo-reviews/blocks/product-reviews/db20e365-d984-4ac4-9655-e1588d951ca9",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "klaviyo_reviews_product_reviews_YtPaQF"
+      ],
+      "settings": {}
     }
   },
   "order": [
     "product_info",
     "guarantees",
+    "178530931009134dc8",
     "engineering",
     "complete_the_look",
     "ugc",
     "reviews",
-    "brand_story_GAGwDD"
+    "brand_story_GAGwDD",
+    "1785308970a4db4de4"
   ]
 }
