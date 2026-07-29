@@ -72,7 +72,12 @@
     <div class="cs__grid">
       {%- for product in feature_collection.products limit: limit -%}
         <div class="cs__product">
-          {%- render 'product-card', product: product, context: 'overlay' -%}
+          {%- comment -%}
+            HOMEPAGE RULE: this is a display-only card — image + name, nothing else.
+            No price, no compare-at, no sale badge, no wishlist heart.
+            Price lives on the collection page and the PDP.
+          {%- endcomment -%}
+          {%- render 'product-card', product: product, context: 'overlay', show_price: false, show_wishlist: false, show_badge: false -%}
         </div>
       {%- endfor -%}
     </div>
