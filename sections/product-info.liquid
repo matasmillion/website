@@ -224,7 +224,11 @@
         {%- if section.settings.show_payment_terms -%}
           <p class="pdp__terms">
             Pay in four interest-free installments of
-            <span data-installment>{{ current_variant.price | divided_by: 4 | money }}</span>.
+            {%- liquid
+              assign inst_cents = current_variant.price | divided_by: 4
+              assign inst_dollars = inst_cents | divided_by: 100
+              assign inst_rem = inst_cents | modulo: 100 | prepend: '00' | slice: -2, 2
+            -%}<span data-installment>${{ inst_dollars }}.{{ inst_rem }}</span>.
             <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
                class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
           </p>
