@@ -224,7 +224,7 @@
         {%- if section.settings.show_payment_terms -%}
           <p class="pdp__terms">
             Pay in four interest-free installments of
-            <span data-installment>{{ current_variant.price | divided_by: 4 | money_without_trailing_zeros }}</span>.
+            <span data-installment>{{ current_variant.price | divided_by: 4 | money }}</span>.
             <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
                class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
           </p>
@@ -333,7 +333,9 @@
             <p class="pdp__tab-meta">{{ product.metafields.custom.model_stats }}</p>
           {%- endif -%}
 
-          <button type="button" class="pdp__tab-link" data-modal-open="size-chart-modal">Size guide</button>
+          {%- if section.settings.size_chart_content != blank -%}
+            <button type="button" class="pdp__tab-link" data-modal-open="size-chart-modal">Size guide</button>
+          {%- endif -%}
 
           {%- if section.settings.size_calculator_url != blank -%}
             <a href="{{ section.settings.size_calculator_url }}" class="pdp__tab-link">Find my size</a>

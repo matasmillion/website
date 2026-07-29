@@ -266,6 +266,10 @@
       });
     }
 
+    // Instalments keep their cents; prices drop a trailing .00
+    const moneyExact = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' });
+
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
 
@@ -326,7 +330,7 @@
 
       // Pay-in-4 figure follows the variant price
       const inst = pdp.querySelector('[data-installment]');
-      if (inst && variant) inst.textContent = money(Math.round(variant.price / 4));
+      if (inst && variant) inst.textContent = moneyExact(variant.price / 4);
     };
 
     groups.forEach((g) => g.addEventListener('variant:change', resolve));
@@ -425,6 +429,10 @@
     const drawer = document.querySelector('[data-cart-drawer]');
     if (!drawer) return;
     const content = drawer.querySelector('#cart-drawer-content');
+
+    // Instalments keep their cents; prices drop a trailing .00
+    const moneyExact = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' });
 
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' });
@@ -676,6 +684,10 @@
     const grid = drawer.querySelector('[data-wishlist-grid]');
     const empty = drawer.querySelector('[data-wishlist-empty]');
 
+    // Instalments keep their cents; prices drop a trailing .00
+    const moneyExact = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' });
+
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' })
         .replace(/\.00$/, '');
@@ -751,6 +763,10 @@
     const results = drawer.querySelector('[data-search-results]');
     const dflt = drawer.querySelector('[data-search-default]');
     const mv = drawer.querySelector('[data-search-mostviewed]');
+
+    // Instalments keep their cents; prices drop a trailing .00
+    const moneyExact = (cents) =>
+      (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' });
 
     const money = (cents) =>
       (cents / 100).toLocaleString(undefined, { style: 'currency', currency: (window.Shopify && Shopify.currency && Shopify.currency.active) || 'USD' }).replace(/\.00$/, '');
