@@ -62,6 +62,34 @@
       "disabled": true,
       "settings": {}
     },
+    "178530931009134dc8": {
+      "type": "apps",
+      "blocks": {
+        "smartsize_smartsize_sizechart_azcYpH": {
+          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
+          "settings": {
+            "style_source": "inherit",
+            "button_label": "",
+            "button_style": "link",
+            "button_icon": "sizenone",
+            "button_color": "#000000",
+            "button_background_color": "",
+            "button_corner_radius_px": 5,
+            "button_margin_top_px": 0,
+            "button_margin_right_px": 0,
+            "button_margin_bottom_px": 0,
+            "button_margin_left_px": 0,
+            "button_alignment": "flex-end",
+            "button_alignment_mobile": "flex-end",
+            "display_mode": "combined"
+          }
+        }
+      },
+      "block_order": [
+        "smartsize_smartsize_sizechart_azcYpH"
+      ],
+      "settings": {}
+    },
     "engineering": {
       "type": "product-content-panel",
       "blocks": {
@@ -84,6 +112,7 @@
         "media_1": {
           "type": "media",
           "settings": {
+            "image": "shopify://shop_images/salt_cand_0.jpg",
             "video_url": ""
           }
         },
@@ -367,11 +396,25 @@
         "cta_style": "btn--secondary",
         "bg_color": ""
       }
+    },
+    "1785308970a4db4de4": {
+      "type": "apps",
+      "blocks": {
+        "klaviyo_reviews_product_reviews_YtPaQF": {
+          "type": "shopify://apps/klaviyo-reviews/blocks/product-reviews/db20e365-d984-4ac4-9655-e1588d951ca9",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "klaviyo_reviews_product_reviews_YtPaQF"
+      ],
+      "settings": {}
     }
   },
   "order": [
     "product_info",
     "guarantees",
+    "178530931009134dc8",
     "engineering",
     "fabric",
     "color",
@@ -379,6 +422,7 @@
     "complete_the_look",
     "ugc",
     "reviews",
-    "brand_story_GAGwDD"
+    "brand_story_GAGwDD",
+    "1785308970a4db4de4"
   ]
 }
