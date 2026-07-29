@@ -23,6 +23,8 @@ Analyze their HTML structure, CSS approach, layout patterns, typography scale, s
 
 3. **Simplicity-first approach.** When in doubt, remove. Aspirational brands sell through desire, not through information overload. Every element on the page must earn its place.
 
+4. **NO PRICES ON THE HOMEPAGE. Ever.** Any product shown on the homepage displays image + product name only. No price, no compare-at price, no sale price, no "was/now", no discount percentage, no sale badge, no wishlist heart, no quick-add button. The homepage exists to display the product, not to sell it — pricing belongs on the collection page and the PDP. This is not a configurable setting the founder can toggle on; the homepage product card must be built without a price element at all. Any shared `product-card.liquid` snippet must take a `show_price` parameter that every homepage section passes as `false`.
+
 ## BRAND IDENTITY
 
 - **Brand name:** Foreign Resource
@@ -105,7 +107,7 @@ Build these sections (all as Online Store 2.0 sections with configurable blocks)
 
 **g. Featured Products Carousel**
 - Horizontal scrolling product cards
-- Minimal card design: image, product name, price. Nothing else.
+- Minimal card design: image + product name. Nothing else. **NO PRICE** — see Critical Requirement 4. Render via `{% render 'product-card', product: product, show_price: false %}`
 - Smooth scroll/drag behavior on desktop and mobile
 - Configurable: which collection to pull from, number of products
 - Design: clean, airy. Product images do the talking.
@@ -155,7 +157,7 @@ Build these sections (all as Online Store 2.0 sections with configurable blocks)
 **c. Product Grid**
 - 2 columns mobile, 3-4 columns desktop (configurable)
 - Large product images — lifestyle and editorial shots should breathe
-- Minimal product info below image: product name + price ONLY
+- Minimal product info below image: product name + price ONLY (the collection page IS the place for price — the homepage is not)
 - No badges, no "SALE" tags, no "NEW" stickers unless explicitly configured
 - Image hover: show alternate image (second product image)
 - Configurable: columns, gap size, image aspect ratio
