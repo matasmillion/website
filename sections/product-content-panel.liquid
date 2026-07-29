@@ -20,13 +20,23 @@
   assign points = section.blocks | where: 'type', 'point'
   assign colors = section.blocks | where: 'type', 'color'
   assign media = section.blocks | where: 'type', 'media'
+
   assign has_copy = false
   if points.size > 0 or colors.size > 0
     assign has_copy = true
   endif
+
+  # A media block with nothing in it would render an empty grey box, so count
+  # only the blocks that actually carry an image or a video.
+  assign filled_media = 0
+  for block in media
+    if block.settings.image != blank or block.settings.video != blank or block.settings.video_url != blank
+      assign filled_media = filled_media | plus: 1
+    endif
+  endfor
 -%}
 
-{%- if has_copy or media.size > 0 -%}
+{%- if has_copy or filled_media > 0 -%}
   {{ 'component-content-panel.css' | asset_url | stylesheet_tag }}
 
   <section class="pcp reveal{% if section.settings.media_first %} pcp--media-first{% endif %}">
@@ -111,11 +121,15 @@
       </div>
 
       {%- comment -%} ===== MEDIA COLUMN ===== {% endcomment -%}
-      {%- if media.size > 0 -%}
+      {%- if filled_media > 0 -%}
         <div class="pcp__media" data-panel-media>
           <div class="pcp__stage">
+            {%- assign slide_i = 0 -%}
             {%- for block in media -%}
-              <div class="pcp__slide{% if forloop.first %} is-active{% endif %}" data-panel-slide="{{ forloop.index0 }}">
+              {%- if block.settings.image == blank and block.settings.video == blank and block.settings.video_url == blank -%}
+                {%- continue -%}
+              {%- endif -%}
+              <div class="pcp__slide{% if slide_i == 0 %} is-active{% endif %}" data-panel-slide="{{ slide_i }}">
                 {%- if block.settings.video != blank -%}
                   {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pcp__media-el' }}
                 {%- elsif block.settings.video_url != blank -%}
@@ -136,17 +150,22 @@
                   >
                 {%- endif -%}
               </div>
+              {%- assign slide_i = slide_i | plus: 1 -%}
             {%- endfor -%}
           </div>
 
-          {%- if media.size > 1 -%}
+          {%- if filled_media > 1 -%}
             <div class="pcp__thumbs">
+              {%- assign thumb_i = 0 -%}
               {%- for block in media -%}
+                {%- if block.settings.image == blank and block.settings.video == blank and block.settings.video_url == blank -%}
+                  {%- continue -%}
+                {%- endif -%}
                 <button
                   type="button"
-                  class="pcp__thumb{% if forloop.first %} is-active{% endif %}"
-                  data-panel-thumb="{{ forloop.index0 }}"
-                  aria-label="View media {{ forloop.index }}"
+                  class="pcp__thumb{% if thumb_i == 0 %} is-active{% endif %}"
+                  data-panel-thumb="{{ thumb_i }}"
+                  aria-label="View media {{ thumb_i | plus: 1 }}"
                 >
                   {%- if block.settings.image != blank -%}
                     <img src="{{ block.settings.image | image_url: width: 120 }}" alt="" width="60" height="60" loading="lazy">
@@ -154,6 +173,7 @@
                     <span class="pcp__thumb-fallback"></span>
                   {%- endif -%}
                 </button>
+                {%- assign thumb_i = thumb_i | plus: 1 -%}
               {%- endfor -%}
             </div>
           {%- endif -%}

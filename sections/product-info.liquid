@@ -233,6 +233,20 @@
         {%- endfor -%}
       {%- endif -%}
 
+      {%- comment -%}
+        Shopify injects its Shop Promise box next to the buy button via
+        content_for_header, so it can't be removed in Liquid — only hidden.
+        Our urgency line plus the estimator now cover the same ground, and two
+        delivery dates computed two different ways is worse than one.
+      {%- endcomment -%}
+      {%- if section.settings.hide_shop_promise -%}
+        <style>
+          shop-promise-banner,
+          [class*="shop-promise"],
+          [id*="shop-promise"]:not(script) { display: none !important; }
+        </style>
+      {%- endif -%}
+
       {%- comment -%} Rolling urgency — same date engine as the estimator {% endcomment -%}
       <p class="pdp__urgency" data-delivery-urgency hidden>
         <span class="dest__pulse" aria-hidden="true"></span>
@@ -417,6 +431,13 @@
       "id": "notify_label",
       "label": "Back-in-stock button label",
       "default": "Notify me when available"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_shop_promise",
+      "label": "Hide Shopify's Shop Promise box",
+      "info": "Our estimator and urgency line replace it. Untick to show both.",
+      "default": true
     },
     {
       "type": "header",
