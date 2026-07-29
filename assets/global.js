@@ -930,30 +930,44 @@
     }
   };
 
+  /* --- Klaviyo back-in-stock: tag whatever it injects so CSS can reach it --- */
+  const initKlaviyoBisSkin = () => {
+    const pdp = document.querySelector('[data-pdp]');
+    if (!pdp) return;
+
+    const tag = () => {
+      pdp.querySelectorAll('button, a, input[type="button"], input[type="submit"]').forEach((el) => {
+        if (el.classList.contains('fr-bis')) return;
+        if (el.closest('[data-sticky-band]')) return;
+        const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
+        const txt = (el.textContent || el.value || '').trim().toLowerCase();
+        const isBis = /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
+                      /^notify me/.test(txt);
+        if (isBis) el.classList.add('fr-bis');
+      });
+    };
+
+    tag();
+    // Klaviyo injects late and can re-render, so keep watching the PDP subtree.
+    new MutationObserver(tag).observe(pdp, { childList: true, subtree: true });
+  };
+
   /* --- PDP sticky band (mobile): hide once past Foreign Engineering --- */
   const initPdpStickyBand = () => {
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // Mobile-only, so the band is visible from load; the sole job here is
-    // retracting it after the engineering section, before Complete the Look.
-    const boundary =
-      document.querySelector('.section-fr-engineering') ||
-      document.querySelector('.section-pdp-complete-the-look');
+    // The band rides along until Complete the Look appears, then stops just
+    // above it — so it is observed directly rather than inferring the point
+    // from where the engineering section ends.
+    const boundary = document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;
-
-    const usingFallback = !document.querySelector('.section-fr-engineering');
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        // On the engineering section, hide once its bottom clears the viewport
-        // top. On the Complete the Look fallback, hide when its TOP arrives —
-        // using its bottom would keep the band up across that whole section,
-        // which is exactly where it must not be.
-        const past = usingFallback
-          ? entry.boundingClientRect.top < 0
-          : !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
-        band.classList.toggle('is-hidden', past);
+        // Hide the moment any part of Complete the Look is on screen, and
+        // bring it back when scrolling up above it again.
+        band.classList.toggle('is-hidden', entry.isIntersecting || entry.boundingClientRect.top < 0);
       });
     }, { threshold: 0 });
 
@@ -1186,7 +1200,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

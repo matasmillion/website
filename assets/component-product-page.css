@@ -221,7 +221,7 @@
     z-index: 90;
     height: var(--pdp-band-h, 126px);
     padding: 10px 0.75rem;
-    background: #FFFFFF;
+    background: var(--color-secondary);
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
@@ -875,13 +875,16 @@
   margin-bottom: 0.5rem;
 }
 
-/* ----- Back in stock: Klaviyo's injected button -----
-   Klaviyo renders .klaviyo-bis-trigger itself, so it is restyled here rather
-   than configured in Klaviyo. Matches the add-to-cart button. */
+/* ----- Back in stock -----
+   Klaviyo injects this button client-side and its class names are not stable,
+   so global.js tags whatever it injects with .fr-bis and we style that.
+   The literal klaviyo-bis-trigger is kept as a belt-and-braces match. */
+.fr-bis,
 .klaviyo-bis-trigger {
   display: block !important;
   width: 100% !important;
   max-width: none !important;
+  min-width: 0 !important;
   height: 50px !important;
   margin: 0 0 1rem !important;
   padding: 0 1.25rem !important;
@@ -896,29 +899,36 @@
   text-transform: uppercase !important;
   text-align: center !important;
   line-height: 50px !important;
+  text-decoration: none !important;
   cursor: pointer !important;
   box-shadow: none !important;
-  transition: opacity var(--duration-base) var(--ease-out) !important;
+  transition: background var(--duration-base) var(--ease-out) !important;
 }
 
-.klaviyo-bis-trigger:hover { background: #000000 !important; border-color: #000000 !important; }
+.fr-bis:hover,
+.klaviyo-bis-trigger:hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+}
 
-/* ----- Size guide (SmartSize app block) -----
-   Centred, and matched to the STORY / SIZING / DELIVERY & RETURNS tab tone
-   (.pdp__tab: 11.2px, .05em, uppercase, #A4A4A4, hover #2D2C2F).
-   !important is required: the app ships its own high-specificity styles. */
+/* ----- Size guide (SmartSize) -----
+   Targeted on the app's own hooks (smartrecom-*, not the smartsize handle) and
+   left UNSCOPED: the block ships display:none and is revealed by app JS, which
+   may relocate the button out of our slot, so descendant selectors are unsafe.
+   Display is deliberately not overridden — that is the app's to control. */
 .pdp__size-guide-slot,
-.pdp__size-guide-slot [class*="smartsize"],
-.pdp__size-guide-slot [id*="smartsize"] {
+#smartrecom-sizechart-button,
+.smartrecom-sizechart-btn-wrap {
   text-align: center !important;
   justify-content: center !important;
   width: 100%;
 }
 
+#smartrecom-sizechart-trigger,
+.smartrecom-sizechart-btn-link,
+.smartrecom-sizechart-btn-button,
 .pdp__size-guide-slot a,
-.pdp__size-guide-slot button,
-.pdp__size-guide-slot [class*="smartsize"] a,
-.pdp__size-guide-slot [class*="smartsize"] button {
+.pdp__size-guide-slot button {
   font-family: var(--font-body) !important;
   font-size: 11.2px !important;
   font-weight: var(--font-weight-medium) !important;
@@ -935,17 +945,18 @@
   min-height: 0 !important;
   height: auto !important;
   line-height: 1.5 !important;
-  display: inline-block !important;
   transition: color var(--duration-fast) var(--ease-out) !important;
 }
 
+#smartrecom-sizechart-trigger:hover,
+.smartrecom-sizechart-btn-link:hover,
+.smartrecom-sizechart-btn-button:hover,
 .pdp__size-guide-slot a:hover,
-.pdp__size-guide-slot button:hover,
-.pdp__size-guide-slot [class*="smartsize"] a:hover,
-.pdp__size-guide-slot [class*="smartsize"] button:hover {
+.pdp__size-guide-slot button:hover {
   color: #2D2C2F !important;
   opacity: 1 !important;
 }
+
 
 /* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
 .pdp__rows {
