@@ -2,6 +2,12 @@
   assign current_variant = product.selected_or_first_available_variant
   assign app_blocks = section.blocks | where: 'type', '@app'
   assign detail_rows = section.blocks | where: 'type', 'detail_row'
+
+  # Instalment figure — this shop's money format drops decimals, so it is
+  # composed by hand rather than via the money filters.
+  assign inst_cents = current_variant.price | divided_by: 4
+  assign inst_dollars = inst_cents | divided_by: 100
+  assign inst_rem = inst_cents | modulo: 100
 -%}
 
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
@@ -223,12 +229,7 @@
         {%- endcomment -%}
         {%- if section.settings.show_payment_terms -%}
           <p class="pdp__terms">
-            Pay in four interest-free installments of
-            {%- liquid
-              assign inst_cents = current_variant.price | divided_by: 4
-              assign inst_dollars = inst_cents | divided_by: 100
-              assign inst_rem = inst_cents | modulo: 100
-            -%}<span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span>.
+            Pay in four interest-free installments of <span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span>.
             <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
                class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
           </p>
