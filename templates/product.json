@@ -16,6 +16,16 @@
         "show_appointment_link": false,
         "appointment_link": "",
         "delivery_text": "Order today for delivery within 5 business days",
+        "size_calculator_url": "",
+        "show_payment_terms": true,
+        "low_stock_threshold": 5,
+        "notify_label": "Notify me when available",
+        "hide_shop_promise": true,
+        "standard_min": 3,
+        "standard_max": 5,
+        "express_min": 1,
+        "express_max": 2,
+        "cutoff_hour": 14,
         "size_chart_content": ""
       }
     },
@@ -52,21 +62,6 @@
       "disabled": true,
       "settings": {}
     },
-    "brand_story_GAGwDD": {
-      "type": "brand-story",
-      "disabled": true,
-      "name": "Brand Story",
-      "settings": {
-        "subheading": "Our Story",
-        "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
-        "layout": "text-center",
-        "cta_text": "Our Mission",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "bg_color": ""
-      }
-    },
     "engineering": {
       "type": "product-content-panel",
       "blocks": {
@@ -88,11 +83,15 @@
         },
         "media_1": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         },
         "media_2": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         }
       },
       "block_order": [
@@ -138,15 +137,22 @@
         },
         "media_1": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
+            "video_url": ""
+          }
         },
         "media_2": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         },
         "media_3": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         }
       },
       "block_order": [
@@ -172,7 +178,7 @@
           "type": "color",
           "settings": {
             "name": "Slate",
-            "swatch": "#4A4E54",
+            "swatch": "#4a4e54",
             "text": "The cool grey of wet stone. The anchor of the wardrobe.",
             "pairing": "Salt, Sand"
           }
@@ -181,7 +187,7 @@
           "type": "color",
           "settings": {
             "name": "Salt",
-            "swatch": "#F2EFE9",
+            "swatch": "#f2efe9",
             "text": "Undyed, unbleached off-white. Reads clean against everything.",
             "pairing": "Slate, Soil"
           }
@@ -190,7 +196,7 @@
           "type": "color",
           "settings": {
             "name": "Sand",
-            "swatch": "#D4C5A9",
+            "swatch": "#d4c5a9",
             "text": "Warm neutral pulled from dry coastline. Softens a dark fit.",
             "pairing": "Soil, Slate"
           }
@@ -199,7 +205,7 @@
           "type": "color",
           "settings": {
             "name": "Sea",
-            "swatch": "#3B5566",
+            "swatch": "#3b5566",
             "text": "Deep and muted, closer to deep water than to navy.",
             "pairing": "Salt, Sand"
           }
@@ -208,7 +214,7 @@
           "type": "color",
           "settings": {
             "name": "Soil",
-            "swatch": "#6B5744",
+            "swatch": "#6b5744",
             "text": "Earth brown. Grounds a look without going black.",
             "pairing": "Sand, Salt"
           }
@@ -217,14 +223,16 @@
           "type": "color",
           "settings": {
             "name": "Sakura",
-            "swatch": "#D9B3B3",
+            "swatch": "#d9b3b3",
             "text": "The one signal colour. Used sparingly, on purpose.",
             "pairing": "Slate, Salt"
           }
         },
         "media_1": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         }
       },
       "block_order": [
@@ -265,11 +273,15 @@
         },
         "media_1": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         },
         "media_2": {
           "type": "media",
-          "settings": {}
+          "settings": {
+            "video_url": ""
+          }
         }
       },
       "block_order": [
@@ -300,21 +312,27 @@
         "person_1": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         },
         "person_2": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         },
         "person_3": {
           "type": "person",
           "settings": {
+            "video_url": "",
             "handle": "@handle",
+            "link": "",
             "flag": "🇺🇸"
           }
         }
@@ -333,6 +351,21 @@
       "settings": {
         "heading": "Reviews",
         "provider": "klaviyo"
+      }
+    },
+    "brand_story_GAGwDD": {
+      "type": "brand-story",
+      "disabled": true,
+      "name": "Brand Story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
       }
     }
   },
