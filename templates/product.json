@@ -11,22 +11,6 @@
   "sections": {
     "product_info": {
       "type": "product-info",
-      "settings": {
-        "show_short_description": false,
-        "show_appointment_link": false,
-        "appointment_link": "",
-        "delivery_text": "Order today for delivery within 5 business days",
-        "size_calculator_url": "",
-        "show_payment_terms": true,
-        "low_stock_threshold": 5,
-        "hide_shop_promise": true,
-        "standard_min": 3,
-        "standard_max": 5,
-        "express_min": 1,
-        "express_max": 2,
-        "cutoff_hour": 14,
-        "size_chart_content": ""
-      },
       "blocks": {
         "row_fabric": {
           "type": "detail_row",
@@ -64,7 +48,24 @@
         "row_fabric",
         "row_color",
         "row_packaging"
-      ]
+      ],
+      "settings": {
+        "show_short_description": false,
+        "show_appointment_link": false,
+        "appointment_link": "",
+        "delivery_text": "Order today for delivery within 5 business days",
+        "size_calculator_url": "",
+        "show_payment_terms": true,
+        "low_stock_threshold": 5,
+        "installments_url": "",
+        "hide_shop_promise": true,
+        "standard_min": 3,
+        "standard_max": 5,
+        "express_min": 1,
+        "express_max": 2,
+        "cutoff_hour": 14,
+        "size_chart_content": ""
+      }
     },
     "guarantees": {
       "type": "product-guarantees",
@@ -105,11 +106,11 @@
         "smartsize_smartsize_sizechart_azcYpH": {
           "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
           "settings": {
-            "style_source": "inherit",
+            "style_source": "customize",
             "button_label": "SIZE GUIDE",
             "button_style": "link",
             "button_icon": "sizenone",
-            "button_color": "#000000",
+            "button_color": "#2D2C2F",
             "button_background_color": "",
             "button_corner_radius_px": 0,
             "button_margin_top_px": 0,
@@ -167,7 +168,7 @@
         "media_2"
       ],
       "settings": {
-        "heading": "Engineering",
+        "heading": "Product Engineering",
         "intro": "<p>The details you only notice once you have lived in it.</p>",
         "media_first": false,
         "link_label": "",
