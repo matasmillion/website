@@ -55,7 +55,7 @@
         "appointment_link": "",
         "delivery_text": "Order today for delivery within 5 business days",
         "size_calculator_url": "",
-        "show_payment_terms": true,
+        "show_payment_terms": false,
         "low_stock_threshold": 5,
         "installments_url": "",
         "hide_shop_promise": true,
