@@ -1,7 +1,11 @@
 /* ============================================
    PRODUCT CARD — Jacquemus overlay
    tag TL · colors TR · name BL · price BR · heart under price
-   Homepage cards are name-only — see .product-card__info--name-only
+
+   Homepage cards are IMAGE ONLY — product-card.liquid skips the whole
+   .product-card__info block, so none of the info rules below apply there.
+   The rules still serve the collection page and the PDP carousels.
+
    Mobile: always visible. Desktop: revealed on hover.
    ============================================ */
 
@@ -137,7 +141,7 @@
 }
 .product-card__wishlist.is-saved svg { fill: currentColor; }
 
-/* ---- OVERLAY context (homepage): info over image bottom ---- */
+/* ---- OVERLAY context: info over image bottom ---- */
 .product-card--overlay .product-card__info {
   position: absolute;
   left: 0;
@@ -164,9 +168,8 @@
 .product-card--below .product-card__title { line-height: 1.35; }
 .product-card--below .product-card__price { color: var(--color-text-light); margin-top: 0.1rem; }
 
-/* ---- NAME-ONLY (homepage): no price, no heart — the title owns the row ----
-   The homepage displays products, it does not sell them. These rules must stay
-   below both context blocks above so they win on source order. */
+/* ---- NAME-ONLY: name but no price and no heart — the title owns the row ----
+   Must stay below both context blocks above so it wins on source order. */
 .product-card__info--name-only {
   grid-template-columns: 1fr;
 }
