@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Track Your Order",
+        "text": "<p>Your order is on its way. Enter your order number and email below to get real-time tracking updates on your shipment. From our warehouse to your door, we want you to know exactly where your pieces are at every step of the journey.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -1,0 +1,122 @@
+{%- comment -%}
+  Foreign Fund — placeholder for the giving-back page (order counter + cause).
+  Counter values are settings-driven for now (update in the theme editor).
+{%- endcomment -%}
+
+<section class="ff">
+  <div class="ff__hero">
+    <p class="ff__eyebrow">{{ section.settings.eyebrow | default: 'Foreign Resource' }}</p>
+    <h1 class="ff__title">{{ section.settings.heading | default: 'Foreign Fund' }}</h1>
+    <p class="ff__intro">{{ section.settings.intro }}</p>
+  </div>
+
+  <div class="ff__counters">
+    <div class="ff__counter">
+      <span class="ff__num">{{ section.settings.orders_count | default: '12,480' }}</span>
+      <span class="ff__label">{{ section.settings.orders_label | default: 'Orders placed' }}</span>
+    </div>
+    <div class="ff__counter">
+      <span class="ff__num">{{ section.settings.donated_amount | default: '$62,400' }}</span>
+      <span class="ff__label">{{ section.settings.donated_label | default: 'Donated to the Freedom Fund' }}</span>
+    </div>
+  </div>
+
+  <div class="ff__cause">
+    <h2 class="ff__cause-title">{{ section.settings.cause_title | default: 'The Freedom Fund' }}</h2>
+    <div class="ff__cause-text">{{ section.settings.cause_text }}</div>
+    {%- if section.settings.cta_link != blank -%}
+      <a href="{{ section.settings.cta_link }}" class="ff__cta">{{ section.settings.cta_text | default: 'Learn more' }}</a>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .ff { padding: var(--space-xl) 1.25rem var(--space-section); }
+  .ff__hero { text-align: center; max-width: 760px; margin: 0 auto var(--space-2xl); }
+  .ff__eyebrow {
+    font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--color-text-light); margin-bottom: var(--space-md);
+  }
+  .ff__title {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 1.5rem + 6vw, 7rem);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    line-height: 0.95;
+    margin-bottom: var(--space-lg);
+  }
+  .ff__intro { font-size: var(--text-base); line-height: 1.8; color: var(--color-text-light); }
+
+  .ff__counters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    max-width: 900px;
+    margin: 0 auto var(--space-2xl);
+    text-align: center;
+  }
+  @media (min-width: 700px) { .ff__counters { grid-template-columns: 1fr 1fr; } }
+  .ff__num {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 2rem + 5vw, 6rem);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .ff__label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+  }
+
+  .ff__cause {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: var(--space-2xl);
+    border-top: 1px solid var(--color-border);
+  }
+  .ff__cause-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+  }
+  .ff__cause-text { font-size: var(--text-base); line-height: 1.9; color: var(--color-primary); }
+  .ff__cause-text p { margin-bottom: 1rem; }
+  .ff__cta {
+    display: inline-block;
+    margin-top: var(--space-lg);
+    background: var(--color-primary);
+    color: var(--color-secondary);
+    padding: 1rem 2.5rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Foreign Fund",
+  "class": "section-foreign-fund",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Foreign Resource" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Foreign Fund" },
+    { "type": "textarea", "id": "intro", "label": "Intro", "default": "Every order moves the world forward. A portion of every purchase goes to the Freedom Fund — helping people achieve pure and true freedom." },
+    { "type": "text", "id": "orders_count", "label": "Orders count", "default": "12,480" },
+    { "type": "text", "id": "orders_label", "label": "Orders label", "default": "Orders placed" },
+    { "type": "text", "id": "donated_amount", "label": "Donated amount", "default": "$62,400" },
+    { "type": "text", "id": "donated_label", "label": "Donated label", "default": "Donated to the Freedom Fund" },
+    { "type": "text", "id": "cause_title", "label": "Cause title", "default": "The Freedom Fund" },
+    { "type": "richtext", "id": "cause_text", "label": "Cause text", "default": "<p>We believe in freedom of movement, of choice, and of life. The Freedom Fund directs a share of every Foreign Resource order toward organizations fighting to free people from modern slavery and to help them build lives of true independence.</p>" },
+    { "type": "text", "id": "cta_text", "label": "CTA text", "default": "Learn more" },
+    { "type": "url", "id": "cta_link", "label": "CTA link" }
+  ],
+  "presets": [{ "name": "Foreign Fund" }]
+}
+{% endschema %}

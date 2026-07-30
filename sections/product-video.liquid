@@ -1,0 +1,134 @@
+{%- liquid
+  assign has_video = false
+  if section.settings.video_url != blank
+    assign has_video = true
+  endif
+-%}
+
+{%- if has_video or request.design_mode -%}
+<section class="product-video reveal">
+  <div class="{% if section.settings.full_width %}container--full{% else %}container{% endif %}">
+    <div class="product-video__wrapper" style="aspect-ratio: {{ section.settings.aspect_ratio }};">
+      {%- if section.settings.video_url != blank -%}
+        {%- if section.settings.video_url contains 'youtube' or section.settings.video_url contains 'youtu.be' -%}
+          {%- assign video_id = section.settings.video_url | split: 'v=' | last | split: '&' | first -%}
+          {%- if section.settings.video_url contains 'youtu.be' -%}
+            {%- assign video_id = section.settings.video_url | split: 'youtu.be/' | last | split: '?' | first -%}
+          {%- endif -%}
+          <iframe
+            src="https://www.youtube.com/embed/{{ video_id }}?rel=0{% if section.settings.autoplay %}&autoplay=1&mute=1{% endif %}"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            loading="lazy"
+            title="Product video"
+            class="product-video__iframe"
+          ></iframe>
+        {%- elsif section.settings.video_url contains 'vimeo' -%}
+          {%- assign vimeo_id = section.settings.video_url | split: 'vimeo.com/' | last | split: '?' | first -%}
+          <iframe
+            src="https://player.vimeo.com/video/{{ vimeo_id }}?{% if section.settings.autoplay %}autoplay=1&muted=1{% endif %}"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            loading="lazy"
+            title="Product video"
+            class="product-video__iframe"
+          ></iframe>
+        {%- else -%}
+          <video
+            class="product-video__element"
+            {% if section.settings.autoplay %}autoplay muted loop{% endif %}
+            playsinline
+            controls
+            {% if section.settings.poster != blank %}poster="{{ section.settings.poster | image_url: width: 1920 }}"{% endif %}
+          >
+            <source src="{{ section.settings.video_url }}" type="video/mp4">
+          </video>
+        {%- endif -%}
+      {%- else -%}
+        <div class="product-video__placeholder">
+          <p>Add a video URL to display product content</p>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+<style>
+  .product-video {
+    padding: var(--space-xl) 0;
+  }
+  .product-video__wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--color-primary);
+  }
+  .product-video__iframe,
+  .product-video__element {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+  }
+  .product-video__placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-white);
+    opacity: 0.5;
+    font-size: var(--text-sm);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Video",
+  "class": "section-product-video",
+  "settings": [
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL",
+      "info": "YouTube, Vimeo, or direct MP4 URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "poster",
+      "label": "Poster image (for MP4)"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay (muted)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        { "value": "16/9", "label": "16:9" },
+        { "value": "2.35/1", "label": "2.35:1 (Cinematic)" },
+        { "value": "4/3", "label": "4:3" }
+      ],
+      "default": "16/9"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Video"
+    }
+  ]
+}
+{% endschema %}

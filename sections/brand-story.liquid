@@ -1,0 +1,177 @@
+{%- liquid
+  assign layout = section.settings.layout | default: 'text-center'
+  assign bg_color = section.settings.bg_color
+-%}
+
+<section class="brand-story brand-story--{{ layout }} reveal" style="{% if bg_color != blank %}background-color: {{ bg_color }};{% endif %}">
+  <div class="container container--narrow">
+    <div class="brand-story__inner">
+      {%- if layout == 'text-left' or layout == 'text-right' -%}
+        {%- if section.settings.image != blank -%}
+          <div class="brand-story__image">
+            {%- render 'responsive-image', image: section.settings.image, sizes: '(max-width: 768px) 100vw, 50vw', max_width: 800 -%}
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+
+      <div class="brand-story__text">
+        {%- if section.settings.subheading != blank -%}
+          <p class="brand-story__subheading">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="brand-story__heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.text != blank -%}
+          <div class="brand-story__body">{{ section.settings.text }}</div>
+        {%- endif -%}
+        {%- if section.settings.cta_text != blank and section.settings.cta_link != blank -%}
+          <a href="{{ section.settings.cta_link }}" class="btn {{ section.settings.cta_style }}">
+            {{ section.settings.cta_text }}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- if layout == 'text-center' and section.settings.image != blank -%}
+        <div class="brand-story__image brand-story__image--below">
+          {%- render 'responsive-image', image: section.settings.image, sizes: '(max-width: 768px) 100vw, 60vw', max_width: 900 -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .brand-story {
+    padding: var(--space-section, clamp(5rem, 3rem + 6vw, 10rem)) 0;
+  }
+  .brand-story--text-center .brand-story__inner {
+    text-align: center;
+  }
+  .brand-story--text-left .brand-story__inner,
+  .brand-story--text-right .brand-story__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 1.5rem + 3vw, 5rem);
+    align-items: center;
+  }
+  .brand-story--text-right .brand-story__image {
+    order: 2;
+  }
+  @media (max-width: 768px) {
+    .brand-story--text-left .brand-story__inner,
+    .brand-story--text-right .brand-story__inner {
+      grid-template-columns: 1fr;
+    }
+    .brand-story--text-right .brand-story__image {
+      order: 0;
+    }
+  }
+  .brand-story__image img {
+    width: 100%;
+    height: auto;
+  }
+  .brand-story__image--below {
+    margin-top: clamp(2rem, 1.5rem + 3vw, 5rem);
+  }
+  .brand-story__subheading {
+    font-size: var(--text-xs);
+    font-weight: normal;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    margin-bottom: var(--space-sm);
+  }
+  .brand-story__heading {
+    font-size: var(--text-display, clamp(4rem, 2rem + 8vw, 10rem));
+    font-weight: normal;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    line-height: 0.9;
+    margin-bottom: var(--space-lg);
+  }
+  .brand-story__body {
+    font-size: var(--text-base);
+    line-height: 1.75;
+    color: var(--color-text-light);
+    margin-bottom: var(--space-lg);
+    max-width: 500px;
+  }
+  .brand-story--text-center .brand-story__body {
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Brand Story",
+  "class": "section-brand-story",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Our Story"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "To inspire global travel"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Body text",
+      "default": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "text-center", "label": "Text center" },
+        { "value": "text-left", "label": "Image left, text right" },
+        { "value": "text-right", "label": "Text left, image right" }
+      ],
+      "default": "text-center"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Our Mission"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "Button style",
+      "options": [
+        { "value": "btn--primary", "label": "Filled" },
+        { "value": "btn--secondary", "label": "Outlined" }
+      ],
+      "default": "btn--secondary"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story"
+    }
+  ]
+}
+{% endschema %}

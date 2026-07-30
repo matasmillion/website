@@ -1,0 +1,121 @@
+{%- comment -%}
+  Foreign Resource — "The Elements". An editorial page describing the brand's
+  7 elements (the actual "foreign resources"). Each element is a block.
+{%- endcomment -%}
+
+<section class="fr-el">
+  <div class="fr-el__hero">
+    {%- if section.settings.eyebrow != blank -%}<p class="fr-el__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+    {%- if section.settings.heading != blank -%}<h1 class="fr-el__title">{{ section.settings.heading }}</h1>{%- endif -%}
+    {%- if section.settings.intro != blank -%}<p class="fr-el__intro">{{ section.settings.intro }}</p>{%- endif -%}
+  </div>
+
+  <div class="fr-el__list">
+    {%- for block in section.blocks -%}
+      <article class="fr-el__item{% if forloop.index0 | modulo: 2 == 1 %} fr-el__item--rev{% endif %}" {{ block.shopify_attributes }}>
+        <div class="fr-el__media">
+          {%- if block.settings.image != blank -%}
+            <img
+              src="{{ block.settings.image | image_url: width: 1000 }}"
+              srcset="{{ block.settings.image | image_url: width: 600 }} 600w, {{ block.settings.image | image_url: width: 1000 }} 1000w"
+              sizes="(min-width: 769px) 45vw, 100vw"
+              alt="{{ block.settings.name | escape }}"
+              width="{{ block.settings.image.width }}"
+              height="{{ block.settings.image.height }}"
+              loading="lazy"
+              class="fr-el__img"
+            >
+          {%- else -%}
+            <div class="fr-el__ph"><span>{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span></div>
+          {%- endif -%}
+        </div>
+        <div class="fr-el__text">
+          <span class="fr-el__num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+          {%- if block.settings.symbol != blank -%}<span class="fr-el__symbol">{{ block.settings.symbol }}</span>{%- endif -%}
+          <h2 class="fr-el__name">{{ block.settings.name }}</h2>
+          {%- if block.settings.keyword != blank -%}<p class="fr-el__keyword">{{ block.settings.keyword }}</p>{%- endif -%}
+          {%- if block.settings.description != blank -%}<div class="fr-el__desc">{{ block.settings.description }}</div>{%- endif -%}
+        </div>
+      </article>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.footer_text != blank -%}
+    <div class="fr-el__footer">{{ section.settings.footer_text }}</div>
+  {%- endif -%}
+</section>
+
+<style>
+  .fr-el { padding: var(--space-2xl) 0 var(--space-section); }
+  .fr-el__hero { text-align: center; max-width: 760px; margin: 0 auto var(--space-3xl); padding: 0 1.25rem; }
+  .fr-el__eyebrow { font-size: var(--text-xs); letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-light); margin-bottom: var(--space-md); }
+  .fr-el__title { font-family: var(--font-heading); font-size: clamp(3rem, 1.5rem + 6vw, 7rem); font-weight: var(--font-weight-medium); text-transform: uppercase; line-height: 0.95; margin-bottom: var(--space-lg); }
+  .fr-el__intro { font-size: var(--text-base); line-height: 1.8; color: var(--color-text-light); }
+
+  .fr-el__list { display: flex; flex-direction: column; gap: clamp(3rem, 2rem + 5vw, 7rem); }
+  .fr-el__item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    align-items: center;
+    padding: 0 clamp(1.25rem, 0.5rem + 4vw, 6rem);
+  }
+  @media (min-width: 769px) {
+    .fr-el__item { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 1rem + 4vw, 5rem); }
+    .fr-el__item--rev .fr-el__media { order: 2; }
+  }
+  .fr-el__media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: #E4DED2; }
+  .fr-el__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .fr-el__ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .fr-el__ph span { font-family: var(--font-heading); font-size: clamp(4rem, 8vw, 9rem); color: var(--color-primary); opacity: 0.12; }
+
+  .fr-el__num { display: inline-block; font-family: 'Helvetica Neue', Inter, sans-serif; font-size: var(--text-xs); letter-spacing: 0.2em; color: var(--color-text-light); margin-bottom: 0.75rem; }
+  .fr-el__symbol { display: inline-block; margin-left: 0.75rem; font-size: var(--text-xs); letter-spacing: 0.2em; color: var(--color-text-light); }
+  .fr-el__name { font-family: var(--font-heading); font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem); font-weight: var(--font-weight-medium); text-transform: uppercase; line-height: 1; margin-bottom: 0.5rem; }
+  .fr-el__keyword { font-size: var(--text-sm); letter-spacing: 0.05em; color: var(--color-text-light); text-transform: uppercase; margin-bottom: var(--space-md); }
+  .fr-el__desc { font-size: var(--text-base); line-height: 1.85; color: var(--color-primary); }
+  .fr-el__desc p { margin-bottom: 1rem; }
+
+  .fr-el__footer { max-width: 620px; margin: var(--space-3xl) auto 0; text-align: center; padding: 0 1.25rem; font-family: var(--font-heading); font-size: var(--text-2xl); line-height: 1.4; color: var(--color-primary); }
+</style>
+
+{% schema %}
+{
+  "name": "Foreign Resource Elements",
+  "class": "section-foreign-resource",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Elements" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Foreign Resource" },
+    { "type": "textarea", "id": "intro", "label": "Intro", "default": "Seven elements define everything we make. Each is a resource for the modern explorer — considered, essential, and built to move with you." },
+    { "type": "richtext", "id": "footer_text", "label": "Closing line", "default": "<p>Seven elements. One resource.</p>" }
+  ],
+  "blocks": [
+    {
+      "type": "element",
+      "name": "Element",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "symbol", "label": "Symbol (optional)" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Element" },
+        { "type": "text", "id": "keyword", "label": "Keyword (optional)" },
+        { "type": "richtext", "id": "description", "label": "Description", "default": "<p>Describe this element and why it matters.</p>" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Foreign Resource Elements",
+      "blocks": [
+        { "type": "element", "settings": { "name": "Element One" } },
+        { "type": "element", "settings": { "name": "Element Two" } },
+        { "type": "element", "settings": { "name": "Element Three" } },
+        { "type": "element", "settings": { "name": "Element Four" } },
+        { "type": "element", "settings": { "name": "Element Five" } },
+        { "type": "element", "settings": { "name": "Element Six" } },
+        { "type": "element", "settings": { "name": "Element Seven" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

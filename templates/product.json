@@ -1,0 +1,269 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "product_info": {
+      "type": "product-info",
+      "blocks": {
+        "row_fabric": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Fabric",
+            "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
+            "swatches": "",
+            "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
+            "link_label": "",
+            "link_url": ""
+          }
+        },
+        "row_color": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Colour",
+            "content": "<p>Six elemental colours we build everything around, chosen to work with each other — so anything you own layers with anything else, wherever you happen to be that morning.</p>",
+            "swatches": "Slate|#4A4E54|The cool grey of wet stone. The anchor of the wardrobe.\nSalt|#F2EFE9|Undyed, unbleached off-white. Reads clean against everything.\nSand|#D4C5A9|Warm neutral pulled from dry coastline. Softens a dark fit.\nSea|#3B5566|Deep and muted, closer to deep water than to navy.\nSoil|#6B5744|Earth brown. Grounds a look without going black.\nSakura|#D9B3B3|The one signal colour. Used sparingly, on purpose.",
+            "link_label": "Explore the Colour Codex",
+            "link_url": "/pages/color-codex"
+          }
+        },
+        "row_packaging": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Packaging",
+            "content": "<p>Arrives in a rigid box worth keeping, wrapped in biodegradable paper with paper tape. No plastic — it breaks down instead of lingering.</p>",
+            "swatches": "",
+            "link_label": "More on our packaging",
+            "link_url": "/pages/packaging"
+          }
+        },
+        "smartsize_smartsize_sizechart_azcYpH": {
+          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
+          "settings": {
+            "style_source": "customize",
+            "button_label": "SIZE GUIDE",
+            "button_style": "link",
+            "button_icon": "sizenone",
+            "button_color": "#2d2c2f",
+            "button_background_color": "",
+            "button_corner_radius_px": 0,
+            "button_margin_top_px": 0,
+            "button_margin_right_px": 0,
+            "button_margin_bottom_px": 0,
+            "button_margin_left_px": 0,
+            "button_alignment": "center",
+            "button_alignment_mobile": "center",
+            "display_mode": "combined"
+          }
+        }
+      },
+      "block_order": [
+        "row_fabric",
+        "row_color",
+        "row_packaging",
+        "smartsize_smartsize_sizechart_azcYpH"
+      ],
+      "settings": {
+        "show_short_description": false,
+        "show_appointment_link": false,
+        "appointment_link": "",
+        "delivery_text": "Order today for delivery within 5 business days",
+        "size_calculator_url": "",
+        "desktop_image_fit": "cover",
+        "desktop_focal_y": "upper",
+        "show_payment_terms": false,
+        "low_stock_threshold": 5,
+        "installments_url": "",
+        "hide_shop_promise": true,
+        "standard_min": 3,
+        "standard_max": 5,
+        "express_min": 1,
+        "express_max": 2,
+        "cutoff_hour": 14,
+        "size_chart_content": ""
+      }
+    },
+    "guarantees": {
+      "type": "product-guarantees",
+      "blocks": {
+        "guarantee_returns": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "returns",
+            "text": "Free Returns & Exchanges"
+          }
+        },
+        "guarantee_delivery": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "clock",
+            "text": "5-Day Delivery Guarantee"
+          }
+        },
+        "guarantee_shipping": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "shipping",
+            "text": "Complimentary Express Over $150"
+          }
+        }
+      },
+      "block_order": [
+        "guarantee_returns",
+        "guarantee_delivery",
+        "guarantee_shipping"
+      ],
+      "disabled": true,
+      "settings": {}
+    },
+    "engineering": {
+      "type": "fr-engineering",
+      "blocks": {
+        "card_mCKrBc": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/FW25AL006_CRESCENTSHOULDERBAG_JETBLACK-ESPRESSO_1_3200x_5dfaf4fd-b26d-47b1-803e-8e053a59c7cd.webp",
+            "title": "Embroidered belt loop",
+            "subtitle": "The details that matter.",
+            "text_position": "bottom-left"
+          }
+        },
+        "card_1": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/bagfix_open_v1.jpg",
+            "title": "Embroidered belt loop",
+            "subtitle": "The details that matter.",
+            "text_position": "bottom-left"
+          }
+        },
+        "card_2": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/4x5_FW24D1_ACC_FW24FD002_SCARLET_1204_3200x_0a20c05e-143d-4250-9083-6eb9b54514b6.webp",
+            "title": "Branded zipper puller",
+            "subtitle": "A little bling never hurt.",
+            "text_position": "bottom-left"
+          }
+        },
+        "card_3": {
+          "type": "card",
+          "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-07-24_at_9.34.40_PM.png",
+            "title": "Zip-off shorts",
+            "subtitle": "Any weather, any time.",
+            "text_position": "bottom-left"
+          }
+        }
+      },
+      "block_order": [
+        "card_mCKrBc",
+        "card_1",
+        "card_2",
+        "card_3"
+      ],
+      "settings": {
+        "label": "Foreign Engineering"
+      }
+    },
+    "complete_the_look": {
+      "type": "product-complete-the-look",
+      "settings": {
+        "heading": "Complete the look",
+        "lookbook_ratio_mobile": "3/4",
+        "lookbook_ratio_desktop": "4/5"
+      }
+    },
+    "ugc": {
+      "type": "product-ugc",
+      "blocks": {
+        "person_1": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_2": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_3": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        }
+      },
+      "block_order": [
+        "person_1",
+        "person_2",
+        "person_3"
+      ],
+      "settings": {
+        "heading": "See others wear em'"
+      }
+    },
+    "reviews": {
+      "type": "product-reviews-container",
+      "settings": {
+        "heading": "Reviews",
+        "provider": "klaviyo"
+      }
+    },
+    "brand_story_GAGwDD": {
+      "type": "brand-story",
+      "disabled": true,
+      "name": "Brand Story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
+      }
+    },
+    "1785308970a4db4de4": {
+      "type": "apps",
+      "blocks": {
+        "klaviyo_reviews_product_reviews_YtPaQF": {
+          "type": "shopify://apps/klaviyo-reviews/blocks/product-reviews/db20e365-d984-4ac4-9655-e1588d951ca9",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "klaviyo_reviews_product_reviews_YtPaQF"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "product_info",
+    "guarantees",
+    "engineering",
+    "complete_the_look",
+    "ugc",
+    "reviews",
+    "brand_story_GAGwDD",
+    "1785308970a4db4de4"
+  ]
+}

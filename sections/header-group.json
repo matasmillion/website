@@ -1,0 +1,60 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "Header Group",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "message_DBEn3X": {
+          "type": "message",
+          "settings": {
+            "text": "Complimentary shipping on orders over $150",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "message_DBEn3X"
+      ],
+      "settings": {
+        "show_announcement": false,
+        "transparent": true,
+        "rotate_speed": 3,
+        "text": "Complimentary shipping on orders over $150",
+        "bg_color": "#000000",
+        "text_color": "#f5f0eb"
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "menu": "menu-2-0",
+        "shop_label": "Shop",
+        "show_foreign_resource": false,
+        "foreign_resource_label": "Foreign Resource",
+        "foreign_resource_link": "shopify://pages/foreign-resource",
+        "show_foreign_world": false,
+        "foreign_world_label": "Foreign World",
+        "foreign_world_link": "shopify://pages/foreign-world",
+        "show_foreign_fund": false,
+        "foreign_fund_label": "Foreign Fund",
+        "foreign_fund_link": "shopify://pages/foreign-fund",
+        "sticky_header": true,
+        "transparent_header": true
+      }
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
+}

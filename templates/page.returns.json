@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Returns & Exchanges",
+        "text": "<p>We want you to be completely satisfied with your purchase. If something does not fit or feel right, our returns and exchanges process is simple and straightforward. Review our policy below to learn about eligibility, timelines, and how to initiate a return. We stand behind our products and are here to make it right.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

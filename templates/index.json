@@ -1,0 +1,183 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "story_1": {
+      "type": "collection-story",
+      "blocks": {
+        "hero_image_6zkkeR": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/IMG_0419.jpg",
+            "aspect_ratio": "9:16",
+            "video": "",
+            "label": "",
+            "link": ""
+          }
+        },
+        "hero_1a": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/IMG_0421.jpg",
+            "aspect_ratio": "9:16",
+            "video": "",
+            "label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "hero_image_6zkkeR",
+        "hero_1a"
+      ],
+      "settings": {
+        "collection": "on-sale",
+        "products_count": 4
+      }
+    },
+    "story_2": {
+      "type": "collection-story",
+      "blocks": {
+        "hero_2a": {
+          "type": "hero_image",
+          "settings": {
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "Women New In",
+            "link": ""
+          }
+        },
+        "hero_2b": {
+          "type": "hero_image",
+          "settings": {
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "Men New In",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "hero_2a",
+        "hero_2b"
+      ],
+      "disabled": true,
+      "settings": {
+        "collection": "",
+        "products_count": 4
+      }
+    },
+    "story_3": {
+      "type": "collection-story",
+      "blocks": {
+        "hero_3a": {
+          "type": "hero_image",
+          "settings": {
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "Les Classiques",
+            "link": ""
+          }
+        },
+        "hero_3b": {
+          "type": "hero_image",
+          "settings": {
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "The Féfé",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "hero_3a",
+        "hero_3b"
+      ],
+      "disabled": true,
+      "settings": {
+        "collection": "",
+        "products_count": 4
+      }
+    },
+    "story_4": {
+      "type": "collection-story",
+      "blocks": {
+        "hero_image_UUPEm4": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/CN_7_36d2a39f-37c7-4a73-b8a5-6d9b09fc8cd2.jpg",
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "",
+            "link": ""
+          }
+        },
+        "hero_4a": {
+          "type": "hero_image",
+          "settings": {
+            "image": "shopify://shop_images/CN_3.jpg",
+            "aspect_ratio": "2:3",
+            "video": "",
+            "label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "hero_image_UUPEm4",
+        "hero_4a"
+      ],
+      "settings": {
+        "collection": "best-sellers",
+        "products_count": 4
+      }
+    },
+    "info_bar": {
+      "type": "info-bar",
+      "blocks": {
+        "info_1": {
+          "type": "info_item",
+          "settings": {
+            "title": "Complimentary shipping",
+            "text": "Free express shipping on orders over $150."
+          }
+        },
+        "info_2": {
+          "type": "info_item",
+          "settings": {
+            "title": "Free returns & exchanges",
+            "text": "Easy returns within 30 days, no questions asked."
+          }
+        },
+        "info_3": {
+          "type": "info_item",
+          "settings": {
+            "title": "Secure payment",
+            "text": "Visa, Mastercard, PayPal, Apple Pay, and more."
+          }
+        }
+      },
+      "block_order": [
+        "info_1",
+        "info_2",
+        "info_3"
+      ],
+      "disabled": true,
+      "settings": {}
+    }
+  },
+  "order": [
+    "story_1",
+    "story_2",
+    "story_3",
+    "story_4",
+    "info_bar"
+  ]
+}

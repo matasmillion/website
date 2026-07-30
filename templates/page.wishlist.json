@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "wishlist-page",
+      "settings": {
+        "heading": "Saved Items",
+        "empty_text": "You haven't saved any items yet.",
+        "empty_cta": "Explore the Collection"
+      }
+    }
+  },
+  "order": ["main"]
+}

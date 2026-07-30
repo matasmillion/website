@@ -1,0 +1,95 @@
+{{ 'component-collection.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+  assign show_hero = section.settings.show_hero
+-%}
+
+{%- if show_hero -%}
+  <section class="collection-hero reveal">
+    {%- if section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | image_url: width: 1920 }}"
+        srcset="{{ section.settings.image | image_url: width: 1000 }} 1000w,
+                {{ section.settings.image | image_url: width: 1400 }} 1400w,
+                {{ section.settings.image | image_url: width: 1920 }} 1920w"
+        sizes="100vw"
+        alt="{{ collection.title | escape }}"
+        width="{{ section.settings.image.width }}"
+        height="{{ section.settings.image.height }}"
+        loading="eager"
+        class="collection-hero__image"
+      >
+    {%- else -%}
+      <div class="collection-hero__image" style="background-color: var(--color-supporting-sand);"></div>
+    {%- endif -%}
+    <div class="collection-hero__overlay" style="background: rgba(0,0,0,{{ overlay_opacity }})"></div>
+    <div class="collection-hero__content" style="text-align: {{ section.settings.text_position }};">
+      <h1 class="collection-hero__title">
+        {{ section.settings.heading | default: collection.title }}
+      </h1>
+      {%- if section.settings.subtext != blank -%}
+        <p class="collection-hero__description">{{ section.settings.subtext }}</p>
+      {%- elsif collection.description != blank and section.settings.show_description -%}
+        <p class="collection-hero__description">{{ collection.description | strip_html | truncate: 200 }}</p>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Collection Hero",
+  "class": "section-collection-hero",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_hero",
+      "label": "Show collection hero",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (leave blank to use collection title)"
+    },
+    {
+      "type": "text",
+      "id": "subtext",
+      "label": "Subtext"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description as subtext",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay darkness (%)",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "default": 30,
+      "unit": "%"
+    }
+  ]
+}
+{% endschema %}

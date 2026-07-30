@@ -1,0 +1,60 @@
+{%- comment -%}
+  Generic placeholder section for Phase 2 pages.
+  Each page template uses this with configurable content.
+{%- endcomment -%}
+
+<section class="placeholder-section">
+  <div class="container container--narrow">
+    {%- if section.settings.heading != blank -%}
+      <h1 class="placeholder-section__heading">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+    {%- if section.settings.text != blank -%}
+      <div class="placeholder-section__text">{{ section.settings.text }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+<style>
+  .placeholder-section {
+    padding: var(--space-3xl) 0;
+    text-align: center;
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+  }
+  .placeholder-section__heading {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-md);
+  }
+  .placeholder-section__text {
+    font-size: var(--text-lg);
+    color: var(--color-text-light);
+    line-height: 1.7;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Placeholder Section",
+  "class": "section-placeholder",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Coming Soon"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>This page is under construction. Check back soon for updates.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Placeholder Section"
+    }
+  ]
+}
+{% endschema %}

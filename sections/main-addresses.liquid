@@ -1,0 +1,124 @@
+{{ 'component-customer.css' | asset_url | stylesheet_tag }}
+
+<section class="customer customer--wide">
+  <div class="customer__header-row">
+    <h1 class="customer__title">{{ 'customer.addresses.title' | t }}</h1>
+    <a href="{{ routes.account_url }}" class="customer__link">{{ 'customer.order.back' | t }}</a>
+  </div>
+
+  <div class="customer__actions" style="max-width: 320px;">
+    <button type="button" class="btn btn--primary btn--full" data-address-toggle="AddressNew">
+      {{ 'customer.addresses.add_new' | t }}
+    </button>
+  </div>
+
+  {%- comment -%} New address form {% endcomment -%}
+  <div class="customer__address-form" id="AddressNew" hidden>
+    {%- form 'customer_address', customer.new_address, class: 'customer__form' -%}
+      <h2 class="customer__section-heading" style="margin-top: 0;">{{ 'customer.addresses.add_new' | t }}</h2>
+      {%- render 'customer-address-fields', form: form, id_prefix: 'New' -%}
+      <div class="customer__actions">
+        <button type="submit" class="btn btn--primary btn--full">{{ 'customer.addresses.save' | t }}</button>
+        <button type="button" class="btn btn--secondary btn--full" data-address-toggle="AddressNew">{{ 'customer.addresses.cancel' | t }}</button>
+      </div>
+    {%- endform -%}
+  </div>
+
+  {%- paginate customer.addresses by 6 -%}
+    {%- if customer.addresses.size > 0 -%}
+      <div class="customer__addresses" style="margin-top: var(--space-lg);">
+        {%- for address in customer.addresses -%}
+          <div class="customer__address-card">
+            {%- if address == customer.default_address -%}
+              <h3>{{ 'customer.addresses.default' | t }}</h3>
+            {%- endif -%}
+            {{ address | format_address }}
+            <div class="customer__address-actions">
+              <button type="button" data-address-toggle="AddressEdit_{{ address.id }}">{{ 'customer.addresses.edit' | t }}</button>
+              <form method="post" action="{{ routes.account_addresses_url }}/{{ address.id }}" onsubmit="return confirm('{{ 'customer.addresses.delete_confirm' | t }}');">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit">{{ 'customer.addresses.delete' | t }}</button>
+              </form>
+            </div>
+
+            <div class="customer__address-form" id="AddressEdit_{{ address.id }}" hidden>
+              {%- form 'customer_address', address, class: 'customer__form' -%}
+                {%- assign id_prefix = 'Edit_' | append: address.id -%}
+                {%- render 'customer-address-fields', form: form, id_prefix: id_prefix -%}
+                <div class="customer__actions">
+                  <button type="submit" class="btn btn--primary btn--full">{{ 'customer.addresses.save' | t }}</button>
+                  <button type="button" class="btn btn--secondary btn--full" data-address-toggle="AddressEdit_{{ address.id }}">{{ 'customer.addresses.cancel' | t }}</button>
+                </div>
+              {%- endform -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+      {%- if paginate.pages > 1 -%}
+        <div class="customer__links" style="flex-direction: row; justify-content: center; gap: 1.5rem;">
+          {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}">{{ 'accessibility.previous' | t }}</a>{%- endif -%}
+          {%- if paginate.next -%}<a href="{{ paginate.next.url }}">{{ 'accessibility.next' | t }}</a>{%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- else -%}
+      <p class="customer__empty">{{ 'customer.addresses.none' | t }}</p>
+    {%- endif -%}
+  {%- endpaginate -%}
+</section>
+
+<script>
+  (function () {
+    document.querySelectorAll('[data-address-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = document.getElementById(btn.getAttribute('data-address-toggle'));
+        if (target) target.hidden = !target.hidden;
+      });
+    });
+
+    // Populate province select from the selected country option's data-provinces
+    document.querySelectorAll('[data-address-country]').forEach(function (countrySelect) {
+      var provinceWrap = document.getElementById(countrySelect.getAttribute('data-province-wrap'));
+      var provinceSelect = provinceWrap && provinceWrap.querySelector('select');
+      if (!provinceSelect) return;
+
+      var update = function () {
+        var option = countrySelect.options[countrySelect.selectedIndex];
+        var provinces = [];
+        try { provinces = JSON.parse(option.getAttribute('data-provinces') || '[]'); } catch (e) {}
+        provinceSelect.innerHTML = '';
+        if (!provinces.length) {
+          provinceWrap.hidden = true;
+          return;
+        }
+        provinces.forEach(function (p) {
+          var opt = document.createElement('option');
+          opt.value = p[0];
+          opt.textContent = p[1];
+          if (p[0] === provinceSelect.getAttribute('data-selected')) opt.selected = true;
+          provinceSelect.appendChild(opt);
+        });
+        provinceWrap.hidden = false;
+      };
+
+      countrySelect.addEventListener('change', update);
+
+      // Initialise with the saved country selected
+      var saved = countrySelect.getAttribute('data-selected');
+      if (saved) {
+        for (var i = 0; i < countrySelect.options.length; i++) {
+          if (countrySelect.options[i].value === saved) { countrySelect.selectedIndex = i; break; }
+        }
+      }
+      update();
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Customer Addresses",
+  "class": "section-customer-addresses",
+  "settings": []
+}
+{% endschema %}

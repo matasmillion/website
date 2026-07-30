@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "placeholder-section",
+      "settings": {
+        "heading": "Early Access",
+        "text": "<p>Be the first to know. Join our Early Access list and get priority entry to new drops, limited editions, and exclusive collaborations before they go live. As part of the inner circle, you will also receive behind-the-scenes updates, travel stories, and invitations to community events. Enter your email below and stay ahead of the crowd.</p>"
+      }
+    }
+  },
+  "order": ["main"]
+}

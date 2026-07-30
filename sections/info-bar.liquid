@@ -1,0 +1,82 @@
+<section class="info-bar">
+  <div class="info-bar__inner">
+    {%- for block in section.blocks -%}
+      <div class="info-bar__item" {{ block.shopify_attributes }}>
+        <h3 class="info-bar__title">{{ block.settings.title }}</h3>
+        {%- if block.settings.text != blank -%}
+          <p class="info-bar__text">{{ block.settings.text }}</p>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+  .info-bar {
+    border-top: 1px solid rgba(10, 10, 10, 0.08);
+    border-bottom: 1px solid rgba(10, 10, 10, 0.08);
+    padding: var(--space-xl) 0;
+  }
+  .info-bar__inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 1rem + 2vw, 3rem);
+    text-align: center;
+  }
+  .info-bar__title {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+  .info-bar__text {
+    font-size: var(--text-sm);
+    color: var(--color-text-light);
+    line-height: 1.5;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Info Bar",
+  "class": "section-info-bar",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "info_item",
+      "name": "Info Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Free shipping and returns"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description",
+          "default": "Free delivery and easy returns within 14 days."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Info Bar",
+      "blocks": [
+        { "type": "info_item", "settings": { "title": "Complimentary shipping", "text": "Free express shipping on orders over $150." } },
+        { "type": "info_item", "settings": { "title": "Free returns & exchanges", "text": "Easy returns within 30 days, no questions asked." } },
+        { "type": "info_item", "settings": { "title": "Secure payment", "text": "Visa, Mastercard, PayPal, Apple Pay, and more." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

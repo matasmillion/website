@@ -1,0 +1,117 @@
+{%- comment -%}
+  PDP — FOREIGN ENGINEERING.
+
+  Full-bleed image cards carrying their own overlay copy. Visual-first by
+  design: the detail is shown, not described with icons.
+
+  Mobile  — horizontal snap carousel, one card per screen.
+  Desktop — all cards flush side by side, edge to edge, no gutters.
+
+  The "FOREIGN ENGINEERING" label appears on the FIRST card only.
+
+  Cards are blocks now; a later pass swaps the source to product metafields
+  without changing this markup.
+{%- endcomment -%}
+
+{%- liquid
+  assign cards = section.blocks | where: 'type', 'card'
+  assign filled = 0
+  for block in cards
+    if block.settings.image != blank
+      assign filled = filled | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if filled > 0 -%}
+  {{ 'component-fr-engineering.css' | asset_url | stylesheet_tag }}
+
+  <section class="fre reveal">
+    <div class="fre__track" data-fre-track>
+      {%- assign card_i = 0 -%}
+      {%- for block in cards -%}
+        {%- comment -%} A card with no image would render an empty flex child {%- endcomment -%}
+        {%- if block.settings.image == blank -%}{%- continue -%}{%- endif -%}
+
+        <article
+          class="fre__card fre__card--{{ block.settings.text_position | default: 'bottom-left' }}"
+          {{ block.shopify_attributes }}
+        >
+          <img
+            class="fre__img"
+            src="{{ block.settings.image | image_url: width: 1400 }}"
+            srcset="{{ block.settings.image | image_url: width: 700 }} 700w,
+                    {{ block.settings.image | image_url: width: 1400 }} 1400w"
+            sizes="(min-width: 769px) 26vw, 86vw"
+            alt="{{ block.settings.title | default: section.settings.label | escape }}"
+            width="{{ block.settings.image.width }}"
+            height="{{ block.settings.image.height }}"
+            loading="lazy"
+          >
+
+          {%- if card_i == 0 and section.settings.label != blank -%}
+            <span class="fre__label">{{ section.settings.label }}</span>
+          {%- endif -%}
+
+          {%- if block.settings.title != blank or block.settings.subtitle != blank -%}
+            <div class="fre__copy">
+              {%- if block.settings.title != blank -%}
+                <h3 class="fre__title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.subtitle != blank -%}
+                <p class="fre__subtitle">{{ block.settings.subtitle }}</p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </article>
+
+        {%- assign card_i = card_i | plus: 1 -%}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Foreign Engineering",
+  "class": "section-fr-engineering",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label (first card only)",
+      "default": "Foreign Engineering"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Embroidered belt loop" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "The details that matter." },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Text position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top centre" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "middle-left", "label": "Middle left" },
+            { "value": "middle-center", "label": "Middle centre" },
+            { "value": "middle-right", "label": "Middle right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom centre" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "bottom-left"
+        }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Foreign Engineering" }]
+}
+{% endschema %}

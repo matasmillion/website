@@ -1,0 +1,92 @@
+{{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+
+<section class="product-recs reveal" data-product-recommendations>
+  <div class="container">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="product-recs__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div class="product-recs__grid">
+      {%- if recommendations.performed -%}
+        {%- if recommendations.products_count > 0 -%}
+          {%- for product in recommendations.products limit: section.settings.products_count -%}
+            <div class="product-recs__item">
+              {%- render 'product-card', product: product -%}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="product-recs__item">
+            <article class="product-card">
+              <div class="product-card__image-wrapper product-card__image-wrapper--portrait">
+                <div class="product-card__placeholder">
+                  {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder-svg' }}
+                </div>
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">Recommendation {{ i }}</h3>
+                <div class="product-card__price">{{ 8500 | money }}</div>
+              </div>
+            </article>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  .product-recs {
+    padding: var(--space-2xl) 0;
+    border-top: var(--border-thin);
+  }
+  .product-recs__heading {
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+  }
+  .product-recs__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--grid-gap);
+  }
+  @media (max-width: 1024px) {
+    .product-recs__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .product-recs__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Recommendations",
+  "class": "section-product-recs",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "You May Also Like"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "Number of products",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Recommendations"
+    }
+  ]
+}
+{% endschema %}
