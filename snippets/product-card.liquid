@@ -4,21 +4,25 @@
   Layout (over the image):
     - tag        : top-left      — show_badge
     - colors     : top-right
-    - name       : bottom-left   — always shown
+    - name       : bottom-left   — show_title
     - price      : bottom-right  — show_price
     - heart      : below price   — show_wishlist
   Mobile: info always visible. Desktop: revealed on hover.
 
   HOMEPAGE RULE — the homepage displays products, it does not sell them.
-  Homepage sections must render a name-only card:
+  Homepage cards are the IMAGE ONLY. No name, no price, no badge, no heart:
 
-    {% render 'product-card', product: product, show_price: false, show_wishlist: false, show_badge: false %}
+    {% render 'product-card', product: product, show_title: false, show_price: false, show_wishlist: false, show_badge: false %}
 
-  Price belongs on the collection page and the PDP, which use the defaults.
+  With all four off the info block is not rendered at all. The product is still
+  reachable and accessible — the image link carries aria-label="{{ product.title }}".
+
+  Names and prices belong on the collection page and the PDP, which use the defaults.
 
   Accepts:
     product              (required)
     context              'overlay' (default) | 'below'
+    show_title           default true
     show_price           default true
     show_wishlist        default true
     show_badge           default true
@@ -34,6 +38,9 @@
 
   # Explicit nil checks. The `default` filter treats false as "missing", so
   # `show_price | default: true` would silently switch the price back on.
+  if show_title == nil
+    assign show_title = true
+  endif
   if show_price == nil
     assign show_price = true
   endif
@@ -44,9 +51,15 @@
     assign show_badge = true
   endif
 
+  # show_meta drives the grid layout; show_info decides whether the block exists.
   assign show_meta = false
   if show_price or show_wishlist
     assign show_meta = true
+  endif
+
+  assign show_info = false
+  if show_title or show_meta
+    assign show_info = true
   endif
 -%}
 {%- comment -%} Badge logic is shared with the PDP gallery {%- endcomment -%}
@@ -133,30 +146,34 @@
     </div>
   </a>
 
-  {%- comment -%} Info overlay — name (BL) + optional price/heart (BR) {% endcomment -%}
-  <div class="product-card__info{% unless show_meta %} product-card__info--name-only{% endunless %}">
-    <a href="{{ product.url }}" class="product-card__title-link">
-      <h3 class="product-card__title">{{ product.title }}</h3>
-    </a>
-    {%- if show_price -%}
-      <span class="product-card__price">
-        {%- if product.compare_at_price > product.price -%}
-          <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
-          <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
-        {%- else -%}
-          {{ product.price | money_without_trailing_zeros }}
-        {%- endif -%}
-      </span>
-    {%- endif -%}
-    {%- if show_wishlist -%}
-      <button
-        class="product-card__wishlist"
-        data-wishlist-toggle="{{ product.handle }}"
-        aria-label="Save {{ product.title }}"
-        aria-pressed="false"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
-    {%- endif -%}
-  </div>
+  {%- comment -%} Info overlay — omitted entirely for image-only homepage cards {% endcomment -%}
+  {%- if show_info -%}
+    <div class="product-card__info{% unless show_meta %} product-card__info--name-only{% endunless %}">
+      {%- if show_title -%}
+        <a href="{{ product.url }}" class="product-card__title-link">
+          <h3 class="product-card__title">{{ product.title }}</h3>
+        </a>
+      {%- endif -%}
+      {%- if show_price -%}
+        <span class="product-card__price">
+          {%- if product.compare_at_price > product.price -%}
+            <s class="product-card__price-compare">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+            <span class="product-card__price-sale">{{ product.price | money_without_trailing_zeros }}</span>
+          {%- else -%}
+            {{ product.price | money_without_trailing_zeros }}
+          {%- endif -%}
+        </span>
+      {%- endif -%}
+      {%- if show_wishlist -%}
+        <button
+          class="product-card__wishlist"
+          data-wishlist-toggle="{{ product.handle }}"
+          aria-label="Save {{ product.title }}"
+          aria-pressed="false"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
 </article>
