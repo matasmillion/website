@@ -23,7 +23,7 @@ Analyze their HTML structure, CSS approach, layout patterns, typography scale, s
 
 3. **Simplicity-first approach.** When in doubt, remove. Aspirational brands sell through desire, not through information overload. Every element on the page must earn its place.
 
-4. **NO PRICES ON THE HOMEPAGE. Ever.** Any product shown on the homepage displays image + product name only. No price, no compare-at price, no sale price, no "was/now", no discount percentage, no sale badge, no wishlist heart, no quick-add button. The homepage exists to display the product, not to sell it — pricing belongs on the collection page and the PDP. This is not a configurable setting the founder can toggle on; the homepage product card must be built without a price element at all. Any shared `product-card.liquid` snippet must take a `show_price` parameter that every homepage section passes as `false`.
+4. **HOMEPAGE PRODUCT CARDS ARE THE IMAGE ONLY.** No product name, no price, no compare-at price, no sale price, no "was/now", no discount percentage, no sale badge, no wishlist heart, no quick-add button — no text of any kind on the card. The homepage exists to display the product, not to sell it. Names and prices belong on the collection page and the PDP. This is not a setting the founder can toggle on. The shared `product-card.liquid` snippet takes `show_title`, `show_price`, `show_wishlist` and `show_badge` (all defaulting to `true`), and every homepage section passes all four as `false` — which makes the snippet omit the info block entirely. Gate them with explicit `if x == nil` checks, never `| default: true`: Liquid's `default` filter treats `false` as missing and would silently switch the elements back on.
 
 ## BRAND IDENTITY
 
@@ -107,7 +107,7 @@ Build these sections (all as Online Store 2.0 sections with configurable blocks)
 
 **g. Featured Products Carousel**
 - Horizontal scrolling product cards
-- Minimal card design: image + product name. Nothing else. **NO PRICE** — see Critical Requirement 4. Render via `{% render 'product-card', product: product, show_price: false %}`
+- Minimal card design: **the image only** — no name, no price. See Critical Requirement 4. Render via `{% render 'product-card', product: product, show_title: false, show_price: false, show_wishlist: false, show_badge: false %}`
 - Smooth scroll/drag behavior on desktop and mobile
 - Configurable: which collection to pull from, number of products
 - Design: clean, airy. Product images do the talking.
