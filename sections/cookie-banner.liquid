@@ -1,0 +1,263 @@
+{{ 'component-cookie-banner.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+  assign position = s.position | default: 'bottom'
+  assign action_style = s.action_style | default: 'buttons'
+
+  # Falls back to the store's own privacy policy so the link works untouched.
+  assign policy_url = s.policy_link | default: shop.privacy_policy.url
+-%}
+
+{%- if s.enabled -%}
+  <div
+    class="cookie-banner cookie-banner--{{ position }} cookie-banner--{{ action_style }}"
+    style="--cookie-bg: {{ s.bg_color }}; --cookie-text: {{ s.text_color }}; --cookie-border: {{ s.border_color }};"
+    data-cookie-banner
+    data-scope="{{ s.display_scope }}"
+    role="region"
+    aria-label="{{ s.aria_label | default: 'Cookie consent' }}"
+    hidden
+  >
+    <div class="cookie-banner__inner">
+      <p class="cookie-banner__text">
+        {{ s.message }}
+        {%- if s.show_policy_link and policy_url != blank -%}
+          <a href="{{ policy_url }}" class="cookie-banner__policy">{{ s.policy_link_text }}</a>
+        {%- endif -%}
+      </p>
+
+      <div class="cookie-banner__actions">
+        <button type="button" class="cookie-banner__btn cookie-banner__btn--accept" data-cookie-accept>
+          {{ s.accept_text }}
+        </button>
+        {%- if s.separator_text != blank -%}
+          <span class="cookie-banner__sep" aria-hidden="true">{{ s.separator_text }}</span>
+        {%- endif -%}
+        <button type="button" class="cookie-banner__btn cookie-banner__btn--decline" data-cookie-decline>
+          {{ s.decline_text }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var el = document.querySelector('[data-cookie-banner]');
+      if (!el) return;
+
+      var FALLBACK_KEY = 'fr:cookie-consent';
+      var HIDE_MS = 400; /* matches --duration-slow */
+      var scope = el.dataset.scope;
+      var designMode = !!(window.Shopify && window.Shopify.designMode);
+
+      function show() {
+        el.hidden = false;
+        requestAnimationFrame(function () { el.classList.add('is-visible'); });
+      }
+
+      function hide() {
+        el.classList.remove('is-visible');
+        setTimeout(function () { el.hidden = true; }, HIDE_MS);
+      }
+
+      function privacy() {
+        return window.Shopify && window.Shopify.customerPrivacy;
+      }
+
+      /* The consent API ships as an on-demand feature, so it has to be pulled in
+         before customerPrivacy exists. Everything degrades if it never arrives. */
+      function loadPrivacy(done) {
+        if (privacy()) { done(); return; }
+        if (!window.Shopify || typeof window.Shopify.loadFeatures !== 'function') { done(); return; }
+        window.Shopify.loadFeatures(
+          [{ name: 'consent-tracking-api', version: '0.1' }],
+          function () { done(); }
+        );
+      }
+
+      function storedDecision() {
+        try { return localStorage.getItem(FALLBACK_KEY); } catch (e) { return null; }
+      }
+
+      function undecided(cp) {
+        try {
+          var c = cp.currentVisitorConsent();
+          return !c || (!c.analytics && !c.marketing && !c.preferences);
+        } catch (e) {
+          return true;
+        }
+      }
+
+      /* Records the choice with Shopify so pixels and apps honour it. In the
+         customizer nothing is persisted — the bar is only there to be styled. */
+      function decide(granted) {
+        if (designMode) { hide(); return; }
+
+        var cp = privacy();
+        if (cp && typeof cp.setTrackingConsent === 'function') {
+          cp.setTrackingConsent(
+            {
+              analytics: granted,
+              marketing: granted,
+              preferences: granted,
+              sale_of_data: granted
+            },
+            hide
+          );
+          return;
+        }
+
+        try { localStorage.setItem(FALLBACK_KEY, granted ? 'granted' : 'denied'); } catch (e) {}
+        hide();
+      }
+
+      el.querySelector('[data-cookie-accept]').addEventListener('click', function () { decide(true); });
+      el.querySelector('[data-cookie-decline]').addEventListener('click', function () { decide(false); });
+
+      /* Always visible in the customizer, otherwise ask the API whether this
+         visitor still owes us a choice. */
+      if (designMode) { show(); return; }
+
+      loadPrivacy(function () {
+        var cp = privacy();
+
+        if (!cp) {
+          if (!storedDecision()) show();
+          return;
+        }
+
+        if (scope === 'always') {
+          if (undecided(cp)) show();
+          return;
+        }
+
+        try {
+          if (cp.shouldShowBanner()) show();
+        } catch (e) {
+          if (undecided(cp)) show();
+        }
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cookie Banner",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show cookie banner",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "display_scope",
+      "label": "Show to",
+      "options": [
+        { "value": "shopify", "label": "Only where consent is required" },
+        { "value": "always", "label": "Every visitor" }
+      ],
+      "default": "shopify",
+      "info": "Follows the regions set in Shopify's customer privacy settings. Pick Every visitor to show it worldwide instead."
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Message",
+      "default": "Foreign Resource uses cookies to improve your shopping experience."
+    },
+    {
+      "type": "text",
+      "id": "accept_text",
+      "label": "Accept text",
+      "default": "Accept"
+    },
+    {
+      "type": "text",
+      "id": "separator_text",
+      "label": "Word between the actions",
+      "default": "or",
+      "info": "Only used by the text-link style. Leave blank to remove it."
+    },
+    {
+      "type": "text",
+      "id": "decline_text",
+      "label": "Decline text",
+      "default": "Decline"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policy_link",
+      "label": "Link to the privacy policy",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "policy_link_text",
+      "label": "Privacy policy link text",
+      "default": "Privacy policy"
+    },
+    {
+      "type": "url",
+      "id": "policy_link",
+      "label": "Privacy policy link",
+      "info": "Leave blank to use the store's own privacy policy page."
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Screen reader label",
+      "default": "Cookie consent"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "bottom", "label": "Bottom of the page" },
+        { "value": "top", "label": "Top of the page" }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "select",
+      "id": "action_style",
+      "label": "Action style",
+      "options": [
+        { "value": "buttons", "label": "Buttons" },
+        { "value": "links", "label": "Text links (quietest)" }
+      ],
+      "default": "buttons"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#F1EEE6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2D2C2F"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Rule",
+      "default": "#D8D3C8"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,200 @@
+/* ============================================
+   COOKIE BANNER — Foreign Resource
+   One quiet line across the foot of the page. Cream ground, thin rule,
+   charcoal type, no corners, no shadow. Same restraint as the info bar.
+   ============================================ */
+
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 120; /* above the header (101), below the cart drawer */
+  background-color: var(--cookie-bg, var(--color-secondary));
+  color: var(--cookie-text, var(--color-primary));
+  border-radius: 0;
+}
+
+.cookie-banner--bottom {
+  bottom: 0;
+  border-top: 1px solid var(--cookie-border, var(--color-border));
+}
+
+.cookie-banner--top {
+  top: 0;
+  border-bottom: 1px solid var(--cookie-border, var(--color-border));
+}
+
+.cookie-banner[hidden] { display: none; }
+
+/* ---- Entrance ---- */
+.cookie-banner {
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out),
+              transform var(--duration-slow) var(--ease-out);
+}
+.cookie-banner--bottom { transform: translateY(100%); }
+.cookie-banner--top { transform: translateY(-100%); }
+
+.cookie-banner.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner,
+  .cookie-banner--bottom,
+  .cookie-banner--top {
+    transform: none;
+    transition: opacity var(--duration-fast) linear;
+  }
+}
+
+/* ---- Layout ---- */
+.cookie-banner__inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0.9rem var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  /* Wider column gap than the actions carry internally, so Accept/Decline
+     read as their own group rather than a third underlined link. */
+  gap: 0.15rem var(--space-md);
+  text-align: center;
+}
+
+.cookie-banner__text {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  margin: 0;
+  color: inherit;
+}
+
+.cookie-banner__policy {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.cookie-banner__policy:hover { opacity: 0.6; }
+
+.cookie-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cookie-banner__sep {
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+/* ---- Action: text links — the quietest option ---- */
+.cookie-banner__btn {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+.cookie-banner__btn:hover { opacity: 0.6; }
+
+.cookie-banner__btn:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* ---- Action: buttons (default) — square boxes, no radius ---- */
+.cookie-banner--buttons .cookie-banner__inner {
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.cookie-banner--buttons .cookie-banner__actions {
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cookie-banner--buttons .cookie-banner__sep { display: none; }
+
+.cookie-banner--buttons .cookie-banner__btn {
+  text-decoration: none;
+  padding: 0.7rem 1.75rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  transition: background-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
+}
+
+.cookie-banner--buttons .cookie-banner__btn--accept {
+  background-color: var(--cookie-text, var(--color-primary));
+  color: var(--cookie-bg, var(--color-secondary));
+}
+.cookie-banner--buttons .cookie-banner__btn--accept:hover {
+  background-color: transparent;
+  color: var(--cookie-text, var(--color-primary));
+  opacity: 1;
+}
+
+.cookie-banner--buttons .cookie-banner__btn--decline {
+  background-color: transparent;
+  color: inherit;
+}
+.cookie-banner--buttons .cookie-banner__btn--decline:hover {
+  background-color: var(--cookie-text, var(--color-primary));
+  color: var(--cookie-bg, var(--color-secondary));
+  opacity: 1;
+}
+
+/* ---- Mobile: stack the copy above the actions, keep taps 44px ---- */
+@media (max-width: 600px) {
+  .cookie-banner__inner {
+    flex-direction: column;
+    /* baseline does not centre once the axis turns vertical */
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem var(--space-md) 0.5rem;
+  }
+
+  .cookie-banner__btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.25rem;
+  }
+
+  /* Boxes stay centred and sized to their label rather than stretching edge
+     to edge — the bar should read as a quiet line, not a form. */
+  .cookie-banner--buttons .cookie-banner__inner {
+    padding: var(--space-sm) var(--space-md);
+  }
+  .cookie-banner--buttons .cookie-banner__actions {
+    justify-content: center;
+  }
+  .cookie-banner--buttons .cookie-banner__btn {
+    min-height: 44px;
+    justify-content: center;
+    padding: 0 1.75rem;
+  }
+}

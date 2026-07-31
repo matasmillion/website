@@ -97,6 +97,9 @@
 
   {%- sections 'footer-group' -%}
 
+  {%- comment -%} Cookie consent — every page, editable in the customizer {% endcomment -%}
+  {%- section 'cookie-banner' -%}
+
   {%- comment -%} Global JS — loaded at end {% endcomment -%}
   <script src="{{ 'global.js' | asset_url }}" defer></script>
 </body>
