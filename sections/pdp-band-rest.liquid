@@ -1,0 +1,53 @@
+{%- comment -%}
+  PDP — Sticky ATC resting area (mobile).
+
+  The mobile add-to-cart band is fixed to the bottom of the viewport and has to
+  stand down before it covers full-bleed imagery. It used to key off whichever
+  of Foreign Engineering or Complete the Look it found first, which meant the
+  handover point moved whenever those sections were reordered.
+
+  This section is that handover point, made explicit and placeable: drop it
+  wherever the band should retire and the band retires there. It renders nothing
+  visible — its only job is to be a position in the flow.
+
+  Desktop ignores it; the band is mobile-only.
+{%- endcomment -%}
+
+<div
+  class="pdp-band-rest"
+  data-band-rest
+  aria-hidden="true"
+  style="--band-rest-gap: {{ section.settings.gap | default: 0 }}px;"
+></div>
+
+<style>
+  /* Zero-height by default so it cannot introduce a seam between the sections
+     it sits between. The gap setting exists for when the band's disappearance
+     needs a beat of breathing room instead. */
+  .pdp-band-rest {
+    height: var(--band-rest-gap, 0);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Sticky ATC resting area",
+  "class": "section-pdp-band-rest",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Invisible. Marks where the mobile add-to-cart band stops following the shopper — place it directly above the first full-bleed section."
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Breathing room",
+      "min": 0, "max": 120, "step": 4, "default": 0,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    { "name": "Sticky ATC resting area" }
+  ]
+}
+{% endschema %}
