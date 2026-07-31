@@ -41,6 +41,7 @@
         "appointment_link": "",
         "size_calculator_url": "",
         "returns_intro": "You have {days} days from the date of delivery to return or exchange items.",
+        "returns_terms": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35",
         "returns_start_label": "Start a return",
         "returns_start_url": "",
         "returns_policy_label": "Read our return policy",
@@ -51,17 +52,12 @@
         "low_stock_threshold": 5,
         "installments_url": "",
         "hide_shop_promise": false,
-        "cutoff_hour": 12,
-        "delivery_timezone": "America/Los_Angeles",
         "standard_label": "Foreign Air",
         "express_label": "Express Air",
-        "size_chart_content": "",
         "delivery_rates": "US|3|5|1|2|$10|$20",
-        "returns_rules": "US|14|Free|Free|$35",
-        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
-        "returns_label_exchange": "Exchange",
-        "returns_label_credit": "Return · Store credit",
-        "returns_label_card": "Return · To card"
+        "cutoff_hour": 12,
+        "delivery_timezone": "America/Los_Angeles",
+        "size_chart_content": ""
       }
     },
     "guarantees": {
@@ -147,108 +143,6 @@
         "label": "Foreign Engineering"
       }
     },
-    "complete_the_look": {
-      "type": "product-complete-the-look",
-      "settings": {
-        "heading": "Complete the look",
-        "lookbook_ratio_mobile": "3/4",
-        "lookbook_ratio_desktop": "4/5"
-      }
-    },
-    "ugc": {
-      "type": "product-ugc",
-      "blocks": {
-        "person_1": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        },
-        "person_2": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        },
-        "person_3": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        }
-      },
-      "block_order": [
-        "person_1",
-        "person_2",
-        "person_3"
-      ],
-      "settings": {
-        "heading": "See others wear em'"
-      }
-    },
-    "reviews": {
-      "type": "product-reviews-container",
-      "settings": {
-        "heading": "Reviews",
-        "provider": "klaviyo"
-      }
-    },
-    "brand_story_GAGwDD": {
-      "type": "brand-story",
-      "disabled": true,
-      "name": "Brand Story",
-      "settings": {
-        "subheading": "Our Story",
-        "heading": "To inspire global travel",
-        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
-        "layout": "text-center",
-        "cta_text": "Our Mission",
-        "cta_link": "",
-        "cta_style": "btn--secondary",
-        "bg_color": ""
-      }
-    },
-    "1785308970a4db4de4": {
-      "type": "apps",
-      "blocks": {
-        "klaviyo_reviews_product_reviews_YtPaQF": {
-          "type": "shopify://apps/klaviyo-reviews/blocks/product-reviews/db20e365-d984-4ac4-9655-e1588d951ca9",
-          "settings": {}
-        }
-      },
-      "block_order": [
-        "klaviyo_reviews_product_reviews_YtPaQF"
-      ],
-      "settings": {}
-    },
-    "178548649408f040eb": {
-      "type": "apps",
-      "blocks": {
-        "judge_me_reviews_review_widget_q4WcLz": {
-          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
-          "settings": {
-            "review_data": "sample_data",
-            "max_width": 1200,
-            "show_shop_reviews": false,
-            "empty_state": "empty_widget"
-          }
-        }
-      },
-      "block_order": [
-        "judge_me_reviews_review_widget_q4WcLz"
-      ],
-      "disabled": true,
-      "settings": {}
-    },
     "company_details": {
       "type": "pdp-company-details",
       "blocks": {
@@ -303,14 +197,81 @@
         "gap": 0
       }
     },
+    "ugc": {
+      "type": "product-ugc",
+      "blocks": {
+        "person_1": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_2": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        },
+        "person_3": {
+          "type": "person",
+          "settings": {
+            "video_url": "",
+            "handle": "@handle",
+            "link": "",
+            "flag": "🇺🇸"
+          }
+        }
+      },
+      "block_order": [
+        "person_1",
+        "person_2",
+        "person_3"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "See others wear em'"
+      }
+    },
+    "reviews": {
+      "type": "product-reviews-container",
+      "settings": {
+        "heading": "Reviews",
+        "provider": "klaviyo"
+      }
+    },
+    "complete_the_look": {
+      "type": "product-complete-the-look",
+      "settings": {
+        "heading": "Complete the look",
+        "lookbook_ratio_mobile": "3/4",
+        "lookbook_ratio_desktop": "4/5"
+      }
+    },
     "you_may_also_like": {
       "type": "product-recommendations",
       "settings": {
         "heading": "You may also like",
-        "products_count": 4,
-        "show_collections": true,
-        "more_heading": "View more",
-        "exclude_handles": "for-shopify-performance-tracking"
+        "products_count": 4
+      }
+    },
+    "brand_story_GAGwDD": {
+      "type": "brand-story",
+      "name": "Brand Story",
+      "settings": {
+        "subheading": "Our Story",
+        "heading": "To inspire global travel",
+        "text": "<p>Foreign Resource is an aspirational travel lifestyle brand for the modern explorer. We design premium essentials that move with you — from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund — our commitment to matching donations to UNHCR, supporting displaced communities worldwide.</p>",
+        "layout": "text-center",
+        "cta_text": "Our Mission",
+        "cta_link": "",
+        "cta_style": "btn--secondary",
+        "bg_color": ""
       }
     }
   },
@@ -324,8 +285,6 @@
     "reviews",
     "complete_the_look",
     "you_may_also_like",
-    "brand_story_GAGwDD",
-    "1785308970a4db4de4",
-    "178548649408f040eb"
+    "brand_story_GAGwDD"
   ]
 }
