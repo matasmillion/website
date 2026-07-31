@@ -227,6 +227,12 @@
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
+
+  /* Slides out of frame at FOREIGN ENGINEERING rather than parking over it.
+     Transform, never the hidden attribute — the band has to animate. */
+  .pdp-band.is-hidden {
+    transform: translateY(100%);
+  }
 }
 
 .pdp-band__top {
@@ -693,6 +699,75 @@
 }
 
 /* Used on both <a> and <button>, so the button chrome is reset here. */
+/* ----- Returns tab -----
+   Centred at every breakpoint, unlike the other panels. It is a short decision
+   block rather than running copy, so a centred column reads as deliberate and
+   keeps the three outcomes on a shared axis for comparison. */
+.pdp__tab-panel--returns {
+  text-align: center;
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
+.pdp__returns-intro {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #2D2C2F;
+  margin: 0 0 1.25rem;
+}
+
+/* Set once here so the label, the value and the pipe-less plain rows all take
+   the same quiet tone — the one .pdp__tab-link--quiet already uses. */
+.pdp__returns-terms {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+  color: #A4A4A4;
+}
+
+/* Spec-sheet rows: label left, cost right, so the column of values can be
+   compared down one axis. The block stays centred; the rows justify inside it. */
+.pdp__returns-term {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 0;
+}
+
+.pdp__returns-term--plain { display: block; }
+
+.pdp__returns-term-label {
+  font-size: 11.2px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.pdp__returns-term-value {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* Stacked, not inline — .pdp__tab-link carries a right margin for the
+   side-by-side case, which would throw the centring off by half of it. */
+.pdp__returns-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pdp__returns-actions .pdp__tab-link { margin: 0; }
+
 .pdp__tab-link {
   font-size: 11px;
   text-decoration: underline;
@@ -710,6 +785,12 @@
 }
 
 .pdp__tab-link:hover { opacity: 0.7; }
+
+/* Must sit after .pdp__tab-link — same specificity, so source order decides. */
+.pdp__tab-link--quiet {
+  font-weight: var(--font-weight-normal);
+  color: #A4A4A4;
+}
 
 /* Card text in the PDP's product rows */
 .ctl .product-card__title,
@@ -799,6 +880,32 @@
 .dest__input:focus { outline: none; }
 .dest__input::placeholder { color: #C9C9C9; }
 
+/* Same line as the input it replaced, with the native chrome stripped and a
+   caret drawn in — a full-width UA select would break the rule underneath. */
+.dest__select {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: #2D2C2F;
+  padding: 0 1.25rem 0 0;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, #2D2C2F 50%),
+                    linear-gradient(135deg, #2D2C2F 50%, transparent 50%);
+  background-position: calc(100% - 6px) center, calc(100% - 1px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.dest__select:focus { outline: none; }
+.dest__select:focus-visible { outline: 1px solid #2D2C2F; outline-offset: 3px; }
+
 .dest__apply {
   background: none;
   border: none;
@@ -817,15 +924,52 @@
 
 .dest__results { margin-top: 1.25rem; }
 
-.dest__method {
-  font-size: 11.5px;
-  color: #2D2C2F;
-  margin-top: 0.75rem;
+/* What the zip gate exists to reveal — ink, not muted, so it lands as the
+   answer rather than as more fine print. Tier and window left, dates right,
+   matching the returns table's spec-row language. */
+.dest__tier {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.dest__date {
-  font-size: 11.5px;
+.dest__tier:first-child { border-top: 1px solid var(--color-border); }
+
+/* Takes the slack so price and date anchor right and their columns line up
+   across both rows. It is the one part that may shrink — the service names are
+   short, the two values beside them are not negotiable. */
+.dest__tier-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 10.5px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #A4A4A4;
+}
+
+/* Sits a step below the date in weight: the shopper is here for when it lands,
+   the price is what that costs. */
+.dest__tier-price {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #6E6D71;
+  white-space: nowrap;
+}
+
+.dest__tier-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #2D2C2F;
+  white-space: nowrap;
 }
 
 .dest__error {
@@ -845,6 +989,17 @@
   color: #2D2C2F;
   margin-bottom: 1rem;
 }
+
+/* The countdown and the arrival date. Pinned to the theme scale so <strong>
+   doesn't fall through to the browser default of 700. */
+.pdp__urgency strong {
+  font-weight: var(--font-weight-semibold);
+  color: #1A191C;
+}
+
+/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
+   rather than [hidden] — the display rule above outranks the attribute. */
+.pdp__urgency.is-superseded { display: none; }
 
 @media (min-width: 769px) {
   .pdp__urgency { justify-content: flex-start; }
@@ -888,8 +1043,12 @@
 .fr-bis,
 .klaviyo-bis-trigger {
   display: block !important;
+  /* width:100% plus horizontal padding overflows its container by the padding
+     unless the box model is pinned — that is what pushed the button off the
+     right edge on mobile. Klaviyo's own reset cannot be relied on here. */
+  box-sizing: border-box !important;
   width: 100% !important;
-  max-width: none !important;
+  max-width: 100% !important;
   min-width: 0 !important;
   height: 50px !important;
   margin: 0 0 1rem !important;
@@ -1083,6 +1242,36 @@
   display: block;
   margin-top: 1rem;
   object-fit: cover;
+}
+
+/* Front and back of the cloth. auto-fit rather than a fixed 2-up: with only one
+   image set the single figure takes the full width instead of leaving a gap. */
+.pdp__fabric-shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.pdp__fabric-shot { margin: 0; }
+
+/* Square crop so the two swatches read as a matched pair regardless of how
+   they were shot. */
+.pdp__fabric-shot img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+.pdp__fabric-shot figcaption {
+  margin-top: 0.4rem;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #A4A4A4;
+  text-align: center;
 }
 
 /* ============================================

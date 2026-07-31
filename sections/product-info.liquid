@@ -1,7 +1,20 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign app_blocks = section.blocks | where: 'type', '@app'
-  assign detail_rows = section.blocks | where: 'type', 'detail_row'
+
+  # FABRIC. Resolved once so the tab button and its panel cannot disagree about
+  # whether there is anything to show.
+  #
+  # WATCH THE BACK KEY. "Fabric (Back)" is custom.fabric_image, not fabric_back
+  # — it predates the front/back pair and was never renamed. Only the front
+  # follows the obvious convention.
+  assign fabric_text = product.metafields.custom.fabric.value
+  assign fabric_front = product.metafields.custom.fabric_front.value
+  assign fabric_back = product.metafields.custom.fabric_image.value
+  assign has_fabric = false
+  if fabric_text != blank or fabric_front != blank or fabric_back != blank
+    assign has_fabric = true
+  endif
 
   # Instalment figure — this shop's money format drops decimals, so it is
   # composed by hand rather than via the money filters.
@@ -364,16 +377,27 @@
 
 
       {%- comment -%}
-        Shopify injects its Shop Promise box next to the buy button via
-        content_for_header, so it can't be removed in Liquid — only hidden.
-        Our urgency line plus the estimator now cover the same ground, and two
-        delivery dates computed two different ways is worse than one.
+        Shopify injects its Shop Promise box via content_for_header, so it can't
+        be removed in Liquid — only placed and hidden.
+
+        PLACEMENT. Shopify's own shop_promise_pdp.js looks for
+        .delivery-promise__promise-container first and mounts into it; failing
+        that it hunts for a form[action*="/cart/add"] and injects itself
+        structurally, which is why it used to land wherever the markup allowed.
+        The empty div below claims that hook, so the banner renders here — above
+        our urgency line, where the delivery story belongs.
+      {%- endcomment -%}
+      <div class="delivery-promise__promise-container"></div>
+
+      {%- comment -%}
+        The escape hatch. Note the element is <delivery-promise-wc> — the older
+        shop-promise-banner / [class*="shop-promise"] selectors matched nothing,
+        which is why ticking this setting appeared to do nothing at all.
       {%- endcomment -%}
       {%- if section.settings.hide_shop_promise -%}
         <style>
-          shop-promise-banner,
-          [class*="shop-promise"],
-          [id*="shop-promise"]:not(script) { display: none !important; }
+          delivery-promise-wc,
+          .delivery-promise__promise-container { display: none !important; }
         </style>
       {%- endif -%}
 
@@ -389,7 +413,13 @@
         </a>
       {%- endif -%}
 
-      {%- comment -%} ===== TABS ===== {% endcomment -%}
+      {%- comment -%}
+        ===== TABS =====
+        Story · Sizing · Fabric · Shipping · Returns. Fabric appears only where
+        the product carries a custom.fabric metafield, so the tab count varies
+        by product — the JS pairs buttons to panels by name over whatever is
+        present rather than assuming a fixed set.
+      {%- endcomment -%}
       {%- comment -%}
         Panels start closed — clicking a tab slides its panel in, clicking the
         active tab again closes it.
@@ -398,6 +428,15 @@
         <div class="pdp__tab-list" role="tablist">
           <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
           <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
+          {%- comment -%}
+            Composition is product-specific, so the tab only exists where the
+            metafield does — an empty Fabric tab is worse than no Fabric tab.
+            The tab JS pairs [data-tab] to [data-tab-panel] by name over
+            whatever is present, so omitting both needs no JS change.
+          {%- endcomment -%}
+          {%- if has_fabric -%}
+            <button class="pdp__tab" role="tab" data-tab="fabric" aria-selected="false" aria-expanded="false">Fabric</button>
+          {%- endif -%}
           <button class="pdp__tab" role="tab" data-tab="shipping" aria-selected="false" aria-expanded="false">Shipping</button>
           <button class="pdp__tab" role="tab" data-tab="returns" aria-selected="false" aria-expanded="false">Returns</button>
         </div>
@@ -439,105 +478,157 @@
           {%- endif -%}
         </div>
 
-        {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
-          {%- render 'delivery-estimator',
-            standard_min: section.settings.standard_min,
-            standard_max: section.settings.standard_max,
-            express_min: section.settings.express_min,
-            express_max: section.settings.express_max,
-            cutoff_hour: section.settings.cutoff_hour
-          -%}
+        {%- comment -%} ===== FABRIC ===== {% endcomment -%}
+        {%- if has_fabric -%}
+          <div class="pdp__tab-panel" data-tab-panel="fabric" role="tabpanel">
+            {%- if fabric_text != blank -%}
+              {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
+              <div class="pdp__tab-description">{{ fabric_text | newline_to_br }}</div>
+            {%- endif -%}
 
-          {%- if section.settings.delivery_text != blank -%}
-            <p class="pdp__tab-meta">{{ section.settings.delivery_text }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-meta">Complimentary shipping on orders over $150.</p>
-
-          <p class="dest__label">Secure payment</p>
-          <p class="pdp__tab-meta">Credit card, PayPal, Shop Pay</p>
-        </div>
-
-        {%- comment -%} ===== RETURNS ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="returns" role="tabpanel">
-          <p class="pdp__tab-meta">You have 14 days from the date of delivery to return your order for free.</p>
-          <p class="pdp__tab-meta">Exchanges are free both ways. Items must be unworn with tags attached.</p>
-          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
-          <a href="/pages/track-order" class="pdp__tab-link">Start a return</a>
-
-          <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
-          <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
-        </div>
-      </div>
-
-      {%- comment -%}
-        ===== DETAIL ROWS (Fabric / Colour / Packaging) =====
-        Clickable dropdown rows sitting directly below the tabs.
-      {%- endcomment -%}
-      {%- if detail_rows.size > 0 -%}
-        <div class="pdp__rows" data-pdp-rows>
-          {%- for block in detail_rows -%}
-            <div class="pdp__row" {{ block.shopify_attributes }}>
-              <button
-                type="button"
-                class="pdp__row-trigger"
-                data-row-trigger
-                aria-expanded="false"
-              >
-                <span>{{ block.settings.heading }}</span>
-                <span class="pdp__row-icon" aria-hidden="true"></span>
-              </button>
-
-              <div class="pdp__row-panel" data-row-panel hidden>
-                {%- if block.settings.content != blank -%}
-                  <div class="pdp__row-copy">{{ block.settings.content }}</div>
+            {%- comment -%}
+              Front and back of the cloth. Either may be missing — the grid is
+              auto-fit so a lone image fills the width instead of sitting in
+              half of an empty two-column row.
+            {%- endcomment -%}
+            {%- if fabric_front != blank or fabric_back != blank -%}
+              <div class="pdp__fabric-shots">
+                {%- if fabric_front != blank -%}
+                  <figure class="pdp__fabric-shot">
+                    <img
+                      src="{{ fabric_front | image_url: width: 800 }}"
+                      srcset="{{ fabric_front | image_url: width: 400 }} 400w,
+                              {{ fabric_front | image_url: width: 800 }} 800w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, front"
+                      width="{{ fabric_front.width }}"
+                      height="{{ fabric_front.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <figcaption>Front</figcaption>
+                  </figure>
                 {%- endif -%}
-
-                {%- comment -%}
-                  Optional swatch list, one per line: Name|#hex|Description
-                  Used by the Colour row to show the full system.
-                {%- endcomment -%}
-                {%- if block.settings.swatches != blank -%}
-                  <ul class="pdp__row-swatches">
-                    {%- assign lines = block.settings.swatches | newline_to_br | split: '<br />' -%}
-                    {%- for line in lines -%}
-                      {%- assign parts = line | strip | split: '|' -%}
-                      {%- if parts.size > 1 -%}
-                        <li class="pdp__row-swatch">
-                          <span class="pdp__row-chip" style="background: {{ parts[1] | strip }};" aria-hidden="true"></span>
-                          <span class="pdp__row-swatch-body">
-                            <span class="pdp__row-swatch-name">{{ parts[0] | strip }}</span>
-                            {%- if parts.size > 2 -%}
-                              <span class="pdp__row-swatch-text">{{ parts[2] | strip }}</span>
-                            {%- endif -%}
-                          </span>
-                        </li>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </ul>
-                {%- endif -%}
-
-                {%- if block.settings.image != blank -%}
-                  <img
-                    class="pdp__row-media"
-                    src="{{ block.settings.image | image_url: width: 900 }}"
-                    alt="{{ block.settings.heading | escape }}"
-                    width="{{ block.settings.image.width }}"
-                    height="{{ block.settings.image.height }}"
-                    loading="lazy"
-                  >
-                {%- elsif block.settings.video != blank -%}
-                  {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pdp__row-media' }}
-                {%- endif -%}
-
-                {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
-                  <a class="pdp__tab-link" href="{{ block.settings.link_url }}">{{ block.settings.link_label }}</a>
+                {%- if fabric_back != blank -%}
+                  <figure class="pdp__fabric-shot">
+                    <img
+                      src="{{ fabric_back | image_url: width: 800 }}"
+                      srcset="{{ fabric_back | image_url: width: 400 }} 400w,
+                              {{ fabric_back | image_url: width: 800 }} 800w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, back"
+                      width="{{ fabric_back.width }}"
+                      height="{{ fabric_back.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <figcaption>Back</figcaption>
+                  </figure>
                 {%- endif -%}
               </div>
-            </div>
-          {%- endfor -%}
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
+        {%- comment -%}
+          Stripped to the zip gate on purpose: free-shipping line, then the
+          estimator, then nothing. The date only gets read if it is the only
+          thing to read, so resist re-adding transit tables, express tiers or
+          payment-method copy here — payment icons already live at checkout.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
+          {%- render 'delivery-estimator',
+            delivery_rates: section.settings.delivery_rates,
+            cutoff_hour: section.settings.cutoff_hour,
+            delivery_timezone: section.settings.delivery_timezone,
+            standard_label: section.settings.standard_label,
+            express_label: section.settings.express_label
+          -%}
         </div>
-      {%- endif -%}
+
+        {%- comment -%}
+          ===== RETURNS =====
+          The window, then the three outcomes ranked best-to-worst, then the
+          action. Support hours and the contact link were cut — nobody opens
+          Returns to find a phone number, and they buried the one line that
+          costs money.
+
+          Terms are one per line in the theme editor; the separators are
+          rendered as hairlines rather than typed dashes.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel" data-returns-panel>
+          {%- comment -%}
+            Returns vary by region — the refund policy offers them in the USA,
+            calls them "offered soon" for EU/UK/CA/AUS and unavailable
+            elsewhere — so the panel resolves against a country the same way the
+            delivery estimator does. Both pickers share one stored choice, so
+            setting it in either tab moves the other.
+          {%- endcomment -%}
+          {%- assign ret_here = localization.country.iso_code | default: 'US' -%}
+          <div class="dest__entry">
+            <label class="dest__hint" for="ret-country">Select your country</label>
+            <div class="dest__row">
+              <select id="ret-country" class="dest__select" data-returns-country>
+                {%- if localization.available_countries.size > 0 -%}
+                  {%- for country in localization.available_countries -%}
+                    <option value="{{ country.iso_code }}" {% if country.iso_code == ret_here %}selected{% endif %}>{{ country.name }}</option>
+                  {%- endfor -%}
+                {%- else -%}
+                  <option value="{{ ret_here }}" selected>{{ localization.country.name | default: 'United States' }}</option>
+                {%- endif -%}
+              </select>
+            </div>
+          </div>
+
+          <script type="text/plain" data-returns-rules>{{ section.settings.returns_rules | escape }}</script>
+
+          {%- comment -%}
+            Costs first, window second. What a return costs is the question that
+            decides the purchase; how many days you have to decide is the
+            qualifier on it. The sentence reads as a footnote to the table.
+            Rows are written by JS from the rules table — the labels stay
+            settings so the wording is still the merchant's.
+          {%- endcomment -%}
+          <ul class="pdp__returns-terms" data-returns-terms hidden>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_exchange | default: 'Exchange' }}</span>
+              <span class="pdp__returns-term-value" data-returns-exchange></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_credit | default: 'Return · Store credit' }}</span>
+              <span class="pdp__returns-term-value" data-returns-credit></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_card | default: 'Return · To card' }}</span>
+              <span class="pdp__returns-term-value" data-returns-card></span>
+            </li>
+          </ul>
+
+          {%- comment -%}
+            {days} is substituted from the rules table so the window can never
+            contradict the row above it.
+          {%- endcomment -%}
+          {%- comment -%}
+            No `| default:` here. A literal {days} inside a {{ }} output tag is
+            a Liquid syntax error — the parser reads the brace as the start of a
+            tag and never finds its terminator. The fallback lives in the JS,
+            where a brace is just a character.
+          {%- endcomment -%}
+          <p class="pdp__returns-intro" data-returns-intro data-template="{{ section.settings.returns_intro | escape }}" hidden></p>
+
+          <p class="pdp__returns-intro" data-returns-none hidden>{{ section.settings.returns_unavailable | default: 'Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.' }}</p>
+
+          <div class="pdp__returns-actions" data-returns-actions>
+            {%- if section.settings.returns_start_label != blank -%}
+              <a href="{{ section.settings.returns_start_url | default: '/pages/track-order' }}" class="pdp__tab-link" data-returns-start>{{ section.settings.returns_start_label }}</a>
+            {%- endif -%}
+            {%- if section.settings.returns_policy_label != blank -%}
+              <a href="{{ section.settings.returns_policy_url | default: '/pages/returns' }}" class="pdp__tab-link pdp__tab-link--quiet">{{ section.settings.returns_policy_label }}</a>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -607,15 +698,73 @@
       "label": "Appointment page link"
     },
     {
-      "type": "text",
-      "id": "delivery_text",
-      "label": "Delivery estimate text",
-      "default": "Order today for delivery within 5 business days"
-    },
-    {
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Returns tab"
+    },
+    {
+      "type": "text",
+      "id": "returns_intro",
+      "label": "Intro line",
+      "info": "{days} is replaced with the return window for the selected country, so the sentence can never contradict the table above it.",
+      "default": "You have {days} days from the date of delivery to return or exchange items."
+    },
+    {
+      "type": "textarea",
+      "id": "returns_rules",
+      "label": "Returns by country",
+      "info": "CODE|window days|exchange|store credit|to card. Costs are free text. A country with no line here is treated as not-yet-offered. Add a ROW line to catch every country not named. Keep in sync with the refund policy.",
+      "default": "US|14|Free|Free|$35"
+    },
+    {
+      "type": "text",
+      "id": "returns_unavailable",
+      "label": "Message where returns aren't offered",
+      "default": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out."
+    },
+    {
+      "type": "text",
+      "id": "returns_label_exchange",
+      "label": "Row label — exchange",
+      "default": "Exchange"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_credit",
+      "label": "Row label — store credit",
+      "default": "Return · Store credit"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_card",
+      "label": "Row label — refund to card",
+      "default": "Return · To card"
+    },
+    {
+      "type": "text",
+      "id": "returns_start_label",
+      "label": "Primary link label",
+      "default": "Start a return"
+    },
+    {
+      "type": "url",
+      "id": "returns_start_url",
+      "label": "Primary link URL"
+    },
+    {
+      "type": "text",
+      "id": "returns_policy_label",
+      "label": "Secondary link label",
+      "default": "Read our return policy"
+    },
+    {
+      "type": "url",
+      "id": "returns_policy_url",
+      "label": "Secondary link URL"
     },
     {
       "type": "header",
@@ -627,8 +776,14 @@
       "label": "Desktop image fit",
       "info": "Cover fills the frame and crops; contain shows the whole image with padding.",
       "options": [
-        { "value": "cover", "label": "Cover (crop to fill)" },
-        { "value": "contain", "label": "Contain (show whole image)" }
+        {
+          "value": "cover",
+          "label": "Cover (crop to fill)"
+        },
+        {
+          "value": "contain",
+          "label": "Contain (show whole image)"
+        }
       ],
       "default": "cover"
     },
@@ -638,11 +793,26 @@
       "label": "Desktop crop focal point",
       "info": "Which part of the image to keep when cropping. Upper keeps heads in frame.",
       "options": [
-        { "value": "top", "label": "Top" },
-        { "value": "upper", "label": "Upper (recommended)" },
-        { "value": "center", "label": "Centre" },
-        { "value": "lower", "label": "Lower" },
-        { "value": "bottom", "label": "Bottom" }
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "upper",
+          "label": "Upper (recommended)"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "lower",
+          "label": "Lower"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
       ],
       "default": "upper"
     },
@@ -660,7 +830,10 @@
       "type": "range",
       "id": "low_stock_threshold",
       "label": "Low stock indicator appears at or below",
-      "min": 1, "max": 20, "step": 1, "default": 5
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
     },
     {
       "type": "url",
@@ -671,8 +844,8 @@
       "type": "checkbox",
       "id": "hide_shop_promise",
       "label": "Hide Shopify's Shop Promise box",
-      "info": "Our estimator and urgency line replace it. Untick to show both.",
-      "default": true
+      "info": "Left unticked, Shop Promise shows and our urgency line hides itself so only one delivery date is on the page.",
+      "default": false
     },
     {
       "type": "header",
@@ -680,37 +853,72 @@
     },
     {
       "type": "paragraph",
-      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime."
+      "content": "One line per country. A theme cannot read shipping rates at runtime, so this table is generated from Settings → Shipping and delivery and must be regenerated when rates change. A country with no line here shows as not-shipped-to rather than guessing."
     },
     {
-      "type": "range",
-      "id": "standard_min",
-      "label": "Standard delivery — fastest (business days)",
-      "min": 1, "max": 14, "step": 1, "default": 3
+      "type": "text",
+      "id": "standard_label",
+      "label": "Standard service name",
+      "default": "Foreign Air"
     },
     {
-      "type": "range",
-      "id": "standard_max",
-      "label": "Standard delivery — slowest (business days)",
-      "min": 1, "max": 21, "step": 1, "default": 5
+      "type": "text",
+      "id": "express_label",
+      "label": "Express service name",
+      "default": "Express Air"
     },
     {
-      "type": "range",
-      "id": "express_min",
-      "label": "Express delivery — fastest (business days)",
-      "min": 1, "max": 7, "step": 1, "default": 1
-    },
-    {
-      "type": "range",
-      "id": "express_max",
-      "label": "Express delivery — slowest (business days)",
-      "min": 1, "max": 10, "step": 1, "default": 2
+      "type": "textarea",
+      "id": "delivery_rates",
+      "label": "Rates by country",
+      "info": "CODE|standard fastest|standard slowest|express fastest|express slowest|standard price|express price — days are business days, \"-\" disables a tier, prices are free text. Add a ROW line to catch every country not named.",
+      "default": "US|3|5|1|2|$10|$20"
     },
     {
       "type": "range",
       "id": "cutoff_hour",
       "label": "Same-day dispatch cutoff (hour, 24h)",
-      "min": 0, "max": 23, "step": 1, "default": 14
+      "min": 0,
+      "max": 23,
+      "step": 1,
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "delivery_timezone",
+      "label": "Warehouse time zone",
+      "info": "The cutoff is read in this zone, not the shopper's. Without it a New York shopper is told a Los Angeles cutoff passed three hours early.",
+      "options": [
+        {
+          "value": "America/Los_Angeles",
+          "label": "Los Angeles (Pacific)"
+        },
+        {
+          "value": "America/Denver",
+          "label": "Denver (Mountain)"
+        },
+        {
+          "value": "America/Chicago",
+          "label": "Chicago (Central)"
+        },
+        {
+          "value": "America/New_York",
+          "label": "New York (Eastern)"
+        },
+        {
+          "value": "Europe/London",
+          "label": "London"
+        },
+        {
+          "value": "Europe/Paris",
+          "label": "Paris"
+        },
+        {
+          "value": "Asia/Shanghai",
+          "label": "Shanghai"
+        }
+      ],
+      "default": "America/Los_Angeles"
     },
     {
       "type": "richtext",
@@ -720,24 +928,8 @@
   ],
   "blocks": [
     {
-      "type": "detail_row",
-      "name": "Detail row",
-      "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Fabric" },
-        { "type": "richtext", "id": "content", "label": "Content" },
-        {
-          "type": "textarea",
-          "id": "swatches",
-          "label": "Swatches (one per line)",
-          "info": "Format: Name|#hex|Description — used for the colour system."
-        },
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "video", "id": "video", "label": "Video" },
-        { "type": "text", "id": "link_label", "label": "Link label" },
-        { "type": "url", "id": "link_url", "label": "Link URL" }
-      ]
-    },
-    { "type": "@app" }
+      "type": "@app"
+    }
   ]
 }
 {% endschema %}
