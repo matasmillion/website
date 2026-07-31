@@ -483,10 +483,11 @@
           rendered as hairlines rather than typed dashes.
         {%- endcomment -%}
         <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel">
-          {%- if section.settings.returns_intro != blank -%}
-            <p class="pdp__returns-intro">{{ section.settings.returns_intro }}</p>
-          {%- endif -%}
-
+          {%- comment -%}
+            Costs first, window second. What a return costs is the question that
+            decides the purchase; how many days you have to decide is the
+            qualifier on it. The sentence reads as a footnote to the table.
+          {%- endcomment -%}
           {%- if section.settings.returns_terms != blank -%}
             <ul class="pdp__returns-terms">
               {%- assign term_lines = section.settings.returns_terms | newline_to_br | split: '<br />' -%}
@@ -506,6 +507,10 @@
                 {%- endif -%}
               {%- endfor -%}
             </ul>
+          {%- endif -%}
+
+          {%- if section.settings.returns_intro != blank -%}
+            <p class="pdp__returns-intro">{{ section.settings.returns_intro }}</p>
           {%- endif -%}
 
           <div class="pdp__returns-actions">
