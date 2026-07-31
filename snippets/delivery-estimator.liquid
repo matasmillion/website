@@ -39,11 +39,6 @@
   data-timezone="{{ delivery_timezone | default: 'America/Los_Angeles' }}"
   data-country="{{ here }}"
 >
-  <p class="dest__label">
-    <span class="dest__pulse" aria-hidden="true"></span>
-    Delivery date estimator
-  </p>
-
   {%- comment -%}
     Parsed in JS rather than emitted as Liquid-built JSON: prices are free text
     ("Free over $150"), and hand-rolling JSON around arbitrary strings in Liquid
@@ -51,6 +46,10 @@
   {%- endcomment -%}
   <script type="text/plain" data-delivery-rates>{{ delivery_rates | default: 'US|3|5|1|2|$10|$20' | escape }}</script>
 
+  {%- comment -%}
+    Picker first, title under it. The country is the input the whole panel turns
+    on, and it matches the Returns tab, which already leads with its picker.
+  {%- endcomment -%}
   <div class="dest__entry">
     <label class="dest__hint" for="dest-country">Select your country</label>
     <div class="dest__row">
@@ -66,6 +65,11 @@
       </select>
     </div>
   </div>
+
+  <p class="dest__label">
+    <span class="dest__pulse" aria-hidden="true"></span>
+    Delivery date estimator
+  </p>
 
   {%- comment -%}
     Two rows, spec-table shape: service name and price on the left, the resolved
