@@ -97,7 +97,7 @@
   opacity: 0.7;
 }
 
-/* ---- Action: text links (default) — the quietest option ---- */
+/* ---- Action: text links — the quietest option ---- */
 .cookie-banner__btn {
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -122,7 +122,7 @@
   outline-offset: 3px;
 }
 
-/* ---- Action: buttons — for when the bar needs more weight ---- */
+/* ---- Action: buttons (default) — square boxes, no radius ---- */
 .cookie-banner--buttons .cookie-banner__inner {
   align-items: center;
   gap: var(--space-sm) var(--space-md);
@@ -184,15 +184,17 @@
     padding: 0 0.25rem;
   }
 
+  /* Boxes stay centred and sized to their label rather than stretching edge
+     to edge — the bar should read as a quiet line, not a form. */
   .cookie-banner--buttons .cookie-banner__inner {
     padding: var(--space-sm) var(--space-md);
   }
   .cookie-banner--buttons .cookie-banner__actions {
-    width: 100%;
+    justify-content: center;
   }
   .cookie-banner--buttons .cookie-banner__btn {
-    flex: 1;
+    min-height: 44px;
     justify-content: center;
-    padding: 0 1rem;
+    padding: 0 1.75rem;
   }
 }
