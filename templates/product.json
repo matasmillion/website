@@ -237,6 +237,16 @@
         "cta_style": "btn--secondary",
         "bg_color": ""
       }
+    },
+    "reviews_masthead": {
+      "type": "product-reviews-masthead",
+      "disabled": true,
+      "settings": {
+        "heading": "Customer Reviews",
+        "collapsed_height": 480,
+        "klaviyo_company_id": "WuWz5B",
+        "klaviyo_api_revision": "2024-10-15"
+      }
     }
   },
   "order": [
@@ -247,6 +257,7 @@
     "band_rest",
     "ugc",
     "reviews",
+    "reviews_masthead",
     "complete_the_look",
     "you_may_also_like",
     "brand_story_GAGwDD"

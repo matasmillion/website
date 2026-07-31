@@ -1,0 +1,449 @@
+{%- comment -%}
+  ============================================================
+  FOREIGN RESOURCE — Reviews (Masthead)
+  Drop-in section. Design target: fr_reviews_masthead_v2.html
+  READ REVIEWS_HANDOFF.md BEFORE WIRING. The only thing that
+  needs implementing is getReviews() — everything else is done.
+  Uses the theme's own tokens from base.css (color/space/type).
+  Scoped to section.id so multiple placements don't collide.
+  ============================================================
+{%- endcomment -%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<section
+  class="frr reveal"
+  id="frr-{{ section.id }}"
+  data-collapsed-height="{{ section.settings.collapsed_height | default: 480 }}">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}
+      <div class="frr__eyebrow">{{ section.settings.heading }}</div>
+    {%- endif -%}
+
+    <!-- SUMMARY (always visible — social proof stays on screen) -->
+    <div class="frr-summary">
+      <div class="frr-score">
+        <div>
+          <div class="frr-score__num" data-avg>—</div>
+          <div class="frr-score__meta">
+            <span class="frr-stars frr-stars--lg" data-summary-stars></span>
+            <span class="frr__eyebrow" data-total>Based on — reviews</span>
+          </div>
+        </div>
+        <div class="frr-score__den">/5</div>
+      </div>
+      <div class="frr-dist" data-dist></div>
+    </div>
+
+    <!-- CONTROLS: filters + actions -->
+    <div class="frr-bar">
+      <div class="frr-inline" data-filters>
+        <span class="frr-lead">Filter</span>
+        <button class="frr-link is-active" data-filter="all">All</button>
+        <button class="frr-link" data-filter="5">5 Star</button>
+        <button class="frr-link" data-filter="4">4 Star</button>
+        <button class="frr-link" data-filter="photos">With Photos</button>
+      </div>
+      <div class="frr-actions">
+        <a class="btn btn--primary" data-write href="#" role="button">Write a Review</a>
+        <a class="btn btn--secondary" data-ask href="#" role="button">Ask a Question</a>
+      </div>
+    </div>
+
+    <!-- CONTROLS: sort + search -->
+    <div class="frr-bar">
+      <div class="frr-inline" data-sorts>
+        <span class="frr-lead">Sort</span>
+        <button class="frr-link is-active" data-sort="relevant">Most Relevant</button>
+        <button class="frr-link" data-sort="best">Best</button>
+        <button class="frr-link" data-sort="worst">Worst</button>
+        <button class="frr-link" data-sort="newest">Newest</button>
+      </div>
+      <div class="frr-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        <input type="text" data-search placeholder="Search reviews" aria-label="Search reviews">
+      </div>
+    </div>
+
+    <div class="frr-count" data-count></div>
+
+    <!-- COLLAPSIBLE / CAPPED LIST -->
+    <div class="frr-scroll-wrap">
+      <div class="frr-scroll" data-list tabindex="0" role="group" aria-label="Customer reviews, scrollable">
+        <div class="frr-empty">Loading reviews…</div>
+      </div>
+      <div class="frr-fade" data-fade></div>
+    </div>
+
+    <div class="frr-more">
+      <button class="frr-toggle" data-toggle aria-expanded="false">
+        <span data-toggle-text>Expand all reviews</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Scoped to this section. Colors/space/type map to theme tokens from base.css.
+     Two local tokens the theme doesn't define: a darker hairline and a mono face. */
+  #frr-{{ section.id }}{
+    --frr-hair: rgba(45,44,47,0.15);
+    --frr-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --frr-display: 'Cormorant Garamond', var(--font-heading);
+    padding: var(--space-2xl) 0;
+    border-top: var(--border-thin);
+  }
+  #frr-{{ section.id }} .frr__eyebrow{
+    font-family: var(--font-body); font-size: var(--text-xs); font-weight: var(--font-weight-medium);
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-text-light);
+    display:block; margin-bottom: var(--space-md);
+  }
+  #frr-{{ section.id }} .frr-stars{display:inline-flex;gap:2px;vertical-align:middle}
+  #frr-{{ section.id }} .frr-stars svg{width:13px;height:13px;display:block}
+  #frr-{{ section.id }} .frr-stars .s-on{fill:var(--color-primary)}
+  #frr-{{ section.id }} .frr-stars .s-off{fill:none;stroke:var(--frr-hair);stroke-width:1.4}
+  #frr-{{ section.id }} .frr-stars--sm svg{width:11px;height:11px}
+  #frr-{{ section.id }} .frr-stars--lg svg{width:17px;height:17px}
+
+  #frr-{{ section.id }} .frr-summary{
+    display:grid; grid-template-columns:auto 1fr; gap:clamp(1.5rem,5vw,4rem); align-items:end;
+    padding-bottom:1.75rem; border-bottom:1px solid var(--color-primary);
+  }
+  #frr-{{ section.id }} .frr-score{display:flex;align-items:flex-start;gap:.4rem;line-height:.8}
+  #frr-{{ section.id }} .frr-score__num{font-family:var(--frr-display);font-weight:500;font-size:clamp(4.5rem,14vw,8rem);letter-spacing:-.04em}
+  #frr-{{ section.id }} .frr-score__den{font-family:var(--frr-display);font-size:clamp(1.1rem,3vw,1.6rem);color:var(--color-text-light);margin-top:.55em}
+  #frr-{{ section.id }} .frr-score__meta{margin-top:.9rem}
+  #frr-{{ section.id }} .frr-score__meta .frr__eyebrow{margin-top:.5rem;margin-bottom:0}
+  #frr-{{ section.id }} .frr-dist{display:flex;flex-direction:column;gap:.5rem;padding-bottom:.35rem}
+  #frr-{{ section.id }} .frr-dist__row{display:grid;grid-template-columns:2.2rem 1fr 2.6rem;align-items:center;gap:.7rem;cursor:pointer;background:none;border:none;padding:0;text-align:left;width:100%;font:inherit;color:inherit}
+  #frr-{{ section.id }} .frr-dist__row .lbl{font-family:var(--frr-mono);font-size:var(--text-xs);letter-spacing:.05em}
+  #frr-{{ section.id }} .frr-dist__bar{height:2px;background:var(--frr-hair);position:relative}
+  #frr-{{ section.id }} .frr-dist__bar span{position:absolute;inset:0 auto 0 0;background:var(--color-primary);width:var(--w,0%);transition:width .5s var(--ease-out)}
+  #frr-{{ section.id }} .frr-dist__row .pct{font-family:var(--frr-mono);font-size:var(--text-xs);color:var(--color-text-light);text-align:right}
+  #frr-{{ section.id }} .frr-dist__row:hover .lbl,#frr-{{ section.id }} .frr-dist__row:hover .pct{color:var(--color-primary)}
+
+  #frr-{{ section.id }} .frr-bar{display:flex;align-items:center;justify-content:space-between;gap:1.25rem;flex-wrap:wrap;padding:1.4rem 0;border-bottom:1px solid var(--frr-hair)}
+  #frr-{{ section.id }} .frr-inline{display:flex;align-items:center;gap:1.35rem;flex-wrap:wrap}
+  #frr-{{ section.id }} .frr-lead{font-family:var(--frr-mono);font-size:var(--text-micro);letter-spacing:.16em;text-transform:uppercase;color:var(--color-text-light)}
+  #frr-{{ section.id }} .frr-link{font-size:var(--text-xs);letter-spacing:.15em;text-transform:uppercase;color:var(--color-text-light);padding-bottom:.35rem;border:none;border-bottom:1px solid transparent;background:none;cursor:pointer;font-family:var(--font-body);transition:all .2s var(--ease-out)}
+  #frr-{{ section.id }} .frr-link:hover{color:var(--color-primary)}
+  #frr-{{ section.id }} .frr-link.is-active{color:var(--color-primary);border-bottom-color:var(--color-accent)}
+  #frr-{{ section.id }} .frr-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+
+  #frr-{{ section.id }} .frr-search{position:relative;min-width:230px;flex:1;max-width:300px}
+  #frr-{{ section.id }} .frr-search input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--frr-hair);padding:.55rem 0 .55rem 1.4rem;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-primary)}
+  #frr-{{ section.id }} .frr-search input::placeholder{color:var(--color-text-light)}
+  #frr-{{ section.id }} .frr-search input:focus{outline:none;border-bottom-color:var(--color-primary)}
+  #frr-{{ section.id }} .frr-search svg{position:absolute;left:0;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--color-text-light);fill:none}
+
+  #frr-{{ section.id }} .frr-count{font-family:var(--frr-mono);font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-light);padding:1.1rem 0 .2rem}
+  #frr-{{ section.id }} .frr-scroll-wrap{position:relative}
+  #frr-{{ section.id }} .frr-scroll{max-height:var(--frr-cap,480px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--color-text-light) transparent;-webkit-overflow-scrolling:touch}
+  #frr-{{ section.id }} .frr-scroll.is-expanded{max-height:none;overflow:visible}
+  #frr-{{ section.id }} .frr-scroll::-webkit-scrollbar{width:3px}
+  #frr-{{ section.id }} .frr-scroll::-webkit-scrollbar-thumb{background:var(--color-text-light)}
+  #frr-{{ section.id }} .frr-scroll::-webkit-scrollbar-track{background:transparent}
+  #frr-{{ section.id }} .frr-fade{position:absolute;left:0;right:6px;bottom:0;height:70px;pointer-events:none;background:linear-gradient(to bottom,rgba(241,238,230,0),var(--color-secondary));opacity:1;transition:opacity .25s ease}
+  #frr-{{ section.id }} .frr-fade.is-hidden{opacity:0}
+
+  #frr-{{ section.id }} .frr-rev{padding:1.85rem 0;border-bottom:1px solid var(--frr-hair);display:grid;gap:.5rem}
+  #frr-{{ section.id }} .frr-rev:first-child{padding-top:.6rem}
+  #frr-{{ section.id }} .frr-rev__top{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  #frr-{{ section.id }} .frr-rev__date{font-family:var(--frr-mono);font-size:var(--text-xs);color:var(--color-text-light);letter-spacing:.04em;white-space:nowrap}
+  #frr-{{ section.id }} .frr-rev__who{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-top:.1rem}
+  #frr-{{ section.id }} .frr-rev__name{font-family:var(--frr-display);font-size:1.3rem;font-weight:500;letter-spacing:-.01em;line-height:1}
+  #frr-{{ section.id }} .frr-rev__body{font-size:var(--text-lg);line-height:1.6;max-width:64ch}
+  #frr-{{ section.id }} .frr-rev__foot{font-size:var(--text-micro);letter-spacing:.16em;text-transform:uppercase;color:var(--color-text-light);margin-top:.25rem}
+  #frr-{{ section.id }} .frr-rev__body-row{display:flex;gap:1rem;align-items:flex-start}
+  #frr-{{ section.id }} .frr-rev__thumb{width:52px;height:66px;border:1px solid var(--frr-hair);flex:none;object-fit:cover;background:linear-gradient(135deg,#E7E2D6,#D4C5A9)}
+  #frr-{{ section.id }} .frr-tag{display:inline-flex;align-items:center;gap:.4em;font-size:var(--text-micro);font-weight:500;letter-spacing:.16em;text-transform:uppercase;padding:.28em .55em;border:1px solid var(--frr-hair);color:var(--color-primary);white-space:nowrap}
+
+  #frr-{{ section.id }} .frr-empty{padding:2.5rem 0;font-size:var(--text-base);color:var(--color-text-light);text-align:center}
+  #frr-{{ section.id }} .frr-more{display:flex;align-items:center;justify-content:center;padding:1.6rem 0 0}
+  #frr-{{ section.id }} .frr-toggle{display:inline-flex;align-items:center;gap:.6rem;font-size:var(--text-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--color-primary);background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:.5rem .2rem;transition:opacity .2s ease}
+  #frr-{{ section.id }} .frr-toggle:hover{opacity:.55}
+  #frr-{{ section.id }} .frr-toggle svg{width:11px;height:11px;stroke:var(--color-primary);fill:none;stroke-width:1.5;transition:transform .3s var(--ease-out)}
+  #frr-{{ section.id }} .frr-toggle.is-open svg{transform:rotate(180deg)}
+
+  @media(max-width:640px){
+    #frr-{{ section.id }} .frr-summary{grid-template-columns:1fr;align-items:start;gap:1.75rem}
+    #frr-{{ section.id }} .frr-search{max-width:none;width:100%}
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="frr-star" viewBox="0 0 24 24"><path d="M12 2.2l2.95 6.03 6.65.96-4.8 4.68 1.13 6.62L12 18.4l-5.93 3.11L7.2 14.9l-4.8-4.68 6.65-.96z"/></symbol>
+</svg>
+
+<script>
+(function(){
+  var root = document.getElementById('frr-{{ section.id }}');
+  if(!root) return;
+  var $  = function(s){return root.querySelector(s);};
+  var $$ = function(s){return Array.prototype.slice.call(root.querySelectorAll(s));};
+
+  /* ============================================================
+     REVIEW DATA — THE ONLY THING TO IMPLEMENT.
+     Return a Promise resolving to an array of Review objects:
+       { name, rating (1-5 number), verified (bool),
+         media (array of image URLs, or [] if none),
+         date (display string e.g. "22 DAYS AGO"),
+         ts (sortable number, higher = newer),
+         title (optional), body, product (optional) }
+     See REVIEWS_HANDOFF.md for the three wiring strategies.
+     The placeholder below just proves the UI; DELETE it.
+     ============================================================ */
+  /* STRATEGY A — Klaviyo Reviews client endpoint.
+     Klaviyo Reviews is the live source: the storefront loads its onsite JS and
+     renders its app block, while Judge.me ships zero scripts (the jdgm strings
+     in the page are an app-detector's regex list and a dormant web pixel).
+     Confirmed against the live storefront, not assumed.
+
+     The company id and revision are section settings so neither is buried in
+     code — Klaviyo pins breaking changes to the revision date. */
+  var KL_COMPANY  = {{ section.settings.klaviyo_company_id | default: '' | json }};
+  var KL_REVISION = {{ section.settings.klaviyo_api_revision | default: '2024-10-15' | json }};
+  var KL_ITEM_ID  = {{ product.id | json }};
+
+  /* Klaviyo's field names are read defensively. This runs in the shopper's
+     browser, which can reach a.klaviyo.com; the build environment cannot —
+     the egress policy denies that host — so the response shape could not be
+     confirmed here. Every field is optional-chained through a fallback list
+     rather than assumed, and anything unmappable degrades to a sensible value
+     instead of throwing. */
+  function pick(o){
+    for (var i=1;i<arguments.length;i++){
+      var path = arguments[i].split('.'), v = o, ok = true;
+      for (var j=0;j<path.length;j++){
+        if (v == null || !(path[j] in v)) { ok = false; break; }
+        v = v[path[j]];
+      }
+      if (ok && v != null && v !== '') return v;
+    }
+    return null;
+  }
+
+  function relativeDate(iso){
+    var t = Date.parse(iso);
+    if (isNaN(t)) return '';
+    var days = Math.max(0, Math.round((Date.now() - t) / 86400000));
+    if (days < 1)  return 'TODAY';
+    if (days < 30) return days + (days === 1 ? ' DAY AGO' : ' DAYS AGO');
+    var months = Math.round(days / 30);
+    if (months < 12) return months + (months === 1 ? ' MONTH AGO' : ' MONTHS AGO');
+    var years = Math.round(months / 12);
+    return years + (years === 1 ? ' YEAR AGO' : ' YEARS AGO');
+  }
+
+  function mapReview(r){
+    var a = (r && r.attributes) || r || {};
+    var created = pick(a, 'created', 'created_at', 'submitted_at', 'timestamp');
+    var imgs = pick(a, 'images', 'media', 'image_urls') || [];
+    if (!Array.isArray(imgs)) imgs = [imgs];
+    // A missing or unparseable rating resolves to 0 so the caller drops the row.
+    // Clamping to a minimum of 1 instead would invent a one-star review and
+    // poison the Worst sort, which is the one thing this section must get right.
+    var raw = Number(pick(a, 'rating', 'score', 'stars'));
+    var rating = (isFinite(raw) && raw > 0) ? Math.max(1, Math.min(5, Math.round(raw))) : 0;
+    return {
+      name:     pick(a, 'author', 'author_name', 'reviewer.name', 'profile.name') || 'Anonymous',
+      rating:   rating,
+      verified: !!pick(a, 'verified', 'verified_purchase', 'is_verified'),
+      media:    imgs.map(function(m){ return typeof m === 'string' ? m : pick(m, 'url', 'src', 'image_url'); })
+                    .filter(Boolean),
+      date:     relativeDate(created),
+      ts:       Date.parse(created) || 0,
+      title:    pick(a, 'title', 'headline') || '',
+      body:     pick(a, 'content', 'body', 'text', 'review') || '',
+      product:  pick(a, 'product.name', 'product_name') || ''
+    };
+  }
+
+  function getReviews(){
+    if (!KL_COMPANY) {
+      return Promise.reject(new Error('No Klaviyo company ID set on the section.'));
+    }
+    var url = 'https://a.klaviyo.com/client/reviews/?company_id=' + encodeURIComponent(KL_COMPANY) +
+              '&filter=' + encodeURIComponent('equals(item.external_id,"' + KL_ITEM_ID + '")') +
+              '&page[size]=100';
+    return fetch(url, { headers: { revision: KL_REVISION, accept: 'application/json' } })
+      .then(function(res){
+        if (!res.ok) throw new Error('Klaviyo reviews HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(json){
+        var rows = (json && json.data) || [];
+        return rows.map(mapReview).filter(function(v){ return v.rating > 0 && v.body; });
+      });
+  }
+
+  /* STRATEGY B for the summary. Shopify's standard reviews.rating and
+     rating_count metafields are populated by the review app, so the average and
+     total are known server-side and are exact — they cover every review, not
+     just the page that loaded. The distribution is not stored anywhere, so it
+     stays null and computeSummary() derives the bars from the loaded reviews. */
+  {%- assign rv_rating = product.metafields.reviews.rating.value -%}
+  {%- assign rv_count = product.metafields.reviews.rating_count.value -%}
+  var SUMMARY_OVERRIDE = null;
+  {%- if rv_rating != blank and rv_count != blank and rv_count > 0 -%}
+    SUMMARY_OVERRIDE = { average: {{ rv_rating.rating | json }}, total: {{ rv_count | json }}, dist: null };
+  {%- endif -%}
+  /* ============================================================ */
+
+  var REVIEWS = [];
+  var state = { filter:'all', sort:'relevant', q:'' };
+
+  var list=$('[data-list]'), fade=$('[data-fade]'), toggle=$('[data-toggle]'),
+      toggleText=$('[data-toggle-text]'), countEl=$('[data-count]');
+
+  root.style.setProperty('--frr-cap', (parseInt(root.dataset.collapsedHeight,10)||480)+'px');
+
+  function starMarkup(n, cls){
+    var s='<span class="frr-stars '+(cls||'')+'">';
+    for(var i=1;i<=5;i++) s+='<svg aria-hidden="true"><use href="#frr-star" class="'+(i<=n?'s-on':'s-off')+'"></use></svg>';
+    return s+'</span>';
+  }
+  function esc(t){var d=document.createElement('div');d.textContent=t==null?'':t;return d.innerHTML;}
+
+  function computeSummary(rv){
+    // The override is merged rather than returned whole: Shopify knows the true
+    // average and total but stores no distribution, so the bars still come from
+    // the loaded reviews. Returning the override outright would leave dist null
+    // and render five empty rows.
+    if (SUMMARY_OVERRIDE && SUMMARY_OVERRIDE.dist) return SUMMARY_OVERRIDE;
+    var total=rv.length, sum=0, dist={5:0,4:0,3:0,2:0,1:0};
+    rv.forEach(function(v){sum+=v.rating; if(dist[v.rating]!=null)dist[v.rating]++;});
+    var pct={}; [5,4,3,2,1].forEach(function(k){pct[k]= total? Math.round(dist[k]/total*100):0;});
+    // Shopify's average and count cover every review ever left; the loaded page
+    // may not. Prefer them for the headline figures, keep the derived bars.
+    if (SUMMARY_OVERRIDE) {
+      return {
+        average: SUMMARY_OVERRIDE.average != null ? SUMMARY_OVERRIDE.average : (total? (sum/total):0),
+        total:   SUMMARY_OVERRIDE.total   != null ? SUMMARY_OVERRIDE.total   : total,
+        dist:    pct
+      };
+    }
+    return { average: total? (sum/total):0, total: total, dist: pct };
+  }
+
+  function renderSummary(){
+    var s=computeSummary(REVIEWS);
+    $('[data-avg]').textContent = s.average ? s.average.toFixed(1) : '—';
+    var rounded=Math.round(s.average);
+    $('[data-summary-stars]').innerHTML = starMarkup(rounded,'frr-stars--lg').replace(/^<span[^>]*>|<\/span>$/g,'');
+    $('[data-total]').textContent = 'Based on '+s.total+' review'+(s.total===1?'':'s');
+    var d=$('[data-dist]'); d.innerHTML='';
+    [5,4,3,2,1].forEach(function(k){
+      var w=s.dist[k]||0;
+      var row=document.createElement('button');
+      row.className='frr-dist__row'; row.setAttribute('data-filter', k===5||k===4?String(k):'');
+      row.innerHTML='<span class="lbl">'+k+' ★</span><div class="frr-dist__bar"><span style="--w:'+w+'%"></span></div><span class="pct">'+w+'%</span>';
+      if(k===5||k===4){ row.addEventListener('click',function(){setFilter(String(k));}); }
+      else { row.style.cursor='default'; }
+      d.appendChild(row);
+    });
+  }
+
+  function apply(){
+    var out=REVIEWS.slice();
+    if(state.filter==='5') out=out.filter(function(v){return v.rating===5;});
+    else if(state.filter==='4') out=out.filter(function(v){return v.rating===4;});
+    else if(state.filter==='photos') out=out.filter(function(v){return v.media && v.media.length;});
+    if(state.q){var q=state.q.toLowerCase(); out=out.filter(function(v){return ((v.name||'')+' '+(v.title||'')+' '+(v.body||'')).toLowerCase().indexOf(q)>-1;});}
+    if(state.sort==='best') out.sort(function(a,b){return b.rating-a.rating || b.ts-a.ts;});
+    else if(state.sort==='worst') out.sort(function(a,b){return a.rating-b.rating || b.ts-a.ts;});
+    else if(state.sort==='newest') out.sort(function(a,b){return b.ts-a.ts;});
+    return out;
+  }
+
+  function render(){
+    var rows=apply();
+    var suffix=(state.filter!=='all'||state.q)?(' shown of '+REVIEWS.length):(' of '+REVIEWS.length);
+    countEl.textContent = rows.length+(rows.length===1?' review':' reviews')+suffix;
+    if(!rows.length){
+      list.innerHTML='<div class="frr-empty">No reviews match — clear the filter or search.</div>';
+    } else {
+      list.innerHTML = rows.map(function(v){
+        var hasImg = v.media && v.media.length;
+        var body = hasImg
+          ? '<div class="frr-rev__body-row"><img class="frr-rev__thumb" src="'+esc(v.media[0])+'" alt="" loading="lazy"><p class="frr-rev__body">'+esc(v.body)+'</p></div>'
+          : '<p class="frr-rev__body">'+esc(v.body)+'</p>';
+        return '<article class="frr-rev">'
+          +'<div class="frr-rev__top">'+starMarkup(v.rating,'frr-stars--sm')+'<span class="frr-rev__date">'+esc(v.date)+'</span></div>'
+          +'<div class="frr-rev__who"><span class="frr-rev__name">'+esc(v.name)+'</span>'+(v.verified?'<span class="frr-tag">Verified Buyer</span>':'')+'</div>'
+          +body
+          +'<div class="frr-rev__foot">'+esc(v.product||'')+(hasImg?' · Photo':'')+'</div>'
+          +'</article>';
+      }).join('');
+    }
+    list.scrollTop=0;
+    updateOverflow();
+  }
+
+  function updateOverflow(){
+    var expanded=list.classList.contains('is-expanded');
+    var overflowing=list.scrollHeight > list.clientHeight+4;
+    if(expanded){ fade.classList.add('is-hidden'); toggle.style.display='inline-flex'; }
+    else{ fade.classList.toggle('is-hidden', !overflowing); toggle.style.display=overflowing?'inline-flex':'none'; }
+  }
+  list.addEventListener('scroll',function(){
+    if(list.classList.contains('is-expanded'))return;
+    var atBottom=list.scrollTop+list.clientHeight>=list.scrollHeight-4;
+    fade.classList.toggle('is-hidden', atBottom);
+  });
+
+  function setFilter(f){
+    state.filter=f;
+    $$('[data-filters] .frr-link').forEach(function(x){x.classList.toggle('is-active',x.dataset.filter===f);});
+    render();
+  }
+  $('[data-filters]').addEventListener('click',function(e){
+    var b=e.target.closest('[data-filter]'); if(!b)return; setFilter(b.dataset.filter);
+  });
+  $('[data-sorts]').addEventListener('click',function(e){
+    var b=e.target.closest('[data-sort]'); if(!b)return;
+    state.sort=b.dataset.sort;
+    $$('[data-sorts] .frr-link').forEach(function(x){x.classList.toggle('is-active',x===b);});
+    render();
+  });
+  $('[data-search]').addEventListener('input',function(e){state.q=e.target.value.trim();render();});
+  toggle.addEventListener('click',function(){
+    var open=!list.classList.contains('is-expanded');
+    list.classList.toggle('is-expanded',open);
+    toggle.classList.toggle('is-open',open);
+    toggle.setAttribute('aria-expanded',open);
+    toggleText.textContent=open?'Collapse reviews':'Expand all reviews';
+    if(!open)list.scrollTop=0;
+    updateOverflow();
+  });
+  window.addEventListener('resize',updateOverflow);
+
+  getReviews().then(function(rv){
+    REVIEWS = Array.isArray(rv)?rv:[];
+    renderSummary();
+    render();
+  }).catch(function(err){
+    console.error('[FR reviews] getReviews failed:', err);
+    list.innerHTML='<div class="frr-empty">Reviews are unavailable right now.</div>';
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Reviews (Masthead)",
+  "class": "section-frr-reviews",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Eyebrow label", "default": "Customer Reviews" },
+    { "type": "header", "content": "Klaviyo Reviews" },
+    { "type": "paragraph", "content": "Reviews are fetched from Klaviyo's client-side Reviews endpoint. The company ID is the public onsite ID already in your storefront script tag — not a private API key, and safe to expose. The summary average and count come from Shopify's own reviews metafields, so they stay correct even if the list fails to load." },
+    { "type": "text", "id": "klaviyo_company_id", "label": "Klaviyo company ID", "default": "WuWz5B" },
+    { "type": "text", "id": "klaviyo_api_revision", "label": "Klaviyo API revision", "info": "Klaviyo pins breaking changes to this date. Bump it only after checking their changelog.", "default": "2024-10-15" },
+    { "type": "range", "id": "collapsed_height", "label": "Collapsed height (px)", "min": 320, "max": 900, "step": 20, "default": 480,
+      "info": "Height of the review list before it scrolls internally / is expanded. ~480px ≈ 3 reviews." }
+  ],
+  "presets": [ { "name": "Reviews (Masthead)" } ]
+}
+{% endschema %}
