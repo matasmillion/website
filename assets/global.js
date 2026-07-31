@@ -908,6 +908,51 @@
   const fmtDate = (d) =>
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
+  // Calendar days from the shopper's today to an arrival date. Both ends are
+  // flattened to midnight because arrival is a date, not an instant, and
+  // rounding absorbs the 23/25-hour days either side of a DST switch.
+  const daysUntil = (target) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const t = new Date(target.getTime());
+    t.setHours(0, 0, 0, 0);
+    return Math.round((t.getTime() - today.getTime()) / 86400000);
+  };
+
+  // Phrase arrival the way Shop Promise does — "tomorrow" lands faster than
+  // "Tue, Aug 4". Measured against the SHOPPER's calendar, not the warehouse's:
+  // tomorrow has to mean tomorrow to whoever is reading it.
+  const fmtRelative = (d) => {
+    const days = daysUntil(d);
+    // Only reachable if the shopper's zone runs ahead of the warehouse's.
+    // "Today" is too strong a claim to make on a timezone artefact.
+    if (days <= 0) return fmtDate(d);
+    if (days === 1) return 'tomorrow';
+    const weekday = d.toLocaleDateString(undefined, { weekday: 'long' });
+    if (days < 7) return weekday;
+    if (days < 14) return 'next ' + weekday;
+    // Past a fortnight "next Tuesday" stops carrying information, and ROW
+    // windows run 10–20 days, so those resolve to a real date.
+    return fmtDate(d);
+  };
+
+  // Assembled as nodes, never innerHTML — the zip is read back from
+  // localStorage, which is shopper-supplied and tamperable.
+  const setLine = (el, parts) => {
+    el.textContent = '';
+    parts.forEach((part) => {
+      const str = part[0];
+      if (!str) return;
+      if (part[1]) {
+        const strong = document.createElement('strong');
+        strong.textContent = str;
+        el.appendChild(strong);
+      } else {
+        el.appendChild(document.createTextNode(str));
+      }
+    });
+  };
+
   // Arrival windows drop the weekday — two of them side by side with the tier
   // label is already a lot of characters for a 390px viewport.
   const fmtShort = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -942,7 +987,12 @@
 
       const renderUrgency = () => {
         if (!text) return 0;
-        const by = addBusinessDays(startFor(), parseInt(cfg.standardMax, 10) || 5);
+        // The fastest lane the shopper could pick, not the slowest — the line
+        // says "as early as". Express is the paid tier; markets without one
+        // (ROW) fall back to the quick end of standard.
+        const fastest =
+          parseInt(cfg.expressMax, 10) || parseInt(cfg.standardMin, 10) || 2;
+        const by = addBusinessDays(startFor(), fastest);
         // Only ever a hint: the zip is known solely after someone has used the
         // estimator, so first-time visitors get the line without a destination.
         let dest = '';
@@ -956,12 +1006,23 @@
         // A weekend countdown would be theatre: nothing dispatches until Monday,
         // so beating "3h" changes no date on the page.
         const left = weekend ? 0 : minsToCutoff(now, cutoff);
-        // Outcome first, deadline second — the date is what the shopper wants,
-        // the countdown is only the condition attached to it.
+        // The countdown and the arrival both render bold — they are the only
+        // two values on the line a shopper actually acts on.
+        const arrival = fmtRelative(by);
         if (left > 0) {
-          text.textContent = `Get it${dest} by ${fmtDate(by)} — order within ${fmtCountdown(left)}`;
+          setLine(text, [
+            ['Order within ', false],
+            [fmtCountdown(left), true],
+            [' to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
         } else {
-          text.textContent = `Get it${dest} by ${fmtDate(by)} — order today`;
+          setLine(text, [
+            ['Order today to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
           // Past the cutoff the line is static; nothing left to count down to.
           if (timer) { clearInterval(timer); timer = null; }
         }

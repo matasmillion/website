@@ -945,6 +945,13 @@
   margin-bottom: 1rem;
 }
 
+/* The countdown and the arrival date. Pinned to the theme scale so <strong>
+   doesn't fall through to the browser default of 700. */
+.pdp__urgency strong {
+  font-weight: var(--font-weight-semibold);
+  color: #1A191C;
+}
+
 /* Shop Promise resolved its own delivery estimate, so ours stands down. Class
    rather than [hidden] — the display rule above outranks the attribute. */
 .pdp__urgency.is-superseded { display: none; }
