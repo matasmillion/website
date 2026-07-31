@@ -1013,15 +1013,13 @@
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // The band rides the viewport bottom, then comes to rest on top of Foreign
-    // Engineering and scrolls away with the page. Parking at Foreign
-    // Engineering rather than Complete the Look is deliberate: the imagery is
-    // full-bleed and the band must never sit over it.
-    // Raising `bottom` by however far that section has entered the viewport
-    // pins the band's base to its top edge.
+    // The band rides the viewport bottom, then comes to rest on top of Complete
+    // the Look and scrolls away with the page — so it ends up sitting *after*
+    // Foreign Engineering, not stacked above it. Raising `bottom` by however far
+    // that section has entered the viewport pins the band's base to its top edge.
     const boundary =
-      document.querySelector('.section-fr-engineering') ||
-      document.querySelector('.section-pdp-complete-the-look');
+      document.querySelector('.section-pdp-complete-the-look') ||
+      document.querySelector('.section-fr-engineering');
     if (!boundary) return;
 
     const syncHeight = () => {
