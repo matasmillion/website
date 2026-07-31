@@ -99,52 +99,9 @@
     },
     "engineering": {
       "type": "fr-engineering",
-      "blocks": {
-        "card_mCKrBc": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/FW25AL006_CRESCENTSHOULDERBAG_JETBLACK-ESPRESSO_1_3200x_5dfaf4fd-b26d-47b1-803e-8e053a59c7cd.webp",
-            "title": "Embroidered belt loop",
-            "subtitle": "The details that matter.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_1": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/bagfix_open_v1.jpg",
-            "title": "Embroidered belt loop",
-            "subtitle": "The details that matter.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_2": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/4x5_FW24D1_ACC_FW24FD002_SCARLET_1204_3200x_0a20c05e-143d-4250-9083-6eb9b54514b6.webp",
-            "title": "Branded zipper puller",
-            "subtitle": "A little bling never hurt.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_3": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/Screenshot_2026-07-24_at_9.34.40_PM.png",
-            "title": "Zip-off shorts",
-            "subtitle": "Any weather, any time.",
-            "text_position": "bottom-left"
-          }
-        }
-      },
-      "block_order": [
-        "card_mCKrBc",
-        "card_1",
-        "card_2",
-        "card_3"
-      ],
       "settings": {
-        "label": "Foreign Engineering"
+        "label": "Foreign Engineering",
+        "text_position": "bottom-left"
       }
     },
     "complete_the_look": {

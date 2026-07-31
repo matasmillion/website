@@ -9,18 +9,33 @@
 
   The "FOREIGN ENGINEERING" label appears on the FIRST card only.
 
-  Cards are blocks now; a later pass swaps the source to product metafields
-  without changing this markup.
+  SOURCE: product metafields, four slots. A product with none of them renders no
+  section at all rather than a generic set shared by the whole catalogue.
+
+  The markup below is unchanged from the block-driven version on purpose:
+  component-fr-engineering.css and initOverlayContrast in global.js both key off
+  .fre__card / .fre__img, and the salt-or-slate contrast measurement breaks the
+  moment those selectors move.
 {%- endcomment -%}
 
 {%- liquid
-  assign cards = section.blocks | where: 'type', 'card'
+  # WATCH THE FIRST ENTRY. Slot 1's image lives at custom.detail_1 — it predates
+  # the foreign_engineering_N naming and was never migrated. The two lists below
+  # are identical except at index 0, and a single shared list built from the
+  # obvious convention would silently render slot 1 empty.
+  assign fe_imgs = 'detail_1,foreign_engineering_2,foreign_engineering_3,foreign_engineering_4' | split: ','
+  assign fe_copy = 'foreign_engineering_1,foreign_engineering_2,foreign_engineering_3,foreign_engineering_4' | split: ','
+
+  # Counts .value, not the metafield object, so a definition pointing at a
+  # deleted file cannot open an empty section with no cards in it.
   assign filled = 0
-  for block in cards
-    if block.settings.image != blank
+  for key in fe_imgs
+    if product.metafields.custom[key].value != blank
       assign filled = filled | plus: 1
     endif
   endfor
+
+  assign text_pos = section.settings.text_position | default: 'bottom-left'
 -%}
 
 {%- if filled > 0 -%}
@@ -29,23 +44,30 @@
   <section class="fre reveal">
     <div class="fre__track" data-fre-track>
       {%- assign card_i = 0 -%}
-      {%- for block in cards -%}
-        {%- comment -%} A card with no image would render an empty flex child {%- endcomment -%}
-        {%- if block.settings.image == blank -%}{%- continue -%}{%- endif -%}
+      {%- for img_key in fe_imgs -%}
+        {%- assign fe_image = product.metafields.custom[img_key].value -%}
 
-        <article
-          class="fre__card fre__card--{{ block.settings.text_position | default: 'bottom-left' }}"
-          {{ block.shopify_attributes }}
-        >
+        {%- comment -%} A slot with no image would render an empty flex child {%- endcomment -%}
+        {%- if fe_image == blank -%}{%- continue -%}{%- endif -%}
+
+        {%- liquid
+          assign copy_key = fe_copy[forloop.index0]
+          assign title_key = copy_key | append: '_title'
+          assign body_key = copy_key | append: '_body'
+          assign fe_title = product.metafields.custom[title_key].value
+          assign fe_body = product.metafields.custom[body_key].value
+        -%}
+
+        <article class="fre__card fre__card--{{ text_pos }}">
           <img
             class="fre__img"
-            src="{{ block.settings.image | image_url: width: 1400 }}"
-            srcset="{{ block.settings.image | image_url: width: 700 }} 700w,
-                    {{ block.settings.image | image_url: width: 1400 }} 1400w"
+            src="{{ fe_image | image_url: width: 1400 }}"
+            srcset="{{ fe_image | image_url: width: 700 }} 700w,
+                    {{ fe_image | image_url: width: 1400 }} 1400w"
             sizes="(min-width: 769px) 26vw, 86vw"
-            alt="{{ block.settings.title | default: section.settings.label | escape }}"
-            width="{{ block.settings.image.width }}"
-            height="{{ block.settings.image.height }}"
+            alt="{{ fe_title | default: section.settings.label | escape }}"
+            width="{{ fe_image.width }}"
+            height="{{ fe_image.height }}"
             loading="lazy"
           >
 
@@ -53,13 +75,17 @@
             <span class="fre__label">{{ section.settings.label }}</span>
           {%- endif -%}
 
-          {%- if block.settings.title != blank or block.settings.subtitle != blank -%}
+          {%- comment -%}
+            Slots with no copy yet render as a bare image. The guard is what
+            makes that a clean full-bleed card instead of an empty overlay box.
+          {%- endcomment -%}
+          {%- if fe_title != blank or fe_body != blank -%}
             <div class="fre__copy">
-              {%- if block.settings.title != blank -%}
-                <h3 class="fre__title">{{ block.settings.title }}</h3>
+              {%- if fe_title != blank -%}
+                <h3 class="fre__title">{{ fe_title }}</h3>
               {%- endif -%}
-              {%- if block.settings.subtitle != blank -%}
-                <p class="fre__subtitle">{{ block.settings.subtitle }}</p>
+              {%- if fe_body != blank -%}
+                <p class="fre__subtitle">{{ fe_body | newline_to_br }}</p>
               {%- endif -%}
             </div>
           {%- endif -%}
@@ -75,41 +101,34 @@
 {
   "name": "Foreign Engineering",
   "class": "section-fr-engineering",
-  "max_blocks": 5,
   "settings": [
+    {
+      "type": "paragraph",
+      "content": "Cards come from the product's Foreign Engineering metafields (image, title and body for slots 1–4). A product with no images set hides this section entirely."
+    },
     {
       "type": "text",
       "id": "label",
       "label": "Label (first card only)",
       "default": "Foreign Engineering"
-    }
-  ],
-  "blocks": [
+    },
     {
-      "type": "card",
-      "name": "Card",
-      "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "title", "label": "Title", "default": "Embroidered belt loop" },
-        { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "The details that matter." },
-        {
-          "type": "select",
-          "id": "text_position",
-          "label": "Text position",
-          "options": [
-            { "value": "top-left", "label": "Top left" },
-            { "value": "top-center", "label": "Top centre" },
-            { "value": "top-right", "label": "Top right" },
-            { "value": "middle-left", "label": "Middle left" },
-            { "value": "middle-center", "label": "Middle centre" },
-            { "value": "middle-right", "label": "Middle right" },
-            { "value": "bottom-left", "label": "Bottom left" },
-            { "value": "bottom-center", "label": "Bottom centre" },
-            { "value": "bottom-right", "label": "Bottom right" }
-          ],
-          "default": "bottom-left"
-        }
-      ]
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "info": "Applies to every card — the metafields carry the copy, not its placement.",
+      "options": [
+        { "value": "top-left", "label": "Top left" },
+        { "value": "top-center", "label": "Top centre" },
+        { "value": "top-right", "label": "Top right" },
+        { "value": "middle-left", "label": "Middle left" },
+        { "value": "middle-center", "label": "Middle centre" },
+        { "value": "middle-right", "label": "Middle right" },
+        { "value": "bottom-left", "label": "Bottom left" },
+        { "value": "bottom-center", "label": "Bottom centre" },
+        { "value": "bottom-right", "label": "Bottom right" }
+      ],
+      "default": "bottom-left"
     }
   ],
   "presets": [{ "name": "Foreign Engineering" }]
