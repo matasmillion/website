@@ -1015,13 +1015,13 @@
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // The band rides the viewport bottom, then comes to rest on top of Complete
-    // the Look and scrolls away with the page — so it ends up sitting *after*
-    // Foreign Engineering, not stacked above it. Raising `bottom` by however far
-    // that section has entered the viewport pins the band's base to its top edge.
+    // FOREIGN ENGINEERING is full-bleed imagery and the band must never sit on
+    // top of it. A fixed element cannot both cross that section and stay clear
+    // of it, so the band retires the moment the section reaches the viewport
+    // and returns if you scroll back up into the product details.
     const boundary =
-      document.querySelector('.section-pdp-complete-the-look') ||
-      document.querySelector('.section-fr-engineering');
+      document.querySelector('.section-fr-engineering') ||
+      document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;
 
     const syncHeight = () => {
@@ -1033,9 +1033,10 @@
     let ticking = false;
     const place = () => {
       ticking = false;
+      // Hide as soon as the section's first pixel crosses the viewport bottom,
+      // which is exactly where the band's own top edge sits.
       const top = boundary.getBoundingClientRect().top;
-      const overlap = window.innerHeight - top;
-      band.style.bottom = overlap > 0 ? overlap + 'px' : '0px';
+      band.classList.toggle('is-hidden', top <= window.innerHeight);
     };
 
     const onScroll = () => {

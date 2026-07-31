@@ -480,7 +480,16 @@
               {%- for line in term_lines -%}
                 {%- assign term = line | strip -%}
                 {%- if term != blank -%}
-                  <li class="pdp__returns-term">{{ term }}</li>
+                  {%- assign parts = term | split: '|' -%}
+                  {%- if parts.size > 1 -%}
+                    <li class="pdp__returns-term">
+                      <span class="pdp__returns-term-label">{{ parts[0] | strip }}</span>
+                      <span class="pdp__returns-term-value">{{ parts[1] | strip }}</span>
+                    </li>
+                  {%- else -%}
+                    {%- comment -%} No pipe: render the line as-is, full width. {%- endcomment -%}
+                    <li class="pdp__returns-term pdp__returns-term--plain">{{ term }}</li>
+                  {%- endif -%}
                 {%- endif -%}
               {%- endfor -%}
             </ul>
@@ -672,8 +681,8 @@
       "type": "textarea",
       "id": "returns_terms",
       "label": "Terms (one per line)",
-      "info": "Ranked best to worst. Rendered as a divided list — do not type dashes between them.",
-      "default": "Free Exchanges\nFree Returns (for store credit)\n$35 Flat Fee Refunds to Card"
+      "info": "Format: Label|Value — label left, value right. Ranked best to worst. Rendered as a divided table, so do not type dashes between them.",
+      "default": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35"
     },
     {
       "type": "text",
