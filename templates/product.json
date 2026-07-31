@@ -12,10 +12,23 @@
     "product_info": {
       "type": "product-info",
       "blocks": {
+        "row_packaging": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Our Packaging",
+            "open_by_default": true,
+            "content": "<p>All our packaging is made of 100% biodegradable and FSC certified paper. All products come inside a 100% organic cotton dust bag with custom logo embroidery. </p>",
+            "swatches": "",
+            "image": "shopify://shop_images/bf2fb898271225.5ed85b600432b.gif",
+            "link_label": "More on our packaging",
+            "link_url": "/pages/packaging"
+          }
+        },
         "row_fabric": {
           "type": "detail_row",
           "settings": {
             "heading": "Our Fabrics",
+            "open_by_default": false,
             "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
             "swatches": "",
             "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
@@ -27,22 +40,11 @@
           "type": "detail_row",
           "settings": {
             "heading": "Our Colors",
+            "open_by_default": false,
             "content": "<p>Six elemental colours we build everything around, chosen to work with each other — so anything you own layers with anything else, wherever you happen to be that morning.</p>",
             "swatches": "Slate|#4A4E54|The cool grey of wet stone. The anchor of the wardrobe.\nSalt|#F2EFE9|Undyed, unbleached off-white. Reads clean against everything.\nSand|#D4C5A9|Warm neutral pulled from dry coastline. Softens a dark fit.\nSea|#3B5566|Deep and muted, closer to deep water than to navy.\nSoil|#6B5744|Earth brown. Grounds a look without going black.\nSakura|#D9B3B3|The one signal colour. Used sparingly, on purpose.",
             "link_label": "Explore the Colour Codex",
             "link_url": "/pages/color-codex"
-          }
-        },
-        "row_packaging": {
-          "type": "detail_row",
-          "settings": {
-            "heading": "Our Packaging",
-            "open_by_default": true,
-            "content": "<p>Arrives in a rigid box worth keeping, wrapped in biodegradable paper with paper tape. No plastic — it breaks down instead of lingering.</p>",
-            "swatches": "",
-            "image": "shopify://shop_images/bf2fb898271225.5ed85b600432b.gif",
-            "link_label": "More on our packaging",
-            "link_url": "/pages/packaging"
           }
         },
         "smartsize_smartsize_sizechart_azcYpH": {
@@ -88,16 +90,16 @@
         "low_stock_threshold": 5,
         "installments_url": "",
         "hide_shop_promise": false,
+        "standard_label": "Foreign Air",
+        "standard_price": "$10",
+        "express_label": "Express Air",
+        "express_price": "$20",
         "standard_min": 3,
         "standard_max": 5,
         "express_min": 1,
         "express_max": 2,
         "cutoff_hour": 13,
         "delivery_timezone": "America/Los_Angeles",
-        "standard_label": "Foreign Air",
-        "standard_price": "$10",
-        "express_label": "Express Air",
-        "express_price": "$20",
         "size_chart_content": ""
       }
     },
