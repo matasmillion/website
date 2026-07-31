@@ -56,12 +56,7 @@
         "delivery_rates": "US|3|5|1|2|$10|$20",
         "cutoff_hour": 12,
         "delivery_timezone": "America/Los_Angeles",
-        "size_chart_content": "",
-        "returns_rules": "US|14|Free|Free|$35",
-        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
-        "returns_label_exchange": "Exchange",
-        "returns_label_credit": "Return · Store credit",
-        "returns_label_card": "Return · To card"
+        "size_chart_content": ""
       }
     },
     "guarantees": {
@@ -218,10 +213,7 @@
       "type": "product-recommendations",
       "settings": {
         "heading": "You may also like",
-        "products_count": 4,
-        "show_collections": true,
-        "more_heading": "View more",
-        "exclude_handles": "for-shopify-performance-tracking"
+        "products_count": 4
       }
     },
     "brand_story_GAGwDD": {
