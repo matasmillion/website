@@ -1198,7 +1198,11 @@
       set('[data-returns-credit]', r.cr);
       set('[data-returns-card]', r.cd);
       if (intro) {
-        const tpl = intro.dataset.template || '';
+        // Carries the fallback because Liquid cannot: a literal {days} inside a
+        // {{ }} output tag fails to parse, so the section ships the setting
+        // bare and the default belongs here.
+        const tpl = intro.dataset.template ||
+          'You have {days} days from the date of delivery to return or exchange items.';
         intro.textContent = tpl.replace('{days}', r.days);
       }
     };
