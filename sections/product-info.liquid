@@ -399,7 +399,13 @@
         </a>
       {%- endif -%}
 
-      {%- comment -%} ===== TABS ===== {% endcomment -%}
+      {%- comment -%}
+        ===== TABS =====
+        Story · Sizing · Fabric · Shipping · Returns. Fabric appears only where
+        the product carries a custom.fabric metafield, so the tab count varies
+        by product — the JS pairs buttons to panels by name over whatever is
+        present rather than assuming a fixed set.
+      {%- endcomment -%}
       {%- comment -%}
         Panels start closed — clicking a tab slides its panel in, clicking the
         active tab again closes it.
