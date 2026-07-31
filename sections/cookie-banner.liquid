@@ -3,7 +3,7 @@
 {%- liquid
   assign s = section.settings
   assign position = s.position | default: 'bottom'
-  assign action_style = s.action_style | default: 'links'
+  assign action_style = s.action_style | default: 'buttons'
 
   # Falls back to the store's own privacy policy so the link works untouched.
   assign policy_url = s.policy_link | default: shop.privacy_policy.url
@@ -184,7 +184,7 @@
       "id": "separator_text",
       "label": "Word between the actions",
       "default": "or",
-      "info": "Leave blank to remove it."
+      "info": "Only used by the text-link style. Leave blank to remove it."
     },
     {
       "type": "text",
@@ -235,10 +235,10 @@
       "id": "action_style",
       "label": "Action style",
       "options": [
-        { "value": "links", "label": "Text links (quietest)" },
-        { "value": "buttons", "label": "Buttons" }
+        { "value": "buttons", "label": "Buttons" },
+        { "value": "links", "label": "Text links (quietest)" }
       ],
-      "default": "links"
+      "default": "buttons"
     },
     {
       "type": "color",
