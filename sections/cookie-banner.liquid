@@ -4,6 +4,9 @@
   assign s = section.settings
   assign position = s.position | default: 'bottom'
   assign action_style = s.action_style | default: 'links'
+
+  # Falls back to the store's own privacy policy so the link works untouched.
+  assign policy_url = s.policy_link | default: shop.privacy_policy.url
 -%}
 
 {%- if s.enabled -%}
@@ -19,8 +22,8 @@
     <div class="cookie-banner__inner">
       <p class="cookie-banner__text">
         {{ s.message }}
-        {%- if s.show_policy_link and s.policy_link != blank -%}
-          <a href="{{ s.policy_link }}" class="cookie-banner__policy">{{ s.policy_link_text }}</a>
+        {%- if s.show_policy_link and policy_url != blank -%}
+          <a href="{{ policy_url }}" class="cookie-banner__policy">{{ s.policy_link_text }}</a>
         {%- endif -%}
       </p>
 
@@ -204,7 +207,8 @@
     {
       "type": "url",
       "id": "policy_link",
-      "label": "Privacy policy link"
+      "label": "Privacy policy link",
+      "info": "Leave blank to use the store's own privacy policy page."
     },
     {
       "type": "text",
