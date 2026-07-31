@@ -115,26 +115,33 @@
           {%- form 'localization', id: 'footer-country-form', class: 'footer__loc-form' -%}
             <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-country">Shipping Country</label>
-            <select id="footer-country" name="country_code" data-loc-select>
-              {%- for country in localization.available_countries -%}
-                <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
-                  {{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
-                </option>
-              {%- endfor -%}
-            </select>
+            <span class="footer__loc-field">
+              {%- comment -%} Sizer: see .footer__loc-field in the stylesheet {%- endcomment -%}
+              <span class="footer__loc-sizer" aria-hidden="true">{{ localization.country.name }} ({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }})</span>
+              <select id="footer-country" name="country_code" data-loc-select>
+                {%- for country in localization.available_countries -%}
+                  <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                    {{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+                  </option>
+                {%- endfor -%}
+              </select>
+            </span>
           {%- endform -%}
         {%- endif -%}
         {%- if localization.available_languages.size > 0 -%}
           {%- form 'localization', id: 'footer-language-form', class: 'footer__loc-form' -%}
             <input type="hidden" name="return_to" value="{{ request.path }}">
             <label for="footer-language">Language</label>
-            <select id="footer-language" name="locale_code" data-loc-select>
-              {%- for language in localization.available_languages -%}
-                <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
-                  {{ language.endonym_name | capitalize }}
-                </option>
-              {%- endfor -%}
-            </select>
+            <span class="footer__loc-field">
+              <span class="footer__loc-sizer" aria-hidden="true">{{ localization.language.endonym_name | capitalize }}</span>
+              <select id="footer-language" name="locale_code" data-loc-select>
+                {%- for language in localization.available_languages -%}
+                  <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
+                    {{ language.endonym_name | capitalize }}
+                  </option>
+                {%- endfor -%}
+              </select>
+            </span>
           {%- endform -%}
         {%- endif -%}
       </div>
@@ -416,22 +423,61 @@
     padding: var(--space-lg) 0;
   }
   /* Each control is its own flex row so the label can never break above the
-     select — a plain form would let the long country name push it down. */
+     select — a plain form would let the long country name push it down.
+     It must still be allowed to shrink: a select sizes itself to its widest
+     option, and the country list holds names far wider than a phone. */
   .footer__loc-form {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
   }
   .footer__loc-form label {
     font-size: var(--text-sm);
     color: var(--color-primary);
     white-space: nowrap;
   }
+  /* A select sizes itself to its widest option, so 237 country names left a
+     long empty underline trailing off to the right. The hidden sizer carries
+     the CURRENT value and sets the width instead: the control fits its
+     selection and grows only when the selection is longer. Changing either
+     control reloads the page, so Liquid re-renders the sizer in step and no
+     JS is needed to keep the two matched. */
+  .footer__loc-field {
+    position: relative;
+    display: inline-block;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* The sizer alone defines the width; the select is taken out of flow so its
+     own widest option cannot contribute. Padding here must match the select's
+     so the underline and hit area line up. */
+  .footer__loc-sizer {
+    display: block;
+    visibility: hidden;
+    white-space: nowrap;
+    overflow: hidden;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    padding: 0.35rem 1.25rem 0.35rem 0;
+  }
+  .footer__loc-form select {
+    position: absolute;
+    inset: 0;
+  }
   .footer__loc-form select {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-primary);
+    /* Shrink to the space available and clip the label rather than letting the
+       widest country name drag the underline off the side of the screen. */
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
     background: none;
     border: none;
     border-bottom: 1px solid var(--color-primary);
