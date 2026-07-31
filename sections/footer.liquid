@@ -416,12 +416,16 @@
     padding: var(--space-lg) 0;
   }
   /* Each control is its own flex row so the label can never break above the
-     select — a plain form would let the long country name push it down. */
+     select — a plain form would let the long country name push it down.
+     It must still be allowed to shrink: a select sizes itself to its widest
+     option, and the country list holds names far wider than a phone. */
   .footer__loc-form {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
   }
   .footer__loc-form label {
     font-size: var(--text-sm);
@@ -432,6 +436,12 @@
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-primary);
+    /* Shrink to the space available and clip the label rather than letting the
+       widest country name drag the underline off the side of the screen. */
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
     background: none;
     border: none;
     border-bottom: 1px solid var(--color-primary);
