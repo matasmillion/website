@@ -440,7 +440,16 @@
         </div>
 
         {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
+        {%- comment -%}
+          Stripped to the zip gate on purpose: free-shipping line, then the
+          estimator, then nothing. The date only gets read if it is the only
+          thing to read, so resist re-adding transit tables, express tiers or
+          payment-method copy here — payment icons already live at checkout.
+        {%- endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
+          {%- assign free_ship = settings.free_shipping_threshold | default: 150 -%}
+          <p class="pdp__tab-meta">Complimentary shipping on orders over ${{ free_ship }}.</p>
+
           {%- render 'delivery-estimator',
             standard_min: section.settings.standard_min,
             standard_max: section.settings.standard_max,
@@ -448,14 +457,6 @@
             express_max: section.settings.express_max,
             cutoff_hour: section.settings.cutoff_hour
           -%}
-
-          {%- if section.settings.delivery_text != blank -%}
-            <p class="pdp__tab-meta">{{ section.settings.delivery_text }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-meta">Complimentary shipping on orders over $150.</p>
-
-          <p class="dest__label">Secure payment</p>
-          <p class="pdp__tab-meta">Credit card, PayPal, Shop Pay</p>
         </div>
 
         {%- comment -%} ===== RETURNS ===== {% endcomment -%}
@@ -625,12 +626,6 @@
       "type": "url",
       "id": "appointment_link",
       "label": "Appointment page link"
-    },
-    {
-      "type": "text",
-      "id": "delivery_text",
-      "label": "Delivery estimate text",
-      "default": "Order today for delivery within 5 business days"
     },
     {
       "type": "url",
