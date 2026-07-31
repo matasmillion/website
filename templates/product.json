@@ -12,41 +12,6 @@
     "product_info": {
       "type": "product-info",
       "blocks": {
-        "row_packaging": {
-          "type": "detail_row",
-          "settings": {
-            "heading": "Our Packaging",
-            "open_by_default": true,
-            "content": "<p>All our packaging is made of 100% biodegradable and FSC certified paper. All products come inside a 100% organic cotton dust bag with custom logo embroidery. </p>",
-            "swatches": "",
-            "image": "shopify://shop_images/bf2fb898271225.5ed85b600432b.gif",
-            "link_label": "More on our packaging",
-            "link_url": "/pages/packaging"
-          }
-        },
-        "row_fabric": {
-          "type": "detail_row",
-          "settings": {
-            "heading": "Our Fabrics",
-            "open_by_default": false,
-            "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
-            "swatches": "",
-            "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
-            "link_label": "",
-            "link_url": ""
-          }
-        },
-        "row_color": {
-          "type": "detail_row",
-          "settings": {
-            "heading": "Our Colors",
-            "open_by_default": false,
-            "content": "<p>Six elemental colours we build everything around, chosen to work with each other — so anything you own layers with anything else, wherever you happen to be that morning.</p>",
-            "swatches": "Slate|#4A4E54|The cool grey of wet stone. The anchor of the wardrobe.\nSalt|#F2EFE9|Undyed, unbleached off-white. Reads clean against everything.\nSand|#D4C5A9|Warm neutral pulled from dry coastline. Softens a dark fit.\nSea|#3B5566|Deep and muted, closer to deep water than to navy.\nSoil|#6B5744|Earth brown. Grounds a look without going black.\nSakura|#D9B3B3|The one signal colour. Used sparingly, on purpose.",
-            "link_label": "Explore the Colour Codex",
-            "link_url": "/pages/color-codex"
-          }
-        },
         "smartsize_smartsize_sizechart_azcYpH": {
           "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
           "settings": {
@@ -68,9 +33,6 @@
         }
       },
       "block_order": [
-        "row_packaging",
-        "row_fabric",
-        "row_color",
         "smartsize_smartsize_sizechart_azcYpH"
       ],
       "settings": {
@@ -286,15 +248,82 @@
       ],
       "disabled": true,
       "settings": {}
+    },
+    "company_details": {
+      "type": "pdp-company-details",
+      "blocks": {
+        "row_packaging": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Our Packaging",
+            "open_by_default": true,
+            "content": "<p>All our packaging is made of 100% biodegradable and FSC certified paper. All products come inside a 100% organic cotton dust bag with custom logo embroidery. </p>",
+            "swatches": "",
+            "image": "shopify://shop_images/bf2fb898271225.5ed85b600432b.gif",
+            "link_label": "More on our packaging",
+            "link_url": "/pages/packaging"
+          }
+        },
+        "row_fabric": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Our Fabrics",
+            "open_by_default": false,
+            "content": "<p>100% organic cotton and sherpa cotton, treated with peppermint oil so it stays fresher between washes. Grown with natural and renewable fibres — no synthetic pesticides or growth hormones.</p>",
+            "swatches": "",
+            "image": "shopify://shop_images/Organic_cotton_vs_regular_cotton_-_Should_you_buy_organic_cotton_products-main-image_1200x1200_5e13df55-b05a-4503-9755-0b71fd736f72.webp",
+            "link_label": "",
+            "link_url": ""
+          }
+        },
+        "row_color": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Our Colors",
+            "open_by_default": false,
+            "content": "<p>Six elemental colours we build everything around, chosen to work with each other — so anything you own layers with anything else, wherever you happen to be that morning.</p>",
+            "swatches": "Slate|#4A4E54|The cool grey of wet stone. The anchor of the wardrobe.\nSalt|#F2EFE9|Undyed, unbleached off-white. Reads clean against everything.\nSand|#D4C5A9|Warm neutral pulled from dry coastline. Softens a dark fit.\nSea|#3B5566|Deep and muted, closer to deep water than to navy.\nSoil|#6B5744|Earth brown. Grounds a look without going black.\nSakura|#D9B3B3|The one signal colour. Used sparingly, on purpose.",
+            "link_label": "Explore the Colour Codex",
+            "link_url": "/pages/color-codex"
+          }
+        }
+      },
+      "block_order": [
+        "row_packaging",
+        "row_fabric",
+        "row_color"
+      ],
+      "settings": {
+        "heading": ""
+      }
+    },
+    "band_rest": {
+      "type": "pdp-band-rest",
+      "settings": {
+        "gap": 0
+      }
+    },
+    "you_may_also_like": {
+      "type": "product-recommendations",
+      "settings": {
+        "heading": "You may also like",
+        "products_count": 4,
+        "show_collections": true,
+        "more_heading": "View more",
+        "exclude_handles": "for-shopify-performance-tracking"
+      }
     }
   },
   "order": [
     "product_info",
     "guarantees",
     "engineering",
-    "complete_the_look",
+    "company_details",
+    "band_rest",
     "ugc",
     "reviews",
+    "complete_the_look",
+    "you_may_also_like",
     "brand_story_GAGwDD",
     "1785308970a4db4de4",
     "178548649408f040eb"

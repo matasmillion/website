@@ -1345,11 +1345,17 @@
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // FOREIGN ENGINEERING is full-bleed imagery and the band must never sit on
-    // top of it. A fixed element cannot both cross that section and stay clear
-    // of it, so the band retires the moment the section reaches the viewport
-    // and returns if you scroll back up into the product details.
+    // The band must never sit on top of full-bleed imagery, and a fixed element
+    // cannot both cross a section and stay clear of it — so it retires the
+    // moment its boundary reaches the viewport and returns if you scroll back
+    // up into the product details.
+    //
+    // The resting-area section is that boundary when present, which keeps the
+    // handover a placeable decision rather than one wired to whichever section
+    // happens to come first. The named sections remain as a fallback for
+    // templates that predate it.
     const boundary =
+      document.querySelector('[data-band-rest]') ||
       document.querySelector('.section-fr-engineering') ||
       document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;

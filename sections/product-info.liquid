@@ -1,7 +1,6 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign app_blocks = section.blocks | where: 'type', '@app'
-  assign detail_rows = section.blocks | where: 'type', 'detail_row'
 
   # Instalment figure — this shop's money format drops decimals, so it is
   # composed by hand rather than via the money filters.
@@ -543,106 +542,6 @@
           </div>
         </div>
       </div>
-
-      {%- comment -%}
-        ===== DETAIL ROWS (Fabric / Colour / Packaging) =====
-        Clickable dropdown rows sitting directly below the tabs.
-      {%- endcomment -%}
-      {%- if detail_rows.size > 0 -%}
-        <div class="pdp__rows" data-pdp-rows>
-          {%- comment -%}
-            Only the first row asking to be open gets it. The group is
-            one-at-a-time by design, so two blocks ticking the box would render
-            a state the JS immediately contradicts on the first click.
-          {%- endcomment -%}
-          {%- assign row_opened = false -%}
-          {%- for block in detail_rows -%}
-            {%- assign is_open = false -%}
-            {%- if block.settings.open_by_default and row_opened == false -%}
-              {%- assign is_open = true -%}
-              {%- assign row_opened = true -%}
-            {%- endif -%}
-            <div class="pdp__row" {{ block.shopify_attributes }}>
-              <button
-                type="button"
-                class="pdp__row-trigger"
-                data-row-trigger
-                aria-expanded="{% if is_open %}true{% else %}false{% endif %}"
-              >
-                <span>{{ block.settings.heading }}</span>
-                <span class="pdp__row-icon" aria-hidden="true"></span>
-              </button>
-
-              <div class="pdp__row-panel" data-row-panel {% unless is_open %}hidden{% endunless %}>
-                {%- if block.settings.content != blank -%}
-                  <div class="pdp__row-copy">{{ block.settings.content }}</div>
-                {%- endif -%}
-
-                {%- comment -%}
-                  Optional swatch list, one per line: Name|#hex|Description
-                  Used by the Colour row to show the full system.
-                {%- endcomment -%}
-                {%- if block.settings.swatches != blank -%}
-                  <ul class="pdp__row-swatches">
-                    {%- assign lines = block.settings.swatches | newline_to_br | split: '<br />' -%}
-                    {%- for line in lines -%}
-                      {%- assign parts = line | strip | split: '|' -%}
-                      {%- if parts.size > 1 -%}
-                        <li class="pdp__row-swatch">
-                          <span class="pdp__row-chip" style="background: {{ parts[1] | strip }};" aria-hidden="true"></span>
-                          <span class="pdp__row-swatch-body">
-                            <span class="pdp__row-swatch-name">{{ parts[0] | strip }}</span>
-                            {%- if parts.size > 2 -%}
-                              <span class="pdp__row-swatch-text">{{ parts[2] | strip }}</span>
-                            {%- endif -%}
-                          </span>
-                        </li>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </ul>
-                {%- endif -%}
-
-                {%- if block.settings.image != blank -%}
-                  {%- comment -%}
-                    Animated GIFs must be served untouched — any CDN transform
-                    risks collapsing them to a single frame. So for a .gif we
-                    rebuild the URL from the path plus the version stamp only,
-                    dropping every sizing parameter. Matching on the parsed
-                    extension rather than a substring keeps a file called
-                    "packaging.gifts.jpg" out of this branch.
-                  {%- endcomment -%}
-                  {%- assign row_src = block.settings.image | image_url: width: 900 -%}
-                  {%- assign row_path = row_src | split: '?' | first -%}
-                  {%- assign row_ext = row_path | split: '.' | last | downcase -%}
-                  {%- if row_ext == 'gif' -%}
-                    {%- if row_src contains 'v=' -%}
-                      {%- assign row_ver = row_src | split: 'v=' | last | split: '&' | first -%}
-                      {%- assign row_src = row_path | append: '?v=' | append: row_ver -%}
-                    {%- else -%}
-                      {%- assign row_src = row_path -%}
-                    {%- endif -%}
-                  {%- endif -%}
-                  <img
-                    class="pdp__row-media"
-                    src="{{ row_src }}"
-                    alt="{{ block.settings.heading | escape }}"
-                    width="{{ block.settings.image.width }}"
-                    height="{{ block.settings.image.height }}"
-                    loading="lazy"
-                    decoding="async"
-                  >
-                {%- elsif block.settings.video != blank -%}
-                  {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pdp__row-media' }}
-                {%- endif -%}
-
-                {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
-                  <a class="pdp__tab-link" href="{{ block.settings.link_url }}">{{ block.settings.link_label }}</a>
-                {%- endif -%}
-              </div>
-            </div>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
     </div>
   </div>
 </div>
@@ -790,8 +689,14 @@
       "label": "Desktop image fit",
       "info": "Cover fills the frame and crops; contain shows the whole image with padding.",
       "options": [
-        { "value": "cover", "label": "Cover (crop to fill)" },
-        { "value": "contain", "label": "Contain (show whole image)" }
+        {
+          "value": "cover",
+          "label": "Cover (crop to fill)"
+        },
+        {
+          "value": "contain",
+          "label": "Contain (show whole image)"
+        }
       ],
       "default": "cover"
     },
@@ -801,11 +706,26 @@
       "label": "Desktop crop focal point",
       "info": "Which part of the image to keep when cropping. Upper keeps heads in frame.",
       "options": [
-        { "value": "top", "label": "Top" },
-        { "value": "upper", "label": "Upper (recommended)" },
-        { "value": "center", "label": "Centre" },
-        { "value": "lower", "label": "Lower" },
-        { "value": "bottom", "label": "Bottom" }
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "upper",
+          "label": "Upper (recommended)"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "lower",
+          "label": "Lower"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
       ],
       "default": "upper"
     },
@@ -823,7 +743,10 @@
       "type": "range",
       "id": "low_stock_threshold",
       "label": "Low stock indicator appears at or below",
-      "min": 1, "max": 20, "step": 1, "default": 5
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
     },
     {
       "type": "url",
@@ -868,7 +791,10 @@
       "type": "range",
       "id": "cutoff_hour",
       "label": "Same-day dispatch cutoff (hour, 24h)",
-      "min": 0, "max": 23, "step": 1, "default": 13
+      "min": 0,
+      "max": 23,
+      "step": 1,
+      "default": 13
     },
     {
       "type": "select",
@@ -876,13 +802,34 @@
       "label": "Warehouse time zone",
       "info": "The cutoff is read in this zone, not the shopper's. Without it a New York shopper is told a Los Angeles cutoff passed three hours early.",
       "options": [
-        { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
-        { "value": "America/Denver", "label": "Denver (Mountain)" },
-        { "value": "America/Chicago", "label": "Chicago (Central)" },
-        { "value": "America/New_York", "label": "New York (Eastern)" },
-        { "value": "Europe/London", "label": "London" },
-        { "value": "Europe/Paris", "label": "Paris" },
-        { "value": "Asia/Shanghai", "label": "Shanghai" }
+        {
+          "value": "America/Los_Angeles",
+          "label": "Los Angeles (Pacific)"
+        },
+        {
+          "value": "America/Denver",
+          "label": "Denver (Mountain)"
+        },
+        {
+          "value": "America/Chicago",
+          "label": "Chicago (Central)"
+        },
+        {
+          "value": "America/New_York",
+          "label": "New York (Eastern)"
+        },
+        {
+          "value": "Europe/London",
+          "label": "London"
+        },
+        {
+          "value": "Europe/Paris",
+          "label": "Paris"
+        },
+        {
+          "value": "Asia/Shanghai",
+          "label": "Shanghai"
+        }
       ],
       "default": "America/Los_Angeles"
     },
@@ -894,36 +841,8 @@
   ],
   "blocks": [
     {
-      "type": "detail_row",
-      "name": "Detail row",
-      "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Fabric" },
-        {
-          "type": "checkbox",
-          "id": "open_by_default",
-          "label": "Open this row on page load",
-          "info": "Rows open one at a time, so if several are ticked only the topmost opens.",
-          "default": false
-        },
-        { "type": "richtext", "id": "content", "label": "Content" },
-        {
-          "type": "textarea",
-          "id": "swatches",
-          "label": "Swatches (one per line)",
-          "info": "Format: Name|#hex|Description — used for the colour system."
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image or GIF",
-          "info": "Animated GIFs are served at full size, untransformed, so the animation survives. Keep them under ~2 MB and no wider than 1200px."
-        },
-        { "type": "video", "id": "video", "label": "Video" },
-        { "type": "text", "id": "link_label", "label": "Link label" },
-        { "type": "url", "id": "link_url", "label": "Link URL" }
-      ]
-    },
-    { "type": "@app" }
+      "type": "@app"
+    }
   ]
 }
 {% endschema %}

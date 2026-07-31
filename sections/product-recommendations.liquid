@@ -33,6 +33,37 @@
         {%- endfor -%}
       {%- endif -%}
     </div>
+
+    {%- comment -%}
+      VIEW MORE — every live collection, straight from the `collections` global
+      so it can never fall out of step with the store. Empty collections are
+      skipped (a shopper following one lands on nothing) and the exclude list
+      handles the internal ones — tracking feeds, duplicates, staging sets —
+      without needing a code change to hide them.
+    {%- endcomment -%}
+    {%- if section.settings.show_collections -%}
+      {%- assign hidden = section.settings.exclude_handles | downcase | split: ',' -%}
+      {%- capture links -%}
+        {%- for collection in collections -%}
+          {%- assign is_hidden = false -%}
+          {%- for h in hidden -%}
+            {%- if h | strip == collection.handle -%}{%- assign is_hidden = true -%}{%- endif -%}
+          {%- endfor -%}
+          {%- if collection.all_products_count > 0 and is_hidden == false -%}
+            <a class="product-recs__collection" href="{{ collection.url }}">{{ collection.title }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+
+      {%- if links != blank -%}
+        <div class="product-recs__more">
+          {%- if section.settings.more_heading != blank -%}
+            <p class="product-recs__more-heading">{{ section.settings.more_heading }}</p>
+          {%- endif -%}
+          <nav class="product-recs__collections" aria-label="{{ section.settings.more_heading | default: 'View more' | escape }}">{{ links }}</nav>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
   </div>
 </section>
 
@@ -60,6 +91,41 @@
   @media (max-width: 768px) {
     .product-recs__grid { grid-template-columns: repeat(2, 1fr); }
   }
+
+  .product-recs__more {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: var(--border-thin);
+  }
+
+  .product-recs__more-heading {
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-md);
+    opacity: 0.5;
+  }
+
+  /* Wraps rather than scrolls — the list is short enough to read at a glance
+     and a hidden overflow would bury whole collections. */
+  .product-recs__collections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.75rem;
+  }
+
+  .product-recs__collection {
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6E6D71;
+    text-decoration: none;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+
+  .product-recs__collection:hover,
+  .product-recs__collection:focus-visible { color: #2D2C2F; }
 </style>
 
 {% schema %}
@@ -81,6 +147,29 @@
       "max": 8,
       "step": 1,
       "default": 4
+    },
+    {
+      "type": "header",
+      "content": "View more"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collections",
+      "label": "List every live collection below",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "more_heading",
+      "label": "View more heading",
+      "default": "View more"
+    },
+    {
+      "type": "text",
+      "id": "exclude_handles",
+      "label": "Collection handles to hide",
+      "info": "Comma separated, e.g. for-shopify-performance-tracking, sales-copy-1. Empty collections are already skipped automatically.",
+      "default": "for-shopify-performance-tracking"
     }
   ],
   "presets": [
