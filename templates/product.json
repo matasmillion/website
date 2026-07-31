@@ -90,12 +90,12 @@
         "low_stock_threshold": 5,
         "installments_url": "",
         "hide_shop_promise": false,
-        "cutoff_hour": 13,
-        "delivery_timezone": "America/Los_Angeles",
         "standard_label": "Foreign Air",
         "express_label": "Express Air",
-        "size_chart_content": "",
-        "delivery_rates": "US|3|5|1|2|$10|$20"
+        "delivery_rates": "US|3|5|1|2|$10|$20",
+        "cutoff_hour": 13,
+        "delivery_timezone": "America/Los_Angeles",
+        "size_chart_content": ""
       }
     },
     "guarantees": {
@@ -137,7 +137,7 @@
         "card_mCKrBc": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/FW25AL006_CRESCENTSHOULDERBAG_JETBLACK-ESPRESSO_1_3200x_5dfaf4fd-b26d-47b1-803e-8e053a59c7cd.webp",
+            "image": "shopify://shop_images/IMG_0155_d8aa1c25-41cf-49e5-a7ed-b33d2b4b3a13.jpg",
             "title": "Embroidered belt loop",
             "subtitle": "The details that matter.",
             "text_position": "bottom-left"
@@ -146,7 +146,7 @@
         "card_1": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/bagfix_open_v1.jpg",
+            "image": "shopify://shop_images/IMG_0151-2.jpg",
             "title": "Embroidered belt loop",
             "subtitle": "The details that matter.",
             "text_position": "bottom-left"
@@ -155,7 +155,7 @@
         "card_2": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/4x5_FW24D1_ACC_FW24FD002_SCARLET_1204_3200x_0a20c05e-143d-4250-9083-6eb9b54514b6.webp",
+            "image": "shopify://shop_images/IMG_0156_93c47366-50b9-49a5-9b1b-1e0e035ff7c3.jpg",
             "title": "Branded zipper puller",
             "subtitle": "A little bling never hurt.",
             "text_position": "bottom-left"
@@ -164,7 +164,7 @@
         "card_3": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/Screenshot_2026-07-24_at_9.34.40_PM.png",
+            "image": "shopify://shop_images/IMG_0145_e799c16d-525a-483f-a709-ab2a7a4fedd0.jpg",
             "title": "Zip-off shorts",
             "subtitle": "Any weather, any time.",
             "text_position": "bottom-left"
