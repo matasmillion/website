@@ -459,15 +459,41 @@
           -%}
         </div>
 
-        {%- comment -%} ===== RETURNS ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="returns" role="tabpanel">
-          <p class="pdp__tab-meta">You have 14 days from the date of delivery to return your order for free.</p>
-          <p class="pdp__tab-meta">Exchanges are free both ways. Items must be unworn with tags attached.</p>
-          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
-          <a href="/pages/track-order" class="pdp__tab-link">Start a return</a>
+        {%- comment -%}
+          ===== RETURNS =====
+          The window, then the three outcomes ranked best-to-worst, then the
+          action. Support hours and the contact link were cut — nobody opens
+          Returns to find a phone number, and they buried the one line that
+          costs money.
 
-          <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
-          <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
+          Terms are one per line in the theme editor; the separators are
+          rendered as hairlines rather than typed dashes.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel">
+          {%- if section.settings.returns_intro != blank -%}
+            <p class="pdp__returns-intro">{{ section.settings.returns_intro }}</p>
+          {%- endif -%}
+
+          {%- if section.settings.returns_terms != blank -%}
+            <ul class="pdp__returns-terms">
+              {%- assign term_lines = section.settings.returns_terms | newline_to_br | split: '<br />' -%}
+              {%- for line in term_lines -%}
+                {%- assign term = line | strip -%}
+                {%- if term != blank -%}
+                  <li class="pdp__returns-term">{{ term }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          <div class="pdp__returns-actions">
+            {%- if section.settings.returns_start_label != blank -%}
+              <a href="{{ section.settings.returns_start_url | default: '/pages/track-order' }}" class="pdp__tab-link">{{ section.settings.returns_start_label }}</a>
+            {%- endif -%}
+            {%- if section.settings.returns_policy_label != blank -%}
+              <a href="{{ section.settings.returns_policy_url | default: '/pages/returns' }}" class="pdp__tab-link pdp__tab-link--quiet">{{ section.settings.returns_policy_label }}</a>
+            {%- endif -%}
+          </div>
         </div>
       </div>
 
@@ -631,6 +657,45 @@
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Returns tab"
+    },
+    {
+      "type": "text",
+      "id": "returns_intro",
+      "label": "Intro line",
+      "default": "You have 14 days from the date of delivery to return or exchange items."
+    },
+    {
+      "type": "textarea",
+      "id": "returns_terms",
+      "label": "Terms (one per line)",
+      "info": "Ranked best to worst. Rendered as a divided list — do not type dashes between them.",
+      "default": "Free Exchanges\nFree Returns (for store credit)\n$35 Flat Fee Refunds to Card"
+    },
+    {
+      "type": "text",
+      "id": "returns_start_label",
+      "label": "Primary link label",
+      "default": "Start a return"
+    },
+    {
+      "type": "url",
+      "id": "returns_start_url",
+      "label": "Primary link URL"
+    },
+    {
+      "type": "text",
+      "id": "returns_policy_label",
+      "label": "Secondary link label",
+      "default": "Read our return policy"
+    },
+    {
+      "type": "url",
+      "id": "returns_policy_url",
+      "label": "Secondary link URL"
     },
     {
       "type": "header",
