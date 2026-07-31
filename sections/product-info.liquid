@@ -477,40 +477,65 @@
           Terms are one per line in the theme editor; the separators are
           rendered as hairlines rather than typed dashes.
         {%- endcomment -%}
-        <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel">
+        <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel" data-returns-panel>
+          {%- comment -%}
+            Returns vary by region — the refund policy offers them in the USA,
+            calls them "offered soon" for EU/UK/CA/AUS and unavailable
+            elsewhere — so the panel resolves against a country the same way the
+            delivery estimator does. Both pickers share one stored choice, so
+            setting it in either tab moves the other.
+          {%- endcomment -%}
+          {%- assign ret_here = localization.country.iso_code | default: 'US' -%}
+          <div class="dest__entry">
+            <label class="dest__hint" for="ret-country">Select your country</label>
+            <div class="dest__row">
+              <select id="ret-country" class="dest__select" data-returns-country>
+                {%- if localization.available_countries.size > 0 -%}
+                  {%- for country in localization.available_countries -%}
+                    <option value="{{ country.iso_code }}" {% if country.iso_code == ret_here %}selected{% endif %}>{{ country.name }}</option>
+                  {%- endfor -%}
+                {%- else -%}
+                  <option value="{{ ret_here }}" selected>{{ localization.country.name | default: 'United States' }}</option>
+                {%- endif -%}
+              </select>
+            </div>
+          </div>
+
+          <script type="text/plain" data-returns-rules>{{ section.settings.returns_rules | escape }}</script>
+
           {%- comment -%}
             Costs first, window second. What a return costs is the question that
             decides the purchase; how many days you have to decide is the
             qualifier on it. The sentence reads as a footnote to the table.
+            Rows are written by JS from the rules table — the labels stay
+            settings so the wording is still the merchant's.
           {%- endcomment -%}
-          {%- if section.settings.returns_terms != blank -%}
-            <ul class="pdp__returns-terms">
-              {%- assign term_lines = section.settings.returns_terms | newline_to_br | split: '<br />' -%}
-              {%- for line in term_lines -%}
-                {%- assign term = line | strip -%}
-                {%- if term != blank -%}
-                  {%- assign parts = term | split: '|' -%}
-                  {%- if parts.size > 1 -%}
-                    <li class="pdp__returns-term">
-                      <span class="pdp__returns-term-label">{{ parts[0] | strip }}</span>
-                      <span class="pdp__returns-term-value">{{ parts[1] | strip }}</span>
-                    </li>
-                  {%- else -%}
-                    {%- comment -%} No pipe: render the line as-is, full width. {%- endcomment -%}
-                    <li class="pdp__returns-term pdp__returns-term--plain">{{ term }}</li>
-                  {%- endif -%}
-                {%- endif -%}
-              {%- endfor -%}
-            </ul>
-          {%- endif -%}
+          <ul class="pdp__returns-terms" data-returns-terms hidden>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_exchange | default: 'Exchange' }}</span>
+              <span class="pdp__returns-term-value" data-returns-exchange></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_credit | default: 'Return · Store credit' }}</span>
+              <span class="pdp__returns-term-value" data-returns-credit></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_card | default: 'Return · To card' }}</span>
+              <span class="pdp__returns-term-value" data-returns-card></span>
+            </li>
+          </ul>
 
-          {%- if section.settings.returns_intro != blank -%}
-            <p class="pdp__returns-intro">{{ section.settings.returns_intro }}</p>
-          {%- endif -%}
+          {%- comment -%}
+            {days} is substituted from the rules table so the window can never
+            contradict the row above it.
+          {%- endcomment -%}
+          <p class="pdp__returns-intro" data-returns-intro data-template="{{ section.settings.returns_intro | default: 'You have {days} days from the date of delivery to return or exchange items.' | escape }}" hidden></p>
 
-          <div class="pdp__returns-actions">
+          <p class="pdp__returns-intro" data-returns-none hidden>{{ section.settings.returns_unavailable | default: 'Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.' }}</p>
+
+          <div class="pdp__returns-actions" data-returns-actions>
             {%- if section.settings.returns_start_label != blank -%}
-              <a href="{{ section.settings.returns_start_url | default: '/pages/track-order' }}" class="pdp__tab-link">{{ section.settings.returns_start_label }}</a>
+              <a href="{{ section.settings.returns_start_url | default: '/pages/track-order' }}" class="pdp__tab-link" data-returns-start>{{ section.settings.returns_start_label }}</a>
             {%- endif -%}
             {%- if section.settings.returns_policy_label != blank -%}
               <a href="{{ section.settings.returns_policy_url | default: '/pages/returns' }}" class="pdp__tab-link pdp__tab-link--quiet">{{ section.settings.returns_policy_label }}</a>
@@ -699,14 +724,39 @@
       "type": "text",
       "id": "returns_intro",
       "label": "Intro line",
-      "default": "You have 14 days from the date of delivery to return or exchange items."
+      "info": "{days} is replaced with the return window for the selected country, so the sentence can never contradict the table above it.",
+      "default": "You have {days} days from the date of delivery to return or exchange items."
     },
     {
       "type": "textarea",
-      "id": "returns_terms",
-      "label": "Terms (one per line)",
-      "info": "Format: Label|Value — label left, value right. Ranked best to worst. Rendered as a divided table, so do not type dashes between them.",
-      "default": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35"
+      "id": "returns_rules",
+      "label": "Returns by country",
+      "info": "CODE|window days|exchange|store credit|to card. Costs are free text. A country with no line here is treated as not-yet-offered. Add a ROW line to catch every country not named. Keep in sync with the refund policy.",
+      "default": "US|14|Free|Free|$35"
+    },
+    {
+      "type": "text",
+      "id": "returns_unavailable",
+      "label": "Message where returns aren't offered",
+      "default": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out."
+    },
+    {
+      "type": "text",
+      "id": "returns_label_exchange",
+      "label": "Row label — exchange",
+      "default": "Exchange"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_credit",
+      "label": "Row label — store credit",
+      "default": "Return · Store credit"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_card",
+      "label": "Row label — refund to card",
+      "default": "Return · To card"
     },
     {
       "type": "text",

@@ -1138,7 +1138,100 @@
       // Resolves on load rather than behind an Apply click: the country is
       // already known from the market, so there is nothing to wait for.
       render(initial);
-      select.addEventListener('change', () => render(select.value));
+
+      select.addEventListener('change', () => {
+        render(select.value);
+        // Keeps the Returns picker in step — one shopper, one country.
+        document.dispatchEvent(new CustomEvent('fr:country', { detail: select.value }));
+      });
+
+      document.addEventListener('fr:country', (e) => {
+        if (e.detail && e.detail !== select.value) {
+          select.value = e.detail;
+          render(e.detail);
+        }
+      });
+    }
+  };
+
+  /* --- PDP Returns resolved against the shopper's country --- */
+  // The refund policy is regional — offered in the USA, "soon" for EU/UK/CA/AUS,
+  // unavailable elsewhere — so the panel cannot state one set of terms and be
+  // right. A country with no line is treated as not-yet-offered rather than
+  // falling back to the US terms, which would promise a return that isn't there.
+  const initReturnsByCountry = () => {
+    const panel = document.querySelector('[data-returns-panel]');
+    if (!panel) return;
+
+    const select = panel.querySelector('[data-returns-country]');
+    const rulesEl = panel.querySelector('[data-returns-rules]');
+    const terms = panel.querySelector('[data-returns-terms]');
+    const intro = panel.querySelector('[data-returns-intro]');
+    const none = panel.querySelector('[data-returns-none]');
+    const start = panel.querySelector('[data-returns-start]');
+
+    // CODE|window days|exchange|store credit|to card
+    const rules = {};
+    ((rulesEl && rulesEl.textContent) || '').split('\n').forEach((line) => {
+      const p = line.split('|').map((s) => s.trim());
+      if (p.length < 5 || !p[0]) return;
+      rules[p[0].toUpperCase()] = { days: p[1], ex: p[2], cr: p[3], cd: p[4] };
+    });
+    const ruleFor = (c) => rules[(c || '').toUpperCase()] || rules.ROW || null;
+
+    const set = (sel, val) => {
+      const el = panel.querySelector(sel);
+      if (el) el.textContent = val || '';
+    };
+
+    const render = (code) => {
+      const r = ruleFor(code);
+      if (terms) terms.hidden = !r;
+      if (intro) intro.hidden = !r;
+      if (none) none.hidden = !!r;
+      // The primary action goes with the terms: offering "Start a return" to a
+      // region that cannot return is the one link worse than no link. The
+      // policy link stays — it is what explains the regional difference.
+      if (start) start.hidden = !r;
+      if (!r) return;
+      set('[data-returns-exchange]', r.ex);
+      set('[data-returns-credit]', r.cr);
+      set('[data-returns-card]', r.cd);
+      if (intro) {
+        const tpl = intro.dataset.template || '';
+        intro.textContent = tpl.replace('{days}', r.days);
+      }
+    };
+
+    if (select) {
+      let initial = select.value;
+      try {
+        const saved = localStorage.getItem(ZIP_KEY);
+        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
+            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
+          initial = saved.toUpperCase();
+        }
+      } catch (e) {}
+      select.value = initial;
+      render(initial);
+
+      select.addEventListener('change', () => {
+        try { localStorage.setItem(ZIP_KEY, select.value); } catch (e) {}
+        render(select.value);
+        // Shipping and Returns answer the same question about the same person.
+        // Setting the country in one tab has to move the other, or the page
+        // quietly holds two different answers.
+        document.dispatchEvent(new CustomEvent('fr:country', { detail: select.value }));
+      });
+
+      document.addEventListener('fr:country', (e) => {
+        if (e.detail && e.detail !== select.value) {
+          select.value = e.detail;
+          render(e.detail);
+        }
+      });
+    } else {
+      render((document.documentElement.lang || 'US').slice(-2).toUpperCase());
     }
   };
 
@@ -1506,7 +1599,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initFreContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initReturnsByCountry, initFreContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
