@@ -408,6 +408,15 @@
         <div class="pdp__tab-list" role="tablist">
           <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
           <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
+          {%- comment -%}
+            Composition is product-specific, so the tab only exists where the
+            metafield does — an empty Fabric tab is worse than no Fabric tab.
+            The tab JS pairs [data-tab] to [data-tab-panel] by name over
+            whatever is present, so omitting both needs no JS change.
+          {%- endcomment -%}
+          {%- if product.metafields.custom.fabric.value != blank -%}
+            <button class="pdp__tab" role="tab" data-tab="fabric" aria-selected="false" aria-expanded="false">Fabric</button>
+          {%- endif -%}
           <button class="pdp__tab" role="tab" data-tab="shipping" aria-selected="false" aria-expanded="false">Shipping</button>
           <button class="pdp__tab" role="tab" data-tab="returns" aria-selected="false" aria-expanded="false">Returns</button>
         </div>
@@ -448,6 +457,14 @@
             <a href="{{ section.settings.size_calculator_url }}" class="pdp__tab-link">Find my size</a>
           {%- endif -%}
         </div>
+
+        {%- comment -%} ===== FABRIC ===== {% endcomment -%}
+        {%- if product.metafields.custom.fabric.value != blank -%}
+          <div class="pdp__tab-panel" data-tab-panel="fabric" role="tabpanel">
+            {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
+            <div class="pdp__tab-description">{{ product.metafields.custom.fabric.value | newline_to_br }}</div>
+          </div>
+        {%- endif -%}
 
         {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
         {%- comment -%}

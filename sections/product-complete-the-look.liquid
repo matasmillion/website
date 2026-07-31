@@ -7,40 +7,33 @@
   Desktop — lookbook left, 2x2 grid right, sized so the whole section reads in
             one viewport rather than being scrolled through.
 
-  Sources, in order of preference:
-    lookbook  product.metafields.custom.lookbook_image   (file_reference)
-              falling back to the product's featured image
-    products  product.metafields.custom.complete_the_look (list.product_reference)
-              falling back to custom.styled_with, then the first collection
+  Sources — both per product, no fallbacks:
+    lookbook  custom.complete_the_look          (file_reference)
+    products  custom.complete_the_look_products (list.product_reference)
+
+  NOTE ON custom.complete_the_look. It used to hold the product list and now
+  holds the lookbook image. This section previously read that key expecting
+  products, and reached for custom.lookbook_image and custom.styled_with, both
+  of which no longer exist on any product — so it was rendering the collection
+  fallback, not curated picks, for the entire catalogue.
+
+  There is deliberately no fallback now. A product with neither metafield set
+  renders no section, rather than a generic grid pulled from its collection that
+  reads as curation but isn't.
 
   The lookbook frame's aspect ratio is set per breakpoint in the theme editor,
   so the shot can be planned around the frame rather than cropped to fit.
-
-  Setting complementary products needs no metaobjects — create one metafield
-  definition (Settings > Custom data > Products):
-      custom.complete_the_look : Product (list of)
-      custom.lookbook_image    : File
 {%- endcomment -%}
 
 {%- liquid
-  assign lookbook = product.metafields.custom.lookbook_image.value
-  if lookbook == blank
-    assign lookbook = product.featured_image
-  endif
-
-  assign picks = product.metafields.custom.complete_the_look.value
-  if picks == blank
-    assign picks = product.metafields.custom.styled_with.value
-  endif
-  if picks == blank and product.collections.size > 0
-    assign picks = product.collections.first.products
-  endif
+  assign lookbook = product.metafields.custom.complete_the_look.value
+  assign picks = product.metafields.custom.complete_the_look_products.value
 
   assign ratio_m = section.settings.lookbook_ratio_mobile | default: '4/5'
   assign ratio_d = section.settings.lookbook_ratio_desktop | default: '4/5'
 -%}
 
-{%- if picks != blank and picks.size > 0 -%}
+{%- if lookbook != blank or picks.size > 0 -%}
   <section
     class="ctl reveal"
     style="--ctl-ratio-m: {{ ratio_m }}; --ctl-ratio-d: {{ ratio_d }};"
@@ -73,6 +66,16 @@
         </div>
       {%- endif -%}
 
+      {%- comment -%}
+        Rendered in the order they were curated — never re-sorted. The current
+        product is skipped because showing the page you are already on inside
+        "Complete the look" reads as a bug; that can leave three tiles in the
+        2x2 if it is ever included in the list.
+
+        Guarded so a lookbook-only product does not leave an empty grid column
+        sitting beside the image on desktop.
+      {%- endcomment -%}
+      {%- if picks.size > 0 -%}
       <div class="ctl__grid">
         {%- assign shown = 0 -%}
         {%- for item in picks -%}
@@ -93,6 +96,7 @@
           {%- endunless -%}
         {%- endfor -%}
       </div>
+      {%- endif -%}
     </div>
   </section>
 
@@ -254,7 +258,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Lookbook comes from the custom.lookbook_image metafield (type: File), falling back to the product's featured image. Products come from custom.complete_the_look (type: Product, list of)."
+      "content": "Lookbook comes from the product's Complete The Look (Look) metafield, and the tiles from Complete The Look (Products), shown in the order they are arranged there. A product with neither set hides this section — there is no fallback, so nothing generic is ever presented as curation."
     }
   ],
   "presets": [{ "name": "PDP Complete the Look" }]

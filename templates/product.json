@@ -41,7 +41,6 @@
         "appointment_link": "",
         "size_calculator_url": "",
         "returns_intro": "You have {days} days from the date of delivery to return or exchange items.",
-        "returns_terms": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35",
         "returns_start_label": "Start a return",
         "returns_start_url": "",
         "returns_policy_label": "Read our return policy",
@@ -57,7 +56,12 @@
         "delivery_rates": "US|3|5|1|2|$10|$20",
         "cutoff_hour": 12,
         "delivery_timezone": "America/Los_Angeles",
-        "size_chart_content": ""
+        "size_chart_content": "",
+        "returns_rules": "US|14|Free|Free|$35",
+        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
+        "returns_label_exchange": "Exchange",
+        "returns_label_credit": "Return · Store credit",
+        "returns_label_card": "Return · To card"
       }
     },
     "guarantees": {
@@ -95,52 +99,9 @@
     },
     "engineering": {
       "type": "fr-engineering",
-      "blocks": {
-        "card_mCKrBc": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/IMG_0155_d8aa1c25-41cf-49e5-a7ed-b33d2b4b3a13.jpg",
-            "title": "Embroidered belt loop",
-            "subtitle": "The details that matter.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_1": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/IMG_0151-2.jpg",
-            "title": "Embroidered belt loop",
-            "subtitle": "The details that matter.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_2": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/IMG_0156_93c47366-50b9-49a5-9b1b-1e0e035ff7c3.jpg",
-            "title": "Branded zipper puller",
-            "subtitle": "A little bling never hurt.",
-            "text_position": "bottom-left"
-          }
-        },
-        "card_3": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/IMG_0145_e799c16d-525a-483f-a709-ab2a7a4fedd0.jpg",
-            "title": "Zip-off shorts",
-            "subtitle": "Any weather, any time.",
-            "text_position": "bottom-left"
-          }
-        }
-      },
-      "block_order": [
-        "card_mCKrBc",
-        "card_1",
-        "card_2",
-        "card_3"
-      ],
       "settings": {
-        "label": "Foreign Engineering"
+        "label": "Foreign Engineering",
+        "text_position": "bottom-left"
       }
     },
     "company_details": {
