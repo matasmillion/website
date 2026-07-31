@@ -80,12 +80,13 @@
         "show_payment_terms": false,
         "low_stock_threshold": 5,
         "installments_url": "",
-        "hide_shop_promise": true,
+        "hide_shop_promise": false,
         "standard_min": 3,
         "standard_max": 5,
         "express_min": 1,
         "express_max": 2,
-        "cutoff_hour": 14,
+        "cutoff_hour": 13,
+        "delivery_timezone": "America/Los_Angeles",
         "size_chart_content": ""
       }
     },

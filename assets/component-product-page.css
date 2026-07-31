@@ -945,6 +945,10 @@
   margin-bottom: 1rem;
 }
 
+/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
+   rather than [hidden] — the display rule above outranks the attribute. */
+.pdp__urgency.is-superseded { display: none; }
+
 @media (min-width: 769px) {
   .pdp__urgency { justify-content: flex-start; }
 }

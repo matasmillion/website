@@ -14,7 +14,8 @@
   Accepts:
     standard_min / standard_max  — business days
     express_min  / express_max   — business days
-    cutoff_hour                  — 0-23, store local time
+    cutoff_hour                  — 0-23, read in delivery_timezone
+    delivery_timezone            — IANA zone the warehouse keeps, e.g. America/Los_Angeles
     free_threshold               — money amount for complimentary standard
 {%- endcomment -%}
 
@@ -25,7 +26,8 @@
   data-standard-max="{{ standard_max | default: 5 }}"
   data-express-min="{{ express_min | default: 1 }}"
   data-express-max="{{ express_max | default: 2 }}"
-  data-cutoff-hour="{{ cutoff_hour | default: 14 }}"
+  data-cutoff-hour="{{ cutoff_hour | default: 13 }}"
+  data-timezone="{{ delivery_timezone | default: 'America/Los_Angeles' }}"
   data-country="{{ localization.country.iso_code | default: 'US' }}"
 >
   <p class="dest__label">

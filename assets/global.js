@@ -860,15 +860,49 @@
     return d;
   };
 
-  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
-  const dispatchStart = (cutoffHour) => {
+  // The cutoff belongs to the warehouse, not the visitor. A shopper in New York
+  // at 3pm is at noon in Los Angeles and still inside a 1pm cutoff — reading the
+  // browser clock would tell them they missed a window they still have an hour of.
+  // The returned Date carries the store's wall clock in its local fields, so
+  // getDay/getHours and the business-day arithmetic below all agree on one zone.
+  const zonedNow = (tz) => {
     const now = new Date();
+    if (!tz) return now;
+    try {
+      const shifted = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      return isNaN(shifted.getTime()) ? now : shifted;
+    } catch (e) {
+      // An unrecognised zone must not take the estimator — or the PDP — down.
+      return now;
+    }
+  };
+
+  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
+  const dispatchStart = (cutoffHour, tz) => {
+    const now = zonedNow(tz);
     let start = new Date(now.getTime());
     const day = start.getDay();
     if (now.getHours() >= cutoffHour || day === 0 || day === 6) {
       start = addBusinessDays(start, 1);
     }
     return start;
+  };
+
+  // Whole minutes until today's cutoff. Both instants sit in the same shifted
+  // frame, so the difference is real elapsed time. Rounding up keeps the tail
+  // honest: 30 seconds out reads "1m", never "0m".
+  const minsToCutoff = (now, cutoffHour) => {
+    const target = new Date(now.getTime());
+    target.setHours(cutoffHour, 0, 0, 0);
+    return Math.ceil((target.getTime() - now.getTime()) / 60000);
+  };
+
+  // Deriving both parts from one total is what stops the old "1h 60m" on the hour.
+  const fmtCountdown = (totalMins) => {
+    const h = Math.floor(totalMins / 60);
+    const m = totalMins % 60;
+    if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    return `${m}m`;
   };
 
   const fmtDate = (d) =>
@@ -894,26 +928,59 @@
     if (!root && !urgency) return;
 
     const cfg = root ? root.dataset : {};
-    const cutoff = parseInt(cfg.cutoffHour, 10) || 14;
+    const cutoff = parseInt(cfg.cutoffHour, 10) || 13;
+    const tz = cfg.timezone || '';
     const country = cfg.country || 'US';
-    const start = dispatchStart(cutoff);
+    // Recomputed rather than captured: a cutoff that passes mid-session has to
+    // roll the dispatch day for the urgency line and the zip results alike.
+    const startFor = () => dispatchStart(cutoff, tz);
 
     // Rolling urgency renders immediately — it needs no zip.
     if (urgency) {
-      const by = addBusinessDays(start, parseInt(cfg.standardMax, 10) || 5);
-      const now = new Date();
       const text = urgency.querySelector('[data-urgency-text]');
-      if (text) {
-        if (now.getHours() < cutoff) {
-          const hrs = cutoff - now.getHours() - 1;
-          const mins = 60 - now.getMinutes();
-          const within = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-          text.textContent = `Order within ${within} to receive by ${fmtDate(by)}`;
+      let timer = null;
+
+      const renderUrgency = () => {
+        if (!text) return 0;
+        const by = addBusinessDays(startFor(), parseInt(cfg.standardMax, 10) || 5);
+        // Only ever a hint: the zip is known solely after someone has used the
+        // estimator, so first-time visitors get the line without a destination.
+        let dest = '';
+        try {
+          const saved = localStorage.getItem(ZIP_KEY);
+          if (saved) dest = ` to ${saved}`;
+        } catch (e) {}
+
+        const now = zonedNow(tz);
+        const weekend = now.getDay() === 0 || now.getDay() === 6;
+        // A weekend countdown would be theatre: nothing dispatches until Monday,
+        // so beating "3h" changes no date on the page.
+        const left = weekend ? 0 : minsToCutoff(now, cutoff);
+        // Outcome first, deadline second — the date is what the shopper wants,
+        // the countdown is only the condition attached to it.
+        if (left > 0) {
+          text.textContent = `Get it${dest} by ${fmtDate(by)} — order within ${fmtCountdown(left)}`;
         } else {
-          text.textContent = `Order today to receive by ${fmtDate(by)}`;
+          text.textContent = `Get it${dest} by ${fmtDate(by)} — order today`;
+          // Past the cutoff the line is static; nothing left to count down to.
+          if (timer) { clearInterval(timer); timer = null; }
         }
         urgency.hidden = false;
-      }
+        return left;
+      };
+
+      // A countdown that doesn't count reads as decoration. Only wind the clock
+      // if there is actually time left to show — a page opened after the cutoff
+      // gets the static line and no interval at all.
+      const tick = () => {
+        if (renderUrgency() > 0 && !timer) timer = setInterval(renderUrgency, 60000);
+      };
+      tick();
+      // Without this a backgrounded tab is restored with a stale number frozen
+      // on screen, which is worse than showing no countdown in the first place.
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tick();
+      });
     }
 
     if (!root) return;
@@ -935,14 +1002,14 @@
       // Guarded: the snippet has shipped both a one-line and a two-tier shape.
       if (stdOut) {
         stdOut.textContent = fmtWindow(
-          start,
+          startFor(),
           parseInt(cfg.standardMin, 10) || 3,
           parseInt(cfg.standardMax, 10) || 5
         );
       }
       if (expOut) {
         expOut.textContent = fmtWindow(
-          start,
+          startFor(),
           parseInt(cfg.expressMin, 10) || 1,
           parseInt(cfg.expressMax, 10) || 2
         );
@@ -962,6 +1029,36 @@
         if (saved) { input.value = saved; render(saved); }
       } catch (e) {}
     }
+  };
+
+  /* --- Shop Promise takes precedence over our own delivery line --- */
+  // Shopify's banner carries a live carrier estimate; ours is derived from theme
+  // settings. Two delivery dates on one page invites the shopper to notice they
+  // disagree, so when theirs resolves, ours steps aside.
+  const initShopPromiseCoordination = () => {
+    const urgency = document.querySelector('[data-delivery-urgency]');
+    if (!urgency) return;
+
+    // Presence is not enough. <delivery-promise-wc> mounts before it resolves,
+    // and stays empty when no promise applies to the product — hiding on the
+    // element alone would silently drop our line for products that never get one.
+    const resolved = () => {
+      const el = document.querySelector('delivery-promise-wc');
+      if (!el || !el.offsetHeight) return false;
+      // The custom element opts into an open shadow root, so its rendered
+      // content is readable from here without touching any internal class name.
+      const root = el.shadowRoot;
+      return !!(root && root.textContent.trim());
+    };
+
+    // Toggle a class, never the hidden attribute — [hidden] is overridden by a
+    // display rule in component-product-page.css and would not take effect.
+    const sync = () => urgency.classList.toggle('is-superseded', resolved());
+
+    sync();
+    // The Shop Promise bundle is deferred and resolves well after this runs, so
+    // a one-shot check would almost always miss it.
+    new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
   };
 
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
@@ -1298,7 +1395,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initFreContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initFreContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
