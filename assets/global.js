@@ -921,8 +921,10 @@
         return;
       }
       error.hidden = true;
-      stdOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.standardMin, 10) || 3));
-      expOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.expressMin, 10) || 1));
+      // Express is no longer rendered in the shipping tab, so both writes are
+      // guarded — the snippet may ship either shape.
+      if (stdOut) stdOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.standardMin, 10) || 3));
+      if (expOut) expOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.expressMin, 10) || 1));
       results.hidden = false;
       try { localStorage.setItem(ZIP_KEY, zip); } catch (e) {}
     };

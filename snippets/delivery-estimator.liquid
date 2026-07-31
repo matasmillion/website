@@ -50,11 +50,14 @@
     </div>
   </div>
 
+  {%- comment -%}
+    One line, deliberately. The whole point of the zip gate is that the date
+    gets read, and a four-line results block was competing with itself. Express
+    and the method labels were cut for that reason — don't add them back
+    without a reason better than "we have the data".
+  {%- endcomment -%}
   <div class="dest__results" data-dest-results hidden>
-    <p class="dest__method">Standard delivery — Complimentary</p>
-    <p class="dest__date">Estimated delivery date: from <span data-dest-standard></span></p>
-    <p class="dest__method">Express delivery (if available)</p>
-    <p class="dest__date">Estimated delivery date: from <span data-dest-express></span></p>
+    <p class="dest__date">Estimated delivery from <span data-dest-standard></span></p>
   </div>
 
   <p class="dest__error" data-dest-error hidden>Enter a valid zip code to see delivery dates.</p>

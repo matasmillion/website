@@ -817,15 +817,14 @@
 
 .dest__results { margin-top: 1.25rem; }
 
-.dest__method {
-  font-size: 11.5px;
-  color: #2D2C2F;
-  margin-top: 0.75rem;
-}
-
+/* The single line the zip gate exists to reveal — ink, not muted, so it lands
+   as the answer rather than as more fine print. */
 .dest__date {
-  font-size: 11.5px;
-  color: #A4A4A4;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #2D2C2F;
+  margin: 0;
 }
 
 .dest__error {
