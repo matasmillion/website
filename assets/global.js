@@ -1323,25 +1323,58 @@
     if (!pdp) return;
 
     const band = document.querySelector('[data-sticky-band]');
+    // The band is display:none above 768px — moving the button into it on
+    // desktop is what made "Notify me" vanish there entirely. Desktop leaves it
+    // where Klaviyo rendered it, inside the buy column.
+    const onMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+    const isBis = (el) => {
+      const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
+      const txt = (el.textContent || el.value || '').trim().toLowerCase();
+      return /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
+             /^notify me/.test(txt);
+    };
+
+    // tag() removes nodes, which the observer would see as another mutation.
+    let syncing = false;
 
     const tag = () => {
+      if (syncing) return;
+      syncing = true;
+
+      // Collect every match INCLUDING ones already moved into the band. The old
+      // version skipped those, so each in-stock → sold-out → in-stock cycle
+      // appended a fresh button beside the untouched previous ones and they
+      // stacked until they filled the page.
+      const found = [];
       pdp.querySelectorAll('button, a, input[type="button"], input[type="submit"]').forEach((el) => {
-        if (el.closest('[data-sticky-band]')) return;
-        const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
-        const txt = (el.textContent || el.value || '').trim().toLowerCase();
-        const isBis = /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
-                      /^notify me/.test(txt);
-        if (!isBis) return;
-        el.classList.add('fr-bis');
-        // Belongs with the buy controls, directly under the sold-out bar —
-        // not stranded below the size selector where Klaviyo drops it.
-        if (band && el.parentElement !== band) band.appendChild(el);
+        if (el.hasAttribute('data-mobile-submit')) return;
+        if (isBis(el)) found.push(el);
       });
+
+      if (found.length) {
+        // Klaviyo's newest render is the live one; the rest are strays.
+        const keep = found[found.length - 1];
+        found.slice(0, -1).forEach((el) => el.remove());
+        keep.classList.add('fr-bis');
+
+        if (onMobile()) {
+          if (band && keep.parentElement !== band) band.appendChild(keep);
+        } else if (band && keep.parentElement === band) {
+          // Resized up from mobile: pull it out of the hidden band so it is
+          // visible again rather than stranded inside a display:none parent.
+          band.parentElement.insertBefore(keep, band);
+        }
+      }
+
+      requestAnimationFrame(() => { syncing = false; });
     };
 
     tag();
     // Klaviyo injects late and can re-render, so keep watching the PDP subtree.
     new MutationObserver(tag).observe(pdp, { childList: true, subtree: true });
+    // Crossing the breakpoint changes which parent the button belongs to.
+    window.addEventListener('resize', tag, { passive: true });
   };
 
   /* --- PDP sticky band (mobile): hide once past Foreign Engineering --- */

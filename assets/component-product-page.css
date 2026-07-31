@@ -1043,8 +1043,12 @@
 .fr-bis,
 .klaviyo-bis-trigger {
   display: block !important;
+  /* width:100% plus horizontal padding overflows its container by the padding
+     unless the box model is pinned — that is what pushed the button off the
+     right edge on mobile. Klaviyo's own reset cannot be relied on here. */
+  box-sizing: border-box !important;
   width: 100% !important;
-  max-width: none !important;
+  max-width: 100% !important;
   min-width: 0 !important;
   height: 50px !important;
   margin: 0 0 1rem !important;
