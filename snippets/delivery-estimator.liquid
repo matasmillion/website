@@ -30,11 +30,11 @@
 >
   <p class="dest__label">
     <span class="dest__pulse" aria-hidden="true"></span>
-    Delivery time
+    Delivery date guarantee
   </p>
 
   <div class="dest__entry">
-    <label class="dest__hint" for="dest-zip">Enter your zip code here to estimate delivery date</label>
+    <label class="dest__hint" for="dest-zip">Enter your zip code here</label>
     <div class="dest__row">
       <input
         type="text"
@@ -51,13 +51,23 @@
   </div>
 
   {%- comment -%}
-    One line, deliberately. The whole point of the zip gate is that the date
-    gets read, and a four-line results block was competing with itself. Express
-    and the method labels were cut for that reason — don't add them back
-    without a reason better than "we have the data".
+    Two rows, spec-table shape: tier plus its business-day window on the left,
+    the resolved dates on the right. The day counts come from the same settings
+    the JS does its arithmetic with, so the label can never drift from the date.
   {%- endcomment -%}
+  {%- assign std_lo = standard_min | default: 3 -%}
+  {%- assign std_hi = standard_max | default: 5 -%}
+  {%- assign exp_lo = express_min | default: 1 -%}
+  {%- assign exp_hi = express_max | default: 2 -%}
   <div class="dest__results" data-dest-results hidden>
-    <p class="dest__date">Estimated delivery from <span data-dest-standard></span></p>
+    <div class="dest__tier">
+      <span class="dest__tier-label">Standard · {{ std_lo }}–{{ std_hi }} business days</span>
+      <span class="dest__tier-date" data-dest-standard></span>
+    </div>
+    <div class="dest__tier">
+      <span class="dest__tier-label">Express · {{ exp_lo }}–{{ exp_hi }} business days</span>
+      <span class="dest__tier-date" data-dest-express></span>
+    </div>
   </div>
 
   <p class="dest__error" data-dest-error hidden>Enter a valid zip code to see delivery dates.</p>

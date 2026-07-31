@@ -874,6 +874,17 @@
   const fmtDate = (d) =>
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
+  // Arrival windows drop the weekday — two of them side by side with the tier
+  // label is already a lot of characters for a 390px viewport.
+  const fmtShort = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  const fmtWindow = (from, lo, hi) => {
+    const a = addBusinessDays(from, lo);
+    const b = addBusinessDays(from, hi);
+    // A one-day window would otherwise read "Aug 5 – Aug 5".
+    return a.getTime() === b.getTime() ? fmtShort(a) : fmtShort(a) + ' – ' + fmtShort(b);
+  };
+
   const validZip = (zip, country) =>
     country === 'US' ? /^\d{5}(-\d{4})?$/.test(zip) : /^[A-Za-z0-9 -]{3,10}$/.test(zip);
 
@@ -921,10 +932,21 @@
         return;
       }
       error.hidden = true;
-      // Express is no longer rendered in the shipping tab, so both writes are
-      // guarded — the snippet may ship either shape.
-      if (stdOut) stdOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.standardMin, 10) || 3));
-      if (expOut) expOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.expressMin, 10) || 1));
+      // Guarded: the snippet has shipped both a one-line and a two-tier shape.
+      if (stdOut) {
+        stdOut.textContent = fmtWindow(
+          start,
+          parseInt(cfg.standardMin, 10) || 3,
+          parseInt(cfg.standardMax, 10) || 5
+        );
+      }
+      if (expOut) {
+        expOut.textContent = fmtWindow(
+          start,
+          parseInt(cfg.expressMin, 10) || 1,
+          parseInt(cfg.expressMax, 10) || 2
+        );
+      }
       results.hidden = false;
       try { localStorage.setItem(ZIP_KEY, zip); } catch (e) {}
     };

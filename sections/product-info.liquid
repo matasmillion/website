@@ -447,9 +447,6 @@
           payment-method copy here — payment icons already live at checkout.
         {%- endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
-          {%- assign free_ship = settings.free_shipping_threshold | default: 150 -%}
-          <p class="pdp__tab-meta">Complimentary shipping on orders over ${{ free_ship }}.</p>
-
           {%- render 'delivery-estimator',
             standard_min: section.settings.standard_min,
             standard_max: section.settings.standard_max,

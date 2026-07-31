@@ -895,14 +895,36 @@
 
 .dest__results { margin-top: 1.25rem; }
 
-/* The single line the zip gate exists to reveal — ink, not muted, so it lands
-   as the answer rather than as more fine print. */
-.dest__date {
+/* What the zip gate exists to reveal — ink, not muted, so it lands as the
+   answer rather than as more fine print. Tier and window left, dates right,
+   matching the returns table's spec-row language. */
+.dest__tier {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dest__tier:first-child { border-top: 1px solid var(--color-border); }
+
+.dest__tier-label {
+  font-size: 10.5px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #A4A4A4;
+}
+
+.dest__tier-date {
+  flex-shrink: 0;
   font-size: 12px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   color: #2D2C2F;
-  margin: 0;
+  white-space: nowrap;
 }
 
 .dest__error {
