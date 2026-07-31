@@ -10,7 +10,7 @@
 {
   "sections": {
     "product_info": {
-      "type": "pdp-product-info",
+      "type": "product-info",
       "blocks": {
         "smartsize_smartsize_sizechart_azcYpH": {
           "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
