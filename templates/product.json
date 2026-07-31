@@ -73,7 +73,6 @@
         "show_short_description": false,
         "show_appointment_link": false,
         "appointment_link": "",
-        "delivery_text": "Order today for delivery within 5 business days",
         "size_calculator_url": "",
         "desktop_image_fit": "cover",
         "desktop_focal_y": "upper",
@@ -271,6 +270,7 @@
       "block_order": [
         "judge_me_reviews_review_widget_q4WcLz"
       ],
+      "disabled": true,
       "settings": {}
     }
   },
