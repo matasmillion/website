@@ -464,7 +464,11 @@
             express_min: section.settings.express_min,
             express_max: section.settings.express_max,
             cutoff_hour: section.settings.cutoff_hour,
-            delivery_timezone: section.settings.delivery_timezone
+            delivery_timezone: section.settings.delivery_timezone,
+            standard_label: section.settings.standard_label,
+            express_label: section.settings.express_label,
+            standard_price: section.settings.standard_price,
+            express_price: section.settings.express_price
           -%}
         </div>
 
@@ -778,7 +782,32 @@
     },
     {
       "type": "paragraph",
-      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime."
+      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime. The day counts calculate the dates but are never shown — the dates say it better."
+    },
+    {
+      "type": "text",
+      "id": "standard_label",
+      "label": "Standard service name",
+      "default": "Foreign Air"
+    },
+    {
+      "type": "text",
+      "id": "standard_price",
+      "label": "Standard price",
+      "info": "Free text, so \"Free over $150\" works as well as \"$10\". Must match the rate at checkout.",
+      "default": "$10"
+    },
+    {
+      "type": "text",
+      "id": "express_label",
+      "label": "Express service name",
+      "default": "Express Air"
+    },
+    {
+      "type": "text",
+      "id": "express_price",
+      "label": "Express price",
+      "default": "$20"
     },
     {
       "type": "range",

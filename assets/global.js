@@ -888,19 +888,27 @@
     return start;
   };
 
-  // Whole minutes until today's cutoff. Both instants sit in the same shifted
-  // frame, so the difference is real elapsed time. Rounding up keeps the tail
-  // honest: 30 seconds out reads "1m", never "0m".
-  const minsToCutoff = (now, cutoffHour) => {
-    const target = new Date(now.getTime());
+  // Whole minutes until the cutoff of the day the order actually dispatches —
+  // today's before the cutoff, the next business day's after it. Past 1pm the
+  // clock restarts against tomorrow rather than dying at "order today", and
+  // because the arrival date is derived from the same dispatch day, beating
+  // this countdown is exactly what earns the date shown beside it.
+  // Both instants sit in the same shifted frame, so the difference is real
+  // elapsed time. Rounding up keeps the tail honest: 30s out reads "1m".
+  const minsToCutoff = (now, start, cutoffHour) => {
+    const target = new Date(start.getTime());
     target.setHours(cutoffHour, 0, 0, 0);
     return Math.ceil((target.getTime() - now.getTime()) / 60000);
   };
 
-  // Deriving both parts from one total is what stops the old "1h 60m" on the hour.
+  // Deriving every part from one total is what stops the old "1h 60m" on the
+  // hour. Days appear because a Friday-afternoon order counts down to Monday's
+  // cutoff, and "71h" is not a number anyone parses at a glance.
   const fmtCountdown = (totalMins) => {
-    const h = Math.floor(totalMins / 60);
+    const d = Math.floor(totalMins / 1440);
+    const h = Math.floor((totalMins % 1440) / 60);
     const m = totalMins % 60;
+    if (d > 0) return h > 0 ? `${d}d ${h}h` : `${d}d`;
     if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
     return `${m}m`;
   };
@@ -992,7 +1000,10 @@
         // (ROW) fall back to the quick end of standard.
         const fastest =
           parseInt(cfg.expressMax, 10) || parseInt(cfg.standardMin, 10) || 2;
-        const by = addBusinessDays(startFor(), fastest);
+        // One dispatch day drives both halves of the line: the countdown is the
+        // deadline to make it, the date is what making it earns.
+        const start = startFor();
+        const by = addBusinessDays(start, fastest);
         // Only ever a hint: the zip is known solely after someone has used the
         // estimator, so first-time visitors get the line without a destination.
         let dest = '';
@@ -1001,11 +1012,9 @@
           if (saved) dest = ` to ${saved}`;
         } catch (e) {}
 
-        const now = zonedNow(tz);
-        const weekend = now.getDay() === 0 || now.getDay() === 6;
-        // A weekend countdown would be theatre: nothing dispatches until Monday,
-        // so beating "3h" changes no date on the page.
-        const left = weekend ? 0 : minsToCutoff(now, cutoff);
+        // Always positive: the target rolls with the dispatch day, so passing
+        // 1pm restarts the clock against tomorrow instead of stalling the line.
+        const left = minsToCutoff(zonedNow(tz), start, cutoff);
         // The countdown and the arrival both render bold — they are the only
         // two values on the line a shopper actually acts on.
         const arrival = fmtRelative(by);
@@ -1018,13 +1027,13 @@
             [dest, false],
           ]);
         } else {
+          // Unreachable while dispatchStart and the target share a cutoff, but
+          // a clock that cannot be trusted should drop the deadline, not guess.
           setLine(text, [
             ['Order today to receive as early as ', false],
             [arrival, true],
             [dest, false],
           ]);
-          // Past the cutoff the line is static; nothing left to count down to.
-          if (timer) { clearInterval(timer); timer = null; }
         }
         urgency.hidden = false;
         return left;
