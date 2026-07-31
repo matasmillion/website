@@ -2,6 +2,20 @@
   assign current_variant = product.selected_or_first_available_variant
   assign app_blocks = section.blocks | where: 'type', '@app'
 
+  # FABRIC. Resolved once so the tab button and its panel cannot disagree about
+  # whether there is anything to show.
+  #
+  # WATCH THE BACK KEY. "Fabric (Back)" is custom.fabric_image, not fabric_back
+  # — it predates the front/back pair and was never renamed. Only the front
+  # follows the obvious convention.
+  assign fabric_text = product.metafields.custom.fabric.value
+  assign fabric_front = product.metafields.custom.fabric_front.value
+  assign fabric_back = product.metafields.custom.fabric_image.value
+  assign has_fabric = false
+  if fabric_text != blank or fabric_front != blank or fabric_back != blank
+    assign has_fabric = true
+  endif
+
   # Instalment figure — this shop's money format drops decimals, so it is
   # composed by hand rather than via the money filters.
   assign inst_cents = current_variant.price | divided_by: 4
@@ -420,7 +434,7 @@
             The tab JS pairs [data-tab] to [data-tab-panel] by name over
             whatever is present, so omitting both needs no JS change.
           {%- endcomment -%}
-          {%- if product.metafields.custom.fabric.value != blank -%}
+          {%- if has_fabric -%}
             <button class="pdp__tab" role="tab" data-tab="fabric" aria-selected="false" aria-expanded="false">Fabric</button>
           {%- endif -%}
           <button class="pdp__tab" role="tab" data-tab="shipping" aria-selected="false" aria-expanded="false">Shipping</button>
@@ -465,10 +479,54 @@
         </div>
 
         {%- comment -%} ===== FABRIC ===== {% endcomment -%}
-        {%- if product.metafields.custom.fabric.value != blank -%}
+        {%- if has_fabric -%}
           <div class="pdp__tab-panel" data-tab-panel="fabric" role="tabpanel">
-            {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
-            <div class="pdp__tab-description">{{ product.metafields.custom.fabric.value | newline_to_br }}</div>
+            {%- if fabric_text != blank -%}
+              {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
+              <div class="pdp__tab-description">{{ fabric_text | newline_to_br }}</div>
+            {%- endif -%}
+
+            {%- comment -%}
+              Front and back of the cloth. Either may be missing — the grid is
+              auto-fit so a lone image fills the width instead of sitting in
+              half of an empty two-column row.
+            {%- endcomment -%}
+            {%- if fabric_front != blank or fabric_back != blank -%}
+              <div class="pdp__fabric-shots">
+                {%- if fabric_front != blank -%}
+                  <figure class="pdp__fabric-shot">
+                    <img
+                      src="{{ fabric_front | image_url: width: 800 }}"
+                      srcset="{{ fabric_front | image_url: width: 400 }} 400w,
+                              {{ fabric_front | image_url: width: 800 }} 800w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, front"
+                      width="{{ fabric_front.width }}"
+                      height="{{ fabric_front.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <figcaption>Front</figcaption>
+                  </figure>
+                {%- endif -%}
+                {%- if fabric_back != blank -%}
+                  <figure class="pdp__fabric-shot">
+                    <img
+                      src="{{ fabric_back | image_url: width: 800 }}"
+                      srcset="{{ fabric_back | image_url: width: 400 }} 400w,
+                              {{ fabric_back | image_url: width: 800 }} 800w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, back"
+                      width="{{ fabric_back.width }}"
+                      height="{{ fabric_back.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <figcaption>Back</figcaption>
+                  </figure>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
           </div>
         {%- endif -%}
 
