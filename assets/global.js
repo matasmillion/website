@@ -860,9 +860,26 @@
     return d;
   };
 
-  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
-  const dispatchStart = (cutoffHour) => {
+  // The cutoff belongs to the warehouse, not the visitor. A shopper in New York
+  // at 3pm is at noon in Los Angeles and still inside a 1pm cutoff — reading the
+  // browser clock would tell them they missed a window they still have an hour of.
+  // The returned Date carries the store's wall clock in its local fields, so
+  // getDay/getHours and the business-day arithmetic below all agree on one zone.
+  const zonedNow = (tz) => {
     const now = new Date();
+    if (!tz) return now;
+    try {
+      const shifted = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      return isNaN(shifted.getTime()) ? now : shifted;
+    } catch (e) {
+      // An unrecognised zone must not take the estimator — or the PDP — down.
+      return now;
+    }
+  };
+
+  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
+  const dispatchStart = (cutoffHour, tz) => {
+    const now = zonedNow(tz);
     let start = new Date(now.getTime());
     const day = start.getDay();
     if (now.getHours() >= cutoffHour || day === 0 || day === 6) {
@@ -871,8 +888,78 @@
     return start;
   };
 
+  // Whole minutes until the cutoff of the day the order actually dispatches —
+  // today's before the cutoff, the next business day's after it. Past 1pm the
+  // clock restarts against tomorrow rather than dying at "order today", and
+  // because the arrival date is derived from the same dispatch day, beating
+  // this countdown is exactly what earns the date shown beside it.
+  // Both instants sit in the same shifted frame, so the difference is real
+  // elapsed time. Rounding up keeps the tail honest: 30s out reads "1m".
+  const minsToCutoff = (now, start, cutoffHour) => {
+    const target = new Date(start.getTime());
+    target.setHours(cutoffHour, 0, 0, 0);
+    return Math.ceil((target.getTime() - now.getTime()) / 60000);
+  };
+
+  // Deriving every part from one total is what stops the old "1h 60m" on the
+  // hour. Days appear because a Friday-afternoon order counts down to Monday's
+  // cutoff, and "71h" is not a number anyone parses at a glance.
+  const fmtCountdown = (totalMins) => {
+    const d = Math.floor(totalMins / 1440);
+    const h = Math.floor((totalMins % 1440) / 60);
+    const m = totalMins % 60;
+    if (d > 0) return h > 0 ? `${d}d ${h}h` : `${d}d`;
+    if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    return `${m}m`;
+  };
+
   const fmtDate = (d) =>
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+  // Calendar days from the shopper's today to an arrival date. Both ends are
+  // flattened to midnight because arrival is a date, not an instant, and
+  // rounding absorbs the 23/25-hour days either side of a DST switch.
+  const daysUntil = (target) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const t = new Date(target.getTime());
+    t.setHours(0, 0, 0, 0);
+    return Math.round((t.getTime() - today.getTime()) / 86400000);
+  };
+
+  // Phrase arrival the way Shop Promise does — "tomorrow" lands faster than
+  // "Tue, Aug 4". Measured against the SHOPPER's calendar, not the warehouse's:
+  // tomorrow has to mean tomorrow to whoever is reading it.
+  const fmtRelative = (d) => {
+    const days = daysUntil(d);
+    // Only reachable if the shopper's zone runs ahead of the warehouse's.
+    // "Today" is too strong a claim to make on a timezone artefact.
+    if (days <= 0) return fmtDate(d);
+    if (days === 1) return 'tomorrow';
+    const weekday = d.toLocaleDateString(undefined, { weekday: 'long' });
+    if (days < 7) return weekday;
+    if (days < 14) return 'next ' + weekday;
+    // Past a fortnight "next Tuesday" stops carrying information, and ROW
+    // windows run 10–20 days, so those resolve to a real date.
+    return fmtDate(d);
+  };
+
+  // Assembled as nodes, never innerHTML — the zip is read back from
+  // localStorage, which is shopper-supplied and tamperable.
+  const setLine = (el, parts) => {
+    el.textContent = '';
+    parts.forEach((part) => {
+      const str = part[0];
+      if (!str) return;
+      if (part[1]) {
+        const strong = document.createElement('strong');
+        strong.textContent = str;
+        el.appendChild(strong);
+      } else {
+        el.appendChild(document.createTextNode(str));
+      }
+    });
+  };
 
   // Arrival windows drop the weekday — two of them side by side with the tier
   // label is already a lot of characters for a 390px viewport.
@@ -894,26 +981,76 @@
     if (!root && !urgency) return;
 
     const cfg = root ? root.dataset : {};
-    const cutoff = parseInt(cfg.cutoffHour, 10) || 14;
+    const cutoff = parseInt(cfg.cutoffHour, 10) || 13;
+    const tz = cfg.timezone || '';
     const country = cfg.country || 'US';
-    const start = dispatchStart(cutoff);
+    // Recomputed rather than captured: a cutoff that passes mid-session has to
+    // roll the dispatch day for the urgency line and the zip results alike.
+    const startFor = () => dispatchStart(cutoff, tz);
 
     // Rolling urgency renders immediately — it needs no zip.
     if (urgency) {
-      const by = addBusinessDays(start, parseInt(cfg.standardMax, 10) || 5);
-      const now = new Date();
       const text = urgency.querySelector('[data-urgency-text]');
-      if (text) {
-        if (now.getHours() < cutoff) {
-          const hrs = cutoff - now.getHours() - 1;
-          const mins = 60 - now.getMinutes();
-          const within = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-          text.textContent = `Order within ${within} to receive by ${fmtDate(by)}`;
+      let timer = null;
+
+      const renderUrgency = () => {
+        if (!text) return 0;
+        // The fastest lane the shopper could pick, not the slowest — the line
+        // says "as early as". Express is the paid tier; markets without one
+        // (ROW) fall back to the quick end of standard.
+        const fastest =
+          parseInt(cfg.expressMax, 10) || parseInt(cfg.standardMin, 10) || 2;
+        // One dispatch day drives both halves of the line: the countdown is the
+        // deadline to make it, the date is what making it earns.
+        const start = startFor();
+        const by = addBusinessDays(start, fastest);
+        // Only ever a hint: the zip is known solely after someone has used the
+        // estimator, so first-time visitors get the line without a destination.
+        let dest = '';
+        try {
+          const saved = localStorage.getItem(ZIP_KEY);
+          if (saved) dest = ` to ${saved}`;
+        } catch (e) {}
+
+        // Always positive: the target rolls with the dispatch day, so passing
+        // 1pm restarts the clock against tomorrow instead of stalling the line.
+        const left = minsToCutoff(zonedNow(tz), start, cutoff);
+        // The countdown and the arrival both render bold — they are the only
+        // two values on the line a shopper actually acts on.
+        const arrival = fmtRelative(by);
+        if (left > 0) {
+          setLine(text, [
+            ['Order within ', false],
+            [fmtCountdown(left), true],
+            [' to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
         } else {
-          text.textContent = `Order today to receive by ${fmtDate(by)}`;
+          // Unreachable while dispatchStart and the target share a cutoff, but
+          // a clock that cannot be trusted should drop the deadline, not guess.
+          setLine(text, [
+            ['Order today to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
         }
         urgency.hidden = false;
-      }
+        return left;
+      };
+
+      // A countdown that doesn't count reads as decoration. Only wind the clock
+      // if there is actually time left to show — a page opened after the cutoff
+      // gets the static line and no interval at all.
+      const tick = () => {
+        if (renderUrgency() > 0 && !timer) timer = setInterval(renderUrgency, 60000);
+      };
+      tick();
+      // Without this a backgrounded tab is restored with a stale number frozen
+      // on screen, which is worse than showing no countdown in the first place.
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tick();
+      });
     }
 
     if (!root) return;
@@ -935,14 +1072,14 @@
       // Guarded: the snippet has shipped both a one-line and a two-tier shape.
       if (stdOut) {
         stdOut.textContent = fmtWindow(
-          start,
+          startFor(),
           parseInt(cfg.standardMin, 10) || 3,
           parseInt(cfg.standardMax, 10) || 5
         );
       }
       if (expOut) {
         expOut.textContent = fmtWindow(
-          start,
+          startFor(),
           parseInt(cfg.expressMin, 10) || 1,
           parseInt(cfg.expressMax, 10) || 2
         );
@@ -962,6 +1099,36 @@
         if (saved) { input.value = saved; render(saved); }
       } catch (e) {}
     }
+  };
+
+  /* --- Shop Promise takes precedence over our own delivery line --- */
+  // Shopify's banner carries a live carrier estimate; ours is derived from theme
+  // settings. Two delivery dates on one page invites the shopper to notice they
+  // disagree, so when theirs resolves, ours steps aside.
+  const initShopPromiseCoordination = () => {
+    const urgency = document.querySelector('[data-delivery-urgency]');
+    if (!urgency) return;
+
+    // Presence is not enough. <delivery-promise-wc> mounts before it resolves,
+    // and stays empty when no promise applies to the product — hiding on the
+    // element alone would silently drop our line for products that never get one.
+    const resolved = () => {
+      const el = document.querySelector('delivery-promise-wc');
+      if (!el || !el.offsetHeight) return false;
+      // The custom element opts into an open shadow root, so its rendered
+      // content is readable from here without touching any internal class name.
+      const root = el.shadowRoot;
+      return !!(root && root.textContent.trim());
+    };
+
+    // Toggle a class, never the hidden attribute — [hidden] is overridden by a
+    // display rule in component-product-page.css and would not take effect.
+    const sync = () => urgency.classList.toggle('is-superseded', resolved());
+
+    sync();
+    // The Shop Promise bundle is deferred and resolves well after this runs, so
+    // a one-shot check would almost always miss it.
+    new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
   };
 
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
@@ -1298,7 +1465,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initFreContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initFreContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

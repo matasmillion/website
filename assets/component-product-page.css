@@ -910,12 +910,28 @@
 
 .dest__tier:first-child { border-top: 1px solid var(--color-border); }
 
+/* Takes the slack so price and date anchor right and their columns line up
+   across both rows. It is the one part that may shrink — the service names are
+   short, the two values beside them are not negotiable. */
 .dest__tier-label {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 10.5px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #A4A4A4;
+}
+
+/* Sits a step below the date in weight: the shopper is here for when it lands,
+   the price is what that costs. */
+.dest__tier-price {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #6E6D71;
+  white-space: nowrap;
 }
 
 .dest__tier-date {
@@ -944,6 +960,17 @@
   color: #2D2C2F;
   margin-bottom: 1rem;
 }
+
+/* The countdown and the arrival date. Pinned to the theme scale so <strong>
+   doesn't fall through to the browser default of 700. */
+.pdp__urgency strong {
+  font-weight: var(--font-weight-semibold);
+  color: #1A191C;
+}
+
+/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
+   rather than [hidden] — the display rule above outranks the attribute. */
+.pdp__urgency.is-superseded { display: none; }
 
 @media (min-width: 769px) {
   .pdp__urgency { justify-content: flex-start; }

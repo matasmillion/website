@@ -12,9 +12,12 @@
   Settings → Shipping and delivery, or move to an app if live rates are needed.
 
   Accepts:
-    standard_min / standard_max  — business days
-    express_min  / express_max   — business days
-    cutoff_hour                  — 0-23, store local time
+    standard_min / standard_max  — business days, drive the dates (never printed)
+    express_min  / express_max   — business days, drive the dates (never printed)
+    standard_label / express_label — service names, e.g. Foreign Air
+    standard_price / express_price — free text, so "Free over $150" is sayable
+    cutoff_hour                  — 0-23, read in delivery_timezone
+    delivery_timezone            — IANA zone the warehouse keeps, e.g. America/Los_Angeles
     free_threshold               — money amount for complimentary standard
 {%- endcomment -%}
 
@@ -25,7 +28,8 @@
   data-standard-max="{{ standard_max | default: 5 }}"
   data-express-min="{{ express_min | default: 1 }}"
   data-express-max="{{ express_max | default: 2 }}"
-  data-cutoff-hour="{{ cutoff_hour | default: 14 }}"
+  data-cutoff-hour="{{ cutoff_hour | default: 13 }}"
+  data-timezone="{{ delivery_timezone | default: 'America/Los_Angeles' }}"
   data-country="{{ localization.country.iso_code | default: 'US' }}"
 >
   <p class="dest__label">
@@ -51,21 +55,21 @@
   </div>
 
   {%- comment -%}
-    Two rows, spec-table shape: tier plus its business-day window on the left,
-    the resolved dates on the right. The day counts come from the same settings
-    the JS does its arithmetic with, so the label can never drift from the date.
+    Two rows, spec-table shape: service name and price on the left, the resolved
+    dates on the right. The business-day counts are deliberately absent — the
+    dates already say when it lands, and "3–5 business days" next to
+    "Aug 6 – Aug 10" is the same fact twice in a weaker unit. The day counts
+    still drive the arithmetic, they just aren't restated as copy.
   {%- endcomment -%}
-  {%- assign std_lo = standard_min | default: 3 -%}
-  {%- assign std_hi = standard_max | default: 5 -%}
-  {%- assign exp_lo = express_min | default: 1 -%}
-  {%- assign exp_hi = express_max | default: 2 -%}
   <div class="dest__results" data-dest-results hidden>
     <div class="dest__tier">
-      <span class="dest__tier-label">Standard · {{ std_lo }}–{{ std_hi }} business days</span>
+      <span class="dest__tier-label">{{ standard_label | default: 'Foreign Air' }}</span>
+      <span class="dest__tier-price">{{ standard_price | default: '$10' }}</span>
       <span class="dest__tier-date" data-dest-standard></span>
     </div>
     <div class="dest__tier">
-      <span class="dest__tier-label">Express · {{ exp_lo }}–{{ exp_hi }} business days</span>
+      <span class="dest__tier-label">{{ express_label | default: 'Express Air' }}</span>
+      <span class="dest__tier-price">{{ express_price | default: '$20' }}</span>
       <span class="dest__tier-date" data-dest-express></span>
     </div>
   </div>

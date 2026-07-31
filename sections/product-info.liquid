@@ -364,16 +364,27 @@
 
 
       {%- comment -%}
-        Shopify injects its Shop Promise box next to the buy button via
-        content_for_header, so it can't be removed in Liquid — only hidden.
-        Our urgency line plus the estimator now cover the same ground, and two
-        delivery dates computed two different ways is worse than one.
+        Shopify injects its Shop Promise box via content_for_header, so it can't
+        be removed in Liquid — only placed and hidden.
+
+        PLACEMENT. Shopify's own shop_promise_pdp.js looks for
+        .delivery-promise__promise-container first and mounts into it; failing
+        that it hunts for a form[action*="/cart/add"] and injects itself
+        structurally, which is why it used to land wherever the markup allowed.
+        The empty div below claims that hook, so the banner renders here — above
+        our urgency line, where the delivery story belongs.
+      {%- endcomment -%}
+      <div class="delivery-promise__promise-container"></div>
+
+      {%- comment -%}
+        The escape hatch. Note the element is <delivery-promise-wc> — the older
+        shop-promise-banner / [class*="shop-promise"] selectors matched nothing,
+        which is why ticking this setting appeared to do nothing at all.
       {%- endcomment -%}
       {%- if section.settings.hide_shop_promise -%}
         <style>
-          shop-promise-banner,
-          [class*="shop-promise"],
-          [id*="shop-promise"]:not(script) { display: none !important; }
+          delivery-promise-wc,
+          .delivery-promise__promise-container { display: none !important; }
         </style>
       {%- endif -%}
 
@@ -452,7 +463,12 @@
             standard_max: section.settings.standard_max,
             express_min: section.settings.express_min,
             express_max: section.settings.express_max,
-            cutoff_hour: section.settings.cutoff_hour
+            cutoff_hour: section.settings.cutoff_hour,
+            delivery_timezone: section.settings.delivery_timezone,
+            standard_label: section.settings.standard_label,
+            express_label: section.settings.express_label,
+            standard_price: section.settings.standard_price,
+            express_price: section.settings.express_price
           -%}
         </div>
 
@@ -757,8 +773,8 @@
       "type": "checkbox",
       "id": "hide_shop_promise",
       "label": "Hide Shopify's Shop Promise box",
-      "info": "Our estimator and urgency line replace it. Untick to show both.",
-      "default": true
+      "info": "Left unticked, Shop Promise shows and our urgency line hides itself so only one delivery date is on the page.",
+      "default": false
     },
     {
       "type": "header",
@@ -766,7 +782,32 @@
     },
     {
       "type": "paragraph",
-      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime."
+      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime. The day counts calculate the dates but are never shown — the dates say it better."
+    },
+    {
+      "type": "text",
+      "id": "standard_label",
+      "label": "Standard service name",
+      "default": "Foreign Air"
+    },
+    {
+      "type": "text",
+      "id": "standard_price",
+      "label": "Standard price",
+      "info": "Free text, so \"Free over $150\" works as well as \"$10\". Must match the rate at checkout.",
+      "default": "$10"
+    },
+    {
+      "type": "text",
+      "id": "express_label",
+      "label": "Express service name",
+      "default": "Express Air"
+    },
+    {
+      "type": "text",
+      "id": "express_price",
+      "label": "Express price",
+      "default": "$20"
     },
     {
       "type": "range",
@@ -796,7 +837,23 @@
       "type": "range",
       "id": "cutoff_hour",
       "label": "Same-day dispatch cutoff (hour, 24h)",
-      "min": 0, "max": 23, "step": 1, "default": 14
+      "min": 0, "max": 23, "step": 1, "default": 13
+    },
+    {
+      "type": "select",
+      "id": "delivery_timezone",
+      "label": "Warehouse time zone",
+      "info": "The cutoff is read in this zone, not the shopper's. Without it a New York shopper is told a Los Angeles cutoff passed three hours early.",
+      "options": [
+        { "value": "America/Los_Angeles", "label": "Los Angeles (Pacific)" },
+        { "value": "America/Denver", "label": "Denver (Mountain)" },
+        { "value": "America/Chicago", "label": "Chicago (Central)" },
+        { "value": "America/New_York", "label": "New York (Eastern)" },
+        { "value": "Europe/London", "label": "London" },
+        { "value": "Europe/Paris", "label": "Paris" },
+        { "value": "Asia/Shanghai", "label": "Shanghai" }
+      ],
+      "default": "America/Los_Angeles"
     },
     {
       "type": "richtext",
