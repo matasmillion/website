@@ -41,6 +41,7 @@
         "appointment_link": "",
         "size_calculator_url": "",
         "returns_intro": "You have {days} days from the date of delivery to return or exchange items.",
+        "returns_terms": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35",
         "returns_start_label": "Start a return",
         "returns_start_url": "",
         "returns_policy_label": "Read our return policy",
@@ -56,12 +57,7 @@
         "delivery_rates": "US|3|5|1|2|$10|$20",
         "cutoff_hour": 12,
         "delivery_timezone": "America/Los_Angeles",
-        "size_chart_content": "",
-        "returns_rules": "US|14|Free|Free|$35",
-        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
-        "returns_label_exchange": "Exchange",
-        "returns_label_credit": "Return · Store credit",
-        "returns_label_card": "Return · To card"
+        "size_chart_content": ""
       }
     },
     "guarantees": {
