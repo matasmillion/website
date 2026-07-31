@@ -254,6 +254,24 @@
         "klaviyo_reviews_product_reviews_YtPaQF"
       ],
       "settings": {}
+    },
+    "178548649408f040eb": {
+      "type": "apps",
+      "blocks": {
+        "judge_me_reviews_review_widget_q4WcLz": {
+          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {
+            "review_data": "sample_data",
+            "max_width": 1200,
+            "show_shop_reviews": false,
+            "empty_state": "empty_widget"
+          }
+        }
+      },
+      "block_order": [
+        "judge_me_reviews_review_widget_q4WcLz"
+      ],
+      "settings": {}
     }
   },
   "order": [
@@ -264,6 +282,7 @@
     "ugc",
     "reviews",
     "brand_story_GAGwDD",
-    "1785308970a4db4de4"
+    "1785308970a4db4de4",
+    "178548649408f040eb"
   ]
 }
