@@ -459,16 +459,11 @@
         {%- endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
           {%- render 'delivery-estimator',
-            standard_min: section.settings.standard_min,
-            standard_max: section.settings.standard_max,
-            express_min: section.settings.express_min,
-            express_max: section.settings.express_max,
+            delivery_rates: section.settings.delivery_rates,
             cutoff_hour: section.settings.cutoff_hour,
             delivery_timezone: section.settings.delivery_timezone,
             standard_label: section.settings.standard_label,
-            express_label: section.settings.express_label,
-            standard_price: section.settings.standard_price,
-            express_price: section.settings.express_price
+            express_label: section.settings.express_label
           -%}
         </div>
 
@@ -798,7 +793,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime. The day counts calculate the dates but are never shown — the dates say it better."
+      "content": "One line per country. A theme cannot read shipping rates at runtime, so this table is generated from Settings → Shipping and delivery and must be regenerated when rates change. A country with no line here shows as not-shipped-to rather than guessing."
     },
     {
       "type": "text",
@@ -808,46 +803,16 @@
     },
     {
       "type": "text",
-      "id": "standard_price",
-      "label": "Standard price",
-      "info": "Free text, so \"Free over $150\" works as well as \"$10\". Must match the rate at checkout.",
-      "default": "$10"
-    },
-    {
-      "type": "text",
       "id": "express_label",
       "label": "Express service name",
       "default": "Express Air"
     },
     {
-      "type": "text",
-      "id": "express_price",
-      "label": "Express price",
-      "default": "$20"
-    },
-    {
-      "type": "range",
-      "id": "standard_min",
-      "label": "Standard delivery — fastest (business days)",
-      "min": 1, "max": 14, "step": 1, "default": 3
-    },
-    {
-      "type": "range",
-      "id": "standard_max",
-      "label": "Standard delivery — slowest (business days)",
-      "min": 1, "max": 21, "step": 1, "default": 5
-    },
-    {
-      "type": "range",
-      "id": "express_min",
-      "label": "Express delivery — fastest (business days)",
-      "min": 1, "max": 7, "step": 1, "default": 1
-    },
-    {
-      "type": "range",
-      "id": "express_max",
-      "label": "Express delivery — slowest (business days)",
-      "min": 1, "max": 10, "step": 1, "default": 2
+      "type": "textarea",
+      "id": "delivery_rates",
+      "label": "Rates by country",
+      "info": "CODE|standard fastest|standard slowest|express fastest|express slowest|standard price|express price — days are business days, \"-\" disables a tier, prices are free text. Add a ROW line to catch every country not named.",
+      "default": "US|3|5|1|2|$10|$20"
     },
     {
       "type": "range",

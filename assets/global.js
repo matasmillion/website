@@ -846,7 +846,9 @@
   };
 
   /* --- PDP Delivery estimator + rolling urgency --- */
-  const ZIP_KEY = 'fr_delivery_zip';
+  // Renamed with the switch from postcodes to countries; the old key is left
+  // behind deliberately so a stored zip cannot be read back as a country code.
+  const ZIP_KEY = 'fr_delivery_country';
 
   // Adds whole business days, skipping weekends.
   const addBusinessDays = (from, days) => {
@@ -972,8 +974,23 @@
     return a.getTime() === b.getTime() ? fmtShort(a) : fmtShort(a) + ' – ' + fmtShort(b);
   };
 
-  const validZip = (zip, country) =>
-    country === 'US' ? /^\d{5}(-\d{4})?$/.test(zip) : /^[A-Za-z0-9 -]{3,10}$/.test(zip);
+  // One line per country: CODE|std_lo|std_hi|exp_lo|exp_hi|std_price|exp_price.
+  // "-" in a day column disables that tier for that country — plenty of lanes
+  // have no express option worth quoting.
+  const parseRates = (text) => {
+    const table = {};
+    (text || '').split('\n').forEach((line) => {
+      const p = line.split('|').map((s) => s.trim());
+      if (p.length < 5 || !p[0]) return;
+      const num = (v) => (v === '-' || v === '' ? null : parseInt(v, 10));
+      table[p[0].toUpperCase()] = {
+        sl: num(p[1]), sh: num(p[2]),
+        el: num(p[3]), eh: num(p[4]),
+        sp: p[5] || '', ep: p[6] || '',
+      };
+    });
+    return table;
+  };
 
   const initDeliveryEstimator = () => {
     const root = document.querySelector('[data-delivery-estimator]');
@@ -984,6 +1001,16 @@
     const cutoff = parseInt(cfg.cutoffHour, 10) || 13;
     const tz = cfg.timezone || '';
     const country = cfg.country || 'US';
+
+    const ratesEl = root ? root.querySelector('[data-delivery-rates]') : null;
+    const rates = parseRates(ratesEl ? ratesEl.textContent : '');
+    // An explicit country wins; a ROW line, if the merchant wrote one, catches
+    // the rest; otherwise the lane genuinely cannot be quoted.
+    const ratesFor = (code) => rates[(code || '').toUpperCase()] || rates.ROW || null;
+
+    const CHOSEN = () => {
+      try { return localStorage.getItem(ZIP_KEY) || country; } catch (e) { return country; }
+    };
     // Recomputed rather than captured: a cutoff that passes mid-session has to
     // roll the dispatch day for the urgency line and the zip results alike.
     const startFor = () => dispatchStart(cutoff, tz);
@@ -996,21 +1023,20 @@
       const renderUrgency = () => {
         if (!text) return 0;
         // The fastest lane the shopper could pick, not the slowest — the line
-        // says "as early as". Express is the paid tier; markets without one
-        // (ROW) fall back to the quick end of standard.
-        const fastest =
-          parseInt(cfg.expressMax, 10) || parseInt(cfg.standardMin, 10) || 2;
+        // says "as early as". Express is the paid tier; lanes without one fall
+        // back to the quick end of standard. A country we cannot quote gets no
+        // line at all rather than a borrowed date from somewhere else.
+        const r = ratesFor(CHOSEN());
+        if (!r || (!r.eh && !r.sl)) { urgency.hidden = true; return 0; }
+        const fastest = r.eh || r.sl || 2;
         // One dispatch day drives both halves of the line: the countdown is the
         // deadline to make it, the date is what making it earns.
         const start = startFor();
         const by = addBusinessDays(start, fastest);
-        // Only ever a hint: the zip is known solely after someone has used the
-        // estimator, so first-time visitors get the line without a destination.
-        let dest = '';
-        try {
-          const saved = localStorage.getItem(ZIP_KEY);
-          if (saved) dest = ` to ${saved}`;
-        } catch (e) {}
+        // The destination suffix is gone with the zip: naming the country here
+        // would read "…as early as Tuesday to US" on a storefront already
+        // scoped to that country. The picker below states it better.
+        const dest = '';
 
         // Always positive: the target rolls with the dispatch day, so passing
         // 1pm restarts the clock against tomorrow instead of stalling the line.
@@ -1055,49 +1081,64 @@
 
     if (!root) return;
 
-    const input = root.querySelector('[data-dest-zip]');
-    const apply = root.querySelector('[data-dest-apply]');
+    const select = root.querySelector('[data-dest-country]');
     const results = root.querySelector('[data-dest-results]');
     const error = root.querySelector('[data-dest-error]');
-    const stdOut = root.querySelector('[data-dest-standard]');
-    const expOut = root.querySelector('[data-dest-express]');
+    const rowFor = (k) => root.querySelector('[data-dest-row="' + k + '"]');
 
-    const render = (zip) => {
-      if (!validZip(zip, country)) {
-        results.hidden = true;
-        error.hidden = false;
-        return;
-      }
-      error.hidden = true;
-      // Guarded: the snippet has shipped both a one-line and a two-tier shape.
-      if (stdOut) {
-        stdOut.textContent = fmtWindow(
-          startFor(),
-          parseInt(cfg.standardMin, 10) || 3,
-          parseInt(cfg.standardMax, 10) || 5
-        );
-      }
-      if (expOut) {
-        expOut.textContent = fmtWindow(
-          startFor(),
-          parseInt(cfg.expressMin, 10) || 1,
-          parseInt(cfg.expressMax, 10) || 2
-        );
-      }
-      results.hidden = false;
-      try { localStorage.setItem(ZIP_KEY, zip); } catch (e) {}
+    // A tier renders only when it has both a window and a price for this
+    // country. Half a row — a service name with an empty date beside it —
+    // reads as broken rather than as unavailable.
+    const tier = (key, lo, hi, price, dateSel, priceSel) => {
+      const row = rowFor(key);
+      if (!row) return false;
+      const dateEl = root.querySelector(dateSel);
+      const priceEl = root.querySelector(priceSel);
+      if (lo == null || hi == null) { row.hidden = true; return false; }
+      if (dateEl) dateEl.textContent = fmtWindow(startFor(), lo, hi);
+      if (priceEl) priceEl.textContent = price || '';
+      row.hidden = false;
+      return true;
     };
 
-    if (apply) apply.addEventListener('click', () => render(input.value.trim()));
-    if (input) {
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); render(input.value.trim()); }
-      });
-      // Remembered zip resolves on load, so returning visitors see dates straight away.
+    const render = (code) => {
+      const r = ratesFor(code);
+      // No zone covers this country, so there is no rate to quote and no
+      // checkout to reach. Saying so beats inventing a date.
+      if (!r) {
+        results.hidden = true;
+        if (error) error.hidden = false;
+        return;
+      }
+      if (error) error.hidden = true;
+      // Both calls must run — each owns its row's visibility — so the results
+      // are collected before being combined rather than short-circuited.
+      const hasStd = tier('standard', r.sl, r.sh, r.sp, '[data-dest-standard]', '[data-dest-standard-price]');
+      const hasExp = tier('express', r.el, r.eh, r.ep, '[data-dest-express]', '[data-dest-express-price]');
+      const shown = hasStd || hasExp;
+      results.hidden = !shown;
+      if (!shown && error) error.hidden = false;
+      try { localStorage.setItem(ZIP_KEY, code); } catch (e) {}
+    };
+
+    if (select) {
+      // The remembered country wins over the market's default, but only while
+      // it is still one of the options — markets change under saved state.
+      let initial = country;
       try {
         const saved = localStorage.getItem(ZIP_KEY);
-        if (saved) { input.value = saved; render(saved); }
+        // Shape-checked before it reaches a selector: storage is user-writable,
+        // and an ISO country code is only ever two letters.
+        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
+            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
+          initial = saved.toUpperCase();
+        }
       } catch (e) {}
+      select.value = initial;
+      // Resolves on load rather than behind an Apply click: the country is
+      // already known from the market, so there is nothing to wait for.
+      render(initial);
+      select.addEventListener('change', () => render(select.value));
     }
   };
 
