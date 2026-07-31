@@ -39,6 +39,7 @@
             "heading": "Packaging",
             "content": "<p>Arrives in a rigid box worth keeping, wrapped in biodegradable paper with paper tape. No plastic — it breaks down instead of lingering.</p>",
             "swatches": "",
+            "image": "shopify://shop_images/bf2fb898271225.5ed85b600432b.gif",
             "link_label": "More on our packaging",
             "link_url": "/pages/packaging"
           }
@@ -74,6 +75,12 @@
         "show_appointment_link": false,
         "appointment_link": "",
         "size_calculator_url": "",
+        "returns_intro": "You have 14 days from the date of delivery to return or exchange items.",
+        "returns_terms": "Exchange|Free\nReturn · Store credit|Free\nReturn · To card|$35",
+        "returns_start_label": "Start a return",
+        "returns_start_url": "",
+        "returns_policy_label": "Read our return policy",
+        "returns_policy_url": "",
         "desktop_image_fit": "cover",
         "desktop_focal_y": "upper",
         "show_payment_terms": false,
