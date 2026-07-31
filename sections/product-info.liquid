@@ -518,13 +518,33 @@
                 {%- endif -%}
 
                 {%- if block.settings.image != blank -%}
+                  {%- comment -%}
+                    Animated GIFs must be served untouched — any CDN transform
+                    risks collapsing them to a single frame. So for a .gif we
+                    rebuild the URL from the path plus the version stamp only,
+                    dropping every sizing parameter. Matching on the parsed
+                    extension rather than a substring keeps a file called
+                    "packaging.gifts.jpg" out of this branch.
+                  {%- endcomment -%}
+                  {%- assign row_src = block.settings.image | image_url: width: 900 -%}
+                  {%- assign row_path = row_src | split: '?' | first -%}
+                  {%- assign row_ext = row_path | split: '.' | last | downcase -%}
+                  {%- if row_ext == 'gif' -%}
+                    {%- if row_src contains 'v=' -%}
+                      {%- assign row_ver = row_src | split: 'v=' | last | split: '&' | first -%}
+                      {%- assign row_src = row_path | append: '?v=' | append: row_ver -%}
+                    {%- else -%}
+                      {%- assign row_src = row_path -%}
+                    {%- endif -%}
+                  {%- endif -%}
                   <img
                     class="pdp__row-media"
-                    src="{{ block.settings.image | image_url: width: 900 }}"
+                    src="{{ row_src }}"
                     alt="{{ block.settings.heading | escape }}"
                     width="{{ block.settings.image.width }}"
                     height="{{ block.settings.image.height }}"
                     loading="lazy"
+                    decoding="async"
                   >
                 {%- elsif block.settings.video != blank -%}
                   {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pdp__row-media' }}
@@ -731,7 +751,12 @@
           "label": "Swatches (one per line)",
           "info": "Format: Name|#hex|Description — used for the colour system."
         },
-        { "type": "image_picker", "id": "image", "label": "Image" },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image or GIF",
+          "info": "Animated GIFs are served at full size, untransformed, so the animation survives. Keep them under ~2 MB and no wider than 1200px."
+        },
         { "type": "video", "id": "video", "label": "Video" },
         { "type": "text", "id": "link_label", "label": "Link label" },
         { "type": "url", "id": "link_url", "label": "Link URL" }
