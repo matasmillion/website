@@ -227,6 +227,12 @@
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
+
+  /* Slides out of frame at FOREIGN ENGINEERING rather than parking over it.
+     Transform, never the hidden attribute — the band has to animate. */
+  .pdp-band.is-hidden {
+    transform: translateY(100%);
+  }
 }
 
 .pdp-band__top {
@@ -717,13 +723,35 @@
   border-top: 1px solid var(--color-border);
 }
 
+/* Spec-sheet rows: label left, cost right, so the column of values can be
+   compared down one axis. The block stays centred; the rows justify inside it. */
 .pdp__returns-term {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  text-align: left;
   border-bottom: 1px solid var(--color-border);
   padding: 0.75rem 0;
+}
+
+.pdp__returns-term--plain { display: block; }
+
+.pdp__returns-term-label {
+  font-size: 11.2px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+}
+
+.pdp__returns-term-value {
+  flex-shrink: 0;
   font-size: 12px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   color: #2D2C2F;
+  white-space: nowrap;
 }
 
 /* Stacked, not inline — .pdp__tab-link carries a right margin for the
