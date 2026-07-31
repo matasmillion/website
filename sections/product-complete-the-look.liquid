@@ -45,8 +45,13 @@
     class="ctl reveal"
     style="--ctl-ratio-m: {{ ratio_m }}; --ctl-ratio-d: {{ ratio_d }};"
   >
-    {%- if section.settings.heading != blank -%}
-      <h2 class="ctl__heading">{{ section.settings.heading }}</h2>
+    {%- comment -%}
+      With a lookbook image the heading rides on top of it, framed exactly like
+      Foreign Engineering's label. Without one there is nothing to overlay, so
+      it falls back into the flow and keeps the page inset.
+    {%- endcomment -%}
+    {%- if section.settings.heading != blank and lookbook == blank -%}
+      <h2 class="ctl__heading ctl__heading--flow">{{ section.settings.heading }}</h2>
     {%- endif -%}
 
     <div class="ctl__layout">
@@ -61,6 +66,10 @@
             alt="{{ product.title | escape }}"
             loading="lazy"
           >
+
+          {%- if section.settings.heading != blank -%}
+            <h2 class="ctl__heading">{{ section.settings.heading }}</h2>
+          {%- endif -%}
         </div>
       {%- endif -%}
 
@@ -95,15 +104,33 @@
       border-top: 1px solid var(--color-border);
     }
 
+    /* Same frame as .fre__label — body face, 11px, wide tracking, sitting in
+       the top-left corner of the image rather than on the page above it. */
     .ctl__heading {
-      padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem);
-      font-family: var(--font-heading);
-      font-size: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      z-index: 2;
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 11px;
       font-weight: var(--font-weight-medium);
-      letter-spacing: 0.01em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #2D2C2F;
+      line-height: 1;
+      color: inherit;
+    }
+
+    /* No image underneath it, so the overlay treatment would leave it floating
+       over the grid. Back into the flow, inset with the rest of the page. */
+    .ctl__heading--flow {
+      position: static;
+      padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem);
       margin-bottom: var(--space-lg);
+      font-size: clamp(1.5rem, 1rem + 1.6vw, 2.25rem);
+      font-family: var(--font-heading);
+      letter-spacing: 0.01em;
+      color: #2D2C2F;
     }
 
     /* Seamless — the images butt up against each other with no gutters */
@@ -114,10 +141,16 @@
     }
 
     .ctl__lookbook {
+      position: relative;
       aspect-ratio: var(--ctl-ratio-m, 4/5);
       overflow: hidden;
       background: #E4DED2;
     }
+
+    /* Salt on dark imagery, slate on pale — measured from the corner the
+       heading actually sits over. Mirrors the Foreign Engineering cards. */
+    .ctl__lookbook { color: #F2EFE9; }
+    .ctl__lookbook.is-light-bg { color: #4A4E54; }
 
     .ctl__lookbook-img {
       width: 100%;

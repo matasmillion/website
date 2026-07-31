@@ -1266,14 +1266,20 @@
   };
 
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
-  const initFreContrast = () => {
-    const cards = document.querySelectorAll('.fre__card');
-    if (!cards.length) return;
+  const initOverlayContrast = () => {
+    // Every place copy is laid over an image. `band` is the strip the copy
+    // actually sits over — Foreign Engineering writes into the bottom-left,
+    // Complete the Look's heading into the top-left — and sampling the wrong
+    // end is how white text ends up on a pale sky.
+    const targets = [
+      { host: '.fre__card', img: '.fre__img', band: 'bottom' },
+      { host: '.ctl__lookbook', img: '.ctl__lookbook-img', band: 'top' },
+    ];
 
-    // Sample the corner the copy sits over and measure its luminance, so the
-    // text flips to slate on pale imagery and stays salt on dark.
-    const measure = (card) => {
-      const img = card.querySelector('.fre__img');
+    // Sample that corner and measure its luminance, so the text flips to slate
+    // on pale imagery and stays salt on dark.
+    const measure = (host, imgSel, band) => {
+      const img = host.querySelector(imgSel);
       if (!img) return;
 
       const sample = () => {
@@ -1282,17 +1288,16 @@
           const w = 24, h = 24;
           c.width = w; c.height = h;
           const ctx = c.getContext('2d');
-          // Bottom-left region — where the title and subtitle sit
-          const sx = 0;
-          const sy = Math.max(0, img.naturalHeight - img.naturalHeight * 0.3);
-          ctx.drawImage(img, sx, sy, img.naturalWidth * 0.5, img.naturalHeight * 0.3, 0, 0, w, h);
+          const bandH = img.naturalHeight * 0.3;
+          const sy = band === 'top' ? 0 : Math.max(0, img.naturalHeight - bandH);
+          ctx.drawImage(img, 0, sy, img.naturalWidth * 0.5, bandH, 0, 0, w, h);
           const d = ctx.getImageData(0, 0, w, h).data;
           let sum = 0;
           for (let i = 0; i < d.length; i += 4) {
             sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
           }
           const avg = sum / (d.length / 4);
-          card.classList.toggle('is-light-bg', avg > 140);
+          host.classList.toggle('is-light-bg', avg > 140);
         } catch (e) {
           // Tainted canvas or a blocked image: keep the salt default
         }
@@ -1303,7 +1308,9 @@
       else img.addEventListener('load', sample, { once: true });
     };
 
-    cards.forEach(measure);
+    targets.forEach((t) => {
+      document.querySelectorAll(t.host).forEach((host) => measure(host, t.img, t.band));
+    });
   };
 
   /* --- Klaviyo back-in-stock: tag whatever it injects so CSS can reach it --- */
@@ -1599,7 +1606,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initReturnsByCountry, initFreContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
