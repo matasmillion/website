@@ -51,6 +51,19 @@
       </div>
     </div>
 
+    {%- comment -%}
+      Klaviyo's own widget, mounted off-screen. Writing a review needs their
+      form — we render the list, not the submission flow — so the buttons above
+      proxy a click into it.
+
+      Clipped rather than display:none on purpose: Klaviyo skips mounting into a
+      subtree it considers hidden, and a widget that never mounts has no trigger
+      to click.
+    {%- endcomment -%}
+    <div class="frr-klaviyo" data-klaviyo-proxy aria-hidden="true">
+      <div class="klaviyo-reviews-all-reviews" data-product-id="{{ product.id }}"></div>
+    </div>
+
     <!-- CONTROLS: sort + search -->
     <div class="frr-bar">
       <div class="frr-inline" data-sorts>
@@ -131,6 +144,11 @@
   #frr-{{ section.id }} .frr-link:hover{color:var(--color-primary)}
   #frr-{{ section.id }} .frr-link.is-active{color:var(--color-primary);border-bottom-color:var(--color-accent)}
   #frr-{{ section.id }} .frr-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+  /* Klaviyo's widget, parked off-screen. Clipped rather than display:none so it
+     still mounts — a widget that never mounts exposes no trigger to click.
+     .is-revealed is the escape hatch when no trigger is found. */
+  #frr-{{ section.id }} .frr-klaviyo{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  #frr-{{ section.id }} .frr-klaviyo.is-revealed{position:static;width:auto;height:auto;overflow:visible;clip:auto;clip-path:none;white-space:normal;margin-top:var(--space-lg,2rem)}
 
   #frr-{{ section.id }} .frr-search{position:relative;min-width:230px;flex:1;max-width:300px}
   #frr-{{ section.id }} .frr-search input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--frr-hair);padding:.55rem 0 .55rem 1.4rem;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-primary)}
@@ -419,6 +437,58 @@
     updateOverflow();
   });
   window.addEventListener('resize',updateOverflow);
+
+  /* WRITE A REVIEW / ASK A QUESTION
+     Klaviyo owns the submission form, so these proxy a click into its widget
+     rather than reimplementing it. The widget mounts late, hence the observer.
+
+     If no trigger turns up, the proxy is revealed instead of leaving a button
+     that silently does nothing — a stock widget appearing is a far better
+     failure than a dead "Write a Review". */
+  (function wireActions(){
+    var proxy = $('[data-klaviyo-proxy]');
+    if (!proxy) return;
+
+    var WRITE_RE = /write.*review|leave.*review|add.*review/i;
+    var ASK_RE   = /ask.*question|have.*question/i;
+
+    function findTrigger(re){
+      var els = proxy.querySelectorAll('button, a, [role="button"]');
+      for (var i = 0; i < els.length; i++){
+        if (re.test((els[i].textContent || '').trim())) return els[i];
+      }
+      return null;
+    }
+
+    function reveal(){
+      proxy.classList.add('is-revealed');
+      proxy.removeAttribute('aria-hidden');
+    }
+
+    function bind(btn, re, label){
+      if (!btn) return;
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        var t = findTrigger(re);
+        if (t) { t.click(); return; }
+        // Klaviyo never gave us a handle — show its widget so the shopper can
+        // still act, and say why in the console rather than failing silently.
+        console.warn('[FR reviews] no Klaviyo trigger for "' + label + '"; revealing the widget.');
+        reveal();
+        proxy.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    bind($('[data-write]'), WRITE_RE, 'Write a Review');
+    bind($('[data-ask]'),   ASK_RE,   'Ask a Question');
+
+    // Nothing to do on mount beyond letting the DOM settle; the lookup happens
+    // at click time so a late re-render cannot leave us holding a stale node.
+    var obs = new MutationObserver(function(){
+      if (findTrigger(WRITE_RE)) obs.disconnect();
+    });
+    obs.observe(proxy, { childList: true, subtree: true });
+  })();
 
   getReviews().then(function(rv){
     REVIEWS = Array.isArray(rv)?rv:[];
