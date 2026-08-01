@@ -222,7 +222,7 @@
      The company id and revision are section settings so neither is buried in
      code — Klaviyo pins breaking changes to the revision date. */
   var KL_COMPANY  = {{ section.settings.klaviyo_company_id | default: '' | json }};
-  var KL_REVISION = {{ section.settings.klaviyo_api_revision | default: '2024-10-15' | json }};
+  var KL_REVISION = {{ section.settings.klaviyo_api_revision | default: '2025-07-15' | json }};
   var KL_ITEM_ID  = {{ product.id | json }};
 
   /* Klaviyo's field names are read defensively. This runs in the shopper's
@@ -496,7 +496,23 @@
     render();
   }).catch(function(err){
     console.error('[FR reviews] getReviews failed:', err);
-    list.innerHTML='<div class="frr-empty">Reviews are unavailable right now.</div>';
+    // Verified against the live account: Klaviyo answers
+    // "client_api_usage_disabled" until client API usage is switched on. Rather
+    // than leave a dead panel, hand over to Klaviyo's own widget — it is already
+    // mounted off-screen for the write/ask buttons, so revealing it costs
+    // nothing and keeps real reviews on the page.
+    var proxy = $('[data-klaviyo-proxy]');
+    if (proxy) {
+      proxy.classList.add('is-revealed');
+      proxy.removeAttribute('aria-hidden');
+      list.innerHTML = '';
+      var wrap = $('.frr-scroll-wrap');
+      if (wrap) wrap.style.display = 'none';
+      var more = $('.frr-more');
+      if (more) more.style.display = 'none';
+    } else {
+      list.innerHTML='<div class="frr-empty">Reviews are unavailable right now.</div>';
+    }
   });
 })();
 </script>
@@ -510,7 +526,7 @@
     { "type": "header", "content": "Klaviyo Reviews" },
     { "type": "paragraph", "content": "Reviews are fetched from Klaviyo's client-side Reviews endpoint. The company ID is the public onsite ID already in your storefront script tag — not a private API key, and safe to expose. The summary average and count come from Shopify's own reviews metafields, so they stay correct even if the list fails to load." },
     { "type": "text", "id": "klaviyo_company_id", "label": "Klaviyo company ID", "default": "WuWz5B" },
-    { "type": "text", "id": "klaviyo_api_revision", "label": "Klaviyo API revision", "info": "Klaviyo pins breaking changes to this date. Bump it only after checking their changelog.", "default": "2024-10-15" },
+    { "type": "text", "id": "klaviyo_api_revision", "label": "Klaviyo API revision", "info": "Klaviyo rejects anything before 2025-01-15; 2025-07-15 is verified working against this account. Bump only after checking their changelog.", "default": "2025-07-15" },
     { "type": "range", "id": "collapsed_height", "label": "Collapsed height (px)", "min": 320, "max": 900, "step": 20, "default": 480,
       "info": "Height of the review list before it scrolls internally / is expanded. ~480px ≈ 3 reviews." }
   ],
