@@ -41,6 +41,11 @@
         "appointment_link": "",
         "size_calculator_url": "",
         "returns_intro": "You have {days} days from the date of delivery to return or exchange items.",
+        "returns_rules": "US|14|Free|Free|$35",
+        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
+        "returns_label_exchange": "Exchange",
+        "returns_label_credit": "Return · Store credit",
+        "returns_label_card": "Return · To card",
         "returns_start_label": "Start a return",
         "returns_start_url": "",
         "returns_policy_label": "Read our return policy",
@@ -56,12 +61,7 @@
         "delivery_rates": "US|3|5|1|2|$10|$20",
         "cutoff_hour": 12,
         "delivery_timezone": "America/Los_Angeles",
-        "size_chart_content": "",
-        "returns_rules": "US|14|Free|Free|$35",
-        "returns_unavailable": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.",
-        "returns_label_exchange": "Exchange",
-        "returns_label_credit": "Return · Store credit",
-        "returns_label_card": "Return · To card"
+        "size_chart_content": ""
       }
     },
     "guarantees": {
@@ -194,7 +194,6 @@
         "person_2",
         "person_3"
       ],
-      "disabled": true,
       "settings": {
         "heading": "See others wear em'"
       }
@@ -204,6 +203,15 @@
       "settings": {
         "heading": "Reviews",
         "provider": "klaviyo"
+      }
+    },
+    "reviews_masthead": {
+      "type": "product-reviews-masthead",
+      "settings": {
+        "heading": "Customer Reviews",
+        "klaviyo_company_id": "WuWz5B",
+        "klaviyo_api_revision": "2024-10-15",
+        "collapsed_height": 480
       }
     },
     "complete_the_look": {
@@ -218,10 +226,7 @@
       "type": "product-recommendations",
       "settings": {
         "heading": "You may also like",
-        "products_count": 4,
-        "show_collections": true,
-        "more_heading": "View more",
-        "exclude_handles": "for-shopify-performance-tracking"
+        "products_count": 4
       }
     },
     "brand_story_GAGwDD": {
@@ -236,16 +241,6 @@
         "cta_link": "",
         "cta_style": "btn--secondary",
         "bg_color": ""
-      }
-    },
-    "reviews_masthead": {
-      "type": "product-reviews-masthead",
-      "disabled": true,
-      "settings": {
-        "heading": "Customer Reviews",
-        "collapsed_height": 480,
-        "klaviyo_company_id": "WuWz5B",
-        "klaviyo_api_revision": "2024-10-15"
       }
     }
   },
