@@ -164,6 +164,7 @@
         "person_1": {
           "type": "person",
           "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-03-03_at_1.14.56_PM.jpg",
             "video_url": "",
             "handle": "@handle",
             "link": "",
@@ -173,6 +174,7 @@
         "person_2": {
           "type": "person",
           "settings": {
+            "image": "shopify://shop_images/hf_20260228_090513_232d3e98-20c4-4687-9af8-02046646d396.png",
             "video_url": "",
             "handle": "@handle",
             "link": "",
@@ -182,6 +184,7 @@
         "person_3": {
           "type": "person",
           "settings": {
+            "image": "shopify://shop_images/Screenshot_2026-03-04_at_5.47.15_PM.jpg",
             "video_url": "",
             "handle": "@handle",
             "link": "",
