@@ -160,43 +160,9 @@
     },
     "ugc": {
       "type": "product-ugc",
-      "blocks": {
-        "person_1": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        },
-        "person_2": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        },
-        "person_3": {
-          "type": "person",
-          "settings": {
-            "video_url": "",
-            "handle": "@handle",
-            "link": "",
-            "flag": "🇺🇸"
-          }
-        }
-      },
-      "block_order": [
-        "person_1",
-        "person_2",
-        "person_3"
-      ],
-      "disabled": true,
       "settings": {
-        "heading": "See others wear em'"
+        "heading": "See others wear em'",
+        "max_items": 12
       }
     },
     "reviews": {

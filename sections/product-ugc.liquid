@@ -1,71 +1,99 @@
 {%- comment -%}
   PDP — "See others wear em'".
 
-  Manually curated for now, per the spec: hand-pick who appears rather than
-  letting an app auto-pull. Each block is one person — image or video, their
-  handle, a link, and a country flag.
+  Per-product, driven entirely by product metafields. This section used to
+  carry the media in its own `person` blocks, but section settings live in
+  templates/product.json — one file shared by every product — so whatever was
+  picked there showed up identically on all ~23 PDPs. Curation that isn't
+  actually per-product reads as a bug, the same trap documented in
+  product-complete-the-look.liquid.
+
+  Sources — all per product, index aligned, no fallbacks:
+    media    custom.ugc          (list.file_reference, Images)
+    handle   custom.ugc_handles  (list.single_line_text_field)
+    link     custom.ugc_links    (list.url)
+    flag     custom.ugc_flags    (list.single_line_text_field, emoji)
+
+  The four lists are matched by position: the 2nd handle captions the 2nd
+  image. Only custom.ugc is required — a product with images and no caption
+  lists renders the media on its own rather than "@handle" placeholders. A
+  product with no custom.ugc renders no section at all.
+
+  custom.ugc is validated to Images in admin, but the video branch is kept so
+  widening that validation later is a one-click change rather than a rewrite.
 
   When an app takes over later, keep this section as the styled shell and let
   the app fill it; the layout below is what the brand wants either way.
 {%- endcomment -%}
 
 {%- liquid
-  # A block with no media would render an empty box under a placeholder
-  # handle, so only count the ones carrying an image or video.
-  assign filled = 0
-  for block in section.blocks
-    if block.settings.image != blank or block.settings.video != blank or block.settings.video_url != blank
-      assign filled = filled | plus: 1
-    endif
-  endfor
+  assign shots = product.metafields.custom.ugc.value
+  assign handles = product.metafields.custom.ugc_handles.value
+  assign links = product.metafields.custom.ugc_links.value
+  assign flags = product.metafields.custom.ugc_flags.value
+
+  assign max_items = section.settings.max_items | default: 12
 -%}
 
-{%- if filled > 0 -%}
+{%- if shots != blank and shots.size > 0 -%}
   <section class="ugc reveal">
     {%- if section.settings.heading != blank -%}
       <h2 class="ugc__heading">{{ section.settings.heading }}</h2>
     {%- endif -%}
 
     <div class="ugc__track">
-      {%- for block in section.blocks -%}
-        {%- if block.settings.image == blank and block.settings.video == blank and block.settings.video_url == blank -%}
-          {%- continue -%}
-        {%- endif -%}
-        <figure class="ugc__item" {{ block.shopify_attributes }}>
+      {%- for shot in shots limit: max_items -%}
+        {%- liquid
+          assign i = forloop.index0
+          assign handle = handles[i]
+          assign link = links[i]
+          assign flag = flags[i]
+
+          assign alt = shot.alt
+          if alt == blank
+            assign alt = handle
+          endif
+          if alt == blank
+            assign alt = 'Customer photo'
+          endif
+        -%}
+        <figure class="ugc__item">
           <div class="ugc__media">
-            {%- if block.settings.video != blank -%}
-              {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'ugc__media-el' }}
-            {%- elsif block.settings.video_url != blank -%}
-              <video class="ugc__media-el" autoplay muted loop playsinline
-                {% if block.settings.image != blank %}poster="{{ block.settings.image | image_url: width: 800 }}"{% endif %}>
-                <source src="{{ block.settings.video_url }}" type="video/mp4">
-              </video>
-            {%- elsif block.settings.image != blank -%}
+            {%- if shot.media_type == 'video' -%}
+              {{ shot | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'ugc__media-el' }}
+            {%- else -%}
               <img
                 class="ugc__media-el"
-                src="{{ block.settings.image | image_url: width: 800 }}"
-                srcset="{{ block.settings.image | image_url: width: 400 }} 400w, {{ block.settings.image | image_url: width: 800 }} 800w"
+                src="{{ shot | image_url: width: 800 }}"
+                srcset="{{ shot | image_url: width: 400 }} 400w, {{ shot | image_url: width: 800 }} 800w"
                 sizes="(min-width: 769px) 30vw, 75vw"
-                alt="{{ block.settings.handle | default: 'Customer photo' | escape }}"
-                width="{{ block.settings.image.width }}"
-                height="{{ block.settings.image.height }}"
+                alt="{{ alt | escape }}"
+                width="{{ shot.width }}"
+                height="{{ shot.height }}"
                 loading="lazy"
               >
             {%- endif -%}
           </div>
 
-          <figcaption class="ugc__caption">
-            {%- if block.settings.flag != blank -%}
-              <span class="ugc__flag" aria-hidden="true">{{ block.settings.flag }}</span>
-            {%- endif -%}
-            {%- if block.settings.handle != blank -%}
-              {%- if block.settings.link != blank -%}
-                <a class="ugc__handle" href="{{ block.settings.link }}" target="_blank" rel="noopener">{{ block.settings.handle }}</a>
-              {%- else -%}
-                <span class="ugc__handle">{{ block.settings.handle }}</span>
+          {%- comment -%}
+            A product can have images with no caption lists set yet, so the
+            whole figcaption is skipped rather than left as an empty row that
+            still eats its margin.
+          {%- endcomment -%}
+          {%- if handle != blank or flag != blank -%}
+            <figcaption class="ugc__caption">
+              {%- if flag != blank -%}
+                <span class="ugc__flag" aria-hidden="true">{{ flag }}</span>
               {%- endif -%}
-            {%- endif -%}
-          </figcaption>
+              {%- if handle != blank -%}
+                {%- if link != blank -%}
+                  <a class="ugc__handle" href="{{ link }}" target="_blank" rel="noopener">{{ handle }}</a>
+                {%- else -%}
+                  <span class="ugc__handle">{{ handle }}</span>
+                {%- endif -%}
+              {%- endif -%}
+            </figcaption>
+          {%- endif -%}
         </figure>
       {%- endfor -%}
     </div>
@@ -145,20 +173,19 @@
   "name": "PDP UGC",
   "class": "section-pdp-ugc",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "See others wear em'" }
-  ],
-  "blocks": [
     {
-      "type": "person",
-      "name": "Person",
-      "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "video", "id": "video", "label": "Video" },
-        { "type": "url", "id": "video_url", "label": "External mp4 URL" },
-        { "type": "text", "id": "handle", "label": "Handle", "default": "@handle" },
-        { "type": "url", "id": "link", "label": "Profile link" },
-        { "type": "text", "id": "flag", "label": "Country flag emoji", "default": "🇺🇸" }
-      ]
+      "type": "paragraph",
+      "content": "Content is per product. Set UGC (images) on the product, and optionally UGC Handles, UGC Links and UGC Flags — those three lists are matched to the images by position."
+    },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "See others wear em'" },
+    {
+      "type": "range",
+      "id": "max_items",
+      "label": "Maximum shots shown",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 12
     }
   ],
   "presets": [{ "name": "PDP UGC" }]
