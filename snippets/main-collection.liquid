@@ -1,0 +1,50 @@
+{%- comment -%}
+  Resolves the one collection a product should say it belongs to, and echoes its
+  title as plain text. Case is left to the caller — the PDP's two eyebrows both
+  uppercase in CSS, but a caller that needs the filter can still apply it.
+
+  Why this exists: `product.collections.first` is not a merchant decision.
+  Shopify does not promise an order, every product sits in ALL, and most also
+  sit in the Faire tracking collection — so the label was effectively random and
+  could show a collection no shopper should ever see.
+
+  Order of preference:
+    1. custom.main_collection — the collection picked on the product in admin
+    2. the first collection whose handle is not on the ignore list
+    3. the fallback label
+
+  Both the ignore list and the fallback are theme settings, so the rule is
+  merchandising, not code.
+
+  Usage:
+    {%- capture main_collection %}{% render 'main-collection', product: product %}{% endcapture -%}
+    {%- assign main_collection = main_collection | strip -%}
+{%- endcomment -%}
+{%- liquid
+  assign main = product.metafields.custom.main_collection.value
+
+  if main != blank and main.title != blank
+    echo main.title
+  else
+    assign label = settings.collection_label_fallback | default: 'ALL'
+
+    # Keep this default in step with settings_schema.json. A setting added to
+    # the schema does not reach settings_data.json until someone opens the
+    # customizer and saves, so until that happens this literal is the live
+    # ignore list — not the one shown in the theme editor.
+    #
+    # `contains` over a split array is exact membership, not a substring test,
+    # so the handles have to be normalised before the comparison.
+    assign ignore_raw = settings.collection_label_ignore | default: 'all-products,for-shopify-performance-tracking'
+    assign ignore = ignore_raw | downcase | replace: ' ', '' | split: ','
+
+    for c in product.collections
+      unless ignore contains c.handle
+        assign label = c.title
+        break
+      endunless
+    endfor
+
+    echo label
+  endif
+-%}
