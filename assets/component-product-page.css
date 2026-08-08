@@ -152,24 +152,23 @@
   will-change: transform;
 }
 
-/* Desktop: the same bar stood on end, climbing toward the top of the screen as
-   the column scrolls through the images.
+/* Desktop: the same bar stood on end — full height, flush to the image's right
+   edge, mirroring the mobile bar's full bleed along the bottom edge. The fill
+   climbs toward the top of the screen as the column scrolls.
 
-   Deliberately inset and shorter than the image rather than full-bleed like the
-   mobile one. Run full height flush to the right edge and the completed bar
-   lands exactly on the image/details column boundary, where a 2px dark line is
-   indistinguishable from a border — it stops reading as progress entirely. Kept
-   short, the unfilled track stays visible above the fill, which is the part that
-   communicates "more images below". It occupies the dot column's old footprint,
-   climbing up from just above the heart. */
+   Full bleed is the intended look, picked deliberately over an inset variant.
+   Worth knowing before anyone "fixes" it: a completed bar lands on the
+   image/details boundary and can read like a column rule. The unfilled track at
+   12% is what separates it from a border mid-scroll. */
 @media (min-width: 769px) {
   .pdp__gallery-progress {
     left: auto;
-    top: auto;
-    bottom: 4.5rem;
-    right: 1.75rem;
+    right: 0;
+    top: 0;
+    bottom: 0;
     width: 2px;
-    height: 38vh;
+    /* top+bottom give the height; an explicit `height` would fight them. */
+    height: auto;
   }
 
   .pdp__gallery-progress-fill {
