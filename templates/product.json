@@ -174,10 +174,11 @@
     },
     "reviews_masthead": {
       "type": "product-reviews-masthead",
+      "disabled": true,
       "settings": {
         "heading": "Customer Reviews",
         "klaviyo_company_id": "WuWz5B",
-        "klaviyo_api_revision": "2024-10-15",
+        "klaviyo_api_revision": "2025-07-15",
         "collapsed_height": 480
       }
     },
