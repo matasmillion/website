@@ -413,12 +413,14 @@
         present rather than assuming a fixed set.
       {%- endcomment -%}
       {%- comment -%}
-        Panels start closed — clicking a tab slides its panel in, clicking the
-        active tab again closes it.
+        Story opens on load at every breakpoint — it is the one panel that
+        justifies the product, so it should never need a click to be read.
+        The rest start closed; clicking a tab slides its panel in, clicking the
+        active tab again closes it (including Story).
       {%- endcomment -%}
       <div class="pdp__tabs" data-pdp-tabs>
         <div class="pdp__tab-list" role="tablist">
-          <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
+          <button class="pdp__tab is-active" role="tab" data-tab="story" aria-selected="true" aria-expanded="true">Story</button>
           <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
           {%- comment -%}
             Composition is product-specific, so the tab only exists where the
@@ -434,11 +436,12 @@
         </div>
 
         {%- comment -%} ===== STORY ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="story" role="tabpanel">
-          {%- if product.collections.size > 0 -%}
-            <p class="pdp__tab-collection">{{ product.collections.first.title | upcase }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-subtitle">{{ product.title }}</p>
+        {%- comment -%}
+          Copy only. The collection, product title and SKU reference all sit
+          above this in the buy column already — repeating them here padded the
+          panel without telling the customer anything new.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel is-active" data-tab-panel="story" role="tabpanel">
           {%- liquid
             assign story = product.metafields.custom.product_story
             if story == blank
@@ -448,7 +451,6 @@
           {%- if story != blank -%}
             <div class="pdp__tab-description">{{ story }}</div>
           {%- endif -%}
-          <p class="pdp__tab-meta">Ref. {{ product.variants.first.sku | default: product.id }}</p>
         </div>
 
         {%- comment -%} ===== SIZING ===== {% endcomment -%}

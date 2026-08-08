@@ -654,19 +654,6 @@
   margin-top: 1rem;
 }
 
-.pdp__tab-collection {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: #A4A4A4;
-  margin-bottom: 0.25rem;
-}
-
-.pdp__tab-subtitle {
-  font-size: 12px;
-  font-weight: var(--font-weight-medium);
-  margin-bottom: 1rem;
-}
-
 .pdp__tab-description {
   font-size: 11px;
   line-height: 1.7;
