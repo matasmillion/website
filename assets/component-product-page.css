@@ -76,6 +76,23 @@
   }
 }
 
+/* Desktop click-to-zoom: the image magnifies inside its own frame and pans with
+   the pointer. The page never leaves — no lightbox, nothing to exit out of.
+   overflow:hidden is what stops the scaled image bleeding into the neighbouring
+   slides of the scroll-snap column. */
+.pdp__gallery-slide { overflow: hidden; }
+
+@media (min-width: 769px) {
+  /* Only `transform` is transitioned. transform-origin is rewritten on every
+     pointermove and has to land instantly, or the pan lags the cursor. */
+  .pdp__gallery-img { transition: transform var(--duration-base) var(--ease-out); }
+  .pdp__gallery-slide.is-zoomed .pdp__gallery-img { transform: scale(2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__gallery-img { transition: none; }
+}
+
 /* Gallery rail — desktop only: tiny dot column bottom-right, heart beneath.
    Mobile uses the progress bar instead, so the whole rail is hidden there. */
 .pdp__gallery-rail { display: none; }
@@ -83,13 +100,15 @@
 @media (min-width: 769px) {
   .pdp__gallery-rail {
     position: absolute;
-    right: 1.25rem;
-    bottom: 1.25rem;
+    right: 1.75rem;
+    bottom: 1.5rem;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.9rem;
+    /* The heart sits roughly two dot-pitches below the column so it reads as a
+       separate control, not the last dot. */
+    gap: 1.6rem;
   }
 }
 
@@ -98,7 +117,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  /* Airy pitch — 3px dot + 16px gap ≈ 19px centre to centre. Tightly packed
+     dots read cheap; the spread is what makes the corner feel considered. */
+  gap: 1rem;
 }
 
 .pdp__gallery-dot {
@@ -197,7 +218,8 @@
   cursor: pointer;
   padding: 0;
   color: var(--color-primary);
-  opacity: 0.4;
+  /* A little more presence than the old 20px heart had, to hold its own at 14px */
+  opacity: 0.5;
   transition: opacity var(--duration-fast) var(--ease-out);
   display: block;
 }
@@ -1430,7 +1452,9 @@
   gap: 0.5rem;
 }
 
-@media (min-width: 769px) {
+/* The lightbox is touch-only now — desktop zooms in place — so gate its
+   controls on the pointer, not the viewport width. */
+@media (pointer: coarse) {
   .pdp-zoom__ctrls { display: flex; }
 }
 

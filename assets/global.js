@@ -1423,7 +1423,7 @@
     place();
   };
 
-  /* --- PDP zoom lightbox + cursor-following affordance --- */
+  /* --- PDP zoom: in-place on desktop, fullscreen lightbox on touch --- */
   const initPdpZoom = () => {
     const gallery = document.querySelector('[data-product-gallery]');
     const zoom = document.querySelector('[data-pdp-zoom]');
@@ -1432,15 +1432,80 @@
     const img = zoom.querySelector('[data-zoom-img]');
     const stage = zoom.querySelector('[data-zoom-stage]');
     const cursor = gallery.querySelector('[data-zoom-cursor]');
+    const main = gallery.querySelector('[data-gallery-main]');
 
-    // Cursor-following +/- over the gallery (desktop, fine pointers only)
-    if (cursor && window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) {
+    // Re-evaluated per call, not cached: a resize or a hybrid device must not
+    // get stuck on whichever path happened to be true at load.
+    const isDesktop = () => window.matchMedia('(min-width: 769px) and (pointer: fine)').matches;
+
+    /* ---- Desktop: magnify inside the gallery frame, pan with the pointer.
+       The page is never covered and there is nothing to exit out of. ---- */
+    let zoomedSlide = null;
+
+    // The point under the cursor is the one that stays put as the image scales,
+    // which is what makes the pan feel like moving a loupe over the fabric.
+    const originFromEvent = (slide, e) => {
+      const r = slide.getBoundingClientRect();
+      const clamp = (n) => Math.max(0, Math.min(100, n));
+      return clamp(((e.clientX - r.left) / r.width) * 100) + '% '
+           + clamp(((e.clientY - r.top) / r.height) * 100) + '%';
+    };
+
+    const slideImg = (slide) => slide && slide.querySelector('.pdp__gallery-img');
+
+    const zoomIn = (slide, e) => {
+      const el = slideImg(slide);
+      if (!el) return;
+      // 2x over a ~58vw column needs the 2048 source. srcset has to go or the
+      // browser re-picks the 1200w candidate and the detail stays mush. Flagged
+      // rather than compared against el.src: image_url emits a protocol-relative
+      // URL, so el.src (resolved, absolute) would never match it.
+      if (slide.dataset.zoomSrc && !el.dataset.zoomLoaded) {
+        el.dataset.zoomLoaded = '1';
+        el.srcset = '';
+        el.src = slide.dataset.zoomSrc;
+      }
+      el.style.transformOrigin = originFromEvent(slide, e);
+      slide.classList.add('is-zoomed');
+      zoomedSlide = slide;
+      if (cursor) cursor.textContent = '−';
+    };
+
+    const zoomOut = () => {
+      if (!zoomedSlide) return;
+      const el = slideImg(zoomedSlide);
+      // The hi-res src stays put — it is already downloaded, and swapping back
+      // would flash on every re-zoom.
+      if (el) el.style.transformOrigin = '';
+      zoomedSlide.classList.remove('is-zoomed');
+      zoomedSlide = null;
+      if (cursor) cursor.textContent = '+';
+    };
+
+    // Cursor-following +/- over the gallery, and the pan while zoomed
+    // (desktop, fine pointers only)
+    if (window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) {
       gallery.addEventListener('pointermove', (e) => {
-        const r = gallery.getBoundingClientRect();
-        cursor.style.transform = 'translate(' + (e.clientX - r.left) + 'px,' + (e.clientY - r.top) + 'px)';
+        if (cursor) {
+          const r = gallery.getBoundingClientRect();
+          cursor.style.transform = 'translate(' + (e.clientX - r.left) + 'px,' + (e.clientY - r.top) + 'px)';
+        }
+        if (zoomedSlide) {
+          const el = slideImg(zoomedSlide);
+          if (el) el.style.transformOrigin = originFromEvent(zoomedSlide, e);
+        }
+      }, { passive: true });
+
+      // Fetch the 2048 ahead of the click so the first zoom doesn't stutter.
+      gallery.addEventListener('pointerover', (e) => {
+        const slide = e.target.closest('[data-gallery-slide]');
+        if (!slide || slide.dataset.zoomPreloaded || !slide.dataset.zoomSrc) return;
+        slide.dataset.zoomPreloaded = '1';
+        new Image().src = slide.dataset.zoomSrc;
       }, { passive: true });
     }
 
+    /* ---- Touch: the fullscreen viewer, since there is no hover to pan with ---- */
     const open = (slide) => {
       if (!slide || !img) return;
       img.src = slide.dataset.zoomSrc || '';
@@ -1463,12 +1528,21 @@
       const slide = e.target.closest('[data-gallery-slide]');
       if (!slide) return;
       if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) return;
-      open(slide);
+      if (!isDesktop()) { open(slide); return; }
+      if (zoomedSlide === slide) { zoomOut(); return; }
+      zoomOut();
+      zoomIn(slide, e);
     });
 
+    // Release the zoom rather than let a magnified frame snap past.
+    gallery.addEventListener('pointerleave', zoomOut);
+    if (main) main.addEventListener('scroll', zoomOut, { passive: true });
+
+    // Lightbox-internal zoom. It must not touch the gallery's cursor chip \u2014
+    // that belongs to the in-place zoom now, and a hybrid device using the
+    // lightbox would otherwise be left showing a stale minus over the gallery.
     const setZoomed = (on) => {
       zoom.classList.toggle('is-zoomed', on);
-      if (cursor) cursor.textContent = on ? '\u2212' : '+';
       if (on && stage) {
         // Centre the pan on the point that was zoomed into
         stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
@@ -1486,7 +1560,9 @@
 
     zoom.querySelectorAll('[data-zoom-close]').forEach(b => b.addEventListener('click', close));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && zoom.classList.contains('is-active')) close();
+      if (e.key !== 'Escape') return;
+      if (zoom.classList.contains('is-active')) close();
+      zoomOut();
     });
   };
 
