@@ -159,5 +159,31 @@
         "unit": "$"
       }
     ]
+  },
+  {
+    "name": "Product page",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Collection label"
+      },
+      {
+        "type": "paragraph",
+        "content": "The small grey line above the product name. Set \"Main Collection\" on a product in Shopify admin to choose it exactly. These settings only decide what happens when that field is left empty."
+      },
+      {
+        "type": "text",
+        "id": "collection_label_ignore",
+        "label": "Collections never used as the label",
+        "info": "Comma-separated collection handles (the end of the collection's URL). Catch-all and internal collections belong here.",
+        "default": "all-products, for-shopify-performance-tracking"
+      },
+      {
+        "type": "text",
+        "id": "collection_label_fallback",
+        "label": "Label when nothing else applies",
+        "default": "ALL"
+      }
+    ]
   }
 ]
