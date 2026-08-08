@@ -226,11 +226,32 @@
   }
 }
 
+/* min-height, not height: the row has to grow for the collection eyebrow.
+   global.js remeasures the band and rewrites --pdp-band-h, so the gallery and
+   scroll padding follow whatever height this ends up at. */
 .pdp-band__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 46px;
+  min-height: 46px;
+}
+
+/* Holds the eyebrow above the title so the heart stays flush right against the
+   pair rather than against the title alone. */
+.pdp-band__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The mobile twin of .pdp__collection, which carries the desktop eyebrow */
+.pdp-band__collection {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #A4A4A4;
+  margin: 0 0 2px;
 }
 
 .pdp-band__title {
@@ -240,7 +261,6 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #2D2C2F;
-  flex: 1;
   margin: 0;
 }
 
