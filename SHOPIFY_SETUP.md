@@ -62,7 +62,22 @@ icon links there.
 - The announcement bar is currently **disabled** in the header group —
   enable it in the customizer if you want the shipping message back.
 
-## 5. Deploying the theme
+## 5. Product metafields
+
+| Field (in the product editor) | Namespace / key | Drives |
+|---|---|---|
+| **Main Collection** | `custom.main_collection` | The small grey collection line above the product name — mobile add-to-cart band and desktop details column |
+
+Pick the collection the product really belongs to (e.g. `BORDERLESS BASICS`), even though the
+product also sits in `ALL` and in whatever sale or seasonal collections it has been added to. This
+is the only thing that decides what the PDP says.
+
+Leave it empty and the theme falls back to the first collection whose handle is **not** on the
+ignore list in *Customize → Theme settings → Product page* — `all-products` and
+`for-shopify-performance-tracking` (Faire) by default — and finally to the label `ALL`. Add any
+other catch-all or internal collection to that list rather than editing the theme.
+
+## 6. Deploying the theme
 
 This repo syncs with Shopify via the **GitHub integration** (you'll see
 "Update from Shopify" commits on the connected branch). That means:
@@ -76,7 +91,7 @@ This repo syncs with Shopify via the **GitHub integration** (you'll see
 - The old `foreign-resource-theme.zip` that lived in this repo was a stale
   snapshot and has been deleted — don't upload it.
 
-## 6. Known intentional gaps
+## 7. Known intentional gaps
 
 - Blog articles render without a comments section (off-brand; can be added
   later if wanted).
