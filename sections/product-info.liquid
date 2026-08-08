@@ -29,6 +29,17 @@
   endif
 -%}
 
+{%- comment -%}
+  The collection eyebrow, resolved once for both places it appears — the mobile
+  band and the desktop details column — so they cannot disagree. See the snippet
+  for why product.collections.first is not good enough.
+
+  Not the Story tab: that panel is deliberately copy-only, and the eyebrow sits
+  above it in the buy column at both breakpoints already.
+{%- endcomment -%}
+{%- capture main_collection %}{% render 'main-collection', product: product %}{% endcapture -%}
+{%- assign main_collection = main_collection | strip -%}
+
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
 {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
@@ -37,7 +48,7 @@
   padding. Declared on :root so html-level rules can resolve it.
 {%- endcomment -%}
 <style>
-  :root { --pdp-band-h: 126px; }
+  :root { --pdp-band-h: 140px; }
   html { scroll-padding-bottom: var(--pdp-band-h); }
 
   /* iOS Safari keeps scrolling <html> even when <body> clips, which is what
@@ -140,7 +151,12 @@
   {%- endcomment -%}
   <div class="pdp-band" data-sticky-band>
     <div class="pdp-band__top">
-      <h1 class="pdp-band__title">{{ product.title }}</h1>
+      <div class="pdp-band__titles">
+        {%- if main_collection != blank -%}
+          <p class="pdp-band__collection">{{ main_collection }}</p>
+        {%- endif -%}
+        <h1 class="pdp-band__title">{{ product.title }}</h1>
+      </div>
       <button
         class="pdp-band__heart"
         data-wishlist-toggle="{{ product.handle }}"
@@ -167,8 +183,8 @@
   <div class="pdp__details">
     <div class="pdp__details-inner">
       {%- comment -%} Desktop-only: collection label + title {% endcomment -%}
-      {%- if product.collections.size > 0 -%}
-        <p class="pdp__collection">{{ product.collections.first.title }}</p>
+      {%- if main_collection != blank -%}
+        <p class="pdp__collection">{{ main_collection }}</p>
       {%- endif -%}
 
       <h1 class="pdp__title">{{ product.title }}</h1>
