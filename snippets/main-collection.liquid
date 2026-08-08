@@ -28,9 +28,14 @@
   else
     assign label = settings.collection_label_fallback | default: 'ALL'
 
+    # Keep this default in step with settings_schema.json. A setting added to
+    # the schema does not reach settings_data.json until someone opens the
+    # customizer and saves, so until that happens this literal is the live
+    # ignore list — not the one shown in the theme editor.
+    #
     # `contains` over a split array is exact membership, not a substring test,
     # so the handles have to be normalised before the comparison.
-    assign ignore_raw = settings.collection_label_ignore | default: 'all-products'
+    assign ignore_raw = settings.collection_label_ignore | default: 'all-products,for-shopify-performance-tracking'
     assign ignore = ignore_raw | downcase | replace: ' ', '' | split: ','
 
     for c in product.collections
