@@ -156,10 +156,10 @@
    edge, mirroring the mobile bar's full bleed along the bottom edge. The fill
    climbs toward the top of the screen as the column scrolls.
 
-   Full bleed is the intended look, picked deliberately over an inset variant.
-   Worth knowing before anyone "fixes" it: a completed bar lands on the
-   image/details boundary and can read like a column rule. The unfilled track at
-   12% is what separates it from a border mid-scroll. */
+   No track here, unlike mobile. A 12% hairline running the whole boundary put a
+   permanent third colour between image and details and read as a scrollbar
+   gutter. Only the fill is painted, so the seam stays clean and the black bar
+   appears to grow out of the bottom corner and retract back into it. */
 @media (min-width: 769px) {
   .pdp__gallery-progress {
     left: auto;
@@ -169,6 +169,7 @@
     width: 2px;
     /* top+bottom give the height; an explicit `height` would fight them. */
     height: auto;
+    background: transparent;
   }
 
   .pdp__gallery-progress-fill {
