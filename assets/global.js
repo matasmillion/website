@@ -1566,14 +1566,11 @@
     });
   };
 
-  /* --- PDP Gallery (swipe + dots + arrows) --- */
+  /* --- PDP Gallery (swipe/scroll + progress bar) --- */
   const initPdpGallery = () => {
     const gallery = document.querySelector('[data-product-gallery]');
     if (!gallery) return;
     const main = gallery.querySelector('[data-gallery-main]');
-    const dots = gallery.querySelectorAll('[data-gallery-dot]');
-    const prev = gallery.querySelector('[data-gallery-prev]');
-    const next = gallery.querySelector('[data-gallery-next]');
     const slides = gallery.querySelectorAll('[data-gallery-slide]');
     const fill = gallery.querySelector('[data-gallery-progress]');
     if (!main || !slides.length) return;
@@ -1584,12 +1581,16 @@
     // Desktop stacks the images and scrolls vertically; mobile swipes horizontally.
     const isVertical = () => window.matchMedia('(min-width: 769px)').matches;
 
-    // Desktop shows discrete dots, mobile a continuous bar. Both are updated
-    // unconditionally — writing to a display:none node costs nothing.
-    const syncUI = (idx) => {
-      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
-      if (fill) fill.style.transform = 'scaleX(' + ((idx + 1) / total) + ')';
+    // One bar, two orientations. The CSS swaps which axis is 2px and where the
+    // fill is anchored; this has to swap the matching axis or the bar sits at 0
+    // forever — scaleX on a 2px-wide track changes nothing visible.
+    const setFill = (frac) => {
+      if (!fill) return;
+      const clamped = Math.min(1, Math.max(0, frac));
+      fill.style.transform = (isVertical() ? 'scaleY(' : 'scaleX(') + clamped + ')';
     };
+
+    const syncUI = (idx) => setFill((idx + 1) / total);
 
     const goTo = (idx) => {
       current = Math.max(0, Math.min(total - 1, idx));
@@ -1601,24 +1602,26 @@
       syncUI(current);
     };
 
-    dots.forEach(dot => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.galleryDot))));
-    if (prev) prev.addEventListener('click', () => goTo(current - 1));
-    if (next) next.addEventListener('click', () => goTo(current + 1));
-
-    // The bar tracks the swipe continuously, so it gets its own undebounced
-    // listener rather than waiting on the 100ms dot settle.
+    // The bar tracks the gesture continuously, so it gets its own undebounced
+    // listener rather than waiting on the 100ms settle below.
     if (fill) {
       main.addEventListener('scroll', () => {
-        if (isVertical()) return;
-        const frac = (main.scrollLeft + main.offsetWidth) / main.scrollWidth;
-        fill.style.transform = 'scaleX(' + Math.min(1, Math.max(0, frac)) + ')';
+        setFill(isVertical()
+          ? (main.scrollTop + main.offsetHeight) / main.scrollHeight
+          : (main.scrollLeft + main.offsetWidth) / main.scrollWidth);
       }, { passive: true });
     }
+
+    // Crossing the breakpoint leaves the fill scaled on the wrong axis, which
+    // reads as a bar stuck empty. Re-assert it against the new orientation.
+    window.matchMedia('(min-width: 769px)').addEventListener('change', () => syncUI(current));
 
     // Reflect position 1 of n at load rather than an empty bar.
     syncUI(0);
 
-    // Sync dots on scroll
+    // Track the settled index. The continuous handler above already paints the
+    // bar mid-gesture; this is what keeps `current` honest for goTo and for the
+    // breakpoint change, and snaps the fill onto an exact 1/n at rest.
     let scrollTimeout;
     main.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);

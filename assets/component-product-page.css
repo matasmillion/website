@@ -93,48 +93,22 @@
   .pdp__gallery-img { transition: none; }
 }
 
-/* Gallery rail — desktop only: tiny dot column bottom-right, heart beneath.
-   Mobile uses the progress bar instead, so the whole rail is hidden there. */
+/* Gallery rail — desktop only: now just the heart, bottom-right. The dot column
+   that used to sit above it was replaced by the vertical progress bar below. */
 .pdp__gallery-rail { display: none; }
 
 @media (min-width: 769px) {
   .pdp__gallery-rail {
     position: absolute;
+    /* Clear of the progress bar's 2px at the right edge — the heart reads as a
+       control on the image, not as the bar's endpoint. */
     right: 1.75rem;
     bottom: 1.5rem;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* The heart sits roughly two dot-pitches below the column so it reads as a
-       separate control, not the last dot. */
-    gap: 1.6rem;
   }
-}
-
-/* Flex doesn't skip a level — the dot wrapper needs its own column flow. */
-.pdp__gallery-dots {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Airy pitch — 3px dot + 16px gap ≈ 19px centre to centre. Tightly packed
-     dots read cheap; the spread is what makes the corner feel considered. */
-  gap: 1rem;
-}
-
-.pdp__gallery-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(45,44,47,0.25);
-  cursor: pointer;
-  padding: 0;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.pdp__gallery-dot.is-active {
-  background: rgba(45,44,47,0.85);
 }
 
 /* Shopify product tag, bottom-left (desktop) */
@@ -156,7 +130,8 @@
   .pdp__gallery-badge { display: block; }
 }
 
-/* Mobile progress bar — flat, flush to the image's bottom edge */
+/* Progress bar — the single image-count affordance at both breakpoints.
+   Mobile: horizontal, flush to the image's bottom edge, filling left to right. */
 .pdp__gallery-progress {
   position: absolute;
   left: 0;
@@ -177,38 +152,32 @@
   will-change: transform;
 }
 
+/* Desktop: the same bar stood on end, climbing toward the top of the screen as
+   the column scrolls through the images.
+
+   Deliberately inset and shorter than the image rather than full-bleed like the
+   mobile one. Run full height flush to the right edge and the completed bar
+   lands exactly on the image/details column boundary, where a 2px dark line is
+   indistinguishable from a border — it stops reading as progress entirely. Kept
+   short, the unfilled track stays visible above the fill, which is the part that
+   communicates "more images below". It occupies the dot column's old footprint,
+   climbing up from just above the heart. */
 @media (min-width: 769px) {
-  .pdp__gallery-progress { display: none; }
-}
+  .pdp__gallery-progress {
+    left: auto;
+    top: auto;
+    bottom: 4.5rem;
+    right: 1.75rem;
+    width: 2px;
+    height: 38vh;
+  }
 
-/* Gallery nav arrows */
-.pdp__gallery-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 1rem;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.pdp__gallery:hover .pdp__gallery-nav {
-  opacity: 0.5;
-}
-
-.pdp__gallery-nav:hover {
-  opacity: 1 !important;
-}
-
-.pdp__gallery-nav--prev { left: 0; }
-.pdp__gallery-nav--next { right: 0; }
-
-/* Desktop navigates by scrolling, so the arrows are dead weight */
-@media (min-width: 769px) {
-  .pdp__gallery-nav { display: none; }
+  .pdp__gallery-progress-fill {
+    /* Anchor at the bottom, or the fill would grow downward from the top. The
+       axis is swapped in JS to match — scaleX on a 2px-wide track is invisible. */
+    transform-origin: bottom;
+    transform: scaleY(0);
+  }
 }
 
 /* Wishlist — flows inside the rail, so no absolute positioning of its own */

@@ -89,18 +89,10 @@
     </div>
 
     <div class="pdp__gallery-rail">
-      {%- if product.images.size > 1 -%}
-        <div class="pdp__gallery-dots">
-          {%- for image in product.images -%}
-            <button
-              class="pdp__gallery-dot{% if forloop.first %} is-active{% endif %}"
-              data-gallery-dot="{{ forloop.index0 }}"
-              aria-label="View image {{ forloop.index }}"
-            ></button>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-      {%- comment -%} Wishlist sits directly beneath the dots {% endcomment -%}
+      {%- comment -%}
+        The dot column used to live here. Both breakpoints now share the single
+        progress bar at the end of this block, so the heart is all the rail holds.
+      {%- endcomment -%}
       <button
         class="pdp__wishlist-img"
         data-wishlist-toggle="{{ product.handle }}"
@@ -110,15 +102,6 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>
-
-    {%- if product.images.size > 1 -%}
-      <button class="pdp__gallery-nav pdp__gallery-nav--prev" data-gallery-prev aria-label="Previous image">
-        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
-      </button>
-      <button class="pdp__gallery-nav pdp__gallery-nav--next" data-gallery-next aria-label="Next image">
-        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="1 1 7 6.5 1 12"/></svg>
-      </button>
-    {%- endif -%}
 
     {%- comment -%} Tag badge, bottom-left (desktop) {% endcomment -%}
     {%- capture badge_label %}{% render 'product-badge-label', product: product %}{% endcapture -%}
@@ -133,10 +116,19 @@
     {%- endcomment -%}
     <span class="pdp__zoom-cursor" data-zoom-cursor aria-hidden="true">+</span>
 
-    {%- comment -%} Mobile: flat progress bar flush to the image's bottom edge {% endcomment -%}
-    <div class="pdp__gallery-progress" aria-hidden="true">
-      <span class="pdp__gallery-progress-fill" data-gallery-progress></span>
-    </div>
+    {%- comment -%}
+      The only how-many-images affordance at either breakpoint. Mobile: flush to
+      the image's bottom edge, filling left to right. Desktop: the same bar stood
+      on end at the image's right edge, filling bottom to top.
+
+      Guarded on image count — with one image the bar would sit permanently full,
+      announcing a gallery that isn't there.
+    {%- endcomment -%}
+    {%- if product.images.size > 1 -%}
+      <div class="pdp__gallery-progress" aria-hidden="true">
+        <span class="pdp__gallery-progress-fill" data-gallery-progress></span>
+      </div>
+    {%- endif -%}
   </div>
 
   {%- comment -%}
