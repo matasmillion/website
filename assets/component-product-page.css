@@ -254,11 +254,16 @@
   margin: 0 0 2px;
 }
 
+/* 17px against the eyebrow's 9px — a 1.9x step. The desktop pair runs
+   9.9/15.9 (1.6x), which is already the weaker hierarchy of the two; at the
+   band's old 12.8px the step was only 1.4x and the two lines read as one
+   block. The product name is what the shopper is buying, so it wins clearly. */
 .pdp-band__title {
   font-family: var(--font-body);
-  font-size: 12.8px;
+  font-size: 17px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.06em;
+  line-height: 1.2;
   text-transform: uppercase;
   color: #2D2C2F;
   margin: 0;
