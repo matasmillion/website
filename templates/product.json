@@ -231,6 +231,7 @@
     },
     "brand_story_GAGwDD": {
       "type": "brand-story",
+      "disabled": true,
       "name": "Brand Story",
       "settings": {
         "subheading": "Our Story",
