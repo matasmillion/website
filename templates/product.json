@@ -64,39 +64,6 @@
         "size_chart_content": ""
       }
     },
-    "guarantees": {
-      "type": "product-guarantees",
-      "blocks": {
-        "guarantee_returns": {
-          "type": "guarantee",
-          "settings": {
-            "icon": "returns",
-            "text": "Free Returns & Exchanges"
-          }
-        },
-        "guarantee_delivery": {
-          "type": "guarantee",
-          "settings": {
-            "icon": "clock",
-            "text": "5-Day Delivery Guarantee"
-          }
-        },
-        "guarantee_shipping": {
-          "type": "guarantee",
-          "settings": {
-            "icon": "shipping",
-            "text": "Complimentary Express Over $150"
-          }
-        }
-      },
-      "block_order": [
-        "guarantee_returns",
-        "guarantee_delivery",
-        "guarantee_shipping"
-      ],
-      "disabled": true,
-      "settings": {}
-    },
     "engineering": {
       "type": "fr-engineering",
       "settings": {
@@ -243,11 +210,43 @@
         "cta_style": "btn--secondary",
         "bg_color": ""
       }
+    },
+    "guarantees": {
+      "type": "product-guarantees",
+      "blocks": {
+        "guarantee_returns": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "returns",
+            "text": "TAXES & DUTIES INCLUDED"
+          }
+        },
+        "guarantee_delivery": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "clock",
+            "text": "GLOBAL SHIPPING"
+          }
+        },
+        "guarantee_shipping": {
+          "type": "guarantee",
+          "settings": {
+            "icon": "shipping",
+            "text": "EASY RETURNS"
+          }
+        }
+      },
+      "block_order": [
+        "guarantee_returns",
+        "guarantee_delivery",
+        "guarantee_shipping"
+      ],
+      "disabled": true,
+      "settings": {}
     }
   },
   "order": [
     "product_info",
-    "guarantees",
     "engineering",
     "company_details",
     "band_rest",
@@ -256,6 +255,7 @@
     "reviews_masthead",
     "complete_the_look",
     "you_may_also_like",
-    "brand_story_GAGwDD"
+    "brand_story_GAGwDD",
+    "guarantees"
   ]
 }
