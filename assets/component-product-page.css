@@ -1124,11 +1124,25 @@
    <body>, keeps its own styling. Display is deliberately not overridden —
    that is the app's to control. */
 .pdp__size-guide-slot,
-#smartrecom-triggers,
-#smartrecom-triggers .smartrecom-container {
+#smartrecom-triggers {
   text-align: center !important;
   justify-content: center !important;
   width: 100%;
+}
+
+/* The pair sits together, centred. width:100% here — which is what this rule
+   used to carry — made each trigger claim an equal share of a flex row, which
+   threw SIZE CHART and FIND MY SIZE to opposite edges of the column with a
+   void between them. They size to their text now and the gap sets the spacing.
+   The wrapper's own display is left to the app, which toggles it. */
+#smartrecom-triggers {
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+#smartrecom-triggers .smartrecom-container {
+  text-align: center !important;
+  width: auto;
 }
 
 #smartrecom-triggers .smartrecom-trigger,
