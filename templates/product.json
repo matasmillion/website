@@ -37,7 +37,7 @@
         "standard_label": "Foreign Air",
         "express_label": "Express Air",
         "delivery_rates": "US|3|5|1|2|$10|$20",
-        "cutoff_hour": 12,
+        "cutoff_hour": 13,
         "delivery_timezone": "America/Los_Angeles",
         "size_chart_content": ""
       }

@@ -1126,9 +1126,22 @@
   color: #1A191C;
 }
 
-/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
-   rather than [hidden] — the display rule above outranks the attribute. */
-.pdp__urgency.is-superseded { display: none; }
+/* Sitting under Shop Promise, the line is the deadline for the date Shopify
+   quotes above it, so the two have to read as one block rather than as two
+   unrelated notes: same 13/11 type, centred on the same axis, and close enough
+   together that the countdown is obviously about the date above it.
+
+   The wording changes too — the arrival date drops out, because Shopify's line
+   already carries it. That happens in renderUrgency, not here. */
+.pdp__urgency.is-with-promise {
+  margin-top: 0.15rem;
+  font-size: 13px;
+  justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .pdp__urgency.is-with-promise { font-size: 11px; }
+}
 
 /* ===== Shop Promise, wearing the theme's clothes =====
 
@@ -1151,9 +1164,12 @@
    that single rule is injected into the shadow root from global.js. */
 delivery-promise-wc {
   display: block;
-  /* The buy column's own spacing token, so the box keeps step with the urgency
-     line below it at both breakpoints. */
-  margin-bottom: var(--pdp-item);
+  /* Tight, because the countdown sits directly underneath and the two are one
+     statement: the date, and the deadline to earn it. The gap to whatever
+     follows is owned by that countdown's own margin. On products with no
+     promise this element is empty and zero-height, so the leftover is a
+     quarter-rem of harmless slack. */
+  margin-bottom: 0.25rem;
 
   /* Inherited by every text node inside the shadow root.
 

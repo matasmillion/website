@@ -1084,6 +1084,25 @@
         // The countdown and the arrival both render bold — they are the only
         // two values on the line a shopper actually acts on.
         const arrival = fmtRelative(by);
+
+        // Beside Shop Promise the line is a deadline and nothing else. Shopify's
+        // own line sits directly above it and already states the arrival date,
+        // and the two dates come from different places — ours from the rates
+        // table in the theme settings, theirs from carrier data. Printing both
+        // only invites the shopper to notice they disagree.
+        if (urgency.classList.contains('is-with-promise')) {
+          if (left > 0) {
+            setLine(text, [['Order within ', false], [fmtCountdown(left), true]]);
+            urgency.hidden = false;
+            return left;
+          }
+          // Past the cutoff there is no deadline worth quoting, and the arrival
+          // date belongs to Shopify's line here, so there is nothing to fall
+          // back to. Say nothing rather than pad the page.
+          urgency.hidden = true;
+          return 0;
+        }
+
         if (left > 0) {
           setLine(text, [
             ['Order within ', false],
@@ -1112,6 +1131,10 @@
         if (renderUrgency() > 0 && !timer) timer = setInterval(renderUrgency, 60000);
       };
       tick();
+      // Shop Promise resolves long after this first render, and it decides which
+      // of the two wordings above is the right one. Re-render when it lands
+      // rather than leaving the full line on screen until the next minute ticks.
+      document.addEventListener('fr:promise', tick);
       // Without this a backgrounded tab is restored with a stale number frozen
       // on screen, which is worse than showing no countdown in the first place.
       document.addEventListener('visibilitychange', () => {
@@ -1356,6 +1379,16 @@
       mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
     }
 
+    /* The widget's outermost element carries margin: 20px 0. Being the first and
+       last in-flow child of a host with no padding or border, those margins
+       collapse straight out through the host, so 20px of air lands below the box
+       that no rule in the theme can see or reach. That is the gap that kept the
+       countdown reading as a separate note rather than as this line's deadline.
+
+       Only the bottom is cleared. The top margin is the separation from the
+       add-to-cart button above, which is already right. */
+    [class*="ProductPageContainer__Spacer"] { margin-bottom: 0 !important; }
+
     /* The expanded zip form is a form: left-aligned, and keeping its own gaps. */
     [class*="ExpansionBlock__ExpansionBlock"] [class*="BlockStack__BlockStack"],
     [class*="ExpansionBlock__ExpansionBlock"] [class*="InlineStack__InlineStack"] {
@@ -1466,12 +1499,23 @@
       });
     };
 
-    // Toggle a class, never the hidden attribute — [hidden] is overridden by a
-    // display rule in component-product-page.css and would not take effect.
+    // Our line no longer stands down for Shopify's — it sits under it as the
+    // deadline for the date Shopify quotes, carrying the pulse and the
+    // countdown. The class is what tells the estimator to drop its own arrival
+    // date and render the countdown alone; see renderUrgency.
+    //
+    // The event fires only on a real change. sync() runs on every body mutation
+    // on the page, and re-rendering the countdown on each of those would be a
+    // lot of work to arrive at the same string.
     const sync = () => {
       skin();
       nameDays();
-      if (urgency) urgency.classList.toggle('is-superseded', resolved());
+      if (!urgency) return;
+      const before = urgency.classList.contains('is-with-promise');
+      const now = resolved();
+      if (before === now) return;
+      urgency.classList.toggle('is-with-promise', now);
+      document.dispatchEvent(new CustomEvent('fr:promise'));
     };
 
     sync();
