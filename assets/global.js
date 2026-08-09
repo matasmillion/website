@@ -1299,24 +1299,48 @@
       letter-spacing: inherit !important;
     }
     [class*="ShopPromiseLogo__Logo"] { vertical-align: middle; }
-    /* The collapsed line follows the buy column: centred on mobile, flush left
-       from the same 769px the rest of the PDP turns at. The expanded zip form is
-       left alone — it is a form, and a centred form reads as a mistake. */
-    [class*="PromiseShell__Promise"] [class*="BlockStack__BlockStack"],
-    [class*="PromiseShell__Promise"] [class*="InlineStack__InlineStack"] {
-      --ui-block-stack-align: center !important;
-      --ui-inline-stack-align: center !important;
+
+    /* ONE LINE: arrival, zip, then the Shop mark to the right of it.
+       Shopify stacks these — arrival on the first row, and the mark on a second
+       row next to "Free shipping over $150". Turning the stack into a wrapping
+       row lifts the mark up beside the zip, and giving the zip form a full
+       basis keeps it on a row of its own when it expands. */
+    [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      column-gap: 0.45em !important;
+      justify-content: center !important;
     }
+    [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="ExpansionBlock__ExpansionBlock"] {
+      flex-basis: 100% !important;
+    }
+
+    /* "Free shipping over $150" — dropped, so nothing sits between the zip and
+       the mark.
+
+       The adjacent sibling is load-bearing, not decoration. It only matches an
+       inline row that FOLLOWS an arrival line, which is the two-row layout this
+       is meant for. On the products where Shopify writes the whole promise
+       sentence into that row instead — "Free delivery tomorrow to 10001" — there
+       is no preceding line, so the rule does not match and the sentence stays.
+       Without the guard, those products would lose their only line of copy and
+       render as a bare Shop mark. */
+    [class*="BlockStack__BlockStack"] > [class*="Text__Text"] + [class*="InlineStack__InlineStack"] > [class*="Text__Text"] {
+      display: none !important;
+    }
+
+    /* The expanded zip form is a form: left-aligned, and keeping its own gaps. */
     [class*="ExpansionBlock__ExpansionBlock"] [class*="BlockStack__BlockStack"],
     [class*="ExpansionBlock__ExpansionBlock"] [class*="InlineStack__InlineStack"] {
       --ui-block-stack-align: start !important;
       --ui-inline-stack-align: start !important;
     }
+
+    /* Same 769px the rest of the PDP turns at. */
     @media (min-width: 769px) {
-      [class*="PromiseShell__Promise"] [class*="BlockStack__BlockStack"],
-      [class*="PromiseShell__Promise"] [class*="InlineStack__InlineStack"] {
-        --ui-block-stack-align: start !important;
-        --ui-inline-stack-align: start !important;
+      [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] {
+        justify-content: flex-start !important;
       }
     }
   `;
