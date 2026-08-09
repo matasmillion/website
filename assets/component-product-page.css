@@ -327,8 +327,21 @@
   .pdp__details {
     /* Clear the fixed chrome so details aren't hidden, while the left image
        stays full-frame behind the transparent header. */
-    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem 2.5rem;
-    align-items: flex-start;
+    /* Vertical padding is symmetric, which it was not while the column stacked
+       from the top. Centring inside a 140px/40px box put the block 100px below
+       the viewport's centre line — the top value still clears the fixed chrome
+       for the case where the panel outgrows the screen and stacks from the top
+       instead, so it is matched rather than removed. */
+    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem;
+    /* Centred on both axes against the full-height image beside it, so the
+       column reads as a block sitting in the space rather than as copy stacked
+       from the top with the rest left empty.
+
+       min-height, not height: when the panel is taller than the viewport the
+       container grows with it, so centring only ever takes up slack and can
+       never push content off the top edge. */
+    align-items: center;
+    justify-content: center;
     min-height: 100vh;
   }
 }
@@ -339,10 +352,12 @@
   text-align: center;
 }
 
+/* Centred at every breakpoint — desktop matches mobile rather than switching to
+   flush left. The max-width still holds the measure; only the alignment of the
+   text inside it changed. */
 @media (min-width: 769px) {
   .pdp__details-inner {
     max-width: 340px;
-    text-align: left;
   }
 }
 
@@ -409,12 +424,6 @@
   justify-content: center;
 }
 
-@media (min-width: 769px) {
-  .pdp__swatch-list {
-    justify-content: flex-start;
-  }
-}
-
 /* Box swatches — square, with a rule under the selected colour */
 .pdp__swatch {
   width: 26px;
@@ -470,12 +479,6 @@
   gap: 0.25rem;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-@media (min-width: 769px) {
-  .pdp__size-buttons {
-    justify-content: flex-start;
-  }
 }
 
 .pdp__size-btn {
@@ -589,12 +592,6 @@
   .pdp__tab-list { gap: 1.25rem; }
 }
 
-@media (min-width: 769px) {
-  .pdp__tab-list {
-    justify-content: flex-start;
-  }
-}
-
 .pdp__tab {
   font-family: var(--font-body);
   font-size: 11.2px;
@@ -631,12 +628,6 @@
 .pdp__tab-panel {
   display: none;
   text-align: center;
-}
-
-@media (min-width: 769px) {
-  .pdp__tab-panel {
-    text-align: left;
-  }
 }
 
 .pdp__tab-panel.is-active {
@@ -804,10 +795,6 @@
   text-transform: uppercase;
   color: #2D2C2F;
   margin: 1.5rem 0 0.75rem;
-}
-
-@media (min-width: 769px) {
-  .dest__label { justify-content: flex-start; }
 }
 
 /* Live-feeling pulse next to delivery messaging */
@@ -982,10 +969,6 @@
    rather than [hidden] — the display rule above outranks the attribute. */
 .pdp__urgency.is-superseded { display: none; }
 
-@media (min-width: 769px) {
-  .pdp__urgency { justify-content: flex-start; }
-}
-
 /* ===== Conversion: installments, low stock, back in stock ===== */
 
 /* A class selector beats the UA [hidden] rule, so anything given an explicit
@@ -1111,24 +1094,10 @@
   opacity: 1 !important;
 }
 
-/* The slot now lives in the Sizing tab, so it follows that panel's alignment
-   rather than the buy column's: centred on mobile, flush left on desktop, in
-   line with the copy above it. Our own slot div is a safe target; same
-   !important weight as the rules above, placed after them so order decides. */
-@media (min-width: 769px) {
-  .pdp__tab-panel .pdp__size-guide-slot,
-  .pdp__tab-panel [class*="smartrecom"] {
-    text-align: left !important;
-    justify-content: flex-start !important;
-  }
-
-  .pdp__tab-panel .pdp__size-guide-slot a,
-  .pdp__tab-panel .pdp__size-guide-slot button,
-  .pdp__tab-panel [class*="smartrecom"] a,
-  .pdp__tab-panel [class*="smartrecom"] button {
-    margin: 0 !important;
-  }
-}
+/* No desktop alignment override any more. This used to flip the slot flush left
+   to match the buy column; the column is centred at every breakpoint now, so
+   the centred rules above are already right and a second set would only fight
+   them. */
 
 
 /* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
