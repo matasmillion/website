@@ -55,7 +55,6 @@
         "show_payment_terms": false,
         "low_stock_threshold": 5,
         "installments_url": "",
-        "hide_shop_promise": false,
         "standard_label": "Foreign Air",
         "express_label": "Express Air",
         "delivery_rates": "US|3|5|1|2|$10|$20",

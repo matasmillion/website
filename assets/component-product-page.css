@@ -995,9 +995,17 @@
   color: #1A191C;
 }
 
-/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
-   rather than [hidden] — the display rule above outranks the attribute. */
-.pdp__urgency.is-superseded { display: none; }
+/* Shop Promise is off the PDP for good — our urgency line is the page's only
+   delivery date, so it never stands down for anything.
+
+   Shopify injects the box from content_for_header and it cannot be removed in
+   Liquid, so it is hidden here instead. Both selectors are needed: the sink div
+   in product-info.liquid, and the custom element itself for the case where
+   Shopify's script ignores the sink and injects into the buy column. !important
+   because the injected bundle ships its own styles. Hidden in CSS rather than
+   removed in JS so the box never paints a frame before it disappears. */
+delivery-promise-wc,
+.delivery-promise__promise-container { display: none !important; }
 
 @media (min-width: 769px) {
   .pdp__urgency { justify-content: flex-start; }

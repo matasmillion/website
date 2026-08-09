@@ -1239,36 +1239,6 @@
     }
   };
 
-  /* --- Shop Promise takes precedence over our own delivery line --- */
-  // Shopify's banner carries a live carrier estimate; ours is derived from theme
-  // settings. Two delivery dates on one page invites the shopper to notice they
-  // disagree, so when theirs resolves, ours steps aside.
-  const initShopPromiseCoordination = () => {
-    const urgency = document.querySelector('[data-delivery-urgency]');
-    if (!urgency) return;
-
-    // Presence is not enough. <delivery-promise-wc> mounts before it resolves,
-    // and stays empty when no promise applies to the product — hiding on the
-    // element alone would silently drop our line for products that never get one.
-    const resolved = () => {
-      const el = document.querySelector('delivery-promise-wc');
-      if (!el || !el.offsetHeight) return false;
-      // The custom element opts into an open shadow root, so its rendered
-      // content is readable from here without touching any internal class name.
-      const root = el.shadowRoot;
-      return !!(root && root.textContent.trim());
-    };
-
-    // Toggle a class, never the hidden attribute — [hidden] is overridden by a
-    // display rule in component-product-page.css and would not take effect.
-    const sync = () => urgency.classList.toggle('is-superseded', resolved());
-
-    sync();
-    // The Shop Promise bundle is deferred and resolves well after this runs, so
-    // a one-shot check would almost always miss it.
-    new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
-  };
-
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
   const initOverlayContrast = () => {
     // Every place copy is laid over an image. `band` is the strip the copy
@@ -1728,7 +1698,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
