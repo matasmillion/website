@@ -390,18 +390,38 @@
   }
 }
 
+/* ----- Vertical rhythm -----
+   One scale for the whole column, so the spacing says something instead of
+   being set per element. Every gap here used to land near 1.25rem, which read
+   as an evenly spaced list: nothing grouped, so the eye had to read all of it
+   to find the size row.
+
+   The ratio is the point. Space between groups is roughly 2.5x the space
+   inside one, which is what separates identity / colour / size / commit /
+   detail into blocks you can skip between. Widen or tighten the column by
+   moving these four values, not the rules below. */
 .pdp__details-inner {
+  --pdp-tight: 0.625rem;  /* label to the thing it labels */
+  --pdp-item: 1rem;       /* between items that belong together */
+  --pdp-block: 1.5rem;    /* a heading to its body */
+  --pdp-group: 2rem;      /* between groups — the gap that does the grouping */
+
   width: 100%;
   max-width: 100%;
   text-align: center;
 }
 
 /* Centred at every breakpoint — desktop matches mobile rather than switching to
-   flush left. The max-width still holds the measure; only the alignment of the
-   text inside it changed. */
+   flush left. Desktop gets the wider measure and the more generous scale: there
+   is room beside a full-height image that a phone does not have. */
 @media (min-width: 769px) {
   .pdp__details-inner {
-    max-width: 340px;
+    --pdp-tight: 0.75rem;
+    --pdp-item: 1.25rem;
+    --pdp-block: 2rem;
+    --pdp-group: 2.75rem;
+
+    max-width: 400px;
   }
 }
 
@@ -422,22 +442,24 @@
 .pdp__collection {
   font-size: 9.9px;
   font-weight: var(--font-weight-medium);
-  letter-spacing: 0.06em;
+  /* Wider tracking than the name below it: at this size the extra air is what
+     makes it read as a label rather than as shrunken copy. */
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #A4A4A4;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-tight);
 }
 
 /* Title — 15.9px desktop */
 .pdp__title {
   font-family: var(--font-body);
-  font-size: 15.9px;
+  font-size: 19px;
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  line-height: 1.3;
-  letter-spacing: 0.06em;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
   color: #2D2C2F;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-group);
 }
 
 /* Description — hidden on mobile */
@@ -459,12 +481,12 @@
 
 /* ===== COLOR SWATCHES ===== */
 .pdp__swatches {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--pdp-group);
 }
 
 .pdp__swatch-list {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.625rem;
   justify-content: center;
 }
 
@@ -497,7 +519,7 @@
 
 /* ===== SIZE SELECTOR ===== */
 .pdp__sizes {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--pdp-group);
 }
 
 .pdp__size-label {
@@ -520,7 +542,7 @@
 
 .pdp__size-buttons {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -575,8 +597,8 @@
     cursor: pointer;
     transition: background var(--duration-base) var(--ease-out),
                 border-color var(--duration-base) var(--ease-out);
-    margin-bottom: 1rem;
-    height: 50px;
+    margin-bottom: var(--pdp-item);
+    height: 56px;
   }
 
   .pdp__add-btn:hover {
@@ -619,16 +641,16 @@
 
 /* ===== TABS ===== */
 .pdp__tabs {
-  margin-top: 1.5rem;
+  margin-top: var(--pdp-group);
   border-top: 1px solid var(--color-border);
-  padding-top: 1.25rem;
+  padding-top: var(--pdp-group);
 }
 
 .pdp__tab-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--pdp-block);
   justify-content: center;
 }
 
@@ -694,8 +716,8 @@
 }
 
 .pdp__tab-description {
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.85;
   color: #2D2C2F;
   opacity: 0.7;
   margin-bottom: 1rem;
@@ -999,7 +1021,7 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   color: #2D2C2F;
-  margin-bottom: 1rem;
+  margin-bottom: var(--pdp-item);
 }
 
 /* The countdown and the arrival date. Pinned to the theme scale so <strong>
@@ -1039,7 +1061,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #A8442A;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-tight);
 }
 
 /* ----- Back in stock -----
