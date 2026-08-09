@@ -1,10 +1,18 @@
 {{ 'component-collection.css' | asset_url | stylesheet_tag }}
 
-{%- comment -%} Jacquemus-style collection header: title + count, then Sort By / Filters {% endcomment -%}
+{%- liquid
+  assign title_alignment = section.settings.title_alignment | default: 'center'
+  assign title_size = section.settings.title_size | default: 30
+-%}
+
+{%- comment -%} Jacquemus-style collection header: title, then Sort By / Filters {% endcomment -%}
 <div class="jc-collection">
-  <div class="jc-collection__head container">
-    <h1 class="jc-collection__title">
-      {{ collection.title }}<sup class="jc-collection__count">{{ collection.products_count }}</sup>
+  <div class="jc-collection__head container jc-collection__head--{{ title_alignment }}">
+    <h1 class="jc-collection__title" style="--jc-title-size: {{ title_size }}px;">
+      {{- collection.title -}}
+      {%- if section.settings.show_count -%}
+        <sup class="jc-collection__count">{{ collection.products_count }}</sup>
+      {%- endif -%}
     </h1>
   </div>
 
@@ -60,6 +68,34 @@
 {
   "name": "Filter Bar",
   "class": "section-filter-bar",
-  "settings": []
+  "settings": [
+    {
+      "type": "select",
+      "id": "title_alignment",
+      "label": "Collection title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Collection title size",
+      "min": 18,
+      "max": 64,
+      "step": 2,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Show product count beside the title",
+      "default": false
+    }
+  ]
 }
 {% endschema %}

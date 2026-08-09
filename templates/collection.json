@@ -14,10 +14,13 @@
       "settings": {
         "show_hero": true,
         "image": "shopify://shop_images/PANTS_5_1_-7.jpg",
+        "full_bleed": true,
+        "aspect_ratio": "16 / 9",
+        "aspect_ratio_mobile": "1 / 1",
         "heading": "",
         "subtext": "",
         "show_description": true,
-        "text_position": "left",
+        "text_position": "middle-left",
         "overlay_opacity": 0
       }
     },
