@@ -1057,22 +1057,32 @@
   border-color: #000000 !important;
 }
 
-/* ----- Size guide (SmartSize) -----
-   Targeted on the app's own hooks (smartrecom-*, not the smartsize handle) and
-   left UNSCOPED: the block ships display:none and is revealed by app JS, which
-   may relocate the button out of our slot, so descendant selectors are unsafe.
-   Display is deliberately not overridden — that is the app's to control. */
+/* ----- Size guide + fit quiz (SmartSize) -----
+   Verified against the injected DOM rather than guessed. The app puts both
+   triggers in one wrapper:
+
+     #smartrecom-triggers
+       #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger   SIZE GUIDE
+       #smartrecom-inline-button-injected    > #smartrecom-button              FIND MY SIZE
+
+   The previous list here named #smartrecom-sizechart-button,
+   .smartrecom-sizechart-btn-wrap, .smartrecom-sizechart-btn-link and
+   .smartrecom-sizechart-btn-button. None of those exist in the rendered page,
+   which is why only SIZE GUIDE ever picked up the theme's type — it was
+   carried by the one real selector in the set.
+
+   Scoped to #smartrecom-triggers so the app's modal, which it appends to
+   <body>, keeps its own styling. Display is deliberately not overridden —
+   that is the app's to control. */
 .pdp__size-guide-slot,
-#smartrecom-sizechart-button,
-.smartrecom-sizechart-btn-wrap {
+#smartrecom-triggers,
+#smartrecom-triggers .smartrecom-container {
   text-align: center !important;
   justify-content: center !important;
   width: 100%;
 }
 
-#smartrecom-sizechart-trigger,
-.smartrecom-sizechart-btn-link,
-.smartrecom-sizechart-btn-button,
+#smartrecom-triggers .smartrecom-trigger,
 .pdp__size-guide-slot a,
 .pdp__size-guide-slot button {
   font-family: var(--font-body) !important;
@@ -1094,9 +1104,7 @@
   transition: color var(--duration-fast) var(--ease-out) !important;
 }
 
-#smartrecom-sizechart-trigger:hover,
-.smartrecom-sizechart-btn-link:hover,
-.smartrecom-sizechart-btn-button:hover,
+#smartrecom-triggers .smartrecom-trigger:hover,
 .pdp__size-guide-slot a:hover,
 .pdp__size-guide-slot button:hover {
   color: #2D2C2F !important;

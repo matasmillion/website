@@ -1735,38 +1735,31 @@
     const panel = document.querySelector('[data-tab-panel="sizing"]');
     if (!panel) return;
 
-    const WRAPS = [
-      '#smartrecom-sizechart-button',
-      '.smartrecom-sizechart-btn-wrap',
-      '#smartrecom-recommender-button',
-      '.smartrecom-recommender-btn-wrap',
-      '[class*="smartrecom"][class*="btn-wrap"]',
-    ].join(',');
-    // Anything that reads as a layer rather than a trigger stays put.
-    const LAYER = /modal|popup|overlay|drawer|dialog|backdrop/i;
+    // Both buttons arrive inside one wrapper the app injects into
+    // .pdp__details-inner, so this is a single move, not a hunt:
+    //   #smartrecom-triggers
+    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE GUIDE
+    //     #smartrecom-inline-button-injected    > #smartrecom-button             FIND MY SIZE
+    // The app's size-chart modal is appended to <body> separately and is left
+    // there — a modal inside a display:none panel could not open.
+    let moves = 0;
 
     const park = () => {
-      document.querySelectorAll(WRAPS).forEach((el) => {
-        if (el.dataset.frParked) return;
-        const id = el.getAttribute('id') || '';
-        const cls = el.getAttribute('class') || '';
-        if (LAYER.test(id) || LAYER.test(cls)) return;
-        // Never reparent something the panel lives inside — that would take the
-        // page with it.
-        if (el.contains(panel)) return;
-        el.dataset.frParked = '1';
-        if (panel.contains(el)) return;
-        panel.appendChild(el);
-      });
+      const triggers = document.getElementById('smartrecom-triggers');
+      if (!triggers || panel.contains(triggers)) return;
+      // If the app insists on putting it back, let it have the last word rather
+      // than trading moves for the life of the page.
+      if (moves >= 5) return;
+      moves += 1;
+      panel.appendChild(triggers);
     };
 
     park();
-    // The embeds land after this file runs, so watch for them. Stamping makes
-    // the observer's own appendChild a no-op on the next pass.
+    // The wrapper lands after this file runs, so watch for it.
     const mo = new MutationObserver(park);
     mo.observe(document.body, { childList: true, subtree: true });
-    // Not left running for the life of the page — the embeds are in within
-    // seconds or they are not coming.
+    // Not left running for the life of the page — it is in within seconds or
+    // it is not coming.
     setTimeout(() => mo.disconnect(), 15000);
   };
 
