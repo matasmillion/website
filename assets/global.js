@@ -180,7 +180,6 @@
     const addText = pdp.querySelector('.pdp__add-text');
     const mobileBtn = pdp.querySelector('[data-mobile-submit]');
     const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
-    const swatchLabel = pdp.querySelector('.pdp__swatch-label');
     const lowStockEl = pdp.querySelector('[data-low-stock]');
     const threshold = parseInt(pdp.dataset.lowStockThreshold, 10) || 5;
 
@@ -212,11 +211,8 @@
       const variant = variants.find((v) =>
         vals.every((val, i) => val == null || v['option' + (i + 1)] === val));
 
-      // Colour label reflects the chosen colour
-      if (swatchLabel) {
-        const colorGroup = pdp.querySelector('.pdp__swatch-list .is-selected');
-        if (colorGroup) swatchLabel.textContent = colorGroup.getAttribute('title') || colorGroup.dataset.variantOption;
-      }
+      // No colour label to sync — the PDP never names the colour. The chip's
+      // is-selected rule is the whole indication.
 
       const setState = (btn, textEl, priceSel) => {
         if (!btn) return;

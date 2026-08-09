@@ -447,14 +447,6 @@
   margin-bottom: 1.25rem;
 }
 
-.pdp__swatch-label {
-  font-size: 11.7px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.06em;
-  color: #2D2C2F;
-  margin-bottom: 0.75rem;
-}
-
 .pdp__swatch-list {
   display: flex;
   gap: 0.5rem;
@@ -498,15 +490,6 @@
 .pdp__sizes {
   margin-bottom: 1.25rem;
 }
-
-.pdp__size-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
 
 .pdp__size-label {
   font-size: 8.4px;
@@ -1162,6 +1145,22 @@
 .pdp__size-guide-slot button:hover {
   color: #2D2C2F !important;
   opacity: 1 !important;
+}
+
+/* The slot now lives in the Sizing tab, so it follows that panel's alignment
+   rather than the buy column's: centred on mobile, flush left on desktop, in
+   line with the copy above it. Our own slot div is a safe target; same
+   !important weight as the rules above, placed after them so order decides. */
+@media (min-width: 769px) {
+  .pdp__tab-panel .pdp__size-guide-slot {
+    text-align: left !important;
+    justify-content: flex-start !important;
+  }
+
+  .pdp__tab-panel .pdp__size-guide-slot a,
+  .pdp__tab-panel .pdp__size-guide-slot button {
+    margin: 0 !important;
+  }
 }
 
 
