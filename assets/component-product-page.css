@@ -247,6 +247,37 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  /* Anchor for the heart when it leaves the flow in the centred variant */
+  position: relative;
+}
+
+/* ----- Centred variant -----
+   The heart has to leave the flow for this to be honest centring. Left in the
+   flow it occupies width on the right, so the name would centre on the space
+   beside it and land visibly left of the band's true centre. Out of flow, the
+   name centres on the band; the matching left gutter is what stops it running
+   under the heart on the right. */
+.pdp-band--align-center .pdp-band__collection,
+.pdp-band--align-center .pdp-band__title {
+  text-align: center;
+}
+
+.pdp-band--align-center .pdp-band__name-row {
+  /* Heart's own footprint (16px glyph + 2 x 0.375rem padding) plus a little
+     air, mirrored on the left so the two gutters cancel out. */
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.pdp-band--align-center .pdp-band__title {
+  flex: 1;
+}
+
+.pdp-band--align-center .pdp-band__heart {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* The mobile twin of .pdp__collection, which carries the desktop eyebrow */

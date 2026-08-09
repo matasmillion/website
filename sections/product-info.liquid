@@ -149,7 +149,14 @@
     second copy would silently break variant sync and add-to-cart feedback.
     Must stay inside [data-pdp]: initPdpVariants scopes its lookup to it.
   {%- endcomment -%}
-  <div class="pdp-band" data-sticky-band>
+  {%- comment -%}
+    Left or centred is a look, not a correctness question, so it is a setting.
+    No `| default:` on a select whose schema already carries one — the filter
+    only fires on blank, which is exactly the case the schema default covers.
+  {%- endcomment -%}
+  {%- assign band_align = section.settings.band_text_align -%}
+  {%- if band_align == blank -%}{%- assign band_align = 'center' -%}{%- endif -%}
+  <div class="pdp-band pdp-band--align-{{ band_align }}" data-sticky-band>
     <div class="pdp-band__top">
       {%- if main_collection != blank -%}
         <p class="pdp-band__collection">{{ main_collection }}</p>
@@ -717,6 +724,27 @@
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Mobile sticky band"
+    },
+    {
+      "type": "select",
+      "id": "band_text_align",
+      "label": "Collection and product name alignment",
+      "info": "The wishlist heart stays on the right either way. Centred reserves a matching gutter on the left so the name sits on the band's centre line rather than beside the heart.",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centred"
+        }
+      ],
+      "default": "center"
     },
     {
       "type": "header",
