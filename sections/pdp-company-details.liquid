@@ -32,6 +32,8 @@
 {%- assign desktop_layout = section.settings.desktop_layout | default: 'columns' -%}
 
 {%- if detail_rows.size > 0 -%}
+  {{ 'component-pdp-details.css' | asset_url | stylesheet_tag }}
+
   <section
     class="pdp-details reveal{% if desktop_layout == 'columns' %} pdp-details--columns{% if section.settings.desktop_media %} pdp-details--media{% endif %}{% endif %}"
     style="--pdp-cols: {{ detail_rows.size }};"
@@ -41,8 +43,9 @@
     {%- endif -%}
 
     {%- comment -%}
-      The attribute's value is what tells initPdpRows the group goes static
-      above 769px, so it can unhide the panels the accordion left closed.
+      initPdpRows in global.js keys off the attribute's presence for the
+      accordion; the value records which layout this instance is in, for the
+      script at the foot of this file.
     {%- endcomment -%}
     <div class="pdp__rows" data-pdp-rows="{% if desktop_layout == 'columns' %}columns{% else %}stack{% endif %}">
       {%- comment -%}
@@ -171,10 +174,54 @@
 </style>
 
 {%- comment -%}
-  The four-up desktop band lives in component-product-page.css alongside the
-  rest of the .pdp__row rules it overrides — keeping it here would put the
-  override in a different stylesheet from the thing it overrides.
+  The four-up desktop band lives in component-pdp-details.css, loaded above —
+  the same arrangement FOREIGN ENGINEERING uses for its own section stylesheet.
+
+  The script below is the other half of it. The CSS already shows the panels
+  the accordion left closed, so this is not what makes them visible; it is what
+  takes the `hidden` attribute off them, because an element that is on screen
+  while still carrying `hidden` is exactly the kind of thing a screen reader is
+  entitled to skip. Going back down to phone width puts the accordion back the
+  way the page rendered rather than leaving four rows hanging open.
+
+  Section-scoped rather than added to initPdpRows in global.js: the accordion
+  is shared, this band is not, and the shared bundle should not carry a
+  breakpoint rule that only one section on one template ever reads.
 {%- endcomment -%}
+
+{%- if desktop_layout == 'columns' -%}
+  <script>
+    (() => {
+      const group = document.querySelector('#shopify-section-{{ section.id }} [data-pdp-rows]');
+      if (!group) return;
+
+      const staticAt = window.matchMedia('(min-width: 769px)');
+      const triggers = Array.from(group.querySelectorAll('[data-row-trigger]'));
+      // Captured before anything moves, so mobile can be restored to it.
+      const renderedOpen = triggers.map(t => t.getAttribute('aria-expanded') === 'true');
+
+      const sync = () => {
+        triggers.forEach((trigger, i) => {
+          const open = staticAt.matches ? true : renderedOpen[i];
+          const panel = trigger.parentElement.querySelector('[data-row-panel]');
+          trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (panel) panel.hidden = !open;
+        });
+      };
+
+      // Inert while the band is static. The triggers are display:none up there,
+      // so this is belt and braces against a stray programmatic click.
+      group.addEventListener('click', (e) => {
+        if (staticAt.matches && e.target.closest('[data-row-trigger]')) {
+          e.stopPropagation();
+        }
+      }, true);
+
+      sync();
+      staticAt.addEventListener('change', sync);
+    })();
+  </script>
+{%- endif -%}
 
 {% schema %}
 {

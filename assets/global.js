@@ -804,38 +804,16 @@
     });
   };
 
-  /* --- PDP detail rows (Packaging / Mission / Colour / Fabric dropdowns) ---
-     Accordion below 769px. Above it, a group marked data-pdp-rows="columns"
-     is laid out as a static four-up band by component-product-page.css: every
-     panel open, no triggers on screen. The CSS shows those panels on its own,
-     but only this can take the `hidden` attribute back off them — and an
-     element that is visible while still carrying `hidden` is exactly the kind
-     of thing a screen reader is entitled to skip.
-
-     The state each group was RENDERED in is captured first, so coming back
-     down to phone width restores the one-open-row the page loaded with rather
-     than leaving four rows hanging open. */
+  /* --- PDP detail rows (Fabric / Colour / Packaging dropdowns) ---
+     The accordion only. Company Details turns itself into a static column band
+     above 769px, and owns that behaviour in its own section file — nothing
+     about it belongs in the shared bundle. */
   const initPdpRows = () => {
-    const staticAt = window.matchMedia('(min-width: 769px)');
-
     document.querySelectorAll('[data-pdp-rows]').forEach(group => {
-      const isColumns = group.dataset.pdpRows === 'columns';
-      const triggers = Array.from(group.querySelectorAll('[data-row-trigger]'));
-      const renderedOpen = triggers.map(t => t.getAttribute('aria-expanded') === 'true');
-
-      const setRow = (trigger, open) => {
-        const panel = trigger.parentElement.querySelector('[data-row-panel]');
-        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (panel) panel.hidden = !open;
-      };
-
-      triggers.forEach(trigger => {
+      group.querySelectorAll('[data-row-trigger]').forEach(trigger => {
         const panel = trigger.parentElement.querySelector('[data-row-panel]');
         if (!panel) return;
         trigger.addEventListener('click', () => {
-          // Inert where the band is static — the trigger is not displayed
-          // there, but a stray programmatic click must not collapse a column.
-          if (isColumns && staticAt.matches) return;
           const open = trigger.getAttribute('aria-expanded') === 'true';
           // One row open at a time keeps the column from running away
           group.querySelectorAll('[data-row-trigger]').forEach(t => t.setAttribute('aria-expanded', 'false'));
@@ -846,17 +824,6 @@
           }
         });
       });
-
-      if (!isColumns) return;
-
-      const syncStatic = () => {
-        triggers.forEach((trigger, i) => {
-          setRow(trigger, staticAt.matches ? true : renderedOpen[i]);
-        });
-      };
-
-      syncStatic();
-      staticAt.addEventListener('change', syncStatic);
     });
   };
 

@@ -1,0 +1,126 @@
+/* ============================================
+   PDP — COMPANY DETAILS
+   Mobile: stacked accordion (base rules live with the other .pdp__row styles
+   in component-product-page.css — this file only adds the desktop band).
+   Desktop: flush columns on the FOREIGN ENGINEERING grid, every panel open.
+
+   Loaded by sections/pdp-company-details.liquid, the same way
+   component-fr-engineering.css is loaded by the section above it.
+   ============================================ */
+
+/* The desktop column heading. The section renders it next to the accordion
+   button and exactly one of the two is ever shown; below 769px it is this one
+   that stands down. */
+.pdp__row-title { display: none; }
+
+/* ===== Detail rows as a flush four-up band (desktop) =====
+   Only when the section asks for it with .pdp-details--columns.
+
+   The geometry is copied from .fre deliberately: full bleed, equal columns,
+   1.25rem inset. Company Details sits directly under FOREIGN ENGINEERING, so
+   matching the column count and the inset puts the dividers on the seams
+   between the images above and the headings under their overlay copy. Two
+   full-width bands on one grid read as one block; on two different grids they
+   read as clutter.
+
+   No accordion up here. Every panel is open, so nothing reflows a quarter of
+   the row on click, and the trigger is replaced by a static heading. */
+@media (min-width: 769px) {
+  /* Doubled class on purpose. The 640px centred default is declared in the
+     section's own <style>, which the browser sees after this file — at equal
+     specificity source order would hand it the win and the band would come out
+     centred and narrow instead of full bleed. */
+  .pdp-details.pdp-details--columns {
+    max-width: none;
+    padding: 0;
+  }
+
+  .pdp-details--columns .pdp-details__heading {
+    padding: 1.25rem 1.25rem 0;
+    margin: 0;
+  }
+
+  /* --pdp-cols comes from the section, counted off the blocks, so three rows
+     make three equal columns rather than four with a hole in the last one. */
+  .pdp-details--columns .pdp__rows {
+    display: grid;
+    grid-template-columns: repeat(var(--pdp-cols, 4), minmax(0, 1fr));
+    margin-top: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Hairline between columns instead of under each row. box-sizing is
+     border-box theme-wide, so the border sits inside the track and the
+     divider lands on the exact quarter — flush with the image seam above. */
+  .pdp-details--columns .pdp__row {
+    border-bottom: 0;
+    border-left: 1px solid var(--color-border);
+    padding: 2rem 1.25rem 2.25rem;
+    min-width: 0;
+  }
+
+  .pdp-details--columns .pdp__row:first-child { border-left: 0; }
+
+  .pdp-details--columns .pdp__row-trigger { display: none; }
+
+  /* Same type as the trigger it stands in for, so the band reads identically
+     whichever breakpoint you came from. */
+  .pdp-details--columns .pdp__row-title {
+    display: block;
+    margin: 0 0 0.85rem;
+    font-family: var(--font-body);
+    font-size: 11.2px;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #2D2C2F;
+  }
+
+  .pdp-details--columns .pdp__row-panel {
+    padding: 0;
+    animation: none;
+  }
+
+  /* Rows the accordion left closed — the ones Liquid renders with `hidden`,
+     plus any the shopper collapsed on a narrow window before widening it.
+     There is no toggle up here to reopen them with, so the column would be a
+     bare heading: the layout, not the last click, decides at this width.
+
+     !important because Chrome's UA sheet declares [hidden] { display: none }
+     !important itself, so nothing weaker reaches it. The section's own script
+     then takes the attribute off for real, which is what keeps the a11y tree
+     honest — this rule is only here so the copy is not missing for the moment
+     before that runs. */
+  .pdp-details--columns .pdp__row-panel[hidden] { display: block !important; }
+
+  /* Pictures are the band above's job. Merchant can opt back in per section. */
+  .pdp-details--columns .pdp__row-media { display: none; }
+  .pdp-details--columns.pdp-details--media .pdp__row-media { display: block; }
+
+  /* Six swatches down a quarter-width column would run to twice the height of
+     its neighbours. Chips and names two-up instead; the descriptions are what
+     the Colour Codex link exists for, and they are still there on mobile. */
+  .pdp-details--columns .pdp__row-swatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem 0.75rem;
+    margin-top: 0.85rem;
+  }
+
+  .pdp-details--columns .pdp__row-swatch {
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pdp-details--columns .pdp__row-chip {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pdp-details--columns .pdp__row-swatch-name { margin-bottom: 0; }
+  .pdp-details--columns .pdp__row-swatch-text { display: none; }
+
+  .pdp-details--columns .pdp__tab-link {
+    margin-top: 0.85rem;
+    margin-right: 0;
+  }
+}
