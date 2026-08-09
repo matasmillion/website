@@ -196,8 +196,14 @@
       {%- comment -%} ===== COLOR SWATCHES ===== {% endcomment -%}
       {%- for option in product.options_with_values -%}
         {%- if option.name == 'Color' or option.name == 'Colour' -%}
+          {%- comment -%}
+            The colour name is deliberately not shown — no label above the row,
+            no title tooltip on the chips. The chip is the colour; the customer
+            meets the name at cart and checkout, on the variant title.
+            aria-label stays: it is how a screen reader tells the chips apart,
+            and it is not a visual reveal.
+          {%- endcomment -%}
           <div class="pdp__swatches">
-            <p class="pdp__swatch-label">{{ option.selected_value }}</p>
             <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
                 {%- liquid
@@ -257,7 +263,6 @@
                   aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
                   style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
-                  title="{{ value }}"
                 ></button>
               {%- endfor -%}
             </div>
@@ -294,17 +299,10 @@
             <div class="pdp__sizes">
               {%- comment -%}
                 No "SIZE" label — the numbers read as sizes on their own. The
-                size-guide link is the SmartSize app block, rendered here so it
-                sits where the old button did.
+                size-guide link used to sit here; it now lives in the Sizing tab
+                with the rest of the fit information, so the buy column stays
+                colour → size → add to cart with nothing in between.
               {%- endcomment -%}
-              {%- if option.name == 'Size' and app_blocks.size > 0 -%}
-                {%- assign size_guide_rendered = true -%}
-                <div class="pdp__size-header">
-                  {%- for block in app_blocks -%}
-                    <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
-                  {%- endfor -%}
-                </div>
-              {%- endif -%}
               {%- comment -%} Low stock — only meaningful when inventory is tracked {% endcomment -%}
               {%- if option.name == 'Size' -%}
                 <p class="pdp__low-stock" data-low-stock hidden></p>
@@ -322,20 +320,6 @@
             </div>
           {%- endunless -%}
         {%- endfor -%}
-        {%- endunless -%}
-
-        {%- comment -%}
-          Products with no Size option (one-size, accessories) never enter the
-          loop above, so the size guide is rendered here instead of vanishing.
-        {%- endcomment -%}
-        {%- unless size_guide_rendered -%}
-          {%- if app_blocks.size > 0 -%}
-            <div class="pdp__size-header">
-              {%- for block in app_blocks -%}
-                <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
         {%- endunless -%}
 
         <button
@@ -477,6 +461,18 @@
 
           {%- if product.metafields.custom.model_stats != blank -%}
             <p class="pdp__tab-meta">{{ product.metafields.custom.model_stats }}</p>
+          {%- endif -%}
+
+          {%- comment -%}
+            The SmartSize app block — the SIZE GUIDE link. It renders here and
+            nowhere else: an app block can only be output once, so moving it out
+            of the buy column meant moving it, not copying it. Products with no
+            Size option get it too, since the panel is unconditional.
+          {%- endcomment -%}
+          {%- if app_blocks.size > 0 -%}
+            {%- for block in app_blocks -%}
+              <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
+            {%- endfor -%}
           {%- endif -%}
 
           {%- if section.settings.size_chart_content != blank -%}
