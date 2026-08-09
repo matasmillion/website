@@ -821,13 +821,22 @@
   white-space: normal;
 }
 
+/* Slate, not the list's inherited grey. Both columns sitting at #A4A4A4 made
+   the whole table recede into the background — the labels are what you scan
+   down to find the row you want, so they carry the contrast and the values
+   stay quiet beside them.
+
+   Applies to the returns table as well as the fabric one. They are the same
+   component a tab apart, and these rules are deliberately shared so the two
+   cannot drift; slate labels in one and grey in the other would read as a bug.
+   To take it back to fabric only, split .pdp__spec-label out of this rule. */
 .pdp__returns-term-label,
 .pdp__spec-label {
   font-size: 11.2px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: inherit;
+  color: #4A4E54;
 }
 
 .pdp__returns-term-value,
@@ -1431,9 +1440,18 @@
    carries more weight than a caption, but it must not compete with the product
    title upstairs. */
 .pdp__fabric-name {
-  font-size: 12px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.14em;
+  /* Cormorant, the brand serif. The whole buy column is Inter, so the serif is
+     what marks the cloth as a named thing of its own rather than another field
+     on this product — the same distinction the fabric page makes.
+
+     Serif wants different settings than the sans it replaced: larger, because
+     Cormorant's x-height runs small and 12px read as a caption, and lighter,
+     because a medium weight at this size turns the uppercase into a slab.
+     Tracking eases off for the same reason. */
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #2D2C2F;
   margin-bottom: var(--pdp-item);
