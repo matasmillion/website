@@ -1830,11 +1830,31 @@ delivery-promise-wc {
 
 .pdp-zoom--inset.is-active .pdp-zoom__img { transform: scale(1); }
 
-/* The 2x inspect still works inside the panel — the stage scrolls — but the
-   settle animation has to stand down or it fights the magnification. */
+/* The settle animation stands down while magnified or it fights the zoom. */
 .pdp-zoom--inset.is-zoomed .pdp-zoom__img {
   transform: none;
   box-shadow: none;
+}
+
+/* Desktop magnification, the same gesture as the gallery: the frame holds still
+   and the image scales inside it with the origin under the pointer.
+
+   The base viewer instead pans a 200%-wide image by scrolling, which works
+   full-bleed but not here — in a fixed panel it threw the picture out of frame
+   and left you hunting with a scrollbar. Measured: 576x720 became 2560x3200.
+
+   Touch keeps the scroll-pan below this breakpoint, exactly as the gallery does:
+   there is no pointer to follow, and the +/- controls are already shown there. */
+@media (min-width: 769px) and (pointer: fine) {
+  .pdp-zoom--inset .pdp-zoom__stage { overflow: hidden; }
+
+  .pdp-zoom--inset.is-zoomed .pdp-zoom__img {
+    max-width: min(100%, 760px);
+    max-height: 80vh;
+    width: auto;
+    transform: scale(2);
+    cursor: zoom-out;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

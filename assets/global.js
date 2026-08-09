@@ -1663,6 +1663,8 @@
       zoom.classList.remove('is-active', 'is-zoomed');
       zoom.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      // Or the next image opens already magnified at the last pointer position.
+      clearInsetZoom();
     };
 
     // Mobile swipes share this surface, so a drag must not count as a click.
@@ -1716,8 +1718,46 @@
     const zout = zoom.querySelector('[data-zoom-out]');
     if (zin) zin.addEventListener('click', () => setZoomed(true));
     if (zout) zout.addEventListener('click', () => setZoomed(false));
+    /* --- Inset panel: magnify under the pointer, like the gallery ---
+       The frame holds still and the image scales inside it. Mapping the pointer
+       to an origin needs the image's UNSCALED box, so it is captured at the
+       moment of zooming in — once scale(2) is on, getBoundingClientRect reports
+       the magnified box and the mapping would drift as you move.
+
+       Fine pointers only, mirroring the gallery: touch has nothing to follow and
+       keeps the scroll-pan. */
+    const finePointer = () => window.matchMedia('(min-width: 769px) and (pointer: fine)').matches;
+    let insetFrame = null;
+
+    const insetOrigin = (e) => {
+      if (!insetFrame || !img) return;
+      const clamp = (n) => Math.max(0, Math.min(100, n));
+      img.style.transformOrigin =
+        clamp(((e.clientX - insetFrame.left) / insetFrame.width) * 100) + '% ' +
+        clamp(((e.clientY - insetFrame.top) / insetFrame.height) * 100) + '%';
+    };
+
+    const clearInsetZoom = () => {
+      insetFrame = null;
+      if (img) img.style.transformOrigin = '';
+    };
+
+    if (stage) stage.addEventListener('pointermove', (e) => {
+      if (!insetFrame) return;
+      if (!zoom.classList.contains('is-zoomed')) return;
+      insetOrigin(e);
+    }, { passive: true });
+
     if (stage) stage.addEventListener('click', (e) => {
-      if (e.target === img) { setZoomed(!zoom.classList.contains('is-zoomed')); return; }
+      if (e.target === img) {
+        const on = !zoom.classList.contains('is-zoomed');
+        if (zoom.classList.contains('pdp-zoom--inset') && finePointer()) {
+          if (on) { insetFrame = img.getBoundingClientRect(); insetOrigin(e); }
+          else clearInsetZoom();
+        }
+        setZoomed(on);
+        return;
+      }
       // Everything around the image is scrim in inset mode, and a scrim you can
       // see the page through reads as dismissable — so it is. The full-bleed
       // viewer has no "outside" to click, which is why this is scoped.
