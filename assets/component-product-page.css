@@ -715,12 +715,36 @@
 
 /* The reassurance, on its own row. Tighter to the line above than to whatever
    follows, so the two read as one thought in two beats. */
+/* The not-offered block: the position, the reassurance, and the policy link,
+   as three evenly spaced rows.
+
+   Spacing lives on the container as a gap, not on the paragraphs. base.css
+   carries a global `p:last-child { margin-bottom: 0 }`, which outranks a class
+   on specificity — so the note's own bottom margin was being zeroed and the
+   policy link sat flush against it with no space at all. A flex gap is out of
+   that rule's reach, and the matching bottom margin carries the same rhythm
+   across to the link, which lives in a sibling container. */
+.pdp__returns-none {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pdp-item);
+  margin-bottom: var(--pdp-item);
+}
+
+/* Ties with p:last-child on specificity and wins on source order, so the gap
+   is the only thing setting the rhythm. */
+.pdp__returns-none p {
+  margin: 0;
+}
+
+/* Same grey as the line above it — neither of these is the offer, so neither
+   takes ink. The medium weight is all that separates them, which is enough to
+   land the second line without promoting it over the link below. */
 .pdp__returns-note {
   font-size: 11.5px;
   line-height: 1.6;
   font-weight: var(--font-weight-medium);
-  color: #2D2C2F;
-  margin: 0 0 1.25rem;
+  color: #A4A4A4;
 }
 
 .pdp__returns-intro {
@@ -735,7 +759,6 @@
    the terms table that replaces it is what earns ink. */
 .pdp__returns-intro--muted {
   color: #A4A4A4;
-  margin-bottom: 0.5rem;
 }
 
 /* Set once here so the label, the value and the pipe-less plain rows all take
