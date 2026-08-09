@@ -500,9 +500,14 @@
     border-top: 1px solid rgba(10, 10, 10, 0.08);
     gap: var(--space-md);
   }
+  /* Body sans, not the display serif: Cormorant sets old-style figures, so
+     "2026" bobbed above and below the cap height of the name beside it.
+     lining-nums is stated outright so a font swapped in via theme settings
+     cannot quietly reintroduce that. */
   .footer__copyright {
-    font-family: var(--font-heading);
+    font-family: var(--font-body);
     font-size: var(--text-sm);
+    font-variant-numeric: lining-nums;
     opacity: 0.5;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -548,10 +553,15 @@
       text-align: center;
       gap: var(--space-lg);
     }
-    .footer__copyright,
     .footer__bottom-logo,
     .footer__bottom-right {
       justify-self: center;
+    }
+    /* Copyright stays in the bottom-left corner at every width, so it opts out
+       of the centring the rest of this row takes. */
+    .footer__copyright {
+      justify-self: start;
+      text-align: left;
     }
     .footer__bottom-logo { order: -1; }
     .footer__legal { justify-content: center; flex-wrap: wrap; }
