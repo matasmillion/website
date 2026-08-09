@@ -3,14 +3,34 @@
    Gallery-like grid, editorial feel
    ============================================ */
 
-/* --- Collection Hero --- */
+/* --- Collection Hero ---
+   Height comes from the merchant's aspect ratio, passed in as --ch-ratio /
+   --ch-ratio-mobile (or --ch-h: 100svh for the full-screen option). The
+   section always sets all four custom properties, so the fallbacks here only
+   matter if the markup and this file ever drift apart. */
 .collection-hero {
   position: relative;
-  min-height: 50vh;
   display: flex;
-  align-items: center;
   justify-content: center;
   overflow: hidden;
+  aspect-ratio: var(--ch-ratio, 16 / 9);
+  height: var(--ch-h, auto);
+}
+
+@media (max-width: 768px) {
+  .collection-hero {
+    aspect-ratio: var(--ch-ratio-mobile, var(--ch-ratio, 16 / 9));
+    height: var(--ch-h-mobile, var(--ch-h, auto));
+  }
+}
+
+/* Flush: the hero slides up under the fixed chrome so the transparent header
+   sits over the image, the same way the homepage hero does. #main-content
+   carries a padding-top of --chrome-h on every non-index template; this
+   cancels it for exactly this section. */
+.collection-hero--flush {
+  margin-top: calc(var(--chrome-h, 82px) * -1);
+  min-height: var(--chrome-h, 82px);
 }
 
 .collection-hero__image {
@@ -26,12 +46,27 @@
   inset: 0;
 }
 
+/* --- Text placement: vertical from the flex container, horizontal from
+   text-align on the full-width content block --- */
+.collection-hero--top { align-items: flex-start; }
+.collection-hero--middle { align-items: center; }
+.collection-hero--bottom { align-items: flex-end; }
+
 .collection-hero__content {
   position: relative;
   z-index: 1;
-  text-align: center;
+  width: 100%;
   color: var(--color-white);
-  padding: var(--space-xl);
+  padding: clamp(1.5rem, 1rem + 3vw, 4rem);
+}
+
+.collection-hero--left .collection-hero__content { text-align: left; }
+.collection-hero--center .collection-hero__content { text-align: center; }
+.collection-hero--right .collection-hero__content { text-align: right; }
+
+/* Top-aligned text would otherwise land behind the header when flush */
+.collection-hero--flush.collection-hero--top .collection-hero__content {
+  padding-top: calc(var(--chrome-h, 82px) + clamp(1rem, 0.5rem + 2vw, 2.5rem));
 }
 
 .collection-hero__title {
@@ -47,10 +82,13 @@
   font-size: var(--text-sm);
   opacity: 0.7;
   max-width: 400px;
-  margin: 0 auto;
   letter-spacing: 0.03em;
   line-height: 1.6;
 }
+
+.collection-hero--left .collection-hero__description { margin: 0 auto 0 0; }
+.collection-hero--center .collection-hero__description { margin: 0 auto; }
+.collection-hero--right .collection-hero__description { margin: 0 0 0 auto; }
 
 /* --- Jacquemus-style collection header --- */
 .jc-collection__head {
@@ -59,9 +97,16 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.jc-collection__head--left { text-align: left; }
+.jc-collection__head--center { text-align: center; }
+.jc-collection__head--right { text-align: right; }
+
+/* Cormorant Garamond, matching the hero title above it. Size is a merchant
+   setting because the serif reads noticeably smaller than Inter at the same
+   pixel value. */
 .jc-collection__title {
-  font-family: var(--font-body);
-  font-size: 20px;
+  font-family: var(--font-heading);
+  font-size: var(--jc-title-size, 30px);
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   color: #2D2C2F;
