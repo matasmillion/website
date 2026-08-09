@@ -145,6 +145,7 @@
     },
     "reviews": {
       "type": "product-reviews-container",
+      "disabled": true,
       "settings": {
         "heading": "Reviews",
         "provider": "klaviyo"
