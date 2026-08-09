@@ -846,6 +846,50 @@
   // behind deliberately so a stored zip cannot be read back as a country code.
   const ZIP_KEY = 'fr_delivery_country';
 
+  // The market country as of the last page we rendered. The footer's Shipping
+  // Country picker submits Shopify's localization form and reloads the page
+  // under a new market, so a change down there surfaces up here as this value
+  // moving between loads.
+  const MARKET_KEY = 'fr_market_country';
+
+  /* --- Which country the Shipping and Returns tabs open on ---
+     The footer's Shipping Country is the default, and moving it moves both
+     tabs. Choosing a country inside either tab overrides that, and the override
+     survives navigation until the shopper changes it again — or until they move
+     the footer picker, which is the more deliberate statement of the two and
+     therefore wins.
+
+     Telling those apart needs memory: the market country is stamped on every
+     load, so if it has moved since we last looked, the footer is what moved it
+     and the stale override is dropped. Without that stamp a saved country
+     outranks the footer forever, which is the bug this fixes. */
+  const resolveCountry = (market, isOption) => {
+    const now = (market || '').toUpperCase();
+    let saved = null;
+    let seen = null;
+    try {
+      saved = localStorage.getItem(ZIP_KEY);
+      seen = localStorage.getItem(MARKET_KEY);
+    } catch (e) { return now; }
+
+    if (now && seen !== now) {
+      try {
+        localStorage.setItem(MARKET_KEY, now);
+        localStorage.removeItem(ZIP_KEY);
+      } catch (e) {}
+      return now;
+    }
+
+    // Shape-checked before it reaches a selector: storage is user-writable, and
+    // an ISO country code is only ever two letters. Still has to be a country
+    // the market actually offers — markets change under saved state.
+    if (saved && /^[A-Za-z]{2}$/.test(saved)) {
+      const code = saved.toUpperCase();
+      if (!isOption || isOption(code)) return code;
+    }
+    return now;
+  };
+
   // Adds whole business days, skipping weekends.
   const addBusinessDays = (from, days) => {
     const d = new Date(from.getTime());
@@ -1114,28 +1158,25 @@
       const shown = hasStd || hasExp;
       results.hidden = !shown;
       if (!shown && error) error.hidden = false;
-      try { localStorage.setItem(ZIP_KEY, code); } catch (e) {}
+      // No longer persists here. render() runs on load as well as on change, so
+      // writing the country from inside it stamped an override the shopper had
+      // never chosen — after which the footer's picker could never win. The
+      // write moved to the change handler, where an actual choice happens.
     };
 
     if (select) {
-      // The remembered country wins over the market's default, but only while
-      // it is still one of the options — markets change under saved state.
-      let initial = country;
-      try {
-        const saved = localStorage.getItem(ZIP_KEY);
-        // Shape-checked before it reaches a selector: storage is user-writable,
-        // and an ISO country code is only ever two letters.
-        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
-            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
-          initial = saved.toUpperCase();
-        }
-      } catch (e) {}
+      // data-country is localization.country.iso_code — the footer's Shipping
+      // Country. resolveCountry decides whether it or a saved override applies.
+      const initial = resolveCountry(country, (code) =>
+        !!select.querySelector('option[value="' + code + '"]'));
       select.value = initial;
       // Resolves on load rather than behind an Apply click: the country is
       // already known from the market, so there is nothing to wait for.
       render(initial);
 
       select.addEventListener('change', () => {
+        // Persisted here and only here — this is the shopper actually choosing.
+        try { localStorage.setItem(ZIP_KEY, select.value); } catch (e) {}
         render(select.value);
         // Keeps the Returns picker in step — one shopper, one country.
         document.dispatchEvent(new CustomEvent('fr:country', { detail: select.value }));
@@ -1204,14 +1245,11 @@
     };
 
     if (select) {
-      let initial = select.value;
-      try {
-        const saved = localStorage.getItem(ZIP_KEY);
-        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
-            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
-          initial = saved.toUpperCase();
-        }
-      } catch (e) {}
+      // Read before anything overrides it: the option Liquid marked selected is
+      // localization.country.iso_code, i.e. the footer's Shipping Country.
+      const market = select.value;
+      const initial = resolveCountry(market, (code) =>
+        !!select.querySelector('option[value="' + code + '"]'));
       select.value = initial;
       render(initial);
 
