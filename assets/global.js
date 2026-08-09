@@ -1330,6 +1330,32 @@
       display: none !important;
     }
 
+    /* A pencil after the zip, so "editable" is stated rather than implied by an
+       underline nobody reads as a control.
+
+       Drawn as a pseudo-element on the TEXT NODE that contains the zip, never on
+       the <u> itself: an ancestor's underline is painted straight through its
+       descendants, pseudo-elements included, so a pencil inside the <u> would
+       have a line ruled across it. Sitting just outside, it ends up in the same
+       place — the zip closes both layouts' sentences — with no underline on it.
+
+       It is masked rather than set as a background image, so the glyph takes
+       currentColor and cannot drift from the text it belongs to. The whole row
+       is already Shopify's click target, so the pencil is live without being
+       wired to anything. */
+    [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="Text__Text"]:has(> u)::after,
+    [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="InlineStack__InlineStack"] > [class*="Text__Text"]:has(> u)::after {
+      content: "";
+      display: inline-block;
+      width: 0.95em;
+      height: 0.95em;
+      margin-left: 0.3em;
+      vertical-align: -0.12em;
+      background-color: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
     /* The expanded zip form is a form: left-aligned, and keeping its own gaps. */
     [class*="ExpansionBlock__ExpansionBlock"] [class*="BlockStack__BlockStack"],
     [class*="ExpansionBlock__ExpansionBlock"] [class*="InlineStack__InlineStack"] {
