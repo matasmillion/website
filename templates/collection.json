@@ -26,7 +26,11 @@
     },
     "filter_bar": {
       "type": "collection-filter-bar",
-      "settings": {}
+      "settings": {
+        "title_alignment": "center",
+        "title_size": 30,
+        "show_count": false
+      }
     },
     "product_grid": {
       "type": "main-collection",

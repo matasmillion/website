@@ -97,9 +97,16 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.jc-collection__head--left { text-align: left; }
+.jc-collection__head--center { text-align: center; }
+.jc-collection__head--right { text-align: right; }
+
+/* Cormorant Garamond, matching the hero title above it. Size is a merchant
+   setting because the serif reads noticeably smaller than Inter at the same
+   pixel value. */
 .jc-collection__title {
-  font-family: var(--font-body);
-  font-size: 20px;
+  font-family: var(--font-heading);
+  font-size: var(--jc-title-size, 30px);
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   color: #2D2C2F;
