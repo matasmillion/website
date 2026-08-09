@@ -1905,35 +1905,51 @@
     const panel = document.querySelector('[data-tab-panel="sizing"]');
     if (!panel) return;
 
-    // Both buttons arrive inside one wrapper the app injects into
-    // .pdp__details-inner, so this is a single move, not a hunt:
+    // The app injects into .pdp__details-inner:
     //   #smartrecom-triggers
-    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE GUIDE
+    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE CHART
     //     #smartrecom-inline-button-injected    > #smartrecom-button             FIND MY SIZE
-    // The app's size-chart modal is appended to <body> separately and is left
-    // there — a modal inside a display:none panel could not open.
-    let moves = 0;
+    // Its size-chart modal goes to <body> separately and is left there — a modal
+    // inside a display:none panel could not open.
+    //
+    // THE TWO BUTTONS ARRIVE INDEPENDENTLY, and that is the whole difficulty.
+    // Moving the wrapper the moment it appears can beat the second button to it,
+    // and the app then drops that one back into .pdp__details-inner where it is
+    // never seen again — which is why previews showed SIZE CHART alone while the
+    // theme editor, with fewer scripts competing, happened to win the race and
+    // showed both.
+    //
+    // So this adopts rather than moves once: the wrapper goes to the panel, and
+    // any trigger container that lands outside afterwards is pulled in after it.
+    const adopt = () => {
+      const wrap = document.getElementById('smartrecom-triggers');
+      if (wrap && !panel.contains(wrap)) {
+        // prepend, not appendChild: the buttons lead the panel and the sizing
+        // copy sits under them. Someone opening Sizing is picking a size, not
+        // reading.
+        panel.prepend(wrap);
+      }
 
-    const park = () => {
-      const triggers = document.getElementById('smartrecom-triggers');
-      if (!triggers || panel.contains(triggers)) return;
-      // If the app insists on putting it back, let it have the last word rather
-      // than trading moves for the life of the page.
-      if (moves >= 5) return;
-      moves += 1;
-      // prepend, not appendChild: the buttons lead the panel and the sizing
-      // copy sits under them. Someone opening Sizing is picking a size, not
-      // reading.
-      panel.prepend(triggers);
+      const home = panel.querySelector('#smartrecom-triggers') || wrap;
+      if (!home || !panel.contains(home)) return;
+
+      // --inline is the injected button wrappers specifically; the app's other
+      // furniture, the modal included, does not carry it.
+      document.querySelectorAll('.smartrecom-container--inline').forEach((c) => {
+        if (!panel.contains(c)) home.appendChild(c);
+      });
     };
 
-    park();
-    // The wrapper lands after this file runs, so watch for it.
-    const mo = new MutationObserver(park);
+    adopt();
+    // Everything lands after this file runs, so watch for it. Each pass leaves
+    // the nodes inside the panel, so the observer's own moves are a no-op on the
+    // next pass and this cannot loop.
+    const mo = new MutationObserver(adopt);
     mo.observe(document.body, { childList: true, subtree: true });
-    // Not left running for the life of the page — it is in within seconds or
-    // it is not coming.
-    setTimeout(() => mo.disconnect(), 15000);
+    // Long enough for a storefront carrying a dozen app scripts to get there.
+    // The previous 15s was tuned against the theme editor, which is not the
+    // slow case.
+    setTimeout(() => mo.disconnect(), 45000);
   };
 
   /* --- Initialize Everything (each isolated so one failure can't break others) --- */
