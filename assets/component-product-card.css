@@ -1,6 +1,7 @@
 /* ============================================
    PRODUCT CARD — Jacquemus overlay
    tag TL · colors TR · name BL · price BR · heart under price
+
    Homepage cards are IMAGE ONLY — product-card.liquid skips the whole
    .product-card__info block, so none of the info rules below apply there.
    The rules still serve the collection page and the PDP carousels.

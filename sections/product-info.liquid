@@ -1,7 +1,84 @@
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
   assign app_blocks = section.blocks | where: 'type', '@app'
-  assign detail_rows = section.blocks | where: 'type', 'detail_row'
+
+  # FABRIC. Resolved once so the tab button and its panel cannot disagree about
+  # whether there is anything to show.
+  #
+  # TWO KEY TRAPS, both from fields that predate the current naming:
+  #   "Fabric (Back)"        is custom.fabric_image, NOT fabric_back
+  #   "Fabric (Composition)" is custom.composition,  NOT fabric_composition
+  #   "Fabric (Weight)"      is custom.weight,       NOT fabric_weight
+  # Everything else follows the obvious fabric_* convention.
+  assign fabric_text = product.metafields.custom.fabric.value
+  assign fabric_front = product.metafields.custom.fabric_front.value
+  assign fabric_back = product.metafields.custom.fabric_image.value
+  assign fabric_name = product.metafields.custom.fabric_name.value
+  assign fabric_type = product.metafields.custom.fabric_type.value
+  assign fabric_composition = product.metafields.custom.composition.value
+  assign fabric_weight = product.metafields.custom.weight.value
+  assign fabric_method = product.metafields.custom.fabric_method.value
+  assign fabric_certs = product.metafields.custom.fabric_certifications.value
+  assign has_fabric = false
+  if fabric_text != blank or fabric_front != blank or fabric_back != blank
+    assign has_fabric = true
+  endif
+  # Specs alone are enough to earn the tab — a product can carry the cloth's
+  # composition without anyone having shot the swatch yet.
+  if fabric_name != blank or fabric_type != blank or fabric_composition != blank or fabric_weight != blank or fabric_method != blank or fabric_certs != blank
+    assign has_fabric = true
+  endif
+
+  # MODEL MEASUREMENTS. Imperial for the US, metric everywhere else — the US is
+  # the only market we sell to that reads feet and pounds. Resolved from the
+  # storefront's country, the same source the Returns panel defaults its picker
+  # to, so it is server-rendered and never flashes the wrong units.
+  #
+  # This replaces custom.model_stats, which was read here for months but has no
+  # metafield definition and no value on any product — the line on screen was
+  # actually coming from custom.sizing.
+  assign model_line = product.metafields.custom.model_metric_system.value
+  if localization.country.iso_code == 'US'
+    assign model_imperial = product.metafields.custom.model_imperial.value
+    if model_imperial != blank
+      assign model_line = model_imperial
+    endif
+  endif
+
+  # custom.sizing is the fit note above that line, and on most products it is
+  # real copy — "Fits oversized", "Check size chart", and so on — with the
+  # measurements written into it as one more paragraph. Those products have no
+  # model_* fields, so nothing collides.
+  #
+  # On a product that HAS the model fields, a sizing note consisting of nothing
+  # but a lone "Model is ..." line is the same fact again in different units.
+  # Suppress that one case rather than print it twice. Deliberately narrow: it
+  # needs the model fields present AND a single line AND that line naming the
+  # model, so a multi-paragraph fit note can never be swallowed.
+  #
+  # This is a display guard, not a data fix. Clearing the duplicate metafield
+  # would be tidier, but the field is shared with the published theme, so that
+  # is the merchant's call to make in admin, not ours to make from here.
+  assign sizing_copy = product.metafields.custom.sizing.value
+  assign show_sizing_copy = true
+  if model_line != blank and sizing_copy != blank
+    assign sizing_lines = sizing_copy | strip | newline_to_br | split: '<br />'
+    assign sizing_kept = ''
+    for sizing_line in sizing_lines
+      assign sizing_line_trim = sizing_line | strip
+      unless sizing_line_trim == blank
+        assign sizing_kept = sizing_kept | append: sizing_line_trim | append: '||'
+      endunless
+    endfor
+    assign sizing_kept = sizing_kept | split: '||'
+    # Nested rather than `and`-joined: Liquid evaluates conditions right to
+    # left, so a one-line version of this reads differently than it looks.
+    if sizing_kept.size == 1
+      if sizing_kept[0] contains 'Model is'
+        assign show_sizing_copy = false
+      endif
+    endif
+  endif
 
   # Instalment figure — this shop's money format drops decimals, so it is
   # composed by hand rather than via the money filters.
@@ -16,6 +93,17 @@
   endif
 -%}
 
+{%- comment -%}
+  The collection eyebrow, resolved once for both places it appears — the mobile
+  band and the desktop details column — so they cannot disagree. See the snippet
+  for why product.collections.first is not good enough.
+
+  Not the Story tab: that panel is deliberately copy-only, and the eyebrow sits
+  above it in the buy column at both breakpoints already.
+{%- endcomment -%}
+{%- capture main_collection %}{% render 'main-collection', product: product %}{% endcapture -%}
+{%- assign main_collection = main_collection | strip -%}
+
 {{ 'component-product-page.css' | asset_url | stylesheet_tag }}
 {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
 
@@ -24,7 +112,7 @@
   padding. Declared on :root so html-level rules can resolve it.
 {%- endcomment -%}
 <style>
-  :root { --pdp-band-h: 126px; }
+  :root { --pdp-band-h: 140px; }
   html { scroll-padding-bottom: var(--pdp-band-h); }
 
   /* iOS Safari keeps scrolling <html> even when <body> clips, which is what
@@ -76,36 +164,19 @@
     </div>
 
     <div class="pdp__gallery-rail">
-      {%- if product.images.size > 1 -%}
-        <div class="pdp__gallery-dots">
-          {%- for image in product.images -%}
-            <button
-              class="pdp__gallery-dot{% if forloop.first %} is-active{% endif %}"
-              data-gallery-dot="{{ forloop.index0 }}"
-              aria-label="View image {{ forloop.index }}"
-            ></button>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
-      {%- comment -%} Wishlist sits directly beneath the dots {% endcomment -%}
+      {%- comment -%}
+        The dot column used to live here. Both breakpoints now share the single
+        progress bar at the end of this block, so the heart is all the rail holds.
+      {%- endcomment -%}
       <button
         class="pdp__wishlist-img"
         data-wishlist-toggle="{{ product.handle }}"
         aria-label="Save {{ product.title }}"
         aria-pressed="false"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>
-
-    {%- if product.images.size > 1 -%}
-      <button class="pdp__gallery-nav pdp__gallery-nav--prev" data-gallery-prev aria-label="Previous image">
-        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="7 1 1 6.5 7 12"/></svg>
-      </button>
-      <button class="pdp__gallery-nav pdp__gallery-nav--next" data-gallery-next aria-label="Next image">
-        <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="currentColor" stroke-width="1"><polyline points="1 1 7 6.5 1 12"/></svg>
-      </button>
-    {%- endif -%}
 
     {%- comment -%} Tag badge, bottom-left (desktop) {% endcomment -%}
     {%- capture badge_label %}{% render 'product-badge-label', product: product %}{% endcapture -%}
@@ -120,10 +191,19 @@
     {%- endcomment -%}
     <span class="pdp__zoom-cursor" data-zoom-cursor aria-hidden="true">+</span>
 
-    {%- comment -%} Mobile: flat progress bar flush to the image's bottom edge {% endcomment -%}
-    <div class="pdp__gallery-progress" aria-hidden="true">
-      <span class="pdp__gallery-progress-fill" data-gallery-progress></span>
-    </div>
+    {%- comment -%}
+      The only how-many-images affordance at either breakpoint. Mobile: flush to
+      the image's bottom edge, filling left to right. Desktop: the same bar stood
+      on end at the image's right edge, filling bottom to top.
+
+      Guarded on image count — with one image the bar would sit permanently full,
+      announcing a gallery that isn't there.
+    {%- endcomment -%}
+    {%- if product.images.size > 1 -%}
+      <div class="pdp__gallery-progress" aria-hidden="true">
+        <span class="pdp__gallery-progress-fill" data-gallery-progress></span>
+      </div>
+    {%- endif -%}
   </div>
 
   {%- comment -%}
@@ -135,7 +215,12 @@
   {%- endcomment -%}
   <div class="pdp-band" data-sticky-band>
     <div class="pdp-band__top">
-      <h1 class="pdp-band__title">{{ product.title }}</h1>
+      <div class="pdp-band__titles">
+        {%- if main_collection != blank -%}
+          <p class="pdp-band__collection">{{ main_collection }}</p>
+        {%- endif -%}
+        <h1 class="pdp-band__title">{{ product.title }}</h1>
+      </div>
       <button
         class="pdp-band__heart"
         data-wishlist-toggle="{{ product.handle }}"
@@ -162,8 +247,8 @@
   <div class="pdp__details">
     <div class="pdp__details-inner">
       {%- comment -%} Desktop-only: collection label + title {% endcomment -%}
-      {%- if product.collections.size > 0 -%}
-        <p class="pdp__collection">{{ product.collections.first.title }}</p>
+      {%- if main_collection != blank -%}
+        <p class="pdp__collection">{{ main_collection }}</p>
       {%- endif -%}
 
       <h1 class="pdp__title">{{ product.title }}</h1>
@@ -175,8 +260,14 @@
       {%- comment -%} ===== COLOR SWATCHES ===== {% endcomment -%}
       {%- for option in product.options_with_values -%}
         {%- if option.name == 'Color' or option.name == 'Colour' -%}
+          {%- comment -%}
+            The colour name is deliberately not shown — no label above the row,
+            no title tooltip on the chips. The chip is the colour; the customer
+            meets the name at cart and checkout, on the variant title.
+            aria-label stays: it is how a screen reader tells the chips apart,
+            and it is not a visual reveal.
+          {%- endcomment -%}
           <div class="pdp__swatches">
-            <p class="pdp__swatch-label">{{ option.selected_value }}</p>
             <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
                 {%- liquid
@@ -236,7 +327,6 @@
                   aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
                   style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
-                  title="{{ value }}"
                 ></button>
               {%- endfor -%}
             </div>
@@ -273,17 +363,10 @@
             <div class="pdp__sizes">
               {%- comment -%}
                 No "SIZE" label — the numbers read as sizes on their own. The
-                size-guide link is the SmartSize app block, rendered here so it
-                sits where the old button did.
+                size-guide link used to sit here; it now lives in the Sizing tab
+                with the rest of the fit information, so the buy column stays
+                colour → size → add to cart with nothing in between.
               {%- endcomment -%}
-              {%- if option.name == 'Size' and app_blocks.size > 0 -%}
-                {%- assign size_guide_rendered = true -%}
-                <div class="pdp__size-header">
-                  {%- for block in app_blocks -%}
-                    <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
-                  {%- endfor -%}
-                </div>
-              {%- endif -%}
               {%- comment -%} Low stock — only meaningful when inventory is tracked {% endcomment -%}
               {%- if option.name == 'Size' -%}
                 <p class="pdp__low-stock" data-low-stock hidden></p>
@@ -301,20 +384,6 @@
             </div>
           {%- endunless -%}
         {%- endfor -%}
-        {%- endunless -%}
-
-        {%- comment -%}
-          Products with no Size option (one-size, accessories) never enter the
-          loop above, so the size guide is rendered here instead of vanishing.
-        {%- endcomment -%}
-        {%- unless size_guide_rendered -%}
-          {%- if app_blocks.size > 0 -%}
-            <div class="pdp__size-header">
-              {%- for block in app_blocks -%}
-                <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
         {%- endunless -%}
 
         <button
@@ -364,16 +433,27 @@
 
 
       {%- comment -%}
-        Shopify injects its Shop Promise box next to the buy button via
-        content_for_header, so it can't be removed in Liquid — only hidden.
-        Our urgency line plus the estimator now cover the same ground, and two
-        delivery dates computed two different ways is worse than one.
+        Shopify injects its Shop Promise box via content_for_header, so it can't
+        be removed in Liquid — only placed and hidden.
+
+        PLACEMENT. Shopify's own shop_promise_pdp.js looks for
+        .delivery-promise__promise-container first and mounts into it; failing
+        that it hunts for a form[action*="/cart/add"] and injects itself
+        structurally, which is why it used to land wherever the markup allowed.
+        The empty div below claims that hook, so the banner renders here — above
+        our urgency line, where the delivery story belongs.
+      {%- endcomment -%}
+      <div class="delivery-promise__promise-container"></div>
+
+      {%- comment -%}
+        The escape hatch. Note the element is <delivery-promise-wc> — the older
+        shop-promise-banner / [class*="shop-promise"] selectors matched nothing,
+        which is why ticking this setting appeared to do nothing at all.
       {%- endcomment -%}
       {%- if section.settings.hide_shop_promise -%}
         <style>
-          shop-promise-banner,
-          [class*="shop-promise"],
-          [id*="shop-promise"]:not(script) { display: none !important; }
+          delivery-promise-wc,
+          .delivery-promise__promise-container { display: none !important; }
         </style>
       {%- endif -%}
 
@@ -389,25 +469,43 @@
         </a>
       {%- endif -%}
 
-      {%- comment -%} ===== TABS ===== {% endcomment -%}
       {%- comment -%}
-        Panels start closed — clicking a tab slides its panel in, clicking the
-        active tab again closes it.
+        ===== TABS =====
+        Story · Sizing · Fabric · Shipping · Returns. Fabric appears only where
+        the product carries a custom.fabric metafield, so the tab count varies
+        by product — the JS pairs buttons to panels by name over whatever is
+        present rather than assuming a fixed set.
+      {%- endcomment -%}
+      {%- comment -%}
+        Story opens on load at every breakpoint — it is the one panel that
+        justifies the product, so it should never need a click to be read.
+        The rest start closed; clicking a tab slides its panel in, clicking the
+        active tab again closes it (including Story).
       {%- endcomment -%}
       <div class="pdp__tabs" data-pdp-tabs>
         <div class="pdp__tab-list" role="tablist">
-          <button class="pdp__tab" role="tab" data-tab="story" aria-selected="false" aria-expanded="false">Story</button>
+          <button class="pdp__tab is-active" role="tab" data-tab="story" aria-selected="true" aria-expanded="true">Story</button>
           <button class="pdp__tab" role="tab" data-tab="sizing" aria-selected="false" aria-expanded="false">Sizing</button>
+          {%- comment -%}
+            Composition is product-specific, so the tab only exists where the
+            metafield does — an empty Fabric tab is worse than no Fabric tab.
+            The tab JS pairs [data-tab] to [data-tab-panel] by name over
+            whatever is present, so omitting both needs no JS change.
+          {%- endcomment -%}
+          {%- if has_fabric -%}
+            <button class="pdp__tab" role="tab" data-tab="fabric" aria-selected="false" aria-expanded="false">Fabric</button>
+          {%- endif -%}
           <button class="pdp__tab" role="tab" data-tab="shipping" aria-selected="false" aria-expanded="false">Shipping</button>
           <button class="pdp__tab" role="tab" data-tab="returns" aria-selected="false" aria-expanded="false">Returns</button>
         </div>
 
         {%- comment -%} ===== STORY ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="story" role="tabpanel">
-          {%- if product.collections.size > 0 -%}
-            <p class="pdp__tab-collection">{{ product.collections.first.title | upcase }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-subtitle">{{ product.title }}</p>
+        {%- comment -%}
+          Copy only. The collection, product title and SKU reference all sit
+          above this in the buy column already — repeating them here padded the
+          panel without telling the customer anything new.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel is-active" data-tab-panel="story" role="tabpanel">
           {%- liquid
             assign story = product.metafields.custom.product_story
             if story == blank
@@ -417,127 +515,310 @@
           {%- if story != blank -%}
             <div class="pdp__tab-description">{{ story }}</div>
           {%- endif -%}
-          <p class="pdp__tab-meta">Ref. {{ product.variants.first.sku | default: product.id }}</p>
         </div>
 
         {%- comment -%} ===== SIZING ===== {% endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="sizing" role="tabpanel">
-          {%- if product.metafields.custom.sizing != blank -%}
-            <div class="pdp__tab-description">{{ product.metafields.custom.sizing }}</div>
+          {%- comment -%}
+            ACTIONS FIRST, then the copy. Someone opening Sizing is trying to
+            pick a size, not read — the two tools that answer that question lead
+            the panel and the measurements support them underneath.
+
+            The SmartSize app block renders here and nowhere else: an app block
+            can only be output once, so moving it out of the buy column meant
+            moving it, not copying it. Products with no Size option get it too,
+            since the panel is unconditional.
+
+            In practice both live buttons arrive from SmartSize's app EMBEDS,
+            which inject #smartrecom-triggers at runtime; initSmartSizePlacement
+            PREPENDS that wrapper to this panel so it lands above this copy too.
+            The two theme links below are dormant (both settings are blank) but
+            are ordered to match, so enabling one changes nothing about layout.
+          {%- endcomment -%}
+          {%- if app_blocks.size > 0 -%}
+            {%- for block in app_blocks -%}
+              <div class="pdp__size-guide-slot" {{ block.shopify_attributes }}>{% render block %}</div>
+            {%- endfor -%}
           {%- endif -%}
 
-          {%- if product.metafields.custom.model_stats != blank -%}
-            <p class="pdp__tab-meta">{{ product.metafields.custom.model_stats }}</p>
+          {%- if section.settings.size_chart_content != blank or section.settings.size_calculator_url != blank -%}
+            <div class="pdp__size-actions">
+              {%- if section.settings.size_calculator_url != blank -%}
+                <a href="{{ section.settings.size_calculator_url }}" class="pdp__size-btn-cta pdp__size-btn-cta--primary">Find my size</a>
+              {%- endif -%}
+              {%- if section.settings.size_chart_content != blank -%}
+                <button type="button" class="pdp__size-btn-cta" data-modal-open="size-chart-modal">Size guide</button>
+              {%- endif -%}
+            </div>
           {%- endif -%}
 
-          {%- if section.settings.size_chart_content != blank -%}
-            <button type="button" class="pdp__tab-link" data-modal-open="size-chart-modal">Size guide</button>
+          {%- if sizing_copy != blank and show_sizing_copy -%}
+            <div class="pdp__tab-description">{{ sizing_copy | newline_to_br }}</div>
           {%- endif -%}
 
-          {%- if section.settings.size_calculator_url != blank -%}
-            <a href="{{ section.settings.size_calculator_url }}" class="pdp__tab-link">Find my size</a>
+          {%- comment -%} Imperial or metric, resolved at the top of this file {%- endcomment -%}
+          {%- if model_line != blank -%}
+            <p class="pdp__tab-meta">{{ model_line }}</p>
           {%- endif -%}
         </div>
 
-        {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
-          {%- render 'delivery-estimator',
-            standard_min: section.settings.standard_min,
-            standard_max: section.settings.standard_max,
-            express_min: section.settings.express_min,
-            express_max: section.settings.express_max,
-            cutoff_hour: section.settings.cutoff_hour
-          -%}
+        {%- comment -%} ===== FABRIC ===== {% endcomment -%}
+        {%- if has_fabric -%}
+          <div class="pdp__tab-panel" data-tab-panel="fabric" role="tabpanel">
+            {%- comment -%}
+              THE CLOTH LEADS. Name, then the swatch, then the prose, then the
+              specs — identity, evidence, story, data. The description used to
+              open the panel, which asked people to read about a texture before
+              being shown it.
 
-          {%- if section.settings.delivery_text != blank -%}
-            <p class="pdp__tab-meta">{{ section.settings.delivery_text }}</p>
-          {%- endif -%}
-          <p class="pdp__tab-meta">Complimentary shipping on orders over $150.</p>
+              The name is a brand-level object, not a per-product one: the same
+              cloth recurs across styles and gets its own entry on the fabric
+              page. Setting it in the same words on every product using it is
+              what makes that legible on the PDP.
+            {%- endcomment -%}
+            {%- if fabric_name != blank -%}
+              <p class="pdp__fabric-name">{{ fabric_name }}</p>
+            {%- endif -%}
 
-          <p class="dest__label">Secure payment</p>
-          <p class="pdp__tab-meta">Credit card, PayPal, Shop Pay</p>
-        </div>
+            {%- comment -%}
+              Front and back of the cloth. Either may be missing — the grid is
+              auto-fit so a lone image fills the width instead of sitting in
+              half of an empty two-column row.
 
-        {%- comment -%} ===== RETURNS ===== {% endcomment -%}
-        <div class="pdp__tab-panel" data-tab-panel="returns" role="tabpanel">
-          <p class="pdp__tab-meta">You have 14 days from the date of delivery to return your order for free.</p>
-          <p class="pdp__tab-meta">Exchanges are free both ways. Items must be unworn with tags attached.</p>
-          <a href="/pages/returns" class="pdp__tab-link">Read our return policy</a>
-          <a href="/pages/track-order" class="pdp__tab-link">Start a return</a>
-
-          <p class="pdp__tab-meta pdp__tab-meta--muted">Monday to Friday from 10:00am to 6:00pm CET.</p>
-          <a href="/pages/contact" class="pdp__tab-link">Contact form</a>
-        </div>
-      </div>
-
-      {%- comment -%}
-        ===== DETAIL ROWS (Fabric / Colour / Packaging) =====
-        Clickable dropdown rows sitting directly below the tabs.
-      {%- endcomment -%}
-      {%- if detail_rows.size > 0 -%}
-        <div class="pdp__rows" data-pdp-rows>
-          {%- for block in detail_rows -%}
-            <div class="pdp__row" {{ block.shopify_attributes }}>
-              <button
-                type="button"
-                class="pdp__row-trigger"
-                data-row-trigger
-                aria-expanded="false"
-              >
-                <span>{{ block.settings.heading }}</span>
-                <span class="pdp__row-icon" aria-hidden="true"></span>
-              </button>
-
-              <div class="pdp__row-panel" data-row-panel hidden>
-                {%- if block.settings.content != blank -%}
-                  <div class="pdp__row-copy">{{ block.settings.content }}</div>
-                {%- endif -%}
-
-                {%- comment -%}
-                  Optional swatch list, one per line: Name|#hex|Description
-                  Used by the Colour row to show the full system.
-                {%- endcomment -%}
-                {%- if block.settings.swatches != blank -%}
-                  <ul class="pdp__row-swatches">
-                    {%- assign lines = block.settings.swatches | newline_to_br | split: '<br />' -%}
-                    {%- for line in lines -%}
-                      {%- assign parts = line | strip | split: '|' -%}
-                      {%- if parts.size > 1 -%}
-                        <li class="pdp__row-swatch">
-                          <span class="pdp__row-chip" style="background: {{ parts[1] | strip }};" aria-hidden="true"></span>
-                          <span class="pdp__row-swatch-body">
-                            <span class="pdp__row-swatch-name">{{ parts[0] | strip }}</span>
-                            {%- if parts.size > 2 -%}
-                              <span class="pdp__row-swatch-text">{{ parts[2] | strip }}</span>
-                            {%- endif -%}
-                          </span>
-                        </li>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </ul>
-                {%- endif -%}
-
-                {%- if block.settings.image != blank -%}
-                  <img
-                    class="pdp__row-media"
-                    src="{{ block.settings.image | image_url: width: 900 }}"
-                    alt="{{ block.settings.heading | escape }}"
-                    width="{{ block.settings.image.width }}"
-                    height="{{ block.settings.image.height }}"
-                    loading="lazy"
+              data-zoom-open/-src/-alt hand these to the gallery's existing
+              lightbox; see initPdpZoom. 2048 matches the gallery's zoom source,
+              since the whole point of opening one is to inspect the weave.
+            {%- endcomment -%}
+            {%- if fabric_front != blank or fabric_back != blank -%}
+              <div class="pdp__fabric-shots">
+                {%- if fabric_front != blank -%}
+                  <button
+                    type="button"
+                    class="pdp__fabric-shot"
+                    data-zoom-open
+                    data-zoom-src="{{ fabric_front | image_url: width: 2048 }}"
+                    data-zoom-alt="{{ product.title | escape }} fabric, front"
+                    aria-label="View {{ product.title | escape }} fabric front full screen"
                   >
-                {%- elsif block.settings.video != blank -%}
-                  {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false, class: 'pdp__row-media' }}
+                    <img
+                      src="{{ fabric_front | image_url: width: 800 }}"
+                      srcset="{{ fabric_front | image_url: width: 400 }} 400w,
+                              {{ fabric_front | image_url: width: 800 }} 800w,
+                              {{ fabric_front | image_url: width: 1200 }} 1200w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, front"
+                      width="{{ fabric_front.width }}"
+                      height="{{ fabric_front.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <span class="pdp__fabric-caption">Front</span>
+                  </button>
                 {%- endif -%}
-
-                {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
-                  <a class="pdp__tab-link" href="{{ block.settings.link_url }}">{{ block.settings.link_label }}</a>
+                {%- if fabric_back != blank -%}
+                  <button
+                    type="button"
+                    class="pdp__fabric-shot"
+                    data-zoom-open
+                    data-zoom-src="{{ fabric_back | image_url: width: 2048 }}"
+                    data-zoom-alt="{{ product.title | escape }} fabric, back"
+                    aria-label="View {{ product.title | escape }} fabric back full screen"
+                  >
+                    <img
+                      src="{{ fabric_back | image_url: width: 800 }}"
+                      srcset="{{ fabric_back | image_url: width: 400 }} 400w,
+                              {{ fabric_back | image_url: width: 800 }} 800w,
+                              {{ fabric_back | image_url: width: 1200 }} 1200w"
+                      sizes="(min-width: 769px) 20vw, 45vw"
+                      alt="{{ product.title | escape }} fabric, back"
+                      width="{{ fabric_back.width }}"
+                      height="{{ fabric_back.height }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                    <span class="pdp__fabric-caption">Back</span>
+                  </button>
                 {%- endif -%}
               </div>
-            </div>
-          {%- endfor -%}
+            {%- endif -%}
+
+            {%- if fabric_text != blank -%}
+              {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
+              <div class="pdp__tab-description">{{ fabric_text | newline_to_br }}</div>
+            {%- endif -%}
+
+            {%- comment -%}
+              Spec table. Shares its rules with the returns table rather than
+              carrying a copy of them, so the two cannot drift apart — see
+              .pdp__spec-* in component-product-page.css. Every row is guarded:
+              a blank field drops its row rather than printing an empty value.
+            {%- endcomment -%}
+            {%- if fabric_type != blank or fabric_composition != blank or fabric_weight != blank or fabric_method != blank or fabric_certs != blank -%}
+              <ul class="pdp__spec-list">
+                {%- if fabric_type != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Type</span>
+                    <span class="pdp__spec-value">{{ fabric_type }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if fabric_composition != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Composition</span>
+                    <span class="pdp__spec-value">{{ fabric_composition }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if fabric_weight != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Weight</span>
+                    <span class="pdp__spec-value">{{ fabric_weight }}</span>
+                  </li>
+                {%- endif -%}
+                {%- comment -%}
+                  Method runs long — "Brushed fleece back face & interlock
+                  knitted front face" is a sentence, not a value. --stack drops
+                  it to its own line instead of squeezing it against the label.
+                {%- endcomment -%}
+                {%- if fabric_method != blank -%}
+                  <li class="pdp__spec-row pdp__spec-row--stack">
+                    <span class="pdp__spec-label">Method</span>
+                    <span class="pdp__spec-value">{{ fabric_method }}</span>
+                  </li>
+                {%- endif -%}
+                {%- comment -%}
+                  Certifications are a list of image files (OEKO-TEX, OCS …), so
+                  the value cell holds marks rather than words.
+                {%- endcomment -%}
+                {%- if fabric_certs != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Certifications</span>
+                    <span class="pdp__spec-value pdp__spec-value--marks">
+                      {%- for cert in fabric_certs -%}
+                        <img
+                          src="{{ cert | image_url: height: 48 }}"
+                          alt="{{ cert.alt | default: 'Certification' | escape }}"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      {%- endfor -%}
+                    </span>
+                  </li>
+                {%- endif -%}
+              </ul>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} ===== SHIPPING ===== {% endcomment -%}
+        {%- comment -%}
+          Stripped to the zip gate on purpose: free-shipping line, then the
+          estimator, then nothing. The date only gets read if it is the only
+          thing to read, so resist re-adding transit tables, express tiers or
+          payment-method copy here — payment icons already live at checkout.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel" data-tab-panel="shipping" role="tabpanel">
+          {%- render 'delivery-estimator',
+            delivery_rates: section.settings.delivery_rates,
+            cutoff_hour: section.settings.cutoff_hour,
+            delivery_timezone: section.settings.delivery_timezone,
+            standard_label: section.settings.standard_label,
+            express_label: section.settings.express_label
+          -%}
         </div>
-      {%- endif -%}
+
+        {%- comment -%}
+          ===== RETURNS =====
+          The window, then the three outcomes ranked best-to-worst, then the
+          action. Support hours and the contact link were cut — nobody opens
+          Returns to find a phone number, and they buried the one line that
+          costs money.
+
+          Terms are one per line in the theme editor; the separators are
+          rendered as hairlines rather than typed dashes.
+        {%- endcomment -%}
+        <div class="pdp__tab-panel pdp__tab-panel--returns" data-tab-panel="returns" role="tabpanel" data-returns-panel>
+          {%- comment -%}
+            Returns vary by region — the refund policy offers them in the USA,
+            calls them "offered soon" for EU/UK/CA/AUS and unavailable
+            elsewhere — so the panel resolves against a country the same way the
+            delivery estimator does. Both pickers share one stored choice, so
+            setting it in either tab moves the other.
+          {%- endcomment -%}
+          {%- assign ret_here = localization.country.iso_code | default: 'US' -%}
+          <div class="dest__entry">
+            <label class="dest__hint" for="ret-country">Select your country</label>
+            <div class="dest__row">
+              <select id="ret-country" class="dest__select" data-returns-country>
+                {%- if localization.available_countries.size > 0 -%}
+                  {%- for country in localization.available_countries -%}
+                    <option value="{{ country.iso_code }}" {% if country.iso_code == ret_here %}selected{% endif %}>{{ country.name }}</option>
+                  {%- endfor -%}
+                {%- else -%}
+                  <option value="{{ ret_here }}" selected>{{ localization.country.name | default: 'United States' }}</option>
+                {%- endif -%}
+              </select>
+            </div>
+          </div>
+
+          <script type="text/plain" data-returns-rules>{{ section.settings.returns_rules | escape }}</script>
+
+          {%- comment -%}
+            Costs first, window second. What a return costs is the question that
+            decides the purchase; how many days you have to decide is the
+            qualifier on it. The sentence reads as a footnote to the table.
+            Rows are written by JS from the rules table — the labels stay
+            settings so the wording is still the merchant's.
+          {%- endcomment -%}
+          <ul class="pdp__returns-terms" data-returns-terms hidden>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_exchange | default: 'Exchange' }}</span>
+              <span class="pdp__returns-term-value" data-returns-exchange></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_credit | default: 'Return · Store credit' }}</span>
+              <span class="pdp__returns-term-value" data-returns-credit></span>
+            </li>
+            <li class="pdp__returns-term">
+              <span class="pdp__returns-term-label">{{ section.settings.returns_label_card | default: 'Return · To card' }}</span>
+              <span class="pdp__returns-term-value" data-returns-card></span>
+            </li>
+          </ul>
+
+          {%- comment -%}
+            {days} is substituted from the rules table so the window can never
+            contradict the row above it.
+          {%- endcomment -%}
+          {%- comment -%}
+            No `| default:` here. A literal {days} inside a {{ }} output tag is
+            a Liquid syntax error — the parser reads the brace as the start of a
+            tag and never finds its terminator. The fallback lives in the JS,
+            where a brace is just a character.
+          {%- endcomment -%}
+          <p class="pdp__returns-intro" data-returns-intro data-template="{{ section.settings.returns_intro | escape }}" hidden></p>
+
+          {%- comment -%}
+            Two rows, not one sentence. The first states the position; the
+            second is the reassurance, and it only lands if it is not buried at
+            the tail of the first. `hidden` stays on the wrapper — that is the
+            node initReturnsByCountry toggles — so the paragraphs inside are
+            never individually addressed by JS.
+          {%- endcomment -%}
+          <div class="pdp__returns-none" data-returns-none hidden>
+            <p class="pdp__returns-intro pdp__returns-intro--muted">{{ section.settings.returns_unavailable | default: 'Returns & Exchanges are not yet offered for your region.' }}</p>
+            {%- if section.settings.returns_unavailable_note != blank -%}
+              <p class="pdp__returns-note">{{ section.settings.returns_unavailable_note }}</p>
+            {%- endif -%}
+          </div>
+
+          <div class="pdp__returns-actions" data-returns-actions>
+            {%- if section.settings.returns_start_label != blank -%}
+              <a href="{{ section.settings.returns_start_url | default: '/pages/track-order' }}" class="pdp__tab-link" data-returns-start>{{ section.settings.returns_start_label }}</a>
+            {%- endif -%}
+            {%- if section.settings.returns_policy_label != blank -%}
+              <a href="{{ section.settings.returns_policy_url | default: '/pages/returns' }}" class="pdp__tab-link pdp__tab-link--quiet">{{ section.settings.returns_policy_label }}</a>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -607,15 +888,81 @@
       "label": "Appointment page link"
     },
     {
-      "type": "text",
-      "id": "delivery_text",
-      "label": "Delivery estimate text",
-      "default": "Order today for delivery within 5 business days"
-    },
-    {
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Returns tab"
+    },
+    {
+      "type": "text",
+      "id": "returns_intro",
+      "label": "Intro line",
+      "info": "{days} is replaced with the return window for the selected country, so the sentence can never contradict the table above it.",
+      "default": "You have {days} days from the date of delivery to return or exchange items."
+    },
+    {
+      "type": "textarea",
+      "id": "returns_rules",
+      "label": "Returns by country",
+      "info": "CODE|window days|exchange|store credit|to card. Costs are free text. A country with no line here is treated as not-yet-offered. Add a ROW line to catch every country not named. Keep in sync with the refund policy.",
+      "default": "US|14|Free|Free|$35"
+    },
+    {
+      "type": "text",
+      "id": "returns_unavailable",
+      "label": "Message where returns aren't offered",
+      "info": "The position. Keep the reassurance in the line below it — as one sentence the second half gets lost.",
+      "default": "Returns & Exchanges are not yet offered for your region."
+    },
+    {
+      "type": "text",
+      "id": "returns_unavailable_note",
+      "label": "Message where returns aren't offered — second line",
+      "info": "Rendered on its own row, under the message above. Leave blank to show only the first line.",
+      "default": "Our team is working hard to roll this feature out."
+    },
+    {
+      "type": "text",
+      "id": "returns_label_exchange",
+      "label": "Row label — exchange",
+      "default": "Exchange"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_credit",
+      "label": "Row label — store credit",
+      "default": "Return · Store credit"
+    },
+    {
+      "type": "text",
+      "id": "returns_label_card",
+      "label": "Row label — refund to card",
+      "default": "Return · To card"
+    },
+    {
+      "type": "text",
+      "id": "returns_start_label",
+      "label": "Primary link label",
+      "default": "Start a return"
+    },
+    {
+      "type": "url",
+      "id": "returns_start_url",
+      "label": "Primary link URL"
+    },
+    {
+      "type": "text",
+      "id": "returns_policy_label",
+      "label": "Secondary link label",
+      "default": "Read our return policy"
+    },
+    {
+      "type": "url",
+      "id": "returns_policy_url",
+      "label": "Secondary link URL"
     },
     {
       "type": "header",
@@ -627,8 +974,14 @@
       "label": "Desktop image fit",
       "info": "Cover fills the frame and crops; contain shows the whole image with padding.",
       "options": [
-        { "value": "cover", "label": "Cover (crop to fill)" },
-        { "value": "contain", "label": "Contain (show whole image)" }
+        {
+          "value": "cover",
+          "label": "Cover (crop to fill)"
+        },
+        {
+          "value": "contain",
+          "label": "Contain (show whole image)"
+        }
       ],
       "default": "cover"
     },
@@ -638,11 +991,26 @@
       "label": "Desktop crop focal point",
       "info": "Which part of the image to keep when cropping. Upper keeps heads in frame.",
       "options": [
-        { "value": "top", "label": "Top" },
-        { "value": "upper", "label": "Upper (recommended)" },
-        { "value": "center", "label": "Centre" },
-        { "value": "lower", "label": "Lower" },
-        { "value": "bottom", "label": "Bottom" }
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "upper",
+          "label": "Upper (recommended)"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        },
+        {
+          "value": "lower",
+          "label": "Lower"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
       ],
       "default": "upper"
     },
@@ -660,7 +1028,10 @@
       "type": "range",
       "id": "low_stock_threshold",
       "label": "Low stock indicator appears at or below",
-      "min": 1, "max": 20, "step": 1, "default": 5
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 5
     },
     {
       "type": "url",
@@ -671,8 +1042,8 @@
       "type": "checkbox",
       "id": "hide_shop_promise",
       "label": "Hide Shopify's Shop Promise box",
-      "info": "Our estimator and urgency line replace it. Untick to show both.",
-      "default": true
+      "info": "Left unticked, Shop Promise shows and our urgency line hides itself so only one delivery date is on the page.",
+      "default": false
     },
     {
       "type": "header",
@@ -680,37 +1051,72 @@
     },
     {
       "type": "paragraph",
-      "content": "Business-day transit windows. Keep these in sync with Settings → Shipping and delivery; a theme cannot read shipping rates at runtime."
+      "content": "One line per country. A theme cannot read shipping rates at runtime, so this table is generated from Settings → Shipping and delivery and must be regenerated when rates change. A country with no line here shows as not-shipped-to rather than guessing."
     },
     {
-      "type": "range",
-      "id": "standard_min",
-      "label": "Standard delivery — fastest (business days)",
-      "min": 1, "max": 14, "step": 1, "default": 3
+      "type": "text",
+      "id": "standard_label",
+      "label": "Standard service name",
+      "default": "Foreign Air"
     },
     {
-      "type": "range",
-      "id": "standard_max",
-      "label": "Standard delivery — slowest (business days)",
-      "min": 1, "max": 21, "step": 1, "default": 5
+      "type": "text",
+      "id": "express_label",
+      "label": "Express service name",
+      "default": "Express Air"
     },
     {
-      "type": "range",
-      "id": "express_min",
-      "label": "Express delivery — fastest (business days)",
-      "min": 1, "max": 7, "step": 1, "default": 1
-    },
-    {
-      "type": "range",
-      "id": "express_max",
-      "label": "Express delivery — slowest (business days)",
-      "min": 1, "max": 10, "step": 1, "default": 2
+      "type": "textarea",
+      "id": "delivery_rates",
+      "label": "Rates by country",
+      "info": "CODE|standard fastest|standard slowest|express fastest|express slowest|standard price|express price — days are business days, \"-\" disables a tier, prices are free text. Add a ROW line to catch every country not named.",
+      "default": "US|3|5|1|2|$10|$20"
     },
     {
       "type": "range",
       "id": "cutoff_hour",
       "label": "Same-day dispatch cutoff (hour, 24h)",
-      "min": 0, "max": 23, "step": 1, "default": 14
+      "min": 0,
+      "max": 23,
+      "step": 1,
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "delivery_timezone",
+      "label": "Warehouse time zone",
+      "info": "The cutoff is read in this zone, not the shopper's. Without it a New York shopper is told a Los Angeles cutoff passed three hours early.",
+      "options": [
+        {
+          "value": "America/Los_Angeles",
+          "label": "Los Angeles (Pacific)"
+        },
+        {
+          "value": "America/Denver",
+          "label": "Denver (Mountain)"
+        },
+        {
+          "value": "America/Chicago",
+          "label": "Chicago (Central)"
+        },
+        {
+          "value": "America/New_York",
+          "label": "New York (Eastern)"
+        },
+        {
+          "value": "Europe/London",
+          "label": "London"
+        },
+        {
+          "value": "Europe/Paris",
+          "label": "Paris"
+        },
+        {
+          "value": "Asia/Shanghai",
+          "label": "Shanghai"
+        }
+      ],
+      "default": "America/Los_Angeles"
     },
     {
       "type": "richtext",
@@ -720,24 +1126,8 @@
   ],
   "blocks": [
     {
-      "type": "detail_row",
-      "name": "Detail row",
-      "settings": [
-        { "type": "text", "id": "heading", "label": "Heading", "default": "Fabric" },
-        { "type": "richtext", "id": "content", "label": "Content" },
-        {
-          "type": "textarea",
-          "id": "swatches",
-          "label": "Swatches (one per line)",
-          "info": "Format: Name|#hex|Description — used for the colour system."
-        },
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "video", "id": "video", "label": "Video" },
-        { "type": "text", "id": "link_label", "label": "Link label" },
-        { "type": "url", "id": "link_url", "label": "Link URL" }
-      ]
-    },
-    { "type": "@app" }
+      "type": "@app"
+    }
   ]
 }
 {% endschema %}

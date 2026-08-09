@@ -180,7 +180,6 @@
     const addText = pdp.querySelector('.pdp__add-text');
     const mobileBtn = pdp.querySelector('[data-mobile-submit]');
     const mobileText = mobileBtn ? mobileBtn.querySelector('span') : null;
-    const swatchLabel = pdp.querySelector('.pdp__swatch-label');
     const lowStockEl = pdp.querySelector('[data-low-stock]');
     const threshold = parseInt(pdp.dataset.lowStockThreshold, 10) || 5;
 
@@ -212,11 +211,8 @@
       const variant = variants.find((v) =>
         vals.every((val, i) => val == null || v['option' + (i + 1)] === val));
 
-      // Colour label reflects the chosen colour
-      if (swatchLabel) {
-        const colorGroup = pdp.querySelector('.pdp__swatch-list .is-selected');
-        if (colorGroup) swatchLabel.textContent = colorGroup.getAttribute('title') || colorGroup.dataset.variantOption;
-      }
+      // No colour label to sync — the PDP never names the colour. The chip's
+      // is-selected rule is the whole indication.
 
       const setState = (btn, textEl, priceSel) => {
         if (!btn) return;
@@ -846,7 +842,9 @@
   };
 
   /* --- PDP Delivery estimator + rolling urgency --- */
-  const ZIP_KEY = 'fr_delivery_zip';
+  // Renamed with the switch from postcodes to countries; the old key is left
+  // behind deliberately so a stored zip cannot be read back as a country code.
+  const ZIP_KEY = 'fr_delivery_country';
 
   // Adds whole business days, skipping weekends.
   const addBusinessDays = (from, days) => {
@@ -860,9 +858,26 @@
     return d;
   };
 
-  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
-  const dispatchStart = (cutoffHour) => {
+  // The cutoff belongs to the warehouse, not the visitor. A shopper in New York
+  // at 3pm is at noon in Los Angeles and still inside a 1pm cutoff — reading the
+  // browser clock would tell them they missed a window they still have an hour of.
+  // The returned Date carries the store's wall clock in its local fields, so
+  // getDay/getHours and the business-day arithmetic below all agree on one zone.
+  const zonedNow = (tz) => {
     const now = new Date();
+    if (!tz) return now;
+    try {
+      const shifted = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+      return isNaN(shifted.getTime()) ? now : shifted;
+    } catch (e) {
+      // An unrecognised zone must not take the estimator — or the PDP — down.
+      return now;
+    }
+  };
+
+  // Orders placed after the cutoff, or at a weekend, dispatch the next business day.
+  const dispatchStart = (cutoffHour, tz) => {
+    const now = zonedNow(tz);
     let start = new Date(now.getTime());
     const day = start.getDay();
     if (now.getHours() >= cutoffHour || day === 0 || day === 6) {
@@ -871,11 +886,107 @@
     return start;
   };
 
+  // Whole minutes until the cutoff of the day the order actually dispatches —
+  // today's before the cutoff, the next business day's after it. Past 1pm the
+  // clock restarts against tomorrow rather than dying at "order today", and
+  // because the arrival date is derived from the same dispatch day, beating
+  // this countdown is exactly what earns the date shown beside it.
+  // Both instants sit in the same shifted frame, so the difference is real
+  // elapsed time. Rounding up keeps the tail honest: 30s out reads "1m".
+  const minsToCutoff = (now, start, cutoffHour) => {
+    const target = new Date(start.getTime());
+    target.setHours(cutoffHour, 0, 0, 0);
+    return Math.ceil((target.getTime() - now.getTime()) / 60000);
+  };
+
+  // Deriving every part from one total is what stops the old "1h 60m" on the
+  // hour. Days appear because a Friday-afternoon order counts down to Monday's
+  // cutoff, and "71h" is not a number anyone parses at a glance.
+  const fmtCountdown = (totalMins) => {
+    const d = Math.floor(totalMins / 1440);
+    const h = Math.floor((totalMins % 1440) / 60);
+    const m = totalMins % 60;
+    if (d > 0) return h > 0 ? `${d}d ${h}h` : `${d}d`;
+    if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+    return `${m}m`;
+  };
+
   const fmtDate = (d) =>
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
-  const validZip = (zip, country) =>
-    country === 'US' ? /^\d{5}(-\d{4})?$/.test(zip) : /^[A-Za-z0-9 -]{3,10}$/.test(zip);
+  // Calendar days from the shopper's today to an arrival date. Both ends are
+  // flattened to midnight because arrival is a date, not an instant, and
+  // rounding absorbs the 23/25-hour days either side of a DST switch.
+  const daysUntil = (target) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const t = new Date(target.getTime());
+    t.setHours(0, 0, 0, 0);
+    return Math.round((t.getTime() - today.getTime()) / 86400000);
+  };
+
+  // Phrase arrival the way Shop Promise does — "tomorrow" lands faster than
+  // "Tue, Aug 4". Measured against the SHOPPER's calendar, not the warehouse's:
+  // tomorrow has to mean tomorrow to whoever is reading it.
+  const fmtRelative = (d) => {
+    const days = daysUntil(d);
+    // Only reachable if the shopper's zone runs ahead of the warehouse's.
+    // "Today" is too strong a claim to make on a timezone artefact.
+    if (days <= 0) return fmtDate(d);
+    if (days === 1) return 'tomorrow';
+    const weekday = d.toLocaleDateString(undefined, { weekday: 'long' });
+    if (days < 7) return weekday;
+    if (days < 14) return 'next ' + weekday;
+    // Past a fortnight "next Tuesday" stops carrying information, and ROW
+    // windows run 10–20 days, so those resolve to a real date.
+    return fmtDate(d);
+  };
+
+  // Assembled as nodes, never innerHTML — the zip is read back from
+  // localStorage, which is shopper-supplied and tamperable.
+  const setLine = (el, parts) => {
+    el.textContent = '';
+    parts.forEach((part) => {
+      const str = part[0];
+      if (!str) return;
+      if (part[1]) {
+        const strong = document.createElement('strong');
+        strong.textContent = str;
+        el.appendChild(strong);
+      } else {
+        el.appendChild(document.createTextNode(str));
+      }
+    });
+  };
+
+  // Arrival windows drop the weekday — two of them side by side with the tier
+  // label is already a lot of characters for a 390px viewport.
+  const fmtShort = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  const fmtWindow = (from, lo, hi) => {
+    const a = addBusinessDays(from, lo);
+    const b = addBusinessDays(from, hi);
+    // A one-day window would otherwise read "Aug 5 – Aug 5".
+    return a.getTime() === b.getTime() ? fmtShort(a) : fmtShort(a) + ' – ' + fmtShort(b);
+  };
+
+  // One line per country: CODE|std_lo|std_hi|exp_lo|exp_hi|std_price|exp_price.
+  // "-" in a day column disables that tier for that country — plenty of lanes
+  // have no express option worth quoting.
+  const parseRates = (text) => {
+    const table = {};
+    (text || '').split('\n').forEach((line) => {
+      const p = line.split('|').map((s) => s.trim());
+      if (p.length < 5 || !p[0]) return;
+      const num = (v) => (v === '-' || v === '' ? null : parseInt(v, 10));
+      table[p[0].toUpperCase()] = {
+        sl: num(p[1]), sh: num(p[2]),
+        el: num(p[3]), eh: num(p[4]),
+        sp: p[5] || '', ep: p[6] || '',
+      };
+    });
+    return table;
+  };
 
   const initDeliveryEstimator = () => {
     const root = document.querySelector('[data-delivery-estimator]');
@@ -883,72 +994,292 @@
     if (!root && !urgency) return;
 
     const cfg = root ? root.dataset : {};
-    const cutoff = parseInt(cfg.cutoffHour, 10) || 14;
+    const cutoff = parseInt(cfg.cutoffHour, 10) || 13;
+    const tz = cfg.timezone || '';
     const country = cfg.country || 'US';
-    const start = dispatchStart(cutoff);
+
+    const ratesEl = root ? root.querySelector('[data-delivery-rates]') : null;
+    const rates = parseRates(ratesEl ? ratesEl.textContent : '');
+    // An explicit country wins; a ROW line, if the merchant wrote one, catches
+    // the rest; otherwise the lane genuinely cannot be quoted.
+    const ratesFor = (code) => rates[(code || '').toUpperCase()] || rates.ROW || null;
+
+    const CHOSEN = () => {
+      try { return localStorage.getItem(ZIP_KEY) || country; } catch (e) { return country; }
+    };
+    // Recomputed rather than captured: a cutoff that passes mid-session has to
+    // roll the dispatch day for the urgency line and the zip results alike.
+    const startFor = () => dispatchStart(cutoff, tz);
 
     // Rolling urgency renders immediately — it needs no zip.
     if (urgency) {
-      const by = addBusinessDays(start, parseInt(cfg.standardMax, 10) || 5);
-      const now = new Date();
       const text = urgency.querySelector('[data-urgency-text]');
-      if (text) {
-        if (now.getHours() < cutoff) {
-          const hrs = cutoff - now.getHours() - 1;
-          const mins = 60 - now.getMinutes();
-          const within = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-          text.textContent = `Order within ${within} to receive by ${fmtDate(by)}`;
+      let timer = null;
+
+      const renderUrgency = () => {
+        if (!text) return 0;
+        // The fastest lane the shopper could pick, not the slowest — the line
+        // says "as early as". Express is the paid tier; lanes without one fall
+        // back to the quick end of standard. A country we cannot quote gets no
+        // line at all rather than a borrowed date from somewhere else.
+        const r = ratesFor(CHOSEN());
+        if (!r || (!r.eh && !r.sl)) { urgency.hidden = true; return 0; }
+        const fastest = r.eh || r.sl || 2;
+        // One dispatch day drives both halves of the line: the countdown is the
+        // deadline to make it, the date is what making it earns.
+        const start = startFor();
+        const by = addBusinessDays(start, fastest);
+        // The destination suffix is gone with the zip: naming the country here
+        // would read "…as early as Tuesday to US" on a storefront already
+        // scoped to that country. The picker below states it better.
+        const dest = '';
+
+        // Always positive: the target rolls with the dispatch day, so passing
+        // 1pm restarts the clock against tomorrow instead of stalling the line.
+        const left = minsToCutoff(zonedNow(tz), start, cutoff);
+        // The countdown and the arrival both render bold — they are the only
+        // two values on the line a shopper actually acts on.
+        const arrival = fmtRelative(by);
+        if (left > 0) {
+          setLine(text, [
+            ['Order within ', false],
+            [fmtCountdown(left), true],
+            [' to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
         } else {
-          text.textContent = `Order today to receive by ${fmtDate(by)}`;
+          // Unreachable while dispatchStart and the target share a cutoff, but
+          // a clock that cannot be trusted should drop the deadline, not guess.
+          setLine(text, [
+            ['Order today to receive as early as ', false],
+            [arrival, true],
+            [dest, false],
+          ]);
         }
         urgency.hidden = false;
-      }
+        return left;
+      };
+
+      // A countdown that doesn't count reads as decoration. Only wind the clock
+      // if there is actually time left to show — a page opened after the cutoff
+      // gets the static line and no interval at all.
+      const tick = () => {
+        if (renderUrgency() > 0 && !timer) timer = setInterval(renderUrgency, 60000);
+      };
+      tick();
+      // Without this a backgrounded tab is restored with a stale number frozen
+      // on screen, which is worse than showing no countdown in the first place.
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tick();
+      });
     }
 
     if (!root) return;
 
-    const input = root.querySelector('[data-dest-zip]');
-    const apply = root.querySelector('[data-dest-apply]');
+    const select = root.querySelector('[data-dest-country]');
     const results = root.querySelector('[data-dest-results]');
     const error = root.querySelector('[data-dest-error]');
-    const stdOut = root.querySelector('[data-dest-standard]');
-    const expOut = root.querySelector('[data-dest-express]');
+    const rowFor = (k) => root.querySelector('[data-dest-row="' + k + '"]');
 
-    const render = (zip) => {
-      if (!validZip(zip, country)) {
-        results.hidden = true;
-        error.hidden = false;
-        return;
-      }
-      error.hidden = true;
-      stdOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.standardMin, 10) || 3));
-      expOut.textContent = fmtDate(addBusinessDays(start, parseInt(cfg.expressMin, 10) || 1));
-      results.hidden = false;
-      try { localStorage.setItem(ZIP_KEY, zip); } catch (e) {}
+    // A tier renders only when it has both a window and a price for this
+    // country. Half a row — a service name with an empty date beside it —
+    // reads as broken rather than as unavailable.
+    const tier = (key, lo, hi, price, dateSel, priceSel) => {
+      const row = rowFor(key);
+      if (!row) return false;
+      const dateEl = root.querySelector(dateSel);
+      const priceEl = root.querySelector(priceSel);
+      if (lo == null || hi == null) { row.hidden = true; return false; }
+      if (dateEl) dateEl.textContent = fmtWindow(startFor(), lo, hi);
+      if (priceEl) priceEl.textContent = price || '';
+      row.hidden = false;
+      return true;
     };
 
-    if (apply) apply.addEventListener('click', () => render(input.value.trim()));
-    if (input) {
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); render(input.value.trim()); }
-      });
-      // Remembered zip resolves on load, so returning visitors see dates straight away.
+    const render = (code) => {
+      const r = ratesFor(code);
+      // No zone covers this country, so there is no rate to quote and no
+      // checkout to reach. Saying so beats inventing a date.
+      if (!r) {
+        results.hidden = true;
+        if (error) error.hidden = false;
+        return;
+      }
+      if (error) error.hidden = true;
+      // Both calls must run — each owns its row's visibility — so the results
+      // are collected before being combined rather than short-circuited.
+      const hasStd = tier('standard', r.sl, r.sh, r.sp, '[data-dest-standard]', '[data-dest-standard-price]');
+      const hasExp = tier('express', r.el, r.eh, r.ep, '[data-dest-express]', '[data-dest-express-price]');
+      const shown = hasStd || hasExp;
+      results.hidden = !shown;
+      if (!shown && error) error.hidden = false;
+      try { localStorage.setItem(ZIP_KEY, code); } catch (e) {}
+    };
+
+    if (select) {
+      // The remembered country wins over the market's default, but only while
+      // it is still one of the options — markets change under saved state.
+      let initial = country;
       try {
         const saved = localStorage.getItem(ZIP_KEY);
-        if (saved) { input.value = saved; render(saved); }
+        // Shape-checked before it reaches a selector: storage is user-writable,
+        // and an ISO country code is only ever two letters.
+        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
+            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
+          initial = saved.toUpperCase();
+        }
       } catch (e) {}
+      select.value = initial;
+      // Resolves on load rather than behind an Apply click: the country is
+      // already known from the market, so there is nothing to wait for.
+      render(initial);
+
+      select.addEventListener('change', () => {
+        render(select.value);
+        // Keeps the Returns picker in step — one shopper, one country.
+        document.dispatchEvent(new CustomEvent('fr:country', { detail: select.value }));
+      });
+
+      document.addEventListener('fr:country', (e) => {
+        if (e.detail && e.detail !== select.value) {
+          select.value = e.detail;
+          render(e.detail);
+        }
+      });
     }
   };
 
-  /* --- Foreign Engineering: pick salt or slate per card from the image --- */
-  const initFreContrast = () => {
-    const cards = document.querySelectorAll('.fre__card');
-    if (!cards.length) return;
+  /* --- PDP Returns resolved against the shopper's country --- */
+  // The refund policy is regional — offered in the USA, "soon" for EU/UK/CA/AUS,
+  // unavailable elsewhere — so the panel cannot state one set of terms and be
+  // right. A country with no line is treated as not-yet-offered rather than
+  // falling back to the US terms, which would promise a return that isn't there.
+  const initReturnsByCountry = () => {
+    const panel = document.querySelector('[data-returns-panel]');
+    if (!panel) return;
 
-    // Sample the corner the copy sits over and measure its luminance, so the
-    // text flips to slate on pale imagery and stays salt on dark.
-    const measure = (card) => {
-      const img = card.querySelector('.fre__img');
+    const select = panel.querySelector('[data-returns-country]');
+    const rulesEl = panel.querySelector('[data-returns-rules]');
+    const terms = panel.querySelector('[data-returns-terms]');
+    const intro = panel.querySelector('[data-returns-intro]');
+    const none = panel.querySelector('[data-returns-none]');
+    const start = panel.querySelector('[data-returns-start]');
+
+    // CODE|window days|exchange|store credit|to card
+    const rules = {};
+    ((rulesEl && rulesEl.textContent) || '').split('\n').forEach((line) => {
+      const p = line.split('|').map((s) => s.trim());
+      if (p.length < 5 || !p[0]) return;
+      rules[p[0].toUpperCase()] = { days: p[1], ex: p[2], cr: p[3], cd: p[4] };
+    });
+    const ruleFor = (c) => rules[(c || '').toUpperCase()] || rules.ROW || null;
+
+    const set = (sel, val) => {
+      const el = panel.querySelector(sel);
+      if (el) el.textContent = val || '';
+    };
+
+    const render = (code) => {
+      const r = ruleFor(code);
+      if (terms) terms.hidden = !r;
+      if (intro) intro.hidden = !r;
+      if (none) none.hidden = !!r;
+      // The primary action goes with the terms: offering "Start a return" to a
+      // region that cannot return is the one link worse than no link. The
+      // policy link stays — it is what explains the regional difference.
+      if (start) start.hidden = !r;
+      if (!r) return;
+      set('[data-returns-exchange]', r.ex);
+      set('[data-returns-credit]', r.cr);
+      set('[data-returns-card]', r.cd);
+      if (intro) {
+        // Carries the fallback because Liquid cannot: a literal {days} inside a
+        // {{ }} output tag fails to parse, so the section ships the setting
+        // bare and the default belongs here.
+        const tpl = intro.dataset.template ||
+          'You have {days} days from the date of delivery to return or exchange items.';
+        intro.textContent = tpl.replace('{days}', r.days);
+      }
+    };
+
+    if (select) {
+      let initial = select.value;
+      try {
+        const saved = localStorage.getItem(ZIP_KEY);
+        if (saved && /^[A-Za-z]{2}$/.test(saved) &&
+            select.querySelector('option[value="' + saved.toUpperCase() + '"]')) {
+          initial = saved.toUpperCase();
+        }
+      } catch (e) {}
+      select.value = initial;
+      render(initial);
+
+      select.addEventListener('change', () => {
+        try { localStorage.setItem(ZIP_KEY, select.value); } catch (e) {}
+        render(select.value);
+        // Shipping and Returns answer the same question about the same person.
+        // Setting the country in one tab has to move the other, or the page
+        // quietly holds two different answers.
+        document.dispatchEvent(new CustomEvent('fr:country', { detail: select.value }));
+      });
+
+      document.addEventListener('fr:country', (e) => {
+        if (e.detail && e.detail !== select.value) {
+          select.value = e.detail;
+          render(e.detail);
+        }
+      });
+    } else {
+      render((document.documentElement.lang || 'US').slice(-2).toUpperCase());
+    }
+  };
+
+  /* --- Shop Promise takes precedence over our own delivery line --- */
+  // Shopify's banner carries a live carrier estimate; ours is derived from theme
+  // settings. Two delivery dates on one page invites the shopper to notice they
+  // disagree, so when theirs resolves, ours steps aside.
+  const initShopPromiseCoordination = () => {
+    const urgency = document.querySelector('[data-delivery-urgency]');
+    if (!urgency) return;
+
+    // Presence is not enough. <delivery-promise-wc> mounts before it resolves,
+    // and stays empty when no promise applies to the product — hiding on the
+    // element alone would silently drop our line for products that never get one.
+    const resolved = () => {
+      const el = document.querySelector('delivery-promise-wc');
+      if (!el || !el.offsetHeight) return false;
+      // The custom element opts into an open shadow root, so its rendered
+      // content is readable from here without touching any internal class name.
+      const root = el.shadowRoot;
+      return !!(root && root.textContent.trim());
+    };
+
+    // Toggle a class, never the hidden attribute — [hidden] is overridden by a
+    // display rule in component-product-page.css and would not take effect.
+    const sync = () => urgency.classList.toggle('is-superseded', resolved());
+
+    sync();
+    // The Shop Promise bundle is deferred and resolves well after this runs, so
+    // a one-shot check would almost always miss it.
+    new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
+  };
+
+  /* --- Foreign Engineering: pick salt or slate per card from the image --- */
+  const initOverlayContrast = () => {
+    // Every place copy is laid over an image. `band` is the strip the copy
+    // actually sits over — Foreign Engineering writes into the bottom-left,
+    // Complete the Look's heading into the top-left — and sampling the wrong
+    // end is how white text ends up on a pale sky.
+    const targets = [
+      { host: '.fre__card', img: '.fre__img', band: 'bottom' },
+      { host: '.ctl__lookbook', img: '.ctl__lookbook-img', band: 'top' },
+    ];
+
+    // Sample that corner and measure its luminance, so the text flips to slate
+    // on pale imagery and stays salt on dark.
+    const measure = (host, imgSel, band) => {
+      const img = host.querySelector(imgSel);
       if (!img) return;
 
       const sample = () => {
@@ -957,17 +1288,16 @@
           const w = 24, h = 24;
           c.width = w; c.height = h;
           const ctx = c.getContext('2d');
-          // Bottom-left region — where the title and subtitle sit
-          const sx = 0;
-          const sy = Math.max(0, img.naturalHeight - img.naturalHeight * 0.3);
-          ctx.drawImage(img, sx, sy, img.naturalWidth * 0.5, img.naturalHeight * 0.3, 0, 0, w, h);
+          const bandH = img.naturalHeight * 0.3;
+          const sy = band === 'top' ? 0 : Math.max(0, img.naturalHeight - bandH);
+          ctx.drawImage(img, 0, sy, img.naturalWidth * 0.5, bandH, 0, 0, w, h);
           const d = ctx.getImageData(0, 0, w, h).data;
           let sum = 0;
           for (let i = 0; i < d.length; i += 4) {
             sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
           }
           const avg = sum / (d.length / 4);
-          card.classList.toggle('is-light-bg', avg > 140);
+          host.classList.toggle('is-light-bg', avg > 140);
         } catch (e) {
           // Tainted canvas or a blocked image: keep the salt default
         }
@@ -978,7 +1308,9 @@
       else img.addEventListener('load', sample, { once: true });
     };
 
-    cards.forEach(measure);
+    targets.forEach((t) => {
+      document.querySelectorAll(t.host).forEach((host) => measure(host, t.img, t.band));
+    });
   };
 
   /* --- Klaviyo back-in-stock: tag whatever it injects so CSS can reach it --- */
@@ -987,25 +1319,58 @@
     if (!pdp) return;
 
     const band = document.querySelector('[data-sticky-band]');
+    // The band is display:none above 768px — moving the button into it on
+    // desktop is what made "Notify me" vanish there entirely. Desktop leaves it
+    // where Klaviyo rendered it, inside the buy column.
+    const onMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+    const isBis = (el) => {
+      const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
+      const txt = (el.textContent || el.value || '').trim().toLowerCase();
+      return /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
+             /^notify me/.test(txt);
+    };
+
+    // tag() removes nodes, which the observer would see as another mutation.
+    let syncing = false;
 
     const tag = () => {
+      if (syncing) return;
+      syncing = true;
+
+      // Collect every match INCLUDING ones already moved into the band. The old
+      // version skipped those, so each in-stock → sold-out → in-stock cycle
+      // appended a fresh button beside the untouched previous ones and they
+      // stacked until they filled the page.
+      const found = [];
       pdp.querySelectorAll('button, a, input[type="button"], input[type="submit"]').forEach((el) => {
-        if (el.closest('[data-sticky-band]')) return;
-        const cls = (el.getAttribute('class') || '') + ' ' + (el.id || '');
-        const txt = (el.textContent || el.value || '').trim().toLowerCase();
-        const isBis = /klaviyo[-_]?bis|bis[-_]?trigger|back[-_]?in[-_]?stock/i.test(cls) ||
-                      /^notify me/.test(txt);
-        if (!isBis) return;
-        el.classList.add('fr-bis');
-        // Belongs with the buy controls, directly under the sold-out bar —
-        // not stranded below the size selector where Klaviyo drops it.
-        if (band && el.parentElement !== band) band.appendChild(el);
+        if (el.hasAttribute('data-mobile-submit')) return;
+        if (isBis(el)) found.push(el);
       });
+
+      if (found.length) {
+        // Klaviyo's newest render is the live one; the rest are strays.
+        const keep = found[found.length - 1];
+        found.slice(0, -1).forEach((el) => el.remove());
+        keep.classList.add('fr-bis');
+
+        if (onMobile()) {
+          if (band && keep.parentElement !== band) band.appendChild(keep);
+        } else if (band && keep.parentElement === band) {
+          // Resized up from mobile: pull it out of the hidden band so it is
+          // visible again rather than stranded inside a display:none parent.
+          band.parentElement.insertBefore(keep, band);
+        }
+      }
+
+      requestAnimationFrame(() => { syncing = false; });
     };
 
     tag();
     // Klaviyo injects late and can re-render, so keep watching the PDP subtree.
     new MutationObserver(tag).observe(pdp, { childList: true, subtree: true });
+    // Crossing the breakpoint changes which parent the button belongs to.
+    window.addEventListener('resize', tag, { passive: true });
   };
 
   /* --- PDP sticky band (mobile): hide once past Foreign Engineering --- */
@@ -1013,13 +1378,17 @@
     const band = document.querySelector('[data-sticky-band]');
     if (!band) return;
 
-    // The band rides the viewport bottom, then comes to rest on top of Foreign
-    // Engineering and scrolls away with the page. Parking at Foreign
-    // Engineering rather than Complete the Look is deliberate: the imagery is
-    // full-bleed and the band must never sit over it.
-    // Raising `bottom` by however far that section has entered the viewport
-    // pins the band's base to its top edge.
+    // The band must never sit on top of full-bleed imagery, and a fixed element
+    // cannot both cross a section and stay clear of it — so it retires the
+    // moment its boundary reaches the viewport and returns if you scroll back
+    // up into the product details.
+    //
+    // The resting-area section is that boundary when present, which keeps the
+    // handover a placeable decision rather than one wired to whichever section
+    // happens to come first. The named sections remain as a fallback for
+    // templates that predate it.
     const boundary =
+      document.querySelector('[data-band-rest]') ||
       document.querySelector('.section-fr-engineering') ||
       document.querySelector('.section-pdp-complete-the-look');
     if (!boundary) return;
@@ -1033,9 +1402,10 @@
     let ticking = false;
     const place = () => {
       ticking = false;
+      // Hide as soon as the section's first pixel crosses the viewport bottom,
+      // which is exactly where the band's own top edge sits.
       const top = boundary.getBoundingClientRect().top;
-      const overlap = window.innerHeight - top;
-      band.style.bottom = overlap > 0 ? overlap + 'px' : '0px';
+      band.classList.toggle('is-hidden', top <= window.innerHeight);
     };
 
     const onScroll = () => {
@@ -1049,7 +1419,7 @@
     place();
   };
 
-  /* --- PDP zoom lightbox + cursor-following affordance --- */
+  /* --- PDP zoom: in-place on desktop, fullscreen lightbox on touch --- */
   const initPdpZoom = () => {
     const gallery = document.querySelector('[data-product-gallery]');
     const zoom = document.querySelector('[data-pdp-zoom]');
@@ -1058,15 +1428,80 @@
     const img = zoom.querySelector('[data-zoom-img]');
     const stage = zoom.querySelector('[data-zoom-stage]');
     const cursor = gallery.querySelector('[data-zoom-cursor]');
+    const main = gallery.querySelector('[data-gallery-main]');
 
-    // Cursor-following +/- over the gallery (desktop, fine pointers only)
-    if (cursor && window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) {
+    // Re-evaluated per call, not cached: a resize or a hybrid device must not
+    // get stuck on whichever path happened to be true at load.
+    const isDesktop = () => window.matchMedia('(min-width: 769px) and (pointer: fine)').matches;
+
+    /* ---- Desktop: magnify inside the gallery frame, pan with the pointer.
+       The page is never covered and there is nothing to exit out of. ---- */
+    let zoomedSlide = null;
+
+    // The point under the cursor is the one that stays put as the image scales,
+    // which is what makes the pan feel like moving a loupe over the fabric.
+    const originFromEvent = (slide, e) => {
+      const r = slide.getBoundingClientRect();
+      const clamp = (n) => Math.max(0, Math.min(100, n));
+      return clamp(((e.clientX - r.left) / r.width) * 100) + '% '
+           + clamp(((e.clientY - r.top) / r.height) * 100) + '%';
+    };
+
+    const slideImg = (slide) => slide && slide.querySelector('.pdp__gallery-img');
+
+    const zoomIn = (slide, e) => {
+      const el = slideImg(slide);
+      if (!el) return;
+      // 2x over a ~58vw column needs the 2048 source. srcset has to go or the
+      // browser re-picks the 1200w candidate and the detail stays mush. Flagged
+      // rather than compared against el.src: image_url emits a protocol-relative
+      // URL, so el.src (resolved, absolute) would never match it.
+      if (slide.dataset.zoomSrc && !el.dataset.zoomLoaded) {
+        el.dataset.zoomLoaded = '1';
+        el.srcset = '';
+        el.src = slide.dataset.zoomSrc;
+      }
+      el.style.transformOrigin = originFromEvent(slide, e);
+      slide.classList.add('is-zoomed');
+      zoomedSlide = slide;
+      if (cursor) cursor.textContent = '−';
+    };
+
+    const zoomOut = () => {
+      if (!zoomedSlide) return;
+      const el = slideImg(zoomedSlide);
+      // The hi-res src stays put — it is already downloaded, and swapping back
+      // would flash on every re-zoom.
+      if (el) el.style.transformOrigin = '';
+      zoomedSlide.classList.remove('is-zoomed');
+      zoomedSlide = null;
+      if (cursor) cursor.textContent = '+';
+    };
+
+    // Cursor-following +/- over the gallery, and the pan while zoomed
+    // (desktop, fine pointers only)
+    if (window.matchMedia('(min-width: 769px) and (pointer: fine)').matches) {
       gallery.addEventListener('pointermove', (e) => {
-        const r = gallery.getBoundingClientRect();
-        cursor.style.transform = 'translate(' + (e.clientX - r.left) + 'px,' + (e.clientY - r.top) + 'px)';
+        if (cursor) {
+          const r = gallery.getBoundingClientRect();
+          cursor.style.transform = 'translate(' + (e.clientX - r.left) + 'px,' + (e.clientY - r.top) + 'px)';
+        }
+        if (zoomedSlide) {
+          const el = slideImg(zoomedSlide);
+          if (el) el.style.transformOrigin = originFromEvent(zoomedSlide, e);
+        }
+      }, { passive: true });
+
+      // Fetch the 2048 ahead of the click so the first zoom doesn't stutter.
+      gallery.addEventListener('pointerover', (e) => {
+        const slide = e.target.closest('[data-gallery-slide]');
+        if (!slide || slide.dataset.zoomPreloaded || !slide.dataset.zoomSrc) return;
+        slide.dataset.zoomPreloaded = '1';
+        new Image().src = slide.dataset.zoomSrc;
       }, { passive: true });
     }
 
+    /* ---- Touch: the fullscreen viewer, since there is no hover to pan with ---- */
     const open = (slide) => {
       if (!slide || !img) return;
       img.src = slide.dataset.zoomSrc || '';
@@ -1089,12 +1524,39 @@
       const slide = e.target.closest('[data-gallery-slide]');
       if (!slide) return;
       if (Math.abs(e.clientX - downX) > 10 || Math.abs(e.clientY - downY) > 10) return;
-      open(slide);
+      if (!isDesktop()) { open(slide); return; }
+      if (zoomedSlide === slide) { zoomOut(); return; }
+      zoomOut();
+      zoomIn(slide, e);
     });
 
+    // Anything else on the page that wants the full-screen viewer: the fabric
+    // swatches in the Fabric tab today. Same contract as a gallery slide —
+    // data-zoom-src and data-zoom-alt — so nothing new has to be taught here.
+    //
+    // Straight to open(), never the isDesktop() fork above: that branch runs
+    // the in-place magnifier, which needs a .pdp__gallery-img child and
+    // gallery-relative pointer geometry a fabric swatch does not have.
+    //
+    // Bound on document, so it also covers nodes moved between panels after
+    // load. It does inherit this function's early return — no gallery on the
+    // page means no lightbox markup either, so there is nothing to open.
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-zoom-open]');
+      if (!trigger) return;
+      e.preventDefault();
+      open(trigger);
+    });
+
+    // Release the zoom rather than let a magnified frame snap past.
+    gallery.addEventListener('pointerleave', zoomOut);
+    if (main) main.addEventListener('scroll', zoomOut, { passive: true });
+
+    // Lightbox-internal zoom. It must not touch the gallery's cursor chip \u2014
+    // that belongs to the in-place zoom now, and a hybrid device using the
+    // lightbox would otherwise be left showing a stale minus over the gallery.
     const setZoomed = (on) => {
       zoom.classList.toggle('is-zoomed', on);
-      if (cursor) cursor.textContent = on ? '\u2212' : '+';
       if (on && stage) {
         // Centre the pan on the point that was zoomed into
         stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
@@ -1112,18 +1574,17 @@
 
     zoom.querySelectorAll('[data-zoom-close]').forEach(b => b.addEventListener('click', close));
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && zoom.classList.contains('is-active')) close();
+      if (e.key !== 'Escape') return;
+      if (zoom.classList.contains('is-active')) close();
+      zoomOut();
     });
   };
 
-  /* --- PDP Gallery (swipe + dots + arrows) --- */
+  /* --- PDP Gallery (swipe/scroll + progress bar) --- */
   const initPdpGallery = () => {
     const gallery = document.querySelector('[data-product-gallery]');
     if (!gallery) return;
     const main = gallery.querySelector('[data-gallery-main]');
-    const dots = gallery.querySelectorAll('[data-gallery-dot]');
-    const prev = gallery.querySelector('[data-gallery-prev]');
-    const next = gallery.querySelector('[data-gallery-next]');
     const slides = gallery.querySelectorAll('[data-gallery-slide]');
     const fill = gallery.querySelector('[data-gallery-progress]');
     if (!main || !slides.length) return;
@@ -1134,12 +1595,16 @@
     // Desktop stacks the images and scrolls vertically; mobile swipes horizontally.
     const isVertical = () => window.matchMedia('(min-width: 769px)').matches;
 
-    // Desktop shows discrete dots, mobile a continuous bar. Both are updated
-    // unconditionally — writing to a display:none node costs nothing.
-    const syncUI = (idx) => {
-      dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
-      if (fill) fill.style.transform = 'scaleX(' + ((idx + 1) / total) + ')';
+    // One bar, two orientations. The CSS swaps which axis is 2px and where the
+    // fill is anchored; this has to swap the matching axis or the bar sits at 0
+    // forever — scaleX on a 2px-wide track changes nothing visible.
+    const setFill = (frac) => {
+      if (!fill) return;
+      const clamped = Math.min(1, Math.max(0, frac));
+      fill.style.transform = (isVertical() ? 'scaleY(' : 'scaleX(') + clamped + ')';
     };
+
+    const syncUI = (idx) => setFill((idx + 1) / total);
 
     const goTo = (idx) => {
       current = Math.max(0, Math.min(total - 1, idx));
@@ -1151,24 +1616,26 @@
       syncUI(current);
     };
 
-    dots.forEach(dot => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.galleryDot))));
-    if (prev) prev.addEventListener('click', () => goTo(current - 1));
-    if (next) next.addEventListener('click', () => goTo(current + 1));
-
-    // The bar tracks the swipe continuously, so it gets its own undebounced
-    // listener rather than waiting on the 100ms dot settle.
+    // The bar tracks the gesture continuously, so it gets its own undebounced
+    // listener rather than waiting on the 100ms settle below.
     if (fill) {
       main.addEventListener('scroll', () => {
-        if (isVertical()) return;
-        const frac = (main.scrollLeft + main.offsetWidth) / main.scrollWidth;
-        fill.style.transform = 'scaleX(' + Math.min(1, Math.max(0, frac)) + ')';
+        setFill(isVertical()
+          ? (main.scrollTop + main.offsetHeight) / main.scrollHeight
+          : (main.scrollLeft + main.offsetWidth) / main.scrollWidth);
       }, { passive: true });
     }
+
+    // Crossing the breakpoint leaves the fill scaled on the wrong axis, which
+    // reads as a bar stuck empty. Re-assert it against the new orientation.
+    window.matchMedia('(min-width: 769px)').addEventListener('change', () => syncUI(current));
 
     // Reflect position 1 of n at load rather than an empty bar.
     syncUI(0);
 
-    // Sync dots on scroll
+    // Track the settled index. The continuous handler above already paints the
+    // bar mid-gesture; this is what keeps `current` honest for goTo and for the
+    // breakpoint change, and snaps the fill onto an exact 1/n at rest.
     let scrollTimeout;
     main.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
@@ -1268,6 +1735,55 @@
     mobileBtn.addEventListener('click', () => form.requestSubmit());
   };
 
+  /* --- SmartSize: park the injected size links in the Sizing tab ---
+     SIZE GUIDE and FIND MY SIZE come from SmartSize APP EMBEDS, not from the
+     section's app block. An embed is injected and positioned by the app's own
+     JS, so Liquid cannot place it — moving the {% render block %} slot moved
+     the block and left the embeds where they were. They are reparented here
+     instead, once they exist, into the Sizing panel where the fit information
+     belongs. The section app block already renders into .pdp__size-guide-slot
+     inside that panel and needs no move.
+
+     Buttons only. The app also appends its size-chart modal to <body>; that has
+     to stay there, because a modal inside a display:none panel cannot open.
+
+     Each node is moved once and stamped. If the app relocates one back we let
+     it be rather than trading moves with it for the life of the page. */
+  const initSmartSizePlacement = () => {
+    const panel = document.querySelector('[data-tab-panel="sizing"]');
+    if (!panel) return;
+
+    // Both buttons arrive inside one wrapper the app injects into
+    // .pdp__details-inner, so this is a single move, not a hunt:
+    //   #smartrecom-triggers
+    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE GUIDE
+    //     #smartrecom-inline-button-injected    > #smartrecom-button             FIND MY SIZE
+    // The app's size-chart modal is appended to <body> separately and is left
+    // there — a modal inside a display:none panel could not open.
+    let moves = 0;
+
+    const park = () => {
+      const triggers = document.getElementById('smartrecom-triggers');
+      if (!triggers || panel.contains(triggers)) return;
+      // If the app insists on putting it back, let it have the last word rather
+      // than trading moves for the life of the page.
+      if (moves >= 5) return;
+      moves += 1;
+      // prepend, not appendChild: the buttons lead the panel and the sizing
+      // copy sits under them. Someone opening Sizing is picking a size, not
+      // reading.
+      panel.prepend(triggers);
+    };
+
+    park();
+    // The wrapper lands after this file runs, so watch for it.
+    const mo = new MutationObserver(park);
+    mo.observe(document.body, { childList: true, subtree: true });
+    // Not left running for the life of the page — it is in within seconds or
+    // it is not coming.
+    setTimeout(() => mo.disconnect(), 15000);
+  };
+
   /* --- Initialize Everything (each isolated so one failure can't break others) --- */
   const init = () => {
     [
@@ -1275,7 +1791,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initFreContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

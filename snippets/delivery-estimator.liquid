@@ -1,61 +1,108 @@
 {%- comment -%}
-  PDP — Zip code delivery date estimator.
+  PDP — Country delivery date estimator.
 
-  Renders the zip input plus a Standard and Express estimated delivery date.
+  Renders a country picker plus a Standard and Express estimated delivery date.
 
   NOTE ON DATA SOURCE
-  A theme cannot read Shopify shipping settings at runtime. The only storefront
-  endpoint for live rates is /cart/shipping_rates.json, which requires a
-  non-empty cart — a PDP visitor usually has none. So the transit windows below
-  are theme settings, seeded from the store's real delivery profile
-  (USA DOMESTIC: Standard, Standard free, Express). Keep them in sync with
-  Settings → Shipping and delivery, or move to an app if live rates are needed.
+  A theme cannot read Shopify shipping settings at runtime: Liquid has no access
+  to delivery profiles, and the one storefront endpoint for live rates,
+  /cart/shipping_rates.json, requires a non-empty cart a PDP visitor does not
+  have. The rates table below is therefore baked, not live — generated from the
+  Admin API (deliveryProfiles → locationGroupZones → methodDefinitions) and
+  pasted into the `delivery_rates` setting. Regenerate it whenever the zones or
+  prices change in Settings → Shipping and delivery.
+
+  Transit days are NOT readable from the Admin API — DeliveryRateDefinition
+  carries a price and no duration — so those columns mirror the transit times
+  configured against each rate by hand.
+
+  The picker lists localization.available_countries, i.e. exactly the countries
+  the storefront actually sells to, so it can never drift from the markets. A
+  country the rates table does not cover renders as unavailable rather than
+  inventing a date for a lane that cannot be quoted.
 
   Accepts:
-    standard_min / standard_max  — business days
-    express_min  / express_max   — business days
-    cutoff_hour                  — 0-23, store local time
-    free_threshold               — money amount for complimentary standard
+    delivery_rates   — one line per country: CODE|std_lo|std_hi|exp_lo|exp_hi|std_price|exp_price
+                       "-" disables a tier. A ROW line, if present, catches
+                       everything not named explicitly.
+    standard_label / express_label — service names, e.g. Foreign Air
+    cutoff_hour      — 0-23, read in delivery_timezone
+    delivery_timezone — IANA zone the warehouse keeps, e.g. America/Los_Angeles
 {%- endcomment -%}
+
+{%- assign here = localization.country.iso_code | default: 'US' -%}
 
 <div
   class="dest"
   data-delivery-estimator
-  data-standard-min="{{ standard_min | default: 3 }}"
-  data-standard-max="{{ standard_max | default: 5 }}"
-  data-express-min="{{ express_min | default: 1 }}"
-  data-express-max="{{ express_max | default: 2 }}"
-  data-cutoff-hour="{{ cutoff_hour | default: 14 }}"
-  data-country="{{ localization.country.iso_code | default: 'US' }}"
+  data-cutoff-hour="{{ cutoff_hour | default: 13 }}"
+  data-timezone="{{ delivery_timezone | default: 'America/Los_Angeles' }}"
+  data-country="{{ here }}"
 >
-  <p class="dest__label">
-    <span class="dest__pulse" aria-hidden="true"></span>
-    Delivery time
-  </p>
+  {%- comment -%}
+    Parsed in JS rather than emitted as Liquid-built JSON: prices are free text
+    ("Free over $150"), and hand-rolling JSON around arbitrary strings in Liquid
+    is how quoting bugs get shipped. type="text/plain" is inert markup.
+  {%- endcomment -%}
+  <script type="text/plain" data-delivery-rates>{{ delivery_rates | default: 'US|3|5|1|2|$10|$20' | escape }}</script>
 
+  {%- comment -%}
+    Picker first, title under it. The country is the input the whole panel turns
+    on, and it matches the Returns tab, which already leads with its picker.
+  {%- endcomment -%}
   <div class="dest__entry">
-    <label class="dest__hint" for="dest-zip">Enter your zip code here to estimate delivery date</label>
+    <label class="dest__hint" for="dest-country">Select your country</label>
     <div class="dest__row">
-      <input
-        type="text"
-        id="dest-zip"
-        class="dest__input"
-        inputmode="numeric"
-        autocomplete="postal-code"
-        maxlength="10"
-        placeholder="00000"
-        data-dest-zip
-      >
-      <button type="button" class="dest__apply" data-dest-apply>Apply</button>
+      <select id="dest-country" class="dest__select" data-dest-country>
+        {%- if localization.available_countries.size > 0 -%}
+          {%- for country in localization.available_countries -%}
+            <option value="{{ country.iso_code }}" {% if country.iso_code == here %}selected{% endif %}>{{ country.name }}</option>
+          {%- endfor -%}
+        {%- else -%}
+          {%- comment -%} Markets not configured: at least quote where we stand. {%- endcomment -%}
+          <option value="{{ here }}" selected>{{ localization.country.name | default: 'United States' }}</option>
+        {%- endif -%}
+      </select>
     </div>
   </div>
 
+  <p class="dest__label">
+    <span class="dest__pulse" aria-hidden="true"></span>
+    Delivery date estimator
+  </p>
+
+  {%- comment -%}
+    Two rows, spec-table shape: service name and price on the left, the resolved
+    dates on the right. The business-day counts are deliberately absent — the
+    dates already say when it lands, and "3–5 business days" next to
+    "Aug 6 – Aug 10" is the same fact twice in a weaker unit. The day counts
+    still drive the arithmetic, they just aren't restated as copy.
+  {%- endcomment -%}
   <div class="dest__results" data-dest-results hidden>
-    <p class="dest__method">Standard delivery — Complimentary</p>
-    <p class="dest__date">Estimated delivery date: from <span data-dest-standard></span></p>
-    <p class="dest__method">Express delivery (if available)</p>
-    <p class="dest__date">Estimated delivery date: from <span data-dest-express></span></p>
+    <div class="dest__tier" data-dest-row="standard" hidden>
+      <span class="dest__tier-label">{{ standard_label | default: 'Foreign Air' }}</span>
+      <span class="dest__tier-price" data-dest-standard-price></span>
+      <span class="dest__tier-date" data-dest-standard></span>
+    </div>
+    <div class="dest__tier" data-dest-row="express" hidden>
+      <span class="dest__tier-label">{{ express_label | default: 'Express Air' }}</span>
+      <span class="dest__tier-price" data-dest-express-price></span>
+      <span class="dest__tier-date" data-dest-express></span>
+    </div>
   </div>
 
-  <p class="dest__error" data-dest-error hidden>Enter a valid zip code to see delivery dates.</p>
+  {%- comment -%}
+    Shown when the selected country has no line in the rates table. Saying so is
+    the honest outcome — a country with no zone cannot be quoted here and cannot
+    check out either, so inventing a date would only move the failure later.
+
+    Worded as work in progress rather than a flat no: the previous "We don't
+    ship here yet." closed the door, when the country is in fact a route we
+    want to hear demand for. contact_url is never passed by the caller, so it
+    resolves to the Contact Us page via the fallback.
+  {%- endcomment -%}
+  <p class="dest__error" data-dest-error hidden>
+    Our team is working on providing seamless shipping to your location.
+    <a href="{{ contact_url | default: '/pages/contact' }}">Ask us about it</a>.
+  </p>
 </div>

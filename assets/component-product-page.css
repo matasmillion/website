@@ -76,44 +76,39 @@
   }
 }
 
-/* Gallery rail — desktop only: tiny dot column bottom-right, heart beneath.
-   Mobile uses the progress bar instead, so the whole rail is hidden there. */
+/* Desktop click-to-zoom: the image magnifies inside its own frame and pans with
+   the pointer. The page never leaves — no lightbox, nothing to exit out of.
+   overflow:hidden is what stops the scaled image bleeding into the neighbouring
+   slides of the scroll-snap column. */
+.pdp__gallery-slide { overflow: hidden; }
+
+@media (min-width: 769px) {
+  /* Only `transform` is transitioned. transform-origin is rewritten on every
+     pointermove and has to land instantly, or the pan lags the cursor. */
+  .pdp__gallery-img { transition: transform var(--duration-base) var(--ease-out); }
+  .pdp__gallery-slide.is-zoomed .pdp__gallery-img { transform: scale(2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__gallery-img { transition: none; }
+}
+
+/* Gallery rail — desktop only: now just the heart, bottom-right. The dot column
+   that used to sit above it was replaced by the vertical progress bar below. */
 .pdp__gallery-rail { display: none; }
 
 @media (min-width: 769px) {
   .pdp__gallery-rail {
     position: absolute;
-    right: 1.25rem;
-    bottom: 1.25rem;
+    /* Clear of the progress bar's 2px at the right edge — the heart reads as a
+       control on the image, not as the bar's endpoint. */
+    right: 1.75rem;
+    bottom: 1.5rem;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.9rem;
   }
-}
-
-/* Flex doesn't skip a level — the dot wrapper needs its own column flow. */
-.pdp__gallery-dots {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.pdp__gallery-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(45,44,47,0.25);
-  cursor: pointer;
-  padding: 0;
-  transition: background var(--duration-fast) var(--ease-out);
-}
-
-.pdp__gallery-dot.is-active {
-  background: rgba(45,44,47,0.85);
 }
 
 /* Shopify product tag, bottom-left (desktop) */
@@ -135,7 +130,8 @@
   .pdp__gallery-badge { display: block; }
 }
 
-/* Mobile progress bar — flat, flush to the image's bottom edge */
+/* Progress bar — the single image-count affordance at both breakpoints.
+   Mobile: horizontal, flush to the image's bottom edge, filling left to right. */
 .pdp__gallery-progress {
   position: absolute;
   left: 0;
@@ -156,38 +152,32 @@
   will-change: transform;
 }
 
+/* Desktop: the same bar stood on end — full height, flush to the image's right
+   edge, mirroring the mobile bar's full bleed along the bottom edge. The fill
+   climbs toward the top of the screen as the column scrolls.
+
+   No track here, unlike mobile. A 12% hairline running the whole boundary put a
+   permanent third colour between image and details and read as a scrollbar
+   gutter. Only the fill is painted, so the seam stays clean and the black bar
+   appears to grow out of the bottom corner and retract back into it. */
 @media (min-width: 769px) {
-  .pdp__gallery-progress { display: none; }
-}
+  .pdp__gallery-progress {
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    /* top+bottom give the height; an explicit `height` would fight them. */
+    height: auto;
+    background: transparent;
+  }
 
-/* Gallery nav arrows */
-.pdp__gallery-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 1rem;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.pdp__gallery:hover .pdp__gallery-nav {
-  opacity: 0.5;
-}
-
-.pdp__gallery-nav:hover {
-  opacity: 1 !important;
-}
-
-.pdp__gallery-nav--prev { left: 0; }
-.pdp__gallery-nav--next { right: 0; }
-
-/* Desktop navigates by scrolling, so the arrows are dead weight */
-@media (min-width: 769px) {
-  .pdp__gallery-nav { display: none; }
+  .pdp__gallery-progress-fill {
+    /* Anchor at the bottom, or the fill would grow downward from the top. The
+       axis is swapped in JS to match — scaleX on a 2px-wide track is invisible. */
+    transform-origin: bottom;
+    transform: scaleY(0);
+  }
 }
 
 /* Wishlist — flows inside the rail, so no absolute positioning of its own */
@@ -197,7 +187,8 @@
   cursor: pointer;
   padding: 0;
   color: var(--color-primary);
-  opacity: 0.4;
+  /* A little more presence than the old 20px heart had, to hold its own at 14px */
+  opacity: 0.5;
   transition: opacity var(--duration-fast) var(--ease-out);
   display: block;
 }
@@ -227,13 +218,40 @@
     transform: translateY(0);
     transition: transform var(--duration-base) var(--ease-out);
   }
+
+  /* Slides out of frame at FOREIGN ENGINEERING rather than parking over it.
+     Transform, never the hidden attribute — the band has to animate. */
+  .pdp-band.is-hidden {
+    transform: translateY(100%);
+  }
 }
 
+/* min-height, not height: the row has to grow for the collection eyebrow.
+   global.js remeasures the band and rewrites --pdp-band-h, so the gallery and
+   scroll padding follow whatever height this ends up at. */
 .pdp-band__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 46px;
+  min-height: 46px;
+}
+
+/* Holds the eyebrow above the title so the heart stays flush right against the
+   pair rather than against the title alone. */
+.pdp-band__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The mobile twin of .pdp__collection, which carries the desktop eyebrow */
+.pdp-band__collection {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #A4A4A4;
+  margin: 0 0 2px;
 }
 
 .pdp-band__title {
@@ -243,7 +261,6 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #2D2C2F;
-  flex: 1;
   margin: 0;
 }
 
@@ -310,22 +327,57 @@
   .pdp__details {
     /* Clear the fixed chrome so details aren't hidden, while the left image
        stays full-frame behind the transparent header. */
-    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem 2.5rem;
-    align-items: flex-start;
+    /* Vertical padding is symmetric, which it was not while the column stacked
+       from the top. Centring inside a 140px/40px box put the block 100px below
+       the viewport's centre line — the top value still clears the fixed chrome
+       for the case where the panel outgrows the screen and stacks from the top
+       instead, so it is matched rather than removed. */
+    padding: calc(var(--chrome-h, 116px) + 1.5rem) 2.5rem;
+    /* Centred on both axes against the full-height image beside it, so the
+       column reads as a block sitting in the space rather than as copy stacked
+       from the top with the rest left empty.
+
+       min-height, not height: when the panel is taller than the viewport the
+       container grows with it, so centring only ever takes up slack and can
+       never push content off the top edge. */
+    align-items: center;
+    justify-content: center;
     min-height: 100vh;
   }
 }
 
+/* ----- Vertical rhythm -----
+   One scale for the whole column, so the spacing says something instead of
+   being set per element. Every gap here used to land near 1.25rem, which read
+   as an evenly spaced list: nothing grouped, so the eye had to read all of it
+   to find the size row.
+
+   The ratio is the point. Space between groups is roughly 2.5x the space
+   inside one, which is what separates identity / colour / size / commit /
+   detail into blocks you can skip between. Widen or tighten the column by
+   moving these four values, not the rules below. */
 .pdp__details-inner {
+  --pdp-tight: 0.625rem;  /* label to the thing it labels */
+  --pdp-item: 1rem;       /* between items that belong together */
+  --pdp-block: 1.5rem;    /* a heading to its body */
+  --pdp-group: 2rem;      /* between groups — the gap that does the grouping */
+
   width: 100%;
   max-width: 100%;
   text-align: center;
 }
 
+/* Centred at every breakpoint — desktop matches mobile rather than switching to
+   flush left. Desktop gets the wider measure and the more generous scale: there
+   is room beside a full-height image that a phone does not have. */
 @media (min-width: 769px) {
   .pdp__details-inner {
-    max-width: 340px;
-    text-align: left;
+    --pdp-tight: 0.75rem;
+    --pdp-item: 1.25rem;
+    --pdp-block: 2rem;
+    --pdp-group: 2.75rem;
+
+    max-width: 400px;
   }
 }
 
@@ -346,22 +398,24 @@
 .pdp__collection {
   font-size: 9.9px;
   font-weight: var(--font-weight-medium);
-  letter-spacing: 0.06em;
+  /* Wider tracking than the name below it: at this size the extra air is what
+     makes it read as a label rather than as shrunken copy. */
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #A4A4A4;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-tight);
 }
 
 /* Title — 15.9px desktop */
 .pdp__title {
   font-family: var(--font-body);
-  font-size: 15.9px;
+  font-size: 19px;
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
-  line-height: 1.3;
-  letter-spacing: 0.06em;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
   color: #2D2C2F;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-group);
 }
 
 /* Description — hidden on mobile */
@@ -383,27 +437,13 @@
 
 /* ===== COLOR SWATCHES ===== */
 .pdp__swatches {
-  margin-bottom: 1.25rem;
-}
-
-.pdp__swatch-label {
-  font-size: 11.7px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.06em;
-  color: #2D2C2F;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--pdp-group);
 }
 
 .pdp__swatch-list {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.625rem;
   justify-content: center;
-}
-
-@media (min-width: 769px) {
-  .pdp__swatch-list {
-    justify-content: flex-start;
-  }
 }
 
 /* Box swatches — square, with a rule under the selected colour */
@@ -435,17 +475,8 @@
 
 /* ===== SIZE SELECTOR ===== */
 .pdp__sizes {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--pdp-group);
 }
-
-.pdp__size-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
 
 .pdp__size-label {
   font-size: 8.4px;
@@ -467,15 +498,9 @@
 
 .pdp__size-buttons {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-@media (min-width: 769px) {
-  .pdp__size-buttons {
-    justify-content: flex-start;
-  }
 }
 
 .pdp__size-btn {
@@ -528,8 +553,8 @@
     cursor: pointer;
     transition: background var(--duration-base) var(--ease-out),
                 border-color var(--duration-base) var(--ease-out);
-    margin-bottom: 1rem;
-    height: 50px;
+    margin-bottom: var(--pdp-item);
+    height: 56px;
   }
 
   .pdp__add-btn:hover {
@@ -572,27 +597,21 @@
 
 /* ===== TABS ===== */
 .pdp__tabs {
-  margin-top: 1.5rem;
+  margin-top: var(--pdp-group);
   border-top: 1px solid var(--color-border);
-  padding-top: 1.25rem;
+  padding-top: var(--pdp-group);
 }
 
 .pdp__tab-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--pdp-block);
   justify-content: center;
 }
 
 @media (min-width: 769px) {
   .pdp__tab-list { gap: 1.25rem; }
-}
-
-@media (min-width: 769px) {
-  .pdp__tab-list {
-    justify-content: flex-start;
-  }
 }
 
 .pdp__tab {
@@ -633,12 +652,6 @@
   text-align: center;
 }
 
-@media (min-width: 769px) {
-  .pdp__tab-panel {
-    text-align: left;
-  }
-}
-
 .pdp__tab-panel.is-active {
   display: block;
   animation: pdp-panel-in var(--duration-base) var(--ease-out) both;
@@ -658,22 +671,9 @@
   margin-top: 1rem;
 }
 
-.pdp__tab-collection {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: #A4A4A4;
-  margin-bottom: 0.25rem;
-}
-
-.pdp__tab-subtitle {
-  font-size: 12px;
-  font-weight: var(--font-weight-medium);
-  margin-bottom: 1rem;
-}
-
 .pdp__tab-description {
-  font-size: 11px;
-  line-height: 1.7;
+  font-size: 12px;
+  line-height: 1.85;
   color: #2D2C2F;
   opacity: 0.7;
   margin-bottom: 1rem;
@@ -693,6 +693,137 @@
 }
 
 /* Used on both <a> and <button>, so the button chrome is reset here. */
+/* ----- Returns tab -----
+   Centred at every breakpoint, unlike the other panels. It is a short decision
+   block rather than running copy, so a centred column reads as deliberate and
+   keeps the three outcomes on a shared axis for comparison. */
+.pdp__tab-panel--returns {
+  text-align: center;
+  max-width: 22rem;
+  margin: 0 auto;
+}
+
+/* Air under the country picker. .dest__entry is shared with the Shipping
+   estimator, which does not want this, so the rule is scoped to the Returns
+   panel. Uses the column's own spacing scale rather than a new number.
+
+   The picker and the answer it produces were a hair apart, which read as one
+   block instead of question-then-answer. */
+.pdp__tab-panel--returns .dest__entry {
+  margin-bottom: var(--pdp-block);
+}
+
+/* The reassurance, on its own row. Tighter to the line above than to whatever
+   follows, so the two read as one thought in two beats. */
+.pdp__returns-note {
+  font-size: 11.5px;
+  line-height: 1.6;
+  font-weight: var(--font-weight-medium);
+  color: #2D2C2F;
+  margin: 0 0 1.25rem;
+}
+
+.pdp__returns-intro {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: #2D2C2F;
+  margin: 0 0 1.25rem;
+}
+
+/* Must sit after .pdp__returns-intro — same specificity, so source order
+   decides. Grey because this is the absence of an offer rather than an offer;
+   the terms table that replaces it is what earns ink. */
+.pdp__returns-intro--muted {
+  color: #A4A4A4;
+  margin-bottom: 0.5rem;
+}
+
+/* Set once here so the label, the value and the pipe-less plain rows all take
+   the same quiet tone — the one .pdp__tab-link--quiet already uses. */
+.pdp__returns-terms,
+.pdp__spec-list {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+  color: #A4A4A4;
+}
+
+/* Spec-sheet rows: label left, cost right, so the column of values can be
+   compared down one axis. The block stays centred; the rows justify inside it. */
+.pdp__returns-term,
+.pdp__spec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 0;
+}
+
+.pdp__returns-term--plain { display: block; }
+
+/* For values that are sentences rather than figures. Side by side, a long
+   method string wraps into a ragged block jammed against its label; stacked, it
+   reads as a short paragraph the label introduces. */
+.pdp__spec-row--stack {
+  display: block;
+}
+
+.pdp__spec-row--stack .pdp__spec-value {
+  display: block;
+  margin-top: 0.35rem;
+  white-space: normal;
+}
+
+.pdp__returns-term-label,
+.pdp__spec-label {
+  font-size: 11.2px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.pdp__returns-term-value,
+.pdp__spec-value {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* Certification marks, not text. Height-capped so a tall logo cannot set the
+   row height, and wrapping so three marks do not overflow a narrow column. */
+.pdp__spec-value--marks {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  white-space: normal;
+}
+
+.pdp__spec-value--marks img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+/* Stacked, not inline — .pdp__tab-link carries a right margin for the
+   side-by-side case, which would throw the centring off by half of it. */
+.pdp__returns-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pdp__returns-actions .pdp__tab-link { margin: 0; }
+
 .pdp__tab-link {
   font-size: 11px;
   text-decoration: underline;
@@ -710,6 +841,15 @@
 }
 
 .pdp__tab-link:hover { opacity: 0.7; }
+
+/* Must sit after .pdp__tab-link — same specificity, so source order decides.
+   Ink, not grey: at #A4A4A4 the policy link read as disabled text rather than
+   as a link, underline notwithstanding. The lighter weight is what keeps it
+   secondary to "Start a return" above it. */
+.pdp__tab-link--quiet {
+  font-weight: var(--font-weight-normal);
+  color: #2D2C2F;
+}
 
 /* Card text in the PDP's product rows */
 .ctl .product-card__title,
@@ -742,10 +882,6 @@
   text-transform: uppercase;
   color: #2D2C2F;
   margin: 1.5rem 0 0.75rem;
-}
-
-@media (min-width: 769px) {
-  .dest__label { justify-content: flex-start; }
 }
 
 /* Live-feeling pulse next to delivery messaging */
@@ -799,6 +935,32 @@
 .dest__input:focus { outline: none; }
 .dest__input::placeholder { color: #C9C9C9; }
 
+/* Same line as the input it replaced, with the native chrome stripped and a
+   caret drawn in — a full-width UA select would break the rule underneath. */
+.dest__select {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: #2D2C2F;
+  padding: 0 1.25rem 0 0;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, #2D2C2F 50%),
+                    linear-gradient(135deg, #2D2C2F 50%, transparent 50%);
+  background-position: calc(100% - 6px) center, calc(100% - 1px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.dest__select:focus { outline: none; }
+.dest__select:focus-visible { outline: 1px solid #2D2C2F; outline-offset: 3px; }
+
 .dest__apply {
   background: none;
   border: none;
@@ -817,15 +979,52 @@
 
 .dest__results { margin-top: 1.25rem; }
 
-.dest__method {
-  font-size: 11.5px;
-  color: #2D2C2F;
-  margin-top: 0.75rem;
+/* What the zip gate exists to reveal — ink, not muted, so it lands as the
+   answer rather than as more fine print. Tier and window left, dates right,
+   matching the returns table's spec-row language. */
+.dest__tier {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.dest__date {
-  font-size: 11.5px;
+.dest__tier:first-child { border-top: 1px solid var(--color-border); }
+
+/* Takes the slack so price and date anchor right and their columns line up
+   across both rows. It is the one part that may shrink — the service names are
+   short, the two values beside them are not negotiable. */
+.dest__tier-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 10.5px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #A4A4A4;
+}
+
+/* Sits a step below the date in weight: the shopper is here for when it lands,
+   the price is what that costs. */
+.dest__tier-price {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #6E6D71;
+  white-space: nowrap;
+}
+
+.dest__tier-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  color: #2D2C2F;
+  white-space: nowrap;
 }
 
 .dest__error {
@@ -843,12 +1042,19 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   color: #2D2C2F;
-  margin-bottom: 1rem;
+  margin-bottom: var(--pdp-item);
 }
 
-@media (min-width: 769px) {
-  .pdp__urgency { justify-content: flex-start; }
+/* The countdown and the arrival date. Pinned to the theme scale so <strong>
+   doesn't fall through to the browser default of 700. */
+.pdp__urgency strong {
+  font-weight: var(--font-weight-semibold);
+  color: #1A191C;
 }
+
+/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
+   rather than [hidden] — the display rule above outranks the attribute. */
+.pdp__urgency.is-superseded { display: none; }
 
 /* ===== Conversion: installments, low stock, back in stock ===== */
 
@@ -876,7 +1082,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #A8442A;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--pdp-tight);
 }
 
 /* ----- Back in stock -----
@@ -888,8 +1094,12 @@
 .fr-bis,
 .klaviyo-bis-trigger {
   display: block !important;
+  /* width:100% plus horizontal padding overflows its container by the padding
+     unless the box model is pinned — that is what pushed the button off the
+     right edge on mobile. Klaviyo's own reset cannot be relied on here. */
+  box-sizing: border-box !important;
   width: 100% !important;
-  max-width: none !important;
+  max-width: 100% !important;
   min-width: 0 !important;
   height: 50px !important;
   margin: 0 0 1rem !important;
@@ -917,51 +1127,136 @@
   border-color: #000000 !important;
 }
 
-/* ----- Size guide (SmartSize) -----
-   Targeted on the app's own hooks (smartrecom-*, not the smartsize handle) and
-   left UNSCOPED: the block ships display:none and is revealed by app JS, which
-   may relocate the button out of our slot, so descendant selectors are unsafe.
-   Display is deliberately not overridden — that is the app's to control. */
+/* ----- Size guide + fit quiz (SmartSize) -----
+   Verified against the injected DOM rather than guessed. The app puts both
+   triggers in one wrapper:
+
+     #smartrecom-triggers
+       #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger   SIZE GUIDE
+       #smartrecom-inline-button-injected    > #smartrecom-button              FIND MY SIZE
+
+   The previous list here named #smartrecom-sizechart-button,
+   .smartrecom-sizechart-btn-wrap, .smartrecom-sizechart-btn-link and
+   .smartrecom-sizechart-btn-button. None of those exist in the rendered page,
+   which is why only SIZE GUIDE ever picked up the theme's type — it was
+   carried by the one real selector in the set.
+
+   Scoped to #smartrecom-triggers so the app's modal, which it appends to
+   <body>, keeps its own styling. Display is deliberately not overridden —
+   that is the app's to control. */
 .pdp__size-guide-slot,
-#smartrecom-sizechart-button,
-.smartrecom-sizechart-btn-wrap {
+#smartrecom-triggers {
   text-align: center !important;
   justify-content: center !important;
   width: 100%;
 }
 
-#smartrecom-sizechart-trigger,
-.smartrecom-sizechart-btn-link,
-.smartrecom-sizechart-btn-button,
-.pdp__size-guide-slot a,
-.pdp__size-guide-slot button {
-  font-family: var(--font-body) !important;
-  font-size: 11.2px !important;
-  font-weight: var(--font-weight-medium) !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-  color: #A4A4A4 !important;
-  text-decoration: none !important;
-  background: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 0 !important;
-  margin: 0 auto !important;
-  box-shadow: none !important;
-  min-height: 0 !important;
-  height: auto !important;
-  line-height: 1.5 !important;
-  transition: color var(--duration-fast) var(--ease-out) !important;
+/* The pair sits together, centred. width:100% here — which is what this rule
+   used to carry — made each trigger claim an equal share of a flex row, which
+   threw SIZE CHART and FIND MY SIZE to opposite edges of the column with a
+   void between them. They size to their text now and the gap sets the spacing.
+   The wrapper's own display is left to the app, which toggles it. */
+#smartrecom-triggers {
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
-#smartrecom-sizechart-trigger:hover,
-.smartrecom-sizechart-btn-link:hover,
-.smartrecom-sizechart-btn-button:hover,
-.pdp__size-guide-slot a:hover,
-.pdp__size-guide-slot button:hover {
-  color: #2D2C2F !important;
+#smartrecom-triggers .smartrecom-container {
+  text-align: center !important;
+  width: auto;
+}
+
+/* Boxes, not text links. These are the two tools that answer "which size am I",
+   so they read as controls — same slate as add-to-cart, same 0.2em tracking.
+   Shared geometry here; the primary/secondary split is below.
+
+   Every declaration stays !important: these fight the app's own stylesheet, and
+   `display` stays absent because the app toggles it to reveal the buttons. */
+#smartrecom-triggers .smartrecom-trigger,
+.pdp__size-guide-slot a,
+.pdp__size-guide-slot button,
+.pdp__size-btn-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--font-body) !important;
+  font-size: 10.7px !important;
+  font-weight: var(--font-weight-medium) !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  border-radius: 0 !important;
+  padding: 0 1.25rem !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  transition: background var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out) !important;
+}
+
+/* SECONDARY — Size guide. Outlined: a reference table you consult, not the
+   path we want people on. */
+#smartrecom-triggers #smartrecom-sizechart-trigger,
+.pdp__size-guide-slot button,
+.pdp__size-btn-cta {
+  background: transparent !important;
+  color: #4A4E54 !important;
+  border: 1px solid #4A4E54 !important;
+}
+
+#smartrecom-triggers #smartrecom-sizechart-trigger:hover,
+.pdp__size-guide-slot button:hover,
+.pdp__size-btn-cta:hover {
+  background: #4A4E54 !important;
+  color: #FFFFFF !important;
   opacity: 1 !important;
 }
+
+/* PRIMARY — Find my size. Filled, matching .pdp__add-btn, because a fit quiz
+   that returns an answer beats a table the shopper has to interpret. The two
+   treatments are what say "these do different things". */
+#smartrecom-triggers #smartrecom-button,
+.pdp__size-guide-slot a,
+.pdp__size-btn-cta--primary {
+  background: #4A4E54 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #4A4E54 !important;
+}
+
+#smartrecom-triggers #smartrecom-button:hover,
+.pdp__size-guide-slot a:hover,
+.pdp__size-btn-cta--primary:hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+/* Theme-side twin of #smartrecom-triggers, for when the settings are filled in.
+   Primary first: Find my size leads in source order too, so it leads for a
+   screen reader and for keyboard tabbing, not just visually. */
+.pdp__size-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: var(--pdp-block);
+}
+
+/* The injected pair needs the same space beneath it as the theme-side twin. It
+   is prepended by initSmartSizePlacement, so it is the panel's first child. */
+#smartrecom-triggers {
+  margin-bottom: var(--pdp-block) !important;
+}
+
+/* No desktop alignment override any more. This used to flip the slot flush left
+   to match the buy column; the column is centred at every breakpoint now, so
+   the centred rules above are already right and a second set would only fight
+   them. */
 
 
 /* ===== Detail rows (Fabric / Colour / Packaging dropdowns) ===== */
@@ -1083,6 +1378,77 @@
   display: block;
   margin-top: 1rem;
   object-fit: cover;
+}
+
+/* Front and back of the cloth. auto-fit rather than a fixed 2-up: with only one
+   image set the single figure takes the full width instead of leaving a gap. */
+/* The cloth's name, above the swatch. Pitched between the collection eyebrow
+   and the product name: it is a brand object that recurs across styles, so it
+   carries more weight than a caption, but it must not compete with the product
+   title upstairs. */
+.pdp__fabric-name {
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+  margin-bottom: var(--pdp-item);
+}
+
+.pdp__fabric-shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: var(--pdp-block);
+}
+
+/* A <button>, not a <figure> — these open the lightbox, so they must be
+   reachable by keyboard and announce themselves. Button chrome reset here. */
+.pdp__fabric-shot {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: zoom-in;
+}
+
+/* Square crop so the two swatches read as a matched pair regardless of how
+   they were shot. */
+.pdp__fabric-shot img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+/* The only cue that these open. Without it the cursor is the whole affordance,
+   which is nothing at all on touch. */
+.pdp__fabric-shot:hover img { opacity: 0.85; }
+
+.pdp__fabric-shot:focus-visible {
+  outline: 1px solid #2D2C2F;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__fabric-shot img { transition: none; }
+}
+
+.pdp__fabric-caption {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #A4A4A4;
+  text-align: center;
 }
 
 /* ============================================
@@ -1241,7 +1607,9 @@
   gap: 0.5rem;
 }
 
-@media (min-width: 769px) {
+/* The lightbox is touch-only now — desktop zooms in place — so gate its
+   controls on the pointer, not the viewport width. */
+@media (pointer: coarse) {
   .pdp-zoom__ctrls { display: flex; }
 }
 
