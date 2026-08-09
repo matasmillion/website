@@ -385,24 +385,33 @@
 
 
       {%- comment -%}
-        Shop Promise is suppressed on the PDP — our own urgency line is the only
-        delivery date on the page. Shopify injects the box via
-        content_for_header, so Liquid cannot delete it; it can only be given a
-        predictable place to land and then hidden (see the display:none rules in
-        component-product-page.css, which cover both the sink and the element).
+        Shop Promise mounts here. Shopify injects it via content_for_header, so
+        Liquid cannot place it directly — but shop_promise_pdp.js looks for
+        .delivery-promise__promise-container first and mounts into it, and only
+        failing that hunts for a form[action*="/cart/add"] to inject itself into
+        structurally. Claiming the hook is what puts the box above our urgency
+        line rather than wherever the form's markup happens to allow.
 
-        The div stays because it is a sink, not a slot. Shopify's
-        shop_promise_pdp.js mounts into .delivery-promise__promise-container when
-        it finds one and otherwise hunts for a form[action*="/cart/add"] and
-        injects itself structurally into the buy column. Claiming the hook keeps
-        the injection somewhere known and inert instead of somewhere it can
-        disturb the form's markup.
-
-        Note the custom element is <delivery-promise-wc> — the shop-promise-banner
-        and [class*="shop-promise"] selectors that read plausibly match nothing at
-        all, which is how this box previously survived being "hidden".
+        It is restyled, not left as Shopify ships it: the grey pill and 14px type
+        are undone in component-product-page.css, which also explains how a
+        shadow root is reachable at all. The element is <delivery-promise-wc>;
+        the shop-promise-banner and [class*="shop-promise"] selectors that read
+        plausibly match nothing.
       {%- endcomment -%}
-      <div class="delivery-promise__promise-container" aria-hidden="true"></div>
+      <div class="delivery-promise__promise-container"></div>
+
+      {%- comment -%}
+        The escape hatch, for the day Shopify rebuilds the widget and the skin
+        stops landing. Hiding it here rather than deleting it is the only option
+        available — see the placement note above. With the box gone the urgency
+        line has nothing to stand down for, so it shows on every product.
+      {%- endcomment -%}
+      {%- if section.settings.hide_shop_promise -%}
+        <style>
+          delivery-promise-wc,
+          .delivery-promise__promise-container { display: none !important; }
+        </style>
+      {%- endif -%}
 
       {%- comment -%} Rolling urgency — same date engine as the estimator {% endcomment -%}
       <p class="pdp__urgency" data-delivery-urgency hidden>
@@ -844,6 +853,13 @@
       "type": "url",
       "id": "installments_url",
       "label": "Pay-in-4 'Learn more' link"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_shop_promise",
+      "label": "Hide Shopify's Shop Promise box",
+      "info": "Left unticked, Shop Promise shows restyled to match the theme, and our urgency countdown hides itself on products it covers so only one delivery date is on the page.",
+      "default": false
     },
     {
       "type": "header",

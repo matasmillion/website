@@ -995,17 +995,62 @@
   color: #1A191C;
 }
 
-/* Shop Promise is off the PDP for good — our urgency line is the page's only
-   delivery date, so it never stands down for anything.
+/* Shop Promise resolved its own delivery estimate, so ours stands down. Class
+   rather than [hidden] — the display rule above outranks the attribute. */
+.pdp__urgency.is-superseded { display: none; }
 
-   Shopify injects the box from content_for_header and it cannot be removed in
-   Liquid, so it is hidden here instead. Both selectors are needed: the sink div
-   in product-info.liquid, and the custom element itself for the case where
-   Shopify's script ignores the sink and injects into the buy column. !important
-   because the injected bundle ships its own styles. Hidden in CSS rather than
-   removed in JS so the box never paints a frame before it disappears. */
-delivery-promise-wc,
-.delivery-promise__promise-container { display: none !important; }
+/* ===== Shop Promise, wearing the theme's clothes =====
+
+   Shopify ships the box as <delivery-promise-wc>. Out of the box it is a grey
+   pill: rgba(0,0,0,0.04) fill, 8px corners, 14px type — none of which belongs
+   beside a buy column set in 11px.
+
+   Its internals live in a shadow root, so ordinary descendant selectors cannot
+   reach them. Two things do reach in, and both are used here:
+
+   1. Inherited properties. The widget's own boundary element runs `all: initial`
+      and then re-declares font-family, font-size, letter-spacing and color as
+      `inherit`, so whatever the host carries flows into every text node inside.
+   2. The --p-* design tokens the widget declares on :host. A normal declaration
+      in the document tree outranks the shadow tree's :host rule for the same
+      element, so setting them here simply wins — no !important needed.
+
+   Padding is the one thing tokens cannot do cleanly (--p-space-350 is also the
+   expanded zip form's row gap, and zeroing it there would cram the form), so
+   that single rule is injected into the shadow root from global.js. */
+delivery-promise-wc {
+  display: block;
+  margin-bottom: 1rem;
+
+  /* Inherited by every text node inside the shadow root. */
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #2D2C2F;
+
+  /* The pill itself. --p-surface-light-hover doubles as the loading skeleton's
+     fill, so clearing it also drops the grey slab that used to flash before the
+     estimate resolved. The row keeps its affordance without a hover tint: the
+     zip inside it is already rendered as a <u>. */
+  --p-surface-light-subdued: transparent;
+  --p-surface-light-hover: transparent;
+  --p-surface-light-active: transparent;
+  --p-border-radius-200: 0;
+
+  /* Type, pulled down from Shopify's 14/12 to the buy column's 11. */
+  --p-text-body-md-font-size: 11px;
+  --p-text-body-sm-font-size: 10.5px;
+  --p-color-text-secondary: #6E6D71;
+
+  /* The Shop mark stays — it is Shopify's, and the programme expects it to be
+     recognisable — but at 12px it sits on the text's baseline instead of
+     towering over an 11px line. */
+  --p-logo-height: 12px;
+}
+
+/* Alignment is not settable from here: the widget's rows are flex containers
+   whose align comes from --ui-* properties written inline by its own JS, and an
+   inline declaration outranks anything the document can say. It is handled in
+   the injected shadow stylesheet alongside the padding. */
 
 @media (min-width: 769px) {
   .pdp__urgency { justify-content: flex-start; }
