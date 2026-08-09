@@ -955,6 +955,17 @@
     return `${m}m`;
   };
 
+  // English, not toLocaleDateString: these names are folded into Shopify's own
+  // English sentence, and localising one word inside it reads worse than not
+  // localising at all. Shared with the weekday pass further down.
+  const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // The cutoff as a clock time a shopper can plan around: 13 -> "1pm".
+  const fmtHour = (h) => {
+    const hour = h % 12 === 0 ? 12 : h % 12;
+    return hour + (h < 12 ? 'am' : 'pm');
+  };
+
   const fmtDate = (d) =>
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
@@ -1080,22 +1091,36 @@
 
         // Always positive: the target rolls with the dispatch day, so passing
         // 1pm restarts the clock against tomorrow instead of stalling the line.
-        const left = minsToCutoff(zonedNow(tz), start, cutoff);
+        const nowZ = zonedNow(tz);
+        const left = minsToCutoff(nowZ, start, cutoff);
+
+        // A countdown only while the cutoff is TODAY. Once dispatch has rolled
+        // — past the cutoff, or a weekend, when the warehouse is not shipping
+        // at all — the digits stop being something to act on: "1d" tells a
+        // shopper nothing, and a 24-hour clock is not urgency. Name the
+        // deadline instead, and let the digits come back when the day arrives.
+        const sameDay = start.getDate() === nowZ.getDate()
+          && start.getMonth() === nowZ.getMonth()
+          && start.getFullYear() === nowZ.getFullYear();
+        const dWord = sameDay ? 'within' : 'by';
+        const dValue = sameDay
+          ? fmtCountdown(left)
+          : SHORT_DAYS[start.getDay()] + ' ' + fmtHour(cutoff);
         // The countdown and the arrival both render bold — they are the only
         // two values on the line a shopper actually acts on.
         const arrival = fmtRelative(by);
 
-        // Published for the Shop Promise line, which folds this value into its
-        // own sentence rather than printing a second one underneath. Set before
-        // either wording below is rendered, so the two can never disagree about
-        // the number, and announced so the fold happens on the same tick.
-        urgency.dataset.countdown = left > 0 ? fmtCountdown(left) : '';
-        document.dispatchEvent(new CustomEvent('fr:countdown'));
+        // Published for the Shop Promise line, which folds this into its own
+        // sentence rather than printing a second one underneath. Set before the
+        // wording below is rendered, so the two can never disagree, and
+        // announced so the fold happens on the same tick.
+        urgency.dataset.deadline = left > 0 ? dWord + ' ' + dValue : '';
+        document.dispatchEvent(new CustomEvent('fr:deadline'));
 
         if (left > 0) {
           setLine(text, [
-            ['Order within ', false],
-            [fmtCountdown(left), true],
+            ['Order ' + dWord + ' ', false],
+            [dValue, true],
             [' to receive as early as ', false],
             [arrival, true],
             [dest, false],
@@ -1326,6 +1351,11 @@
       vertical-align: baseline;
       margin-left: 0.45em;
     }
+    /* fitOneLine sets white-space on the sentence itself to hold it to one line.
+       The zip form lives inside that element and is not part of the sentence, so
+       it has to opt back out or its copy runs off the side. */
+    [class*="ExpansionBlock__ExpansionBlock"] { white-space: normal; }
+
     /* The zip form is a form, not part of the sentence: its own block, left. */
     [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="ExpansionBlock__ExpansionBlock"] {
       display: block !important;
@@ -1438,11 +1468,10 @@
   // a day behind the warehouse — without it, an arrival quoted for today could
   // be thrown a full year forward and named the wrong day.
   const SP_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const SP_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   // English abbreviations to match the English month already in the sentence.
   // Localising only the weekday would produce "jeu, Aug 13".
   const SP_DATE = new RegExp('\\b(' + SP_MONTHS.join('|') + ')\\s+(\\d{1,2})\\b');
-  const SP_HAS_DAY = new RegExp('\\b(' + SP_DAYS.join('|') + '),');
+  const SP_HAS_DAY = new RegExp('\\b(' + SHORT_DAYS.join('|') + '),');
 
   const nameTheDay = (root) => {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -1461,7 +1490,7 @@
       if (when.getTime() < now.getTime() - 7 * 86400000) {
         when = new Date(now.getFullYear() + 1, SP_MONTHS.indexOf(m[1]), parseInt(m[2], 10));
       }
-      edits.push([node, text.replace(m[0], SP_DAYS[when.getDay()] + ', ' + m[0])]);
+      edits.push([node, text.replace(m[0], SHORT_DAYS[when.getDay()] + ', ' + m[0])]);
     }
     edits.forEach((edit) => { edit[0].nodeValue = edit[1]; });
     return edits.length;
@@ -1488,13 +1517,13 @@
   // The lead pattern accepts its own output as well as Shopify's, because this
   // runs again every minute and has to swap the number in a sentence it already
   // wrote without wrapping it a second time.
-  const SP_LEAD = /^\s*(?:Arrives as soon as|Order within .+? to receive as soon as)\s*$/;
+  const SP_LEAD = /^\s*(?:Arrives as soon as|Order (?:within|by) .+? to receive as soon as)\s*$/;
   const SP_JOIN = /^\s*(?:in|at)\s*$/;
 
-  const foldCountdown = (root, countdown) => {
-    // No countdown means no deadline worth claiming — past the cutoff, or a
+  const foldCountdown = (root, deadline) => {
+    // No deadline means none worth claiming — past the cutoff, or a
     // country the rates table cannot quote. Shopify's own sentence stands.
-    if (!countdown) return false;
+    if (!deadline) return false;
     // The postcode anchors the line: it is the only <u> in the box, and the
     // sentence is exactly its parent's child nodes.
     const zip = root.querySelector('u');
@@ -1513,13 +1542,55 @@
     // miss so the countdown falls back to its own line rather than vanishing.
     if (!lead) return false;
 
-    const next = 'Order within ' + countdown + ' to receive as soon as ';
+    const next = 'Order ' + deadline + ' to receive as soon as ';
     // Written only on a real change. sync() runs on every body mutation on the
     // page, and an unconditional write would fire the shadow observer each time
     // to land the identical string.
     if (lead.nodeValue !== next) lead.nodeValue = next;
     if (join && join.nodeValue !== ' at ') join.nodeValue = ' at ';
     return true;
+  };
+
+  /* --- Hold the sentence to one line --- */
+  // It cannot be held there by CSS alone: the copy is fixed, the column is not,
+  // and the sentence changes width on its own — "1d" becomes "4h 12m" a minute
+  // later, and the postcode is whatever the shopper typed. So the type is
+  // measured against the space and scaled to fit.
+  //
+  // FIT_FLOOR is where legibility beats the one-line rule. Below it the sentence
+  // is allowed to wrap again rather than shrink into something nobody can read.
+  const FIT_FLOOR = 9;
+  const fitOneLine = (el) => {
+    const sr = el.shadowRoot;
+    const stack = sr && sr.querySelector('[class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"]');
+    if (!stack) return;
+    const avail = el.clientWidth;
+    if (!avail) return;
+
+    // Measured at whatever size is currently applied and scaled from there, so
+    // no reset write is needed — and because the result is always clamped to
+    // base, repeated passes converge instead of oscillating.
+    const cur = parseFloat(getComputedStyle(el).fontSize) || 13;
+    const base = window.matchMedia('(min-width: 769px)').matches ? 11 : 13;
+
+    // Wrapping is suppressed ON THE ELEMENT to take the measurement, so the
+    // number is the width the sentence WANTS rather than the width the column
+    // has already forced on it. Inline rather than through the stylesheet
+    // deliberately: driving it from a :host attribute meant scrollWidth could be
+    // read before the rule landed, which reported "already fits" and let the
+    // sentence run straight out of the column.
+    stack.style.whiteSpace = 'nowrap';
+    const needed = stack.scrollWidth;
+    if (!needed) return;
+
+    const next = Math.max(FIT_FLOOR, Math.min(base, Math.floor(cur * (avail / needed) * 10) / 10));
+    const px = next + 'px';
+    if (el.style.fontSize !== px) el.style.fontSize = px;
+
+    // One line only where it genuinely fits at the size we settled on. At the
+    // floor a long sentence in a narrow column still will not, and running out
+    // of the column is worse than wrapping.
+    stack.style.whiteSpace = needed * (next / cur) <= avail + 1 ? 'nowrap' : 'normal';
   };
 
   // Shop Promise carries a live carrier estimate; our countdown carries the
@@ -1591,11 +1662,14 @@
       nameDays();
       const el = host();
       const sr = el && el.shadowRoot;
-      const countdown = urgency ? urgency.dataset.countdown || '' : '';
-      const merged = !!(sr && resolved() && foldCountdown(sr, countdown));
+      const deadline = urgency ? urgency.dataset.deadline || '' : '';
+      const merged = !!(sr && resolved() && foldCountdown(sr, deadline));
       if (el) el.toggleAttribute('data-fr-merged', merged);
       // Folded, so our own copy of the line would be the same sentence twice.
       if (urgency) urgency.classList.toggle('is-merged', merged);
+      // After the fold, never before: the sentence it writes is the one being
+      // measured, and it is longer than the one Shopify shipped.
+      if (el && merged) fitOneLine(el);
     };
 
     sync();
@@ -1604,8 +1678,17 @@
     new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
     // The number changes on the minute, and that tick happens inside the
     // estimator with nothing in the DOM to observe. No loop: sync writes text,
-    // it never republishes the countdown.
-    document.addEventListener('fr:countdown', sync);
+    // it never republishes the deadline.
+    document.addEventListener('fr:deadline', sync);
+    // The column width changes with the viewport and the fit is width-derived,
+    // so a resize invalidates it. rAF-coalesced: resize fires continuously
+    // while a window is dragged, and each pass forces layout.
+    let fitting = false;
+    window.addEventListener('resize', () => {
+      if (fitting) return;
+      fitting = true;
+      requestAnimationFrame(() => { fitting = false; sync(); });
+    });
   };
 
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
