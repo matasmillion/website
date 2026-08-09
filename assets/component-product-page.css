@@ -1718,6 +1718,54 @@ delivery-promise-wc {
   width: 200%;
 }
 
+/* ----- Inset variant: a panel over the page, not a replacement for it -----
+   Used by the fabric swatches. The shopper is comparing a weave against the
+   product it belongs to, so the page stays visible and dimmed behind rather
+   than being painted out — which is also what makes opening and closing feel
+   like a layer moving instead of a navigation.
+
+   The gallery's touch viewer deliberately keeps the full-bleed white treatment:
+   it is a pan-and-zoom surface where surrounding page would only be noise. */
+.pdp-zoom--inset {
+  background: rgba(45, 44, 47, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* The padding is the effect — it is what leaves the page showing around the
+   panel. clamp so a phone still gets a usable image and a wide desktop does not
+   stretch the swatch to the full viewport. */
+.pdp-zoom--inset .pdp-zoom__stage {
+  padding: clamp(1.25rem, 6vw, 5rem);
+  cursor: default;
+}
+
+.pdp-zoom--inset .pdp-zoom__img {
+  max-width: min(100%, 760px);
+  max-height: 80vh;
+  width: auto;
+  object-fit: contain;
+  cursor: zoom-in;
+  /* Lifts the panel off the scrim; without it a dark swatch dissolves into the
+     dimmed page behind. */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  transform: scale(0.985);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.pdp-zoom--inset.is-active .pdp-zoom__img { transform: scale(1); }
+
+/* The 2x inspect still works inside the panel — the stage scrolls — but the
+   settle animation has to stand down or it fights the magnification. */
+.pdp-zoom--inset.is-zoomed .pdp-zoom__img {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp-zoom--inset .pdp-zoom__img { transition: none; transform: none; }
+}
+
 .pdp-zoom__close {
   position: absolute;
   top: 1rem;
