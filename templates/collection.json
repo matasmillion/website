@@ -16,11 +16,11 @@
         "image": "shopify://shop_images/PANTS_5_1_-7.jpg",
         "full_bleed": true,
         "aspect_ratio": "16 / 9",
-        "aspect_ratio_mobile": "4 / 5",
+        "aspect_ratio_mobile": "1 / 1",
         "heading": "",
         "subtext": "",
         "show_description": true,
-        "text_position": "middle-center",
+        "text_position": "middle-left",
         "overlay_opacity": 0
       }
     },
