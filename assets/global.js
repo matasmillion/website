@@ -1309,33 +1309,102 @@
     }
   };
 
-  /* --- Shop Promise takes precedence over our own delivery line --- */
-  // Shopify's banner carries a live carrier estimate; ours is derived from theme
-  // settings. Two delivery dates on one page invites the shopper to notice they
-  // disagree, so when theirs resolves, ours steps aside.
-  const initShopPromiseCoordination = () => {
-    const urgency = document.querySelector('[data-delivery-urgency]');
-    if (!urgency) return;
+  /* --- Shop Promise: the few rules the document cannot reach --- */
+  // Everything tokens and inheritance can do is in component-product-page.css.
+  // What is left needs a stylesheet INSIDE the shadow root, because it either
+  // targets an internal class or has to outrank an inline style the widget's
+  // own JS writes:
+  //
+  //   padding    — .ContainerCommon__Container reads --p-space-350, which is
+  //                also the expanded zip form's row gap. Zeroing the token
+  //                would flatten the form; zeroing the class leaves it alone.
+  //   alignment  — the rows are flex, aligned by --ui-*-align written inline.
+  //                Only !important beats an inline declaration.
+  //
+  // Selectors match on the component half of each class ([class*=]) rather than
+  // the full string. These are webpack module names — stable in shape, not
+  // guaranteed verbatim across Shopify's rebuilds — so matching the half that
+  // carries the meaning survives a rehash of the rest.
+  const PROMISE_SKIN = `
+    [class*="ContainerCommon__Container"] {
+      padding: 0 !important;
+      font-size: inherit !important;
+    }
+    [class*="Text__Text"] {
+      font-size: inherit !important;
+      letter-spacing: inherit !important;
+    }
+    [class*="ShopPromiseLogo__Logo"] { vertical-align: middle; }
+    /* The collapsed line follows the buy column: centred on mobile, flush left
+       from the same 769px the rest of the PDP turns at. The expanded zip form is
+       left alone — it is a form, and a centred form reads as a mistake. */
+    [class*="PromiseShell__Promise"] [class*="BlockStack__BlockStack"],
+    [class*="PromiseShell__Promise"] [class*="InlineStack__InlineStack"] {
+      --ui-block-stack-align: center !important;
+      --ui-inline-stack-align: center !important;
+    }
+    [class*="ExpansionBlock__ExpansionBlock"] [class*="BlockStack__BlockStack"],
+    [class*="ExpansionBlock__ExpansionBlock"] [class*="InlineStack__InlineStack"] {
+      --ui-block-stack-align: start !important;
+      --ui-inline-stack-align: start !important;
+    }
+    @media (min-width: 769px) {
+      [class*="PromiseShell__Promise"] [class*="BlockStack__BlockStack"],
+      [class*="PromiseShell__Promise"] [class*="InlineStack__InlineStack"] {
+        --ui-block-stack-align: start !important;
+        --ui-inline-stack-align: start !important;
+      }
+    }
+  `;
 
-    // Presence is not enough. <delivery-promise-wc> mounts before it resolves,
-    // and stays empty when no promise applies to the product — hiding on the
-    // element alone would silently drop our line for products that never get one.
+  // The box carries a live carrier estimate; our urgency line is derived from
+  // the theme's rates table. Two delivery dates on one page invites the shopper
+  // to notice they disagree, so when Shopify's resolves, ours steps aside.
+  const initShopPromise = () => {
+    const host = () => document.querySelector('delivery-promise-wc');
+    if (!host() && !document.querySelector('.delivery-promise__promise-container')) return;
+    const urgency = document.querySelector('[data-delivery-urgency]');
+
+    // Appended last so it follows the widget's own stylesheets; every rule that
+    // has to win says so explicitly anyway.
+    const skin = () => {
+      const el = host();
+      const sr = el && el.shadowRoot;
+      if (!sr || sr.querySelector('[data-fr-skin]')) return;
+      const style = document.createElement('style');
+      style.setAttribute('data-fr-skin', '');
+      style.textContent = PROMISE_SKIN;
+      sr.appendChild(style);
+    };
+
+    // Presence is not enough on either count. <delivery-promise-wc> mounts empty
+    // and stays empty on products no promise covers, so hiding our line on the
+    // element alone would drop it from PDPs that never get a box at all.
+    //
+    // Nor is shadowRoot.textContent: the widget ships nineteen <style> elements
+    // inside the shadow root, so that string is never blank and the check it
+    // backed was only ever passing by way of the offsetHeight test beside it.
+    // Read the rendered leaves instead.
     const resolved = () => {
-      const el = document.querySelector('delivery-promise-wc');
+      const el = host();
       if (!el || !el.offsetHeight) return false;
-      // The custom element opts into an open shadow root, so its rendered
-      // content is readable from here without touching any internal class name.
-      const root = el.shadowRoot;
-      return !!(root && root.textContent.trim());
+      const sr = el.shadowRoot;
+      if (!sr) return false;
+      return [...sr.querySelectorAll('*')].some(
+        (n) => !/^(style|script)$/i.test(n.tagName) && n.childElementCount === 0 && n.textContent.trim()
+      );
     };
 
     // Toggle a class, never the hidden attribute — [hidden] is overridden by a
     // display rule in component-product-page.css and would not take effect.
-    const sync = () => urgency.classList.toggle('is-superseded', resolved());
+    const sync = () => {
+      skin();
+      if (urgency) urgency.classList.toggle('is-superseded', resolved());
+    };
 
     sync();
-    // The Shop Promise bundle is deferred and resolves well after this runs, so
-    // a one-shot check would almost always miss it.
+    // The bundle is deferred and resolves well after this runs, so a one-shot
+    // check would almost always miss it.
     new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
   };
 
@@ -1576,10 +1645,15 @@
     }
 
     /* ---- Touch: the fullscreen viewer, since there is no hover to pan with ---- */
-    const open = (slide) => {
+    // inset: open as a panel floating over a dimmed page rather than replacing
+    // the page outright. The gallery's touch viewer wants the full bleed — it
+    // is a pan-and-zoom surface — but a fabric swatch is being compared against
+    // the product it belongs to, so the page has to stay visible behind it.
+    const open = (slide, inset) => {
       if (!slide || !img) return;
       img.src = slide.dataset.zoomSrc || '';
       img.alt = slide.dataset.zoomAlt || '';
+      zoom.classList.toggle('pdp-zoom--inset', !!inset);
       zoom.classList.add('is-active');
       zoom.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -1619,7 +1693,7 @@
       const trigger = e.target.closest('[data-zoom-open]');
       if (!trigger) return;
       e.preventDefault();
-      open(trigger);
+      open(trigger, true);
     });
 
     // Release the zoom rather than let a magnified frame snap past.
@@ -1643,7 +1717,11 @@
     if (zin) zin.addEventListener('click', () => setZoomed(true));
     if (zout) zout.addEventListener('click', () => setZoomed(false));
     if (stage) stage.addEventListener('click', (e) => {
-      if (e.target === img) setZoomed(!zoom.classList.contains('is-zoomed'));
+      if (e.target === img) { setZoomed(!zoom.classList.contains('is-zoomed')); return; }
+      // Everything around the image is scrim in inset mode, and a scrim you can
+      // see the page through reads as dismissable — so it is. The full-bleed
+      // viewer has no "outside" to click, which is why this is scoped.
+      if (zoom.classList.contains('pdp-zoom--inset')) close();
     });
 
     zoom.querySelectorAll('[data-zoom-close]').forEach(b => b.addEventListener('click', close));
@@ -1865,7 +1943,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromise, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
