@@ -110,22 +110,6 @@
         "disabled": false,
         "settings": {}
       },
-      "5958882876626866175": {
-        "type": "shopify://apps/smartsize/blocks/smartsize-sizechart-embed/465a43e0-6a1a-4d30-b82e-fe6118568705",
-        "disabled": false,
-        "settings": {
-          "button_label": "SIZE GUIDE",
-          "button_style": "link",
-          "button_icon": "sizenone",
-          "button_color": "#000000",
-          "button_background_color": "",
-          "button_corner_radius_px": 5,
-          "button_margin_top_px": 0,
-          "button_margin_right_px": 0,
-          "button_margin_bottom_px": 0,
-          "button_margin_left_px": 0
-        }
-      },
       "10736359279748399689": {
         "type": "shopify://apps/smartsize/blocks/smartsize-recommender-embed/465a43e0-6a1a-4d30-b82e-fe6118568705",
         "disabled": false,
@@ -136,6 +120,22 @@
           "smartrecom_button_icon": "sizenone",
           "smartrecom_button_text_color": "#000000",
           "smartrecom_button_background_color": "",
+          "button_corner_radius_px": 5,
+          "button_margin_top_px": 0,
+          "button_margin_right_px": 0,
+          "button_margin_bottom_px": 0,
+          "button_margin_left_px": 0
+        }
+      },
+      "5958882876626866175": {
+        "type": "shopify://apps/smartsize/blocks/smartsize-sizechart-embed/465a43e0-6a1a-4d30-b82e-fe6118568705",
+        "disabled": false,
+        "settings": {
+          "button_label": "SIZE GUIDE",
+          "button_style": "button",
+          "button_icon": "sizenone",
+          "button_color": "#000000",
+          "button_background_color": "",
           "button_corner_radius_px": 5,
           "button_margin_top_px": 0,
           "button_margin_right_px": 0,
