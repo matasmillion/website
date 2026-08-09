@@ -1,0 +1,960 @@
+<title>Pay in 4 — FR treatment</title>
+<style>
+  /* ============================================================
+     Foreign Resource — PDP installments mockup
+     Chrome tokens. The device frames below deliberately do NOT
+     use these: a mockup of a light site stays light in both
+     themes, so every colour inside .frame is a literal drawn
+     from the theme's own tokens.
+     ============================================================ */
+  :root {
+    --paper:    #F1EEE6;
+    --card:     #FAF8F3;
+    --ink:      #2D2C2F;
+    --ink-soft: #6E6D71;
+    --muted:    #A4A4A4;
+    --rule:     rgba(164, 164, 164, 0.4);
+    --rule-firm:rgba(45, 44, 47, 0.16);
+    --accent:   #C4632A;
+    --slate:    #4A4E54;
+    --good:     #5E7350;
+
+    --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:    #1A191C;
+      --card:     #232226;
+      --ink:      #EDE9E1;
+      --ink-soft: #A9A6A0;
+      --muted:    #7C7A80;
+      --rule:     rgba(237, 233, 225, 0.16);
+      --rule-firm:rgba(237, 233, 225, 0.28);
+      --accent:   #E0844C;
+      --good:     #92AC81;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:    #1A191C;
+    --card:     #232226;
+    --ink:      #EDE9E1;
+    --ink-soft: #A9A6A0;
+    --muted:    #7C7A80;
+    --rule:     rgba(237, 233, 225, 0.16);
+    --rule-firm:rgba(237, 233, 225, 0.28);
+    --accent:   #E0844C;
+    --good:     #92AC81;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.1rem, 4vw, 2.5rem) 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 6vw, 4.5rem);
+  }
+
+  /* ---------- masthead ---------- */
+  .eyebrow {
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 7vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.005em;
+    margin: 0.5rem 0 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    max-width: 62ch;
+    margin: 1.25rem 0 0;
+    color: var(--ink-soft);
+    font-size: 15.5px;
+  }
+
+  .standfirst strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------- section scaffolding ---------- */
+  section { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.4vw, 2.3rem);
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .sec-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule-firm);
+  }
+
+  .sec-head p { margin: 0.4rem 0 0; max-width: 62ch; color: var(--ink-soft); font-size: 14.5px; }
+
+  /* ---------- variant switcher ---------- */
+  .switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 0.9rem 0;
+    background: linear-gradient(var(--paper) 72%, transparent);
+  }
+
+  .switcher button {
+    font-family: var(--sans);
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .switcher button:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .switcher button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .switcher button[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ---------- the rig ---------- */
+  .rig {
+    display: grid;
+    grid-template-columns: 390px minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
+  }
+
+  @media (max-width: 880px) {
+    .rig { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .rig-col { display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+
+  .rig-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .rig-label span { letter-spacing: 0.04em; text-transform: none; font-size: 11px; }
+
+  .note {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 46ch;
+  }
+
+  .note b { color: var(--ink); font-weight: 500; }
+
+  /* ============================================================
+     DEVICE FRAMES — always light, always literal pixel sizes.
+     Everything below sets its own colour; nothing inherits from
+     the chrome tokens above.
+     ============================================================ */
+  .frame {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F1EEE6;
+    color: #2D2C2F;
+    border: 1px solid rgba(45, 44, 47, 0.22);
+    overflow: hidden;
+  }
+
+  /* ----- phone ----- */
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    height: 660px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone__gallery {
+    flex: 0 0 300px;
+    background:
+      radial-gradient(120% 90% at 50% 18%, #3A3A3C 0%, #232325 55%, #171718 100%);
+    position: relative;
+  }
+
+  .phone__gallery::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: rgba(45, 44, 47, 0.15);
+  }
+
+  .phone__gallery::before {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 45%;
+    height: 2px;
+    background: #2D2C2F;
+    z-index: 1;
+  }
+
+  .phone__col {
+    flex: 1;
+    padding: 1.25rem 0.75rem 0;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .phone__band {
+    border-top: 1px solid rgba(164, 164, 164, 0.4);
+    background: #F1EEE6;
+    padding: 0.85rem 0.75rem 1rem;
+  }
+
+  .band__top {
+    display: grid;
+    grid-template-columns: 22px 1fr 22px;
+    align-items: center;
+    margin-bottom: 0.7rem;
+  }
+
+  .band__titles { grid-column: 2; text-align: center; }
+
+  .band__collection {
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #A4A4A4;
+  }
+
+  .band__title {
+    font-size: 15.9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2D2C2F;
+    margin-top: 4px;
+  }
+
+  .band__heart { grid-column: 3; color: #2D2C2F; opacity: 0.85; }
+
+  /* ----- desktop buy column ----- */
+  .desk { padding: 2.75rem 2rem 2.25rem; display: flex; justify-content: center; }
+  .desk__col { width: 100%; max-width: 400px; text-align: center; }
+
+  .fr-collection {
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #A4A4A4;
+    margin-bottom: 0.75rem;
+  }
+
+  .fr-title {
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.35;
+    color: #2D2C2F;
+    margin-bottom: 2.75rem;
+  }
+
+  .fr-sizes {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .fr-size {
+    min-width: 42px;
+    height: 34px;
+    line-height: 32px;
+    border: 1px solid rgba(164, 164, 164, 0.6);
+    font-size: 10.7px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: #2D2C2F;
+    background: transparent;
+  }
+
+  .fr-size.is-selected { border-color: #2D2C2F; background: #2D2C2F; color: #F1EEE6; }
+
+  /* The phone column is shorter than the desktop one, so the size row sits
+     closer to the line beneath it. */
+  .phone__col .fr-sizes { margin-bottom: 0.5rem; }
+
+  /* the add-to-cart bar, desktop and mobile share the look */
+  .fr-atc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 56px;
+    padding: 0 1.25rem;
+    background: #4A4E54;
+    border: 1px solid #4A4E54;
+    color: #FFFFFF;
+    font-size: 10.7px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .phone__band .fr-atc { height: 50px; }
+
+  /* the restyled Shop Promise, for context — this already ships */
+  .fr-promise {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #2D2C2F;
+    margin-top: 1.25rem;
+  }
+
+  .fr-promise u { text-underline-offset: 2px; }
+
+  .fr-promise .mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: #5A31F4;
+    font-weight: 500;
+  }
+
+  /* ============================================================
+     THE SLOT — one per treatment. Only the selected one shows.
+     ============================================================ */
+  .slot { display: none; margin-top: 1rem; }
+  .rig[data-variant="0"] .slot--0,
+  .rig[data-variant="a"] .slot--a,
+  .rig[data-variant="b"] .slot--b,
+  .rig[data-variant="c"] .slot--c { display: block; }
+
+  /* --- 0. Shopify, as shipped --- */
+  .shopify-pill {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    letter-spacing: 0;
+    color: #1A1A1A;
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .shoppay-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #5A31F4;
+    color: #FFFFFF;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .shoppay-lockup .pay {
+    background: #FFFFFF;
+    color: #5A31F4;
+    border-radius: 2px;
+    padding: 0 3px;
+    font-size: 10px;
+  }
+
+  .shopify-pill a { color: #1A1A1A; text-underline-offset: 2px; }
+
+  /* --- A. quiet sentence --- */
+  .terms-sentence {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #6E6E6E;
+    letter-spacing: 0.02em;
+  }
+
+  .terms-sentence a { color: #2D2C2F; text-underline-offset: 2px; }
+
+  /* --- B. hairline ledger --- */
+  .terms-ledger {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid rgba(164, 164, 164, 0.4);
+    border-bottom: 1px solid rgba(164, 164, 164, 0.4);
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .terms-ledger .qual { color: #A4A4A4; }
+  .terms-ledger .figure { color: #2D2C2F; font-variant-numeric: tabular-nums; }
+
+  /* --- C. the unfilled echo (recommended) --- */
+  .terms-echo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    height: 42px;
+    padding: 0 1.25rem;
+    background: transparent;
+    border: 1px solid rgba(74, 78, 84, 0.35);
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #4A4E54;
+  }
+
+  .terms-echo .figure { font-variant-numeric: tabular-nums; color: #2D2C2F; }
+
+  .terms-echo__aside {
+    display: block;
+    margin-top: 0.55rem;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: #A4A4A4;
+  }
+
+  .terms-echo__aside a { color: #6E6E6E; text-underline-offset: 2px; }
+
+  /* ---------- comparison table ---------- */
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    min-width: 640px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.85rem 1rem 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom-color: var(--rule-firm);
+  }
+
+  tbody th { font-weight: 500; color: var(--ink); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+  td.pick { color: var(--ink); }
+
+  .tag {
+    display: inline-block;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border: 1px solid currentColor;
+    color: var(--good);
+  }
+
+  /* ---------- flags ---------- */
+  .flags { display: flex; flex-direction: column; gap: 0; }
+
+  .flag {
+    display: grid;
+    grid-template-columns: 1.2rem minmax(0, 1fr);
+    gap: 0 0.9rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .flag:first-child { border-top: 1px solid var(--rule); }
+
+  .flag__mark { color: var(--accent); font-size: 13px; line-height: 1.75; }
+
+  .flag h3 {
+    margin: 0 0 0.25rem;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .flag p { margin: 0; font-size: 13.5px; color: var(--ink-soft); max-width: 68ch; }
+
+  /* ---------- code ---------- */
+  pre {
+    margin: 0;
+    padding: 1.25rem;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.65;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--ink);
+  }
+
+  :not(pre) > code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    color: var(--ink);
+    background: var(--card);
+    padding: 0.1em 0.35em;
+    border: 1px solid var(--rule);
+  }
+
+  footer {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule-firm);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Foreign Resource · PDP · buy column</p>
+    <h1>Pay in 4, in our own voice</h1>
+    <p class="standfirst">
+      Shop Promise now wears the theme's clothes. The installments line does not — it is still
+      Shopify's grey pill, 14px type, Shop&nbsp;Pay lockup, sitting directly under a buy column set
+      in 11px. <strong>Three treatments below</strong>, drawn on the real column at real pixel sizes.
+      Switch between them; the phone and the desktop column change together.
+    </p>
+  </header>
+
+  <section>
+    <div class="switcher" role="group" aria-label="Installments treatment">
+      <button type="button" data-set="0" aria-pressed="false">Shopify, as shipped</button>
+      <button type="button" data-set="a" aria-pressed="false">A · Quiet sentence</button>
+      <button type="button" data-set="b" aria-pressed="false">B · Hairline ledger</button>
+      <button type="button" data-set="c" aria-pressed="true">C · Unfilled echo</button>
+    </div>
+
+    <div class="rig" id="rig" data-variant="c">
+
+      <!-- ============ PHONE ============ -->
+      <div class="rig-col">
+        <p class="rig-label">Mobile <span>390 × 660</span></p>
+
+        <div class="frame phone">
+          <div class="phone__gallery" aria-hidden="true"></div>
+
+          <div class="phone__col">
+            <div class="fr-sizes">
+              <div class="fr-size">XS</div>
+              <div class="fr-size is-selected">S</div>
+              <div class="fr-size">M</div>
+              <div class="fr-size">L</div>
+            </div>
+
+            <!-- slot: mobile -->
+            <div class="slot slot--0">
+              <div class="shopify-pill">
+                <span>Pay in 4 interest-free installments of <b>$34.25</b> with</span>
+                <span class="shoppay-lockup">shop<span class="pay">Pay</span></span>
+                <a href="#0">Learn more</a>
+              </div>
+            </div>
+
+            <div class="slot slot--a">
+              <p class="terms-sentence">
+                Or four interest-free payments of $34.25.
+                <a href="#0">Learn&nbsp;more</a>
+              </p>
+            </div>
+
+            <div class="slot slot--b">
+              <div class="terms-ledger">
+                <span class="qual">4 payments, interest-free</span>
+                <span class="figure">$34.25</span>
+              </div>
+            </div>
+
+            <div class="slot slot--c">
+              <div class="terms-echo">
+                <span>Or 4 payments</span>
+                <span class="figure">$34.25</span>
+              </div>
+              <span class="terms-echo__aside">
+                At checkout with Shop&nbsp;Pay · <a href="#0">How it works</a>
+              </span>
+            </div>
+
+            <p class="fr-promise">
+              Arrives as soon as Aug 13 in <u>67025</u>
+              <span class="mark">↺ Promise</span>
+            </p>
+          </div>
+
+          <div class="phone__band">
+            <div class="band__top">
+              <div class="band__titles">
+                <div class="band__collection">Borderless Basics</div>
+                <div class="band__title">Zip-up Hoodie</div>
+              </div>
+              <svg class="band__heart" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <path d="M12 20s-7-4.5-7-9.5A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.5C19 15.5 12 20 12 20z"/>
+              </svg>
+            </div>
+            <div class="fr-atc">
+              <span>Add to cart</span>
+              <span>$137</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="note">
+          The line stays <b>in the column</b>, not in the sticky band. Band height feeds
+          <code>--pdp-band-h</code>, which the gallery sizes itself against — a fourth row there
+          takes 40-odd pixels off every product image on every phone.
+        </p>
+      </div>
+
+      <!-- ============ DESKTOP ============ -->
+      <div class="rig-col">
+        <p class="rig-label">Desktop <span>400px buy column</span></p>
+
+        <div class="frame desk">
+          <div class="desk__col">
+            <div class="fr-collection">Borderless Basics</div>
+            <div class="fr-title">Zip-up Hoodie</div>
+
+            <div class="fr-sizes">
+              <div class="fr-size">XS</div>
+              <div class="fr-size is-selected">S</div>
+              <div class="fr-size">M</div>
+              <div class="fr-size">L</div>
+            </div>
+
+            <div class="fr-atc">
+              <span>Add to cart</span>
+              <span>$137</span>
+            </div>
+
+            <!-- slot: desktop -->
+            <div class="slot slot--0">
+              <div class="shopify-pill">
+                <span>Pay in 4 interest-free installments of <b>$34.25</b> with</span>
+                <span class="shoppay-lockup">shop<span class="pay">Pay</span></span>
+                <a href="#0">Learn more</a>
+              </div>
+            </div>
+
+            <div class="slot slot--a">
+              <p class="terms-sentence">
+                Or four interest-free payments of $34.25.
+                <a href="#0">Learn&nbsp;more</a>
+              </p>
+            </div>
+
+            <div class="slot slot--b">
+              <div class="terms-ledger">
+                <span class="qual">4 payments, interest-free</span>
+                <span class="figure">$34.25</span>
+              </div>
+            </div>
+
+            <div class="slot slot--c">
+              <div class="terms-echo">
+                <span>Or 4 payments</span>
+                <span class="figure">$34.25</span>
+              </div>
+              <span class="terms-echo__aside">
+                At checkout with Shop&nbsp;Pay · <a href="#0">How it works</a>
+              </span>
+            </div>
+
+            <p class="fr-promise">
+              Arrives as soon as Aug 13 in <u>67025</u>
+              <span class="mark">↺ Promise</span>
+            </p>
+          </div>
+        </div>
+
+        <p class="note">
+          Treatment <b>C</b> borrows the add-to-cart bar's exact geometry — same width, same
+          left-label / right-figure split, same 0.2em tracking — and empties it out. The commit
+          reads first because it is filled; the alternative reads second because it is only drawn.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ COMPARISON ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>What each one costs you</h2>
+      <p>
+        All three drop the grey pill, the 14px type and the Shop&nbsp;Pay lockup from the buy
+        column. They differ in how much weight the line carries.
+      </p>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Reads as</th>
+            <th scope="col">Weight against the ATC</th>
+            <th scope="col">Watch for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">A · Quiet sentence</th>
+            <td>Body copy, easy to skip</td>
+            <td>Recedes — it is the lightest thing on the column</td>
+            <td>Shoppers who need the number to decide never see it</td>
+          </tr>
+          <tr>
+            <th scope="row">B · Hairline ledger</th>
+            <td>A spec row, like the fabric table</td>
+            <td>Level with the size row, below the button</td>
+            <td>Two more hairlines in a column that already has several</td>
+          </tr>
+          <tr>
+            <th scope="row">C · Unfilled echo <span class="tag">Pick</span></th>
+            <td class="pick">A second, quieter way to buy</td>
+            <td class="pick">Deliberate second place — same shape, no fill</td>
+            <td class="pick">Looks clickable but isn't; the aside underneath does the explaining</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ FLAGS ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Before this ships</h2>
+      <p>Four things that are about the money, not the type.</p>
+    </div>
+
+    <div class="flags">
+      <div class="flag">
+        <div class="flag__mark">§</div>
+        <div>
+          <h3>Writing our own copy makes it our disclosure</h3>
+          <p>
+            Shopify ships <code>{{ form | payment_terms }}</code> as a locked web component partly
+            because instalment messaging is regulated in the US. Replacing it with our own wording
+            means Foreign Resource is authoring that line. Keep the figure exact, keep the link
+            pointing at Shopify's own terms, and don't add claims Shop&nbsp;Pay doesn't make.
+          </p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <div class="flag__mark">§</div>
+        <div>
+          <h3>Gate it on eligibility, not just on a checkbox</h3>
+          <p>
+            Shop&nbsp;Pay Installments only applies inside an eligible order-value range and for US
+            buyers. The line renders today whenever the section setting is on, so a $28 tee and an
+            overseas visitor both get offered something checkout will not honour. Confirm the
+            current thresholds in the Shop&nbsp;Pay dashboard and gate on price and market.
+          </p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <div class="flag__mark">§</div>
+        <div>
+          <h3>Our quarter is an even quarter; Shopify's is not</h3>
+          <p>
+            The theme divides the variant price by four. Shop&nbsp;Pay absorbs the odd cents into
+            the first payment, so on a price that doesn't divide cleanly our figure can sit a penny
+            under the one the customer actually sees. "Payments from $34.25" is the honest fix if
+            we don't want to replicate their rounding.
+          </p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <div class="flag__mark">§</div>
+        <div>
+          <h3>The Shop mark goes, unlike on Promise</h3>
+          <p>
+            The restyled Promise box keeps Shopify's mark because the programme expects it to stay
+            recognisable. Here the mark is dropped from the bar and named in the aside instead
+            ("At checkout with Shop&nbsp;Pay"), which keeps the attribution without putting a purple
+            lockup in a column that has no other colour in it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CODE ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>What C costs to build</h2>
+      <p>
+        Two files, both already carrying the pieces. The markup replaces
+        <code>sections/product-info.liquid:414–420</code>; the styles replace
+        <code>.pdp__terms</code> in <code>assets/component-product-page.css</code>. The JS hook
+        <code>[data-installment]</code> is untouched, so the figure keeps following the variant.
+      </p>
+    </div>
+
+<pre><code>{%- comment -%} product-info.liquid — replaces the .pdp__terms block {%- endcomment -%}
+{%- if section.settings.show_payment_terms
+   and current_variant.price &gt;= section.settings.installments_min
+   and current_variant.price &lt;= section.settings.installments_max -%}
+  &lt;div class="pdp__terms"&gt;
+    &lt;div class="pdp__terms-bar"&gt;
+      &lt;span&gt;Or 4 payments&lt;/span&gt;
+      &lt;span class="pdp__terms-figure" data-installment&gt;
+        ${{ inst_dollars }}.{% if inst_rem &lt; 10 %}0{% endif %}{{ inst_rem }}
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;p class="pdp__terms-aside"&gt;
+      At checkout with Shop&amp;nbsp;Pay ·
+      &lt;a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
+         class="pdp__terms-link" target="_blank" rel="noopener"&gt;How it works&lt;/a&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+{%- endif -%}</code></pre>
+
+<pre><code>/* component-product-page.css — replaces .pdp__terms */
+
+/* An unfilled add-to-cart bar. Geometry is deliberately identical to
+   .pdp__add-btn so the two read as one decision with two answers;
+   only the fill is withheld. Height is 42 rather than 56 because it
+   is the second answer, not the first. */
+.pdp__terms { margin-bottom: var(--pdp-item); }
+
+.pdp__terms-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  height: 42px;
+  padding: 0 1.25rem;
+  border: 1px solid rgba(74, 78, 84, 0.35);
+  font-size: 9.9px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #4A4E54;
+}
+
+/* Digits align with the price in the button above it. */
+.pdp__terms-figure {
+  color: #2D2C2F;
+  font-variant-numeric: tabular-nums;
+}
+
+.pdp__terms-aside {
+  margin-top: 0.55rem;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #A4A4A4;
+}
+
+.pdp__terms-link {
+  color: #6E6E6E;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pdp__terms-link:hover { opacity: 0.7; }</code></pre>
+  </section>
+
+  <footer>
+    Mockup only — nothing here is on JACQUEMUS 1.1 yet. Cormorant Garamond and Inter are not
+    embedded, so this page falls back to Georgia and the system sans; on the live theme the buy
+    column is Inter throughout. Figures shown for a $137 variant.
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var rig = document.getElementById('rig');
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('.switcher button'));
+
+    function select(key) {
+      rig.setAttribute('data-variant', key);
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.set === key));
+      });
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { select(b.dataset.set); });
+    });
+  })();
+</script>
