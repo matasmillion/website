@@ -151,20 +151,26 @@
   {%- endcomment -%}
   <div class="pdp-band" data-sticky-band>
     <div class="pdp-band__top">
-      <div class="pdp-band__titles">
-        {%- if main_collection != blank -%}
-          <p class="pdp-band__collection">{{ main_collection }}</p>
-        {%- endif -%}
+      {%- if main_collection != blank -%}
+        <p class="pdp-band__collection">{{ main_collection }}</p>
+      {%- endif -%}
+      {%- comment -%}
+        The heart is a sibling of the title, not of the eyebrow-and-title pair.
+        Centred against the pair it split the difference between the two lines
+        and read as aligned to neither; against the name alone it lines up with
+        the name whether or not the eyebrow renders.
+      {%- endcomment -%}
+      <div class="pdp-band__name-row">
         <h1 class="pdp-band__title">{{ product.title }}</h1>
+        <button
+          class="pdp-band__heart"
+          data-wishlist-toggle="{{ product.handle }}"
+          aria-label="Save {{ product.title }}"
+          aria-pressed="false"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
       </div>
-      <button
-        class="pdp-band__heart"
-        data-wishlist-toggle="{{ product.handle }}"
-        aria-label="Save {{ product.title }}"
-        aria-pressed="false"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
     </div>
     <button type="button" class="pdp-band__atc" data-mobile-submit {% unless current_variant.available %}disabled{% endunless %}>
       <span>{% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}</span>
