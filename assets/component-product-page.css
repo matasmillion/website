@@ -1151,10 +1151,18 @@
    that single rule is injected into the shadow root from global.js. */
 delivery-promise-wc {
   display: block;
-  margin-bottom: 1rem;
+  /* The buy column's own spacing token, so the box keeps step with the urgency
+     line below it at both breakpoints. */
+  margin-bottom: var(--pdp-item);
 
-  /* Inherited by every text node inside the shadow root. */
-  font-size: 11px;
+  /* Inherited by every text node inside the shadow root.
+
+     13px on mobile. At 11 it matched the urgency line exactly, but that line is
+     a countdown you glance at, and this one carries the date, the postcode and
+     an edit control — on a phone it was small enough to skip. Desktop keeps 11,
+     where the buy column is narrower relative to the viewport and the line
+     already reads. */
+  font-size: 13px;
   letter-spacing: 0.04em;
   color: #2D2C2F;
 
@@ -1167,15 +1175,25 @@ delivery-promise-wc {
   --p-surface-light-active: transparent;
   --p-border-radius-200: 0;
 
-  /* Type, pulled down from Shopify's 14/12 to the buy column's 11. */
-  --p-text-body-md-font-size: 11px;
-  --p-text-body-sm-font-size: 10.5px;
+  /* Type, pulled down from Shopify's own 14/12. The skin makes every text node
+     inherit from this element, so these only matter if the injected stylesheet
+     never lands — but that is exactly when they matter most. */
+  --p-text-body-md-font-size: 13px;
+  --p-text-body-sm-font-size: 12px;
   --p-color-text-secondary: #6E6D71;
 
   /* The Shop mark stays — it is Shopify's, and the programme expects it to be
-     recognisable — but at 12px it sits on the text's baseline instead of
-     towering over an 11px line. */
-  --p-logo-height: 12px;
+     recognisable. Sized in em so it tracks the breakpoint change below instead
+     of needing a second declaration to stay in proportion. */
+  --p-logo-height: 1.05em;
+}
+
+@media (min-width: 769px) {
+  delivery-promise-wc {
+    font-size: 11px;
+    --p-text-body-md-font-size: 11px;
+    --p-text-body-sm-font-size: 10.5px;
+  }
 }
 
 /* Alignment is not settable from here: the widget's rows are flex containers

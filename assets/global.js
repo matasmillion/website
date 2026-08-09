@@ -1363,13 +1363,51 @@
       --ui-inline-stack-align: start !important;
     }
 
-    /* Same 769px the rest of the PDP turns at. */
-    @media (min-width: 769px) {
-      [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] {
-        justify-content: flex-start !important;
-      }
-    }
+    /* Centred at every width, deliberately — no desktop flush-left override.
+       The buy column this sits in is centre-aligned all the way up, so the line
+       was the one element breaking ranks with the add-to-cart bar above it and
+       the tab row below. */
   `;
+
+  /* --- "Aug 13" -> "Thu, Aug 13" --- */
+  // The one thing here that is not styling. Shopify writes the arrival date
+  // without a weekday, and a weekday is the part a shopper actually plans
+  // around, so it is inserted into the text node.
+  //
+  // The year is not in the string, so it is inferred: the widget only ever
+  // quotes arrivals ahead of today, so a date reading as past belongs to next
+  // year. The week of slack covers a shopper whose clock or timezone puts them
+  // a day behind the warehouse — without it, an arrival quoted for today could
+  // be thrown a full year forward and named the wrong day.
+  const SP_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const SP_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // English abbreviations to match the English month already in the sentence.
+  // Localising only the weekday would produce "jeu, Aug 13".
+  const SP_DATE = new RegExp('\\b(' + SP_MONTHS.join('|') + ')\\s+(\\d{1,2})\\b');
+  const SP_HAS_DAY = new RegExp('\\b(' + SP_DAYS.join('|') + '),');
+
+  const nameTheDay = (root) => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    // Collected first, written after: editing text nodes mid-walk mutates the
+    // tree the walker is standing in.
+    const edits = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue;
+      // Idempotence is what stops the observer below looping on its own writes.
+      if (!text || SP_HAS_DAY.test(text)) continue;
+      const m = text.match(SP_DATE);
+      if (!m) continue;
+      const now = new Date();
+      let when = new Date(now.getFullYear(), SP_MONTHS.indexOf(m[1]), parseInt(m[2], 10));
+      if (when.getTime() < now.getTime() - 7 * 86400000) {
+        when = new Date(now.getFullYear() + 1, SP_MONTHS.indexOf(m[1]), parseInt(m[2], 10));
+      }
+      edits.push([node, text.replace(m[0], SP_DAYS[when.getDay()] + ', ' + m[0])]);
+    }
+    edits.forEach((edit) => { edit[0].nodeValue = edit[1]; });
+    return edits.length;
+  };
 
   // The box carries a live carrier estimate; our urgency line is derived from
   // the theme's rates table. Two delivery dates on one page invites the shopper
@@ -1409,10 +1447,30 @@
       );
     };
 
+    // The weekday has to be reapplied whenever the widget rewrites its own copy
+    // — changing the postcode re-renders the line — and the observer below is
+    // watching document.body, which does NOT see mutations inside a shadow root.
+    // So the shadow root gets an observer of its own, attached once it exists.
+    let watching = false;
+    const nameDays = () => {
+      const el = host();
+      const sr = el && el.shadowRoot;
+      if (!sr) return;
+      nameTheDay(sr);
+      if (watching) return;
+      watching = true;
+      // Our own write lands as a characterData mutation and re-enters here;
+      // nameTheDay is idempotent, so the second pass edits nothing and stops.
+      new MutationObserver(() => nameTheDay(sr)).observe(sr, {
+        childList: true, subtree: true, characterData: true,
+      });
+    };
+
     // Toggle a class, never the hidden attribute — [hidden] is overridden by a
     // display rule in component-product-page.css and would not take effect.
     const sync = () => {
       skin();
+      nameDays();
       if (urgency) urgency.classList.toggle('is-superseded', resolved());
     };
 
