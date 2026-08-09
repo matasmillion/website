@@ -11,30 +11,6 @@
   "sections": {
     "product_info": {
       "type": "product-info",
-      "blocks": {
-        "smartsize_smartsize_sizechart_azcYpH": {
-          "type": "shopify://apps/smartsize/blocks/smartsize-sizechart/465a43e0-6a1a-4d30-b82e-fe6118568705",
-          "settings": {
-            "style_source": "customize",
-            "button_label": "",
-            "button_style": "button",
-            "button_icon": "hanger_black",
-            "button_color": "#2d2c2f",
-            "button_background_color": "",
-            "button_corner_radius_px": 0,
-            "button_margin_top_px": 0,
-            "button_margin_right_px": 0,
-            "button_margin_bottom_px": 0,
-            "button_margin_left_px": 0,
-            "button_alignment": "center",
-            "button_alignment_mobile": "center",
-            "display_mode": "combined"
-          }
-        }
-      },
-      "block_order": [
-        "smartsize_smartsize_sizechart_azcYpH"
-      ],
       "settings": {
         "show_short_description": false,
         "show_appointment_link": false,
