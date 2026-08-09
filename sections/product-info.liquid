@@ -687,14 +687,18 @@
                   </li>
                 {%- endif -%}
                 {%- comment -%}
-                  Method runs long — "Brushed fleece back face & interlock
-                  knitted front face" is a sentence, not a value. --stack drops
-                  it to its own line instead of squeezing it against the label.
+                  Flush right with every other value — the column of values down
+                  the right edge is the point of the table, and Method breaking
+                  out of it read as a mistake rather than as emphasis.
+
+                  --wrap because this row is prose where the others are figures:
+                  it has to be free to run onto a second line if a merchant
+                  writes a longer method than "Brushed & Fleeced Interior".
                 {%- endcomment -%}
                 {%- if fabric_method != blank -%}
-                  <li class="pdp__spec-row pdp__spec-row--stack">
+                  <li class="pdp__spec-row">
                     <span class="pdp__spec-label">Method</span>
-                    <span class="pdp__spec-value">{{ fabric_method }}</span>
+                    <span class="pdp__spec-value pdp__spec-value--wrap">{{ fabric_method }}</span>
                   </li>
                 {%- endif -%}
                 {%- comment -%}

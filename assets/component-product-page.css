@@ -808,19 +808,6 @@
 
 .pdp__returns-term--plain { display: block; }
 
-/* For values that are sentences rather than figures. Side by side, a long
-   method string wraps into a ragged block jammed against its label; stacked, it
-   reads as a short paragraph the label introduces. */
-.pdp__spec-row--stack {
-  display: block;
-}
-
-.pdp__spec-row--stack .pdp__spec-value {
-  display: block;
-  margin-top: 0.35rem;
-  white-space: normal;
-}
-
 /* Slate, not the list's inherited grey. Both columns sitting at #A4A4A4 made
    the whole table recede into the background — the labels are what you scan
    down to find the row you want, so they carry the contrast and the values
@@ -847,6 +834,17 @@
   letter-spacing: 0.01em;
   color: inherit;
   white-space: nowrap;
+}
+
+/* For a row whose value is prose rather than a figure — Method. It sits flush
+   right with "480 gsm" and the rest, but unlike them it has to be able to wrap.
+   flex-shrink matters as much as white-space here: the rule above pins values
+   at flex-shrink:0, so without this a long method could not narrow and would
+   push out past the row instead of wrapping inside it. */
+.pdp__spec-value--wrap {
+  flex-shrink: 1;
+  white-space: normal;
+  text-align: right;
 }
 
 /* Certification marks, not text. Height-capped so a tall logo cannot set the
