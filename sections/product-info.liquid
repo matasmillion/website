@@ -386,6 +386,48 @@
         {%- endfor -%}
         {%- endunless -%}
 
+        {%- comment -%}
+          Pay in 4. Shopify's {{ form | payment_terms }} renders a locked-down
+          web component — its Shop Pay lockup and wording can't be restyled or
+          reworded, and at 14px type under a 20px lockup it reads as an ad
+          dropped into a column set in 11px. So the line is written here
+          instead, with the instalment figure derived from the variant price
+          and kept in sync by JS.
+
+          Above the button, not below: it is a condition on the price about to
+          be committed to, not a footnote to a decision already made.
+
+          Gated on the eligible order range as well as on the setting. Outside
+          that range Shop Pay does not offer instalments at checkout, so the
+          line would be promising something the cart cannot honour. Set the
+          minimum to 0 to show it on everything.
+        {%- endcomment -%}
+        {%- if section.settings.show_payment_terms -%}
+          {%- liquid
+            assign inst_min = section.settings.installments_min | default: 0 | times: 100
+            assign inst_max = section.settings.installments_max | default: 1000000 | times: 100
+            assign inst_eligible = false
+            if current_variant.price >= inst_min and current_variant.price <= inst_max
+              assign inst_eligible = true
+            endif
+          -%}
+          <p
+            class="pdp__terms"
+            data-terms
+            data-terms-min="{{ inst_min }}"
+            data-terms-max="{{ inst_max }}"
+            {% unless inst_eligible %}hidden{% endunless %}
+          >
+            Or 4 payments of&nbsp;<span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span> at 0% interest with&nbsp;<a
+              href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
+              class="pdp__terms-mark"
+              target="_blank"
+              rel="noopener"
+              aria-label="Shop Pay — how instalments work"
+            ><span>shop</span><span class="pdp__terms-mark-pay">Pay</span></a>
+          </p>
+        {%- endif -%}
+
         <button
           type="submit"
           class="pdp__add-btn"
@@ -405,19 +447,6 @@
           </span>
         </button>
 
-        {%- comment -%}
-          Pay in 4. Shopify's {{ form | payment_terms }} renders a locked-down
-          web component — its Shop Pay lockup and wording can't be restyled or
-          reworded. So the line is written here instead, with the instalment
-          figure derived from the variant price and kept in sync by JS.
-        {%- endcomment -%}
-        {%- if section.settings.show_payment_terms -%}
-          <p class="pdp__terms">
-            Pay in four interest-free installments of&nbsp;<span data-installment>${{ inst_dollars }}.{% if inst_rem < 10 %}0{% endif %}{{ inst_rem }}</span>.
-            <a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
-               class="pdp__terms-link" target="_blank" rel="noopener">Learn more</a>
-          </p>
-        {%- endif -%}
       {%- endform -%}
 
       {%- comment -%}
@@ -1044,7 +1073,21 @@
     {
       "type": "url",
       "id": "installments_url",
-      "label": "Pay-in-4 'Learn more' link"
+      "label": "Pay-in-4 link",
+      "info": "Where the Shop Pay mark at the end of the line goes. Defaults to shop.app/pay-installments."
+    },
+    {
+      "type": "number",
+      "id": "installments_min",
+      "label": "Pay-in-4 line shows at or above ($)",
+      "info": "Shop Pay only finances orders inside an eligible range, so below this the line is hidden rather than promising something checkout will not honour. Confirm the current figure in your Shop Pay dashboard. Set to 0 to show it on every product.",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "installments_max",
+      "label": "Pay-in-4 line shows at or below ($)",
+      "default": 3000
     },
     {
       "type": "checkbox",

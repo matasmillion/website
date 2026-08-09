@@ -1151,19 +1151,55 @@ delivery-promise-wc {
    display below must opt back out when hidden. */
 [hidden] { display: none !important; }
 
+/* ----- Pay in 4 -----
+   Sits above the add-to-cart button and is set in the column's ink rather than
+   the grey it used to carry: this is a sentence the shopper is meant to read
+   before committing, not a disclaimer parked under a decision already made.
+   The Shop Pay mark closes the line and is the only link in it, so the sentence
+   has one destination instead of competing for the click with the button. */
 .pdp__terms {
   font-size: 11px;
-  line-height: 1.5;
-  color: #6E6E6E;
-  margin-bottom: 1rem;
-}
-
-.pdp__terms-link {
+  line-height: 1.55;
+  letter-spacing: 0.02em;
   color: #2D2C2F;
-  text-decoration: underline;
+  margin-bottom: var(--pdp-item);
 }
 
-.pdp__terms-link:hover { opacity: 0.7; }
+/* Digits line up with the price in the button below. */
+.pdp__terms [data-installment] { font-variant-numeric: tabular-nums; }
+
+/* The Shop Pay lockup. Shopify's own component renders it at 20px, which is
+   most of why the shipped line read as an ad dropped into the column; at 9px it
+   sits on the sentence rather than over it. The vertical-align nudge is load
+   bearing and was measured, not guessed: an inline-flex box takes its baseline
+   from the 9px "shop" inside it, which leaves the pill hanging below the 11px
+   text it sits in. -1px puts it back on the sentence; -2 and below read as
+   dropped. */
+.pdp__terms-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: -1px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #5A31F4;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.pdp__terms-mark-pay {
+  background: #FFFFFF;
+  color: #5A31F4;
+  border-radius: 2px;
+  padding: 0 3px;
+  font-size: 8px;
+}
+
+.pdp__terms-mark:hover { opacity: 0.85; }
 
 .pdp__low-stock {
   font-size: 10px;

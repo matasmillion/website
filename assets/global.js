@@ -252,9 +252,18 @@
       }
 
       // Back in stock replaces the disabled button when a variant is sold out
-      // Pay-in-4 figure follows the variant price
+      // Pay-in-4 figure follows the variant price, and the line stands down on
+      // variants priced outside the range Shop Pay will actually finance —
+      // Liquid can only judge the variant the page loaded with.
       const inst = pdp.querySelector('[data-installment]');
       if (inst && variant) inst.textContent = moneyExact(variant.price / 4);
+
+      const terms = pdp.querySelector('[data-terms]');
+      if (terms && variant) {
+        const min = Number(terms.dataset.termsMin) || 0;
+        const max = Number(terms.dataset.termsMax) || Infinity;
+        terms.hidden = variant.price < min || variant.price > max;
+      }
     };
 
     groups.forEach((g) => g.addEventListener('variant:change', resolve));
