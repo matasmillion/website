@@ -95,8 +95,14 @@
     Shown when the selected country has no line in the rates table. Saying so is
     the honest outcome — a country with no zone cannot be quoted here and cannot
     check out either, so inventing a date would only move the failure later.
+
+    Worded as work in progress rather than a flat no: the previous "We don't
+    ship here yet." closed the door, when the country is in fact a route we
+    want to hear demand for. contact_url is never passed by the caller, so it
+    resolves to the Contact Us page via the fallback.
   {%- endcomment -%}
   <p class="dest__error" data-dest-error hidden>
-    We don't ship here yet. <a href="{{ contact_url | default: '/pages/contact' }}">Ask us about it</a>.
+    Our team is working on providing seamless shipping to your location.
+    <a href="{{ contact_url | default: '/pages/contact' }}">Ask us about it</a>.
   </p>
 </div>

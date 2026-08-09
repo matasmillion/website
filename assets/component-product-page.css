@@ -747,6 +747,26 @@
   margin: 0 auto;
 }
 
+/* Air under the country picker. .dest__entry is shared with the Shipping
+   estimator, which does not want this, so the rule is scoped to the Returns
+   panel. Uses the column's own spacing scale rather than a new number.
+
+   The picker and the answer it produces were a hair apart, which read as one
+   block instead of question-then-answer. */
+.pdp__tab-panel--returns .dest__entry {
+  margin-bottom: var(--pdp-block);
+}
+
+/* The reassurance, on its own row. Tighter to the line above than to whatever
+   follows, so the two read as one thought in two beats. */
+.pdp__returns-note {
+  font-size: 11.5px;
+  line-height: 1.6;
+  font-weight: var(--font-weight-medium);
+  color: #2D2C2F;
+  margin: 0 0 1.25rem;
+}
+
 .pdp__returns-intro {
   font-size: 11.5px;
   line-height: 1.6;
@@ -754,9 +774,18 @@
   margin: 0 0 1.25rem;
 }
 
+/* Must sit after .pdp__returns-intro — same specificity, so source order
+   decides. Grey because this is the absence of an offer rather than an offer;
+   the terms table that replaces it is what earns ink. */
+.pdp__returns-intro--muted {
+  color: #A4A4A4;
+  margin-bottom: 0.5rem;
+}
+
 /* Set once here so the label, the value and the pipe-less plain rows all take
    the same quiet tone — the one .pdp__tab-link--quiet already uses. */
-.pdp__returns-terms {
+.pdp__returns-terms,
+.pdp__spec-list {
   list-style: none;
   margin: 0 0 1.5rem;
   padding: 0;
@@ -766,7 +795,8 @@
 
 /* Spec-sheet rows: label left, cost right, so the column of values can be
    compared down one axis. The block stays centred; the rows justify inside it. */
-.pdp__returns-term {
+.pdp__returns-term,
+.pdp__spec-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -778,7 +808,21 @@
 
 .pdp__returns-term--plain { display: block; }
 
-.pdp__returns-term-label {
+/* For values that are sentences rather than figures. Side by side, a long
+   method string wraps into a ragged block jammed against its label; stacked, it
+   reads as a short paragraph the label introduces. */
+.pdp__spec-row--stack {
+  display: block;
+}
+
+.pdp__spec-row--stack .pdp__spec-value {
+  display: block;
+  margin-top: 0.35rem;
+  white-space: normal;
+}
+
+.pdp__returns-term-label,
+.pdp__spec-label {
   font-size: 11.2px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.05em;
@@ -786,13 +830,31 @@
   color: inherit;
 }
 
-.pdp__returns-term-value {
+.pdp__returns-term-value,
+.pdp__spec-value {
   flex-shrink: 0;
   font-size: 12px;
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.01em;
   color: inherit;
   white-space: nowrap;
+}
+
+/* Certification marks, not text. Height-capped so a tall logo cannot set the
+   row height, and wrapping so three marks do not overflow a narrow column. */
+.pdp__spec-value--marks {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  white-space: normal;
+}
+
+.pdp__spec-value--marks img {
+  height: 24px;
+  width: auto;
+  display: block;
 }
 
 /* Stacked, not inline — .pdp__tab-link carries a right margin for the
@@ -824,10 +886,13 @@
 
 .pdp__tab-link:hover { opacity: 0.7; }
 
-/* Must sit after .pdp__tab-link — same specificity, so source order decides. */
+/* Must sit after .pdp__tab-link — same specificity, so source order decides.
+   Ink, not grey: at #A4A4A4 the policy link read as disabled text rather than
+   as a link, underline notwithstanding. The lighter weight is what keeps it
+   secondary to "Start a return" above it. */
 .pdp__tab-link--quiet {
   font-weight: var(--font-weight-normal);
-  color: #A4A4A4;
+  color: #2D2C2F;
 }
 
 /* Card text in the PDP's product rows */
@@ -1136,7 +1201,7 @@
    void between them. They size to their text now and the gap sets the spacing.
    The wrapper's own display is left to the app, which toggles it. */
 #smartrecom-triggers {
-  gap: 1.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -1145,33 +1210,91 @@
   width: auto;
 }
 
+/* Boxes, not text links. These are the two tools that answer "which size am I",
+   so they read as controls — same slate as add-to-cart, same 0.2em tracking.
+   Shared geometry here; the primary/secondary split is below.
+
+   Every declaration stays !important: these fight the app's own stylesheet, and
+   `display` stays absent because the app toggles it to reveal the buttons. */
 #smartrecom-triggers .smartrecom-trigger,
 .pdp__size-guide-slot a,
-.pdp__size-guide-slot button {
+.pdp__size-guide-slot button,
+.pdp__size-btn-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   font-family: var(--font-body) !important;
-  font-size: 11.2px !important;
+  font-size: 10.7px !important;
   font-weight: var(--font-weight-medium) !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.2em !important;
   text-transform: uppercase !important;
-  color: #A4A4A4 !important;
   text-decoration: none !important;
-  background: none !important;
-  border: none !important;
   border-radius: 0 !important;
-  padding: 0 !important;
-  margin: 0 auto !important;
+  padding: 0 1.25rem !important;
+  margin: 0 !important;
   box-shadow: none !important;
-  min-height: 0 !important;
-  height: auto !important;
-  line-height: 1.5 !important;
-  transition: color var(--duration-fast) var(--ease-out) !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  transition: background var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out) !important;
 }
 
-#smartrecom-triggers .smartrecom-trigger:hover,
-.pdp__size-guide-slot a:hover,
-.pdp__size-guide-slot button:hover {
-  color: #2D2C2F !important;
+/* SECONDARY — Size guide. Outlined: a reference table you consult, not the
+   path we want people on. */
+#smartrecom-triggers #smartrecom-sizechart-trigger,
+.pdp__size-guide-slot button,
+.pdp__size-btn-cta {
+  background: transparent !important;
+  color: #4A4E54 !important;
+  border: 1px solid #4A4E54 !important;
+}
+
+#smartrecom-triggers #smartrecom-sizechart-trigger:hover,
+.pdp__size-guide-slot button:hover,
+.pdp__size-btn-cta:hover {
+  background: #4A4E54 !important;
+  color: #FFFFFF !important;
   opacity: 1 !important;
+}
+
+/* PRIMARY — Find my size. Filled, matching .pdp__add-btn, because a fit quiz
+   that returns an answer beats a table the shopper has to interpret. The two
+   treatments are what say "these do different things". */
+#smartrecom-triggers #smartrecom-button,
+.pdp__size-guide-slot a,
+.pdp__size-btn-cta--primary {
+  background: #4A4E54 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #4A4E54 !important;
+}
+
+#smartrecom-triggers #smartrecom-button:hover,
+.pdp__size-guide-slot a:hover,
+.pdp__size-btn-cta--primary:hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+/* Theme-side twin of #smartrecom-triggers, for when the settings are filled in.
+   Primary first: Find my size leads in source order too, so it leads for a
+   screen reader and for keyboard tabbing, not just visually. */
+.pdp__size-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: var(--pdp-block);
+}
+
+/* The injected pair needs the same space beneath it as the theme-side twin. It
+   is prepended by initSmartSizePlacement, so it is the panel's first child. */
+#smartrecom-triggers {
+  margin-bottom: var(--pdp-block) !important;
 }
 
 /* No desktop alignment override any more. This used to flip the slot flush left
@@ -1303,14 +1426,40 @@
 
 /* Front and back of the cloth. auto-fit rather than a fixed 2-up: with only one
    image set the single figure takes the full width instead of leaving a gap. */
+/* The cloth's name, above the swatch. Pitched between the collection eyebrow
+   and the product name: it is a brand object that recurs across styles, so it
+   carries more weight than a caption, but it must not compete with the product
+   title upstairs. */
+.pdp__fabric-name {
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2D2C2F;
+  margin-bottom: var(--pdp-item);
+}
+
 .pdp__fabric-shots {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-bottom: var(--pdp-block);
 }
 
-.pdp__fabric-shot { margin: 0; }
+/* A <button>, not a <figure> — these open the lightbox, so they must be
+   reachable by keyboard and announce themselves. Button chrome reset here. */
+.pdp__fabric-shot {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: zoom-in;
+}
 
 /* Square crop so the two swatches read as a matched pair regardless of how
    they were shot. */
@@ -1319,9 +1468,24 @@
   aspect-ratio: 1 / 1;
   object-fit: cover;
   display: block;
+  transition: opacity var(--duration-base) var(--ease-out);
 }
 
-.pdp__fabric-shot figcaption {
+/* The only cue that these open. Without it the cursor is the whole affordance,
+   which is nothing at all on touch. */
+.pdp__fabric-shot:hover img { opacity: 0.85; }
+
+.pdp__fabric-shot:focus-visible {
+  outline: 1px solid #2D2C2F;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__fabric-shot img { transition: none; }
+}
+
+.pdp__fabric-caption {
+  display: block;
   margin-top: 0.4rem;
   font-size: 10px;
   font-weight: var(--font-weight-medium);
