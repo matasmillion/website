@@ -23,7 +23,7 @@
     "font_body_size": 13,
     "social_instagram": "https://www.instagram.com/foreignresource/",
     "cart_type": "drawer",
-    "free_shipping_threshold": 150,
+    "free_shipping_threshold": 200,
     "sections": {
       "cookie-banner": {
         "type": "cookie-banner",
