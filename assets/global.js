@@ -1085,23 +1085,12 @@
         // two values on the line a shopper actually acts on.
         const arrival = fmtRelative(by);
 
-        // Beside Shop Promise the line is a deadline and nothing else. Shopify's
-        // own line sits directly above it and already states the arrival date,
-        // and the two dates come from different places — ours from the rates
-        // table in the theme settings, theirs from carrier data. Printing both
-        // only invites the shopper to notice they disagree.
-        if (urgency.classList.contains('is-with-promise')) {
-          if (left > 0) {
-            setLine(text, [['Order within ', false], [fmtCountdown(left), true]]);
-            urgency.hidden = false;
-            return left;
-          }
-          // Past the cutoff there is no deadline worth quoting, and the arrival
-          // date belongs to Shopify's line here, so there is nothing to fall
-          // back to. Say nothing rather than pad the page.
-          urgency.hidden = true;
-          return 0;
-        }
+        // Published for the Shop Promise line, which folds this value into its
+        // own sentence rather than printing a second one underneath. Set before
+        // either wording below is rendered, so the two can never disagree about
+        // the number, and announced so the fold happens on the same tick.
+        urgency.dataset.countdown = left > 0 ? fmtCountdown(left) : '';
+        document.dispatchEvent(new CustomEvent('fr:countdown'));
 
         if (left > 0) {
           setLine(text, [
@@ -1131,10 +1120,6 @@
         if (renderUrgency() > 0 && !timer) timer = setInterval(renderUrgency, 60000);
       };
       tick();
-      // Shop Promise resolves long after this first render, and it decides which
-      // of the two wordings above is the right one. Re-render when it lands
-      // rather than leaving the full line on screen until the next minute ticks.
-      document.addEventListener('fr:promise', tick);
       // Without this a backgrounded tab is restored with a stale number frozen
       // on screen, which is worse than showing no countdown in the first place.
       document.addEventListener('visibilitychange', () => {
@@ -1323,20 +1308,28 @@
     }
     [class*="ShopPromiseLogo__Logo"] { vertical-align: middle; }
 
-    /* ONE LINE: arrival, zip, then the Shop mark to the right of it.
-       Shopify stacks these — arrival on the first row, and the mark on a second
-       row next to "Free shipping over $150". Turning the stack into a wrapping
-       row lifts the mark up beside the zip, and giving the zip form a full
-       basis keeps it on a row of its own when it expands. */
+    /* ONE SENTENCE: deadline, date, postcode, then the Shop mark at the end.
+       Shopify stacks these as flex rows — arrival on the first, the mark on a
+       second next to "Free shipping over $150".
+
+       The stack becomes plain block flow rather than a flex row. A flex row
+       wraps by ITEM, so once the sentence grew long enough to fill the column
+       the mark was pushed onto a line of its own; as inline content the mark
+       simply follows the last word and the whole thing wraps like the paragraph
+       it is. Centring is text-align for the same reason. */
     [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] {
-      flex-direction: row !important;
-      flex-wrap: wrap !important;
-      align-items: center !important;
-      column-gap: 0.45em !important;
-      justify-content: center !important;
+      display: block !important;
+      text-align: center !important;
     }
+    [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="InlineStack__InlineStack"] {
+      display: inline-flex !important;
+      vertical-align: baseline;
+      margin-left: 0.45em;
+    }
+    /* The zip form is a form, not part of the sentence: its own block, left. */
     [class*="ContainerCommon__Container"] > [class*="BlockStack__BlockStack"] > [class*="ExpansionBlock__ExpansionBlock"] {
-      flex-basis: 100% !important;
+      display: block !important;
+      text-align: left !important;
     }
 
     /* "Free shipping over $150" — dropped, so nothing sits between the zip and
@@ -1379,6 +1372,38 @@
       mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h9'/%3E%3Cpath d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z'/%3E%3C/svg%3E") center / contain no-repeat;
     }
 
+    /* The green pulse, on the front of the folded sentence.
+
+       Gated on :host([data-fr-merged]) so it only appears once the countdown is
+       actually in the line — a live dot on a sentence making no deadline claim
+       is decoration pretending to be information.
+
+       The keyframes are declared here rather than reused from
+       component-product-page.css: animations do not cross a shadow boundary, so
+       .dest__pulse's own @keyframes are invisible from in here. */
+    :host([data-fr-merged]) [class*="Text__Text"]:has(> u)::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #3FA34D;
+      margin-right: 0.45em;
+      vertical-align: 0.08em;
+      box-shadow: 0 0 0 0 rgba(63, 163, 77, 0.55);
+      animation: fr-promise-pulse 2s ease-out infinite;
+    }
+
+    @keyframes fr-promise-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(63, 163, 77, 0.55); }
+      70%  { box-shadow: 0 0 0 6px rgba(63, 163, 77, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(63, 163, 77, 0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :host([data-fr-merged]) [class*="Text__Text"]:has(> u)::before { animation: none; }
+    }
+
     /* The widget's outermost element carries margin: 20px 0. Being the first and
        last in-flow child of a host with no padding or border, those margins
        collapse straight out through the host, so 20px of air lands below the box
@@ -1399,7 +1424,7 @@
     /* Centred at every width, deliberately — no desktop flush-left override.
        The buy column this sits in is centre-aligned all the way up, so the line
        was the one element breaking ranks with the add-to-cart bar above it and
-       the tab row below. */
+       the tab row below. Handled by text-align on the block above. */
   `;
 
   /* --- "Aug 13" -> "Thu, Aug 13" --- */
@@ -1442,9 +1467,64 @@
     return edits.length;
   };
 
-  // The box carries a live carrier estimate; our urgency line is derived from
-  // the theme's rates table. Two delivery dates on one page invites the shopper
-  // to notice they disagree, so when Shopify's resolves, ours steps aside.
+  /* --- Fold the countdown into Shopify's sentence --- */
+  // One claim, in the order it is acted on: the deadline first, then what
+  // beating it earns. Shopify writes the text node
+  //   "Arrives as soon as Wed, Aug 12 in "  <u>67025</u>
+  // and this rewrites it to
+  //   "Order within 1d to receive as soon as Wed, Aug 12 at "  <u>67025</u>
+  // leaving the postcode, the pencil and the Shop mark exactly where they are.
+  //
+  // The sentence is NOT one text node. Shopify splits it into three, either
+  // side of the date, which is itself a node so the widget can rewrite the date
+  // alone:
+  //
+  //   "Arrives as soon as "   "Wed, Aug 12"   " in "   <u>67025</u>
+  //
+  // So the fold edits the two joining nodes and leaves the date between them
+  // untouched — which is also why the weekday pass upstream works: it matches
+  // that middle node on its own.
+  //
+  // The lead pattern accepts its own output as well as Shopify's, because this
+  // runs again every minute and has to swap the number in a sentence it already
+  // wrote without wrapping it a second time.
+  const SP_LEAD = /^\s*(?:Arrives as soon as|Order within .+? to receive as soon as)\s*$/;
+  const SP_JOIN = /^\s*(?:in|at)\s*$/;
+
+  const foldCountdown = (root, countdown) => {
+    // No countdown means no deadline worth claiming — past the cutoff, or a
+    // country the rates table cannot quote. Shopify's own sentence stands.
+    if (!countdown) return false;
+    // The postcode anchors the line: it is the only <u> in the box, and the
+    // sentence is exactly its parent's child nodes.
+    const zip = root.querySelector('u');
+    const line = zip && zip.parentElement;
+    if (!line) return false;
+
+    let lead = null;
+    let join = null;
+    [...line.childNodes].forEach((n) => {
+      if (n.nodeType !== 3 || !n.nodeValue) return;
+      if (!lead && SP_LEAD.test(n.nodeValue)) lead = n;
+      else if (!join && SP_JOIN.test(n.nodeValue)) join = n;
+    });
+    // A phrasing this does not know — Shopify also writes "Free delivery
+    // tomorrow to 10001", which has no date to hang a deadline off. Report the
+    // miss so the countdown falls back to its own line rather than vanishing.
+    if (!lead) return false;
+
+    const next = 'Order within ' + countdown + ' to receive as soon as ';
+    // Written only on a real change. sync() runs on every body mutation on the
+    // page, and an unconditional write would fire the shadow observer each time
+    // to land the identical string.
+    if (lead.nodeValue !== next) lead.nodeValue = next;
+    if (join && join.nodeValue !== ' at ') join.nodeValue = ' at ';
+    return true;
+  };
+
+  // Shop Promise carries a live carrier estimate; our countdown carries the
+  // dispatch deadline. Folded together they read as one sentence; where the
+  // fold fails, the countdown keeps its own line below.
   const initShopPromise = () => {
     const host = () => document.querySelector('delivery-promise-wc');
     if (!host() && !document.querySelector('.delivery-promise__promise-container')) return;
@@ -1499,29 +1579,33 @@
       });
     };
 
-    // Our line no longer stands down for Shopify's — it sits under it as the
-    // deadline for the date Shopify quotes, carrying the pulse and the
-    // countdown. The class is what tells the estimator to drop its own arrival
-    // date and render the countdown alone; see renderUrgency.
+    // Order matters: the weekday has to be on the date before the fold reads it,
+    // or the sentence ends up quoting "Aug 12" without the day it took work to
+    // add.
     //
-    // The event fires only on a real change. sync() runs on every body mutation
-    // on the page, and re-rendering the countdown on each of those would be a
-    // lot of work to arrive at the same string.
+    // The data-fr-merged attribute is what the pulse hangs off in the skin — a
+    // green dot belongs on a line that makes a deadline claim, not on Shopify's
+    // untouched sentence where the fold did not take.
     const sync = () => {
       skin();
       nameDays();
-      if (!urgency) return;
-      const before = urgency.classList.contains('is-with-promise');
-      const now = resolved();
-      if (before === now) return;
-      urgency.classList.toggle('is-with-promise', now);
-      document.dispatchEvent(new CustomEvent('fr:promise'));
+      const el = host();
+      const sr = el && el.shadowRoot;
+      const countdown = urgency ? urgency.dataset.countdown || '' : '';
+      const merged = !!(sr && resolved() && foldCountdown(sr, countdown));
+      if (el) el.toggleAttribute('data-fr-merged', merged);
+      // Folded, so our own copy of the line would be the same sentence twice.
+      if (urgency) urgency.classList.toggle('is-merged', merged);
     };
 
     sync();
     // The bundle is deferred and resolves well after this runs, so a one-shot
     // check would almost always miss it.
     new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
+    // The number changes on the minute, and that tick happens inside the
+    // estimator with nothing in the DOM to observe. No loop: sync writes text,
+    // it never republishes the countdown.
+    document.addEventListener('fr:countdown', sync);
   };
 
   /* --- Foreign Engineering: pick salt or slate per card from the image --- */
