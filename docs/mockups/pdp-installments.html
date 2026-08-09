@@ -16,7 +16,6 @@
     --rule:     rgba(164, 164, 164, 0.4);
     --rule-firm:rgba(45, 44, 47, 0.16);
     --accent:   #C4632A;
-    --slate:    #4A4E54;
     --good:     #5E7350;
 
     --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
@@ -120,17 +119,20 @@
 
   .sec-head p { margin: 0.4rem 0 0; max-width: 62ch; color: var(--ink-soft); font-size: 14.5px; }
 
-  /* ---------- variant switcher ---------- */
-  .switcher {
+  /* ---------- controls ---------- */
+  .controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
     position: sticky;
     top: 0;
     z-index: 20;
     padding: 0.9rem 0;
     background: linear-gradient(var(--paper) 72%, transparent);
   }
+
+  .switcher { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
   .switcher button {
     font-family: var(--sans);
@@ -155,6 +157,18 @@
     border-color: var(--ink);
     color: var(--paper);
   }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .toggle input { accent-color: var(--accent); width: 15px; height: 15px; }
+  .toggle:has(input:disabled) { opacity: 0.35; cursor: not-allowed; }
 
   /* ---------- the rig ---------- */
   .rig {
@@ -217,7 +231,7 @@
   }
 
   .phone__gallery {
-    flex: 0 0 300px;
+    flex: 0 0 320px;
     background:
       radial-gradient(120% 90% at 50% 18%, #3A3A3C 0%, #232325 55%, #171718 100%);
     position: relative;
@@ -312,6 +326,8 @@
     margin-bottom: 2rem;
   }
 
+  .phone__col .fr-sizes { margin-bottom: 1.25rem; }
+
   .fr-size {
     min-width: 42px;
     height: 34px;
@@ -325,10 +341,6 @@
   }
 
   .fr-size.is-selected { border-color: #2D2C2F; background: #2D2C2F; color: #F1EEE6; }
-
-  /* The phone column is shorter than the desktop one, so the size row sits
-     closer to the line beneath it. */
-  .phone__col .fr-sizes { margin-bottom: 0.5rem; }
 
   /* the add-to-cart bar, desktop and mobile share the look */
   .fr-atc {
@@ -372,13 +384,68 @@
   }
 
   /* ============================================================
-     THE SLOT — one per treatment. Only the selected one shows.
+     THE SLOT — sits above the add-to-cart bar, where the
+     reference puts it. One block per treatment; only the
+     selected one displays.
      ============================================================ */
-  .slot { display: none; margin-top: 1rem; }
+  .slot { display: none; margin-bottom: 1rem; }
+  .rig[data-variant="d"] .slot--d,
   .rig[data-variant="0"] .slot--0,
   .rig[data-variant="a"] .slot--a,
   .rig[data-variant="b"] .slot--b,
   .rig[data-variant="c"] .slot--c { display: block; }
+
+  /* --- D. the sentence, provider linked (recommended) --- */
+  .terms-line {
+    font-size: 11px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    color: #2D2C2F;
+    margin: 0;
+    text-align: center;
+  }
+
+  .terms-line a {
+    color: #2D2C2F;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .terms-line .figure { font-variant-numeric: tabular-nums; }
+
+  /* The Shop Pay lockup, sized to sit on an 11px baseline rather than tower
+     over it. Shopify's own component renders it at 20px, which is what made
+     the shipped line read as an ad rather than as part of the column. */
+  .shop-pay-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    vertical-align: -3px;
+    background: #5A31F4;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+    text-decoration: none;
+  }
+
+  .shop-pay-mark .pay {
+    background: #FFFFFF;
+    color: #5A31F4;
+    border-radius: 2px;
+    padding: 0 3px;
+    font-size: 8px;
+  }
+
+  a.shop-pay-mark:hover { opacity: 0.85; }
+
+  /* The monthly half of the sentence, shown only when the toggle is on. */
+  .terms-line .monthly { display: none; }
+  .rig[data-monthly="on"] .terms-line .monthly { display: inline; }
+  .rig[data-monthly="on"] .terms-line .lead-or { display: none; }
 
   /* --- 0. Shopify, as shipped --- */
   .shopify-pill {
@@ -425,6 +492,7 @@
     line-height: 1.5;
     color: #6E6E6E;
     letter-spacing: 0.02em;
+    margin: 0;
   }
 
   .terms-sentence a { color: #2D2C2F; text-underline-offset: 2px; }
@@ -448,7 +516,7 @@
   .terms-ledger .qual { color: #A4A4A4; }
   .terms-ledger .figure { color: #2D2C2F; font-variant-numeric: tabular-nums; }
 
-  /* --- C. the unfilled echo (recommended) --- */
+  /* --- C. unfilled echo of the button --- */
   .terms-echo {
     display: flex;
     align-items: center;
@@ -468,15 +536,41 @@
 
   .terms-echo .figure { font-variant-numeric: tabular-nums; color: #2D2C2F; }
 
-  .terms-echo__aside {
-    display: block;
-    margin-top: 0.55rem;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    color: #A4A4A4;
+  /* ---------- specimen strip ---------- */
+  .specimen {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
-  .terms-echo__aside a { color: #6E6E6E; text-underline-offset: 2px; }
+  .specimen__row { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .specimen__label {
+    font-size: 9.9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Rendered on the theme's own ground, at the theme's own size, so the
+     specimen is the real thing rather than a description of it. */
+  .specimen__line {
+    background: #F1EEE6;
+    color: #2D2C2F;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(45, 44, 47, 0.14);
+  }
+
+  .specimen__line a { color: #2D2C2F; text-decoration: underline; text-underline-offset: 2px; }
+  .specimen__line s { color: #A4A4A4; text-decoration-color: #C4632A; }
 
   /* ---------- comparison table ---------- */
   .table-scroll { overflow-x: auto; }
@@ -541,7 +635,8 @@
     letter-spacing: 0.01em;
   }
 
-  .flag p { margin: 0; font-size: 13.5px; color: var(--ink-soft); max-width: 68ch; }
+  .flag p { margin: 0 0 0.5rem; font-size: 13.5px; color: var(--ink-soft); max-width: 68ch; }
+  .flag p:last-child { margin-bottom: 0; }
 
   /* ---------- code ---------- */
   pre {
@@ -584,21 +679,30 @@
     <h1>Pay in 4, in our own voice</h1>
     <p class="standfirst">
       Shop Promise now wears the theme's clothes. The installments line does not — it is still
-      Shopify's grey pill, 14px type, Shop&nbsp;Pay lockup, sitting directly under a buy column set
-      in 11px. <strong>Three treatments below</strong>, drawn on the real column at real pixel sizes.
-      Switch between them; the phone and the desktop column change together.
+      Shopify's grey pill, 14px type, 20px lockup, sitting in a column set in 11px.
+      <strong>The treatment below follows the Klarna pattern</strong>: one plain sentence above the
+      button, ending in the Shop&nbsp;Pay mark, which is the link. Drawn on the real mobile and
+      desktop columns at real pixel sizes — switch treatments and both frames change together.
     </p>
   </header>
 
   <section>
-    <div class="switcher" role="group" aria-label="Installments treatment">
-      <button type="button" data-set="0" aria-pressed="false">Shopify, as shipped</button>
-      <button type="button" data-set="a" aria-pressed="false">A · Quiet sentence</button>
-      <button type="button" data-set="b" aria-pressed="false">B · Hairline ledger</button>
-      <button type="button" data-set="c" aria-pressed="true">C · Unfilled echo</button>
+    <div class="controls">
+      <div class="switcher" role="group" aria-label="Installments treatment">
+        <button type="button" data-set="d" aria-pressed="true">The sentence</button>
+        <button type="button" data-set="0" aria-pressed="false">Shopify, as shipped</button>
+        <button type="button" data-set="a" aria-pressed="false">Earlier · A</button>
+        <button type="button" data-set="b" aria-pressed="false">Earlier · B</button>
+        <button type="button" data-set="c" aria-pressed="false">Earlier · C</button>
+      </div>
+
+      <label class="toggle">
+        <input type="checkbox" id="monthly-toggle">
+        Include the &ldquo;from&nbsp;$X/month&rdquo; half
+      </label>
     </div>
 
-    <div class="rig" id="rig" data-variant="c">
+    <div class="rig" id="rig" data-variant="d" data-monthly="off">
 
       <!-- ============ PHONE ============ -->
       <div class="rig-col">
@@ -616,6 +720,16 @@
             </div>
 
             <!-- slot: mobile -->
+            <div class="slot slot--d">
+              <p class="terms-line">
+                <span class="monthly">From <span class="figure">$12</span>/month, or 4</span><span
+                  class="lead-or">Or 4</span> payments of
+                <span class="figure">$34.25</span> at 0% interest with
+                <a class="shop-pay-mark" href="#0" aria-label="Shop Pay — how instalments work"
+                   ><span>shop</span><span class="pay">Pay</span></a>
+              </p>
+            </div>
+
             <div class="slot slot--0">
               <div class="shopify-pill">
                 <span>Pay in 4 interest-free installments of <b>$34.25</b> with</span>
@@ -643,9 +757,6 @@
                 <span>Or 4 payments</span>
                 <span class="figure">$34.25</span>
               </div>
-              <span class="terms-echo__aside">
-                At checkout with Shop&nbsp;Pay · <a href="#0">How it works</a>
-              </span>
             </div>
 
             <p class="fr-promise">
@@ -673,8 +784,9 @@
         </div>
 
         <p class="note">
-          The line stays <b>in the column</b>, not in the sticky band. Band height feeds
-          <code>--pdp-band-h</code>, which the gallery sizes itself against — a fourth row there
+          On mobile the button lives in the sticky band, so the line sits at the foot of the column
+          instead. It stays <b>out of the band</b> deliberately: band height feeds
+          <code>--pdp-band-h</code>, which the gallery sizes itself against, and a fourth row there
           takes 40-odd pixels off every product image on every phone.
         </p>
       </div>
@@ -695,12 +807,17 @@
               <div class="fr-size">L</div>
             </div>
 
-            <div class="fr-atc">
-              <span>Add to cart</span>
-              <span>$137</span>
+            <!-- slot: desktop, above the button as in the reference -->
+            <div class="slot slot--d">
+              <p class="terms-line">
+                <span class="monthly">From <span class="figure">$12</span>/month, or 4</span><span
+                  class="lead-or">Or 4</span> payments of
+                <span class="figure">$34.25</span> at 0% interest with
+                <a class="shop-pay-mark" href="#0" aria-label="Shop Pay — how instalments work"
+                   ><span>shop</span><span class="pay">Pay</span></a>
+              </p>
             </div>
 
-            <!-- slot: desktop -->
             <div class="slot slot--0">
               <div class="shopify-pill">
                 <span>Pay in 4 interest-free installments of <b>$34.25</b> with</span>
@@ -728,9 +845,11 @@
                 <span>Or 4 payments</span>
                 <span class="figure">$34.25</span>
               </div>
-              <span class="terms-echo__aside">
-                At checkout with Shop&nbsp;Pay · <a href="#0">How it works</a>
-              </span>
+            </div>
+
+            <div class="fr-atc">
+              <span>Add to cart</span>
+              <span>$137</span>
             </div>
 
             <p class="fr-promise">
@@ -741,23 +860,61 @@
         </div>
 
         <p class="note">
-          Treatment <b>C</b> borrows the add-to-cart bar's exact geometry — same width, same
-          left-label / right-figure split, same 0.2em tracking — and empties it out. The commit
-          reads first because it is filled; the alternative reads second because it is only drawn.
+          <b>Above</b> the button, as in the reference. It reads as a condition on the price you are
+          about to commit to; below the button it reads as an afterthought to a decision already
+          made. The Shop&nbsp;Pay mark stays and carries the link, but at 9px instead of Shopify's
+          20px — small enough to sit on the line rather than tower over it.
         </p>
       </div>
 
     </div>
   </section>
 
+  <!-- ============ COPY ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>The line itself</h2>
+      <p>
+        At the column's own 11px, in the theme ink rather than the grey the old line used — a
+        sentence people are meant to read, not a disclaimer. The Shop&nbsp;Pay mark closes it and
+        is the only link.
+      </p>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen__row">
+        <p class="specimen__label">Ships as</p>
+        <p class="specimen__line">
+          Or 4 payments of $34.25 at 0% interest with
+          <a class="shop-pay-mark" href="#0" aria-label="Shop Pay"
+             ><span>shop</span><span class="pay">Pay</span></a>
+        </p>
+      </div>
+
+      <div class="specimen__row">
+        <p class="specimen__label">With monthly financing, if we turn it on</p>
+        <p class="specimen__line">
+          From $12/month, or 4 payments of $34.25 at 0% interest with
+          <a class="shop-pay-mark" href="#0" aria-label="Shop Pay"
+             ><span>shop</span><span class="pay">Pay</span></a>
+        </p>
+      </div>
+
+      <div class="specimen__row">
+        <p class="specimen__label">Dropped from the reference</p>
+        <p class="specimen__line">
+          <s>Check purchase power</s> — the mark is the link instead, so the sentence has one
+          destination rather than two competing underlines.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ COMPARISON ============ -->
   <section>
     <div class="sec-head">
-      <h2>What each one costs you</h2>
-      <p>
-        All three drop the grey pill, the 14px type and the Shop&nbsp;Pay lockup from the buy
-        column. They differ in how much weight the line carries.
-      </p>
+      <h2>Against the passes before it</h2>
+      <p>Kept in the switcher above so the choice is visible, not asserted.</p>
     </div>
 
     <div class="table-scroll">
@@ -766,28 +923,34 @@
           <tr>
             <th scope="col"></th>
             <th scope="col">Reads as</th>
-            <th scope="col">Weight against the ATC</th>
-            <th scope="col">Watch for</th>
+            <th scope="col">Position</th>
+            <th scope="col">Why not</th>
           </tr>
         </thead>
         <tbody>
           <tr>
+            <th scope="row">The sentence <span class="tag">Ship</span></th>
+            <td class="pick">A condition on the price</td>
+            <td class="pick">Above the button</td>
+            <td class="pick">—</td>
+          </tr>
+          <tr>
             <th scope="row">A · Quiet sentence</th>
             <td>Body copy, easy to skip</td>
-            <td>Recedes — it is the lightest thing on the column</td>
-            <td>Shoppers who need the number to decide never see it</td>
+            <td>Below the button</td>
+            <td>Grey on grey; the number never gets seen</td>
           </tr>
           <tr>
             <th scope="row">B · Hairline ledger</th>
-            <td>A spec row, like the fabric table</td>
-            <td>Level with the size row, below the button</td>
+            <td>A spec row</td>
+            <td>Below the button</td>
             <td>Two more hairlines in a column that already has several</td>
           </tr>
           <tr>
-            <th scope="row">C · Unfilled echo <span class="tag">Pick</span></th>
-            <td class="pick">A second, quieter way to buy</td>
-            <td class="pick">Deliberate second place — same shape, no fill</td>
-            <td class="pick">Looks clickable but isn't; the aside underneath does the explaining</td>
+            <th scope="row">C · Unfilled echo</th>
+            <td>A second way to buy</td>
+            <td>Below the button</td>
+            <td>Looks clickable, isn't — the bar shape overpromises</td>
           </tr>
         </tbody>
       </table>
@@ -798,19 +961,38 @@
   <section>
     <div class="sec-head">
       <h2>Before this ships</h2>
-      <p>Four things that are about the money, not the type.</p>
+      <p>Four things about the money, not the type.</p>
     </div>
 
     <div class="flags">
       <div class="flag">
         <div class="flag__mark">§</div>
         <div>
+          <h3>The &ldquo;from $X/month&rdquo; half is the risky half</h3>
+          <p>
+            In the Klarna reference both clauses are true of one provider: Klarna's monthly
+            financing and its Pay-in-4 are both 0% on eligible orders. Shop&nbsp;Pay splits
+            differently — the 4-payment plan is interest-free, but its monthly plans are
+            interest-bearing and carry an order minimum. Written as one sentence, &ldquo;at 0%
+            interest&rdquo; would land on both halves and be wrong about the first.
+          </p>
+          <p>
+            So the toggle above is off by default. If we do want the monthly clause, it needs its
+            own rate and its own minimum: &ldquo;From $12/month with Shop&nbsp;Pay financing, or 4
+            payments of $34.25 at 0% interest.&rdquo;
+          </p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <div class="flag__mark">§</div>
+        <div>
           <h3>Writing our own copy makes it our disclosure</h3>
           <p>
             Shopify ships <code>{{ form | payment_terms }}</code> as a locked web component partly
-            because instalment messaging is regulated in the US. Replacing it with our own wording
-            means Foreign Resource is authoring that line. Keep the figure exact, keep the link
-            pointing at Shopify's own terms, and don't add claims Shop&nbsp;Pay doesn't make.
+            because instalment messaging is regulated in the US. Replacing it with our own sentence
+            means Foreign Resource is authoring that line. Keep the figure exact, point
+            Shop&nbsp;Pay at Shopify's own terms page, and don't make claims Shop&nbsp;Pay doesn't.
           </p>
         </div>
       </div>
@@ -823,7 +1005,8 @@
             Shop&nbsp;Pay Installments only applies inside an eligible order-value range and for US
             buyers. The line renders today whenever the section setting is on, so a $28 tee and an
             overseas visitor both get offered something checkout will not honour. Confirm the
-            current thresholds in the Shop&nbsp;Pay dashboard and gate on price and market.
+            current thresholds in the Shop&nbsp;Pay dashboard; the code below gates on a min and max
+            you set in the customiser.
           </p>
         </div>
       </div>
@@ -835,21 +1018,8 @@
           <p>
             The theme divides the variant price by four. Shop&nbsp;Pay absorbs the odd cents into
             the first payment, so on a price that doesn't divide cleanly our figure can sit a penny
-            under the one the customer actually sees. "Payments from $34.25" is the honest fix if
-            we don't want to replicate their rounding.
-          </p>
-        </div>
-      </div>
-
-      <div class="flag">
-        <div class="flag__mark">§</div>
-        <div>
-          <h3>The Shop mark goes, unlike on Promise</h3>
-          <p>
-            The restyled Promise box keeps Shopify's mark because the programme expects it to stay
-            recognisable. Here the mark is dropped from the bar and named in the aside instead
-            ("At checkout with Shop&nbsp;Pay"), which keeps the attribution without putting a purple
-            lockup in a column that has no other colour in it.
+            under the one the customer actually sees. &ldquo;4 payments from $34.25&rdquo; is the
+            honest fix if we don't want to replicate their rounding.
           </p>
         </div>
       </div>
@@ -859,84 +1029,109 @@
   <!-- ============ CODE ============ -->
   <section>
     <div class="sec-head">
-      <h2>What C costs to build</h2>
+      <h2>What it costs to build</h2>
       <p>
         Two files, both already carrying the pieces. The markup replaces
-        <code>sections/product-info.liquid:414–420</code>; the styles replace
-        <code>.pdp__terms</code> in <code>assets/component-product-page.css</code>. The JS hook
+        <code>sections/product-info.liquid:414–420</code> and moves above the
+        <code>.pdp__add-btn</code>; the styles replace <code>.pdp__terms</code> in
+        <code>assets/component-product-page.css</code>. The JS hook
         <code>[data-installment]</code> is untouched, so the figure keeps following the variant.
       </p>
     </div>
 
-<pre><code>{%- comment -%} product-info.liquid — replaces the .pdp__terms block {%- endcomment -%}
+<pre><code>{%- comment -%}
+  Pay in 4. Shopify's {{ form | payment_terms }} renders a locked-down web
+  component — its Shop Pay lockup and wording can't be restyled or reworded.
+  So the line is written here instead, with the instalment figure derived from
+  the variant price and kept in sync by JS.
+
+  Gated on the eligible order range as well as the setting: outside it,
+  checkout will not offer instalments and the line would be a promise we
+  cannot keep.
+{%- endcomment -%}
 {%- if section.settings.show_payment_terms
    and current_variant.price &gt;= section.settings.installments_min
    and current_variant.price &lt;= section.settings.installments_max -%}
-  &lt;div class="pdp__terms"&gt;
-    &lt;div class="pdp__terms-bar"&gt;
-      &lt;span&gt;Or 4 payments&lt;/span&gt;
-      &lt;span class="pdp__terms-figure" data-installment&gt;
-        ${{ inst_dollars }}.{% if inst_rem &lt; 10 %}0{% endif %}{{ inst_rem }}
-      &lt;/span&gt;
-    &lt;/div&gt;
-    &lt;p class="pdp__terms-aside"&gt;
-      At checkout with Shop&amp;nbsp;Pay ·
-      &lt;a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
-         class="pdp__terms-link" target="_blank" rel="noopener"&gt;How it works&lt;/a&gt;
-    &lt;/p&gt;
-  &lt;/div&gt;
+  &lt;p class="pdp__terms"&gt;
+    Or 4 payments of
+    &lt;span data-installment&gt;${{ inst_dollars }}.{% if inst_rem &lt; 10 %}0{% endif %}{{ inst_rem }}&lt;/span&gt;
+    at 0% interest with
+    &lt;a href="{{ section.settings.installments_url | default: 'https://shop.app/pay-installments' }}"
+       class="pdp__terms-mark" target="_blank" rel="noopener" aria-label="Shop Pay — how instalments work"&gt;
+      &lt;span&gt;shop&lt;/span&gt;&lt;span class="pdp__terms-mark-pay"&gt;Pay&lt;/span&gt;
+    &lt;/a&gt;
+  &lt;/p&gt;
 {%- endif -%}</code></pre>
 
-<pre><code>/* component-product-page.css — replaces .pdp__terms */
+<pre><code>/* component-product-page.css — replaces .pdp__terms
 
-/* An unfilled add-to-cart bar. Geometry is deliberately identical to
-   .pdp__add-btn so the two read as one decision with two answers;
-   only the fill is withheld. Height is 42 rather than 56 because it
-   is the second answer, not the first. */
-.pdp__terms { margin-bottom: var(--pdp-item); }
-
-.pdp__terms-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  height: 42px;
-  padding: 0 1.25rem;
-  border: 1px solid rgba(74, 78, 84, 0.35);
-  font-size: 9.9px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #4A4E54;
-}
-
-/* Digits align with the price in the button above it. */
-.pdp__terms-figure {
+   Set in the column's ink rather than the old #6E6E6E: this is a sentence
+   the shopper is meant to read before committing, not a disclaimer parked
+   under the decision. The mark is the only link, so the line has one
+   destination instead of competing for the click with the button below. */
+.pdp__terms {
+  font-size: 11px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
   color: #2D2C2F;
-  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--pdp-item);
 }
 
-.pdp__terms-aside {
-  margin-top: 0.55rem;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: #A4A4A4;
+/* Digits line up with the price in the button below. */
+.pdp__terms [data-installment] { font-variant-numeric: tabular-nums; }
+
+/* The Shop Pay lockup. Shopify's own component renders it at 20px, which is
+   most of why the shipped line read as an ad dropped into the column; at 9px
+   it sits on the sentence instead of over it. vertical-align nudges the box
+   down onto the text baseline — inline-flex aligns on its own bottom edge,
+   which without this leaves the mark riding high. */
+.pdp__terms-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: -3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #5A31F4;
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
 }
 
-.pdp__terms-link {
-  color: #6E6E6E;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.pdp__terms-mark-pay {
+  background: #FFFFFF;
+  color: #5A31F4;
+  border-radius: 2px;
+  padding: 0 3px;
+  font-size: 8px;
 }
 
-.pdp__terms-link:hover { opacity: 0.7; }</code></pre>
+.pdp__terms-mark:hover { opacity: 0.85; }</code></pre>
+
+<pre><code>// product-info.liquid schema — two new settings beside show_payment_terms
+{
+  "type": "range",
+  "id": "installments_min",
+  "label": "Instalments shown at or above (cents)",
+  "min": 0, "max": 20000, "step": 500, "default": 5000
+},
+{
+  "type": "range",
+  "id": "installments_max",
+  "label": "Instalments shown at or below (cents)",
+  "min": 20000, "max": 300000, "step": 5000, "default": 300000
+}</code></pre>
   </section>
 
   <footer>
     Mockup only — nothing here is on JACQUEMUS 1.1 yet. Cormorant Garamond and Inter are not
     embedded, so this page falls back to Georgia and the system sans; on the live theme the buy
-    column is Inter throughout. Figures shown for a $137 variant.
+    column is Inter throughout. The Shop&nbsp;Pay mark is drawn in CSS rather than dropped in as
+    Shopify's SVG — swap in the official asset from their brand kit if you want the exact wordmark.
+    Figures shown for a $137 variant.
   </footer>
 
 </div>
@@ -945,16 +1140,23 @@
   (function () {
     var rig = document.getElementById('rig');
     var buttons = Array.prototype.slice.call(document.querySelectorAll('.switcher button'));
+    var monthly = document.getElementById('monthly-toggle');
 
     function select(key) {
       rig.setAttribute('data-variant', key);
       buttons.forEach(function (b) {
         b.setAttribute('aria-pressed', String(b.dataset.set === key));
       });
+      // The monthly clause exists only in the sentence treatment.
+      monthly.disabled = key !== 'd';
     }
 
     buttons.forEach(function (b) {
       b.addEventListener('click', function () { select(b.dataset.set); });
+    });
+
+    monthly.addEventListener('change', function () {
+      rig.setAttribute('data-monthly', monthly.checked ? 'on' : 'off');
     });
   })();
 </script>
