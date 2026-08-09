@@ -1,24 +1,50 @@
 {%- comment -%}
   PDP — Company details.
 
-  The Fabric / Colour / Packaging dropdowns, lifted out of Product Info so they
+  The Packaging / Mission / Colour / Fabric rows, lifted out of Product Info so they
   can be ordered, moved or removed independently of the buy box. They render the
   same .pdp__rows markup as before, so component-product-page.css and
   initPdpRows in global.js pick them up unchanged.
 
   Rows open one at a time. Which one starts open is a per-block checkbox rather
   than a hardcoded first-row rule, so it stays a merchandising decision.
+
+  DESKTOP — the same blocks laid out as one flush four-up band, on the same
+  column geometry as FOREIGN ENGINEERING directly above it: full bleed, equal
+  columns, 1.25rem inset. The dividers therefore land exactly on the seams
+  between the images upstairs instead of cutting across them, which is what
+  keeps two stacked full-width bands from reading as noise.
+
+  The accordion is a mobile behaviour only. Across four short columns there is
+  nothing to collapse, and a click that reflowed a quarter of the row would be
+  the messy part — so on desktop every panel is simply open, the toggle is
+  replaced by a plain heading, and the images stay off by default (the band
+  above is already carrying the pictures).
+
+  Two headings are rendered per row, one shown per breakpoint: a <button> for
+  the mobile accordion and an <h3> for the static desktop column. Duplicating
+  two or three words of heading text is the cost of not lying about the
+  semantics — a button that cannot be pressed, or an aria-expanded that
+  contradicts what is on screen, is worse.
 {%- endcomment -%}
 
 {%- assign detail_rows = section.blocks | where: 'type', 'detail_row' -%}
+{%- assign desktop_layout = section.settings.desktop_layout | default: 'columns' -%}
 
 {%- if detail_rows.size > 0 -%}
-  <section class="pdp-details reveal">
+  <section
+    class="pdp-details reveal{% if desktop_layout == 'columns' %} pdp-details--columns{% if section.settings.desktop_media %} pdp-details--media{% endif %}{% endif %}"
+    style="--pdp-cols: {{ detail_rows.size }};"
+  >
     {%- if section.settings.heading != blank -%}
       <h2 class="pdp-details__heading">{{ section.settings.heading }}</h2>
     {%- endif -%}
 
-    <div class="pdp__rows" data-pdp-rows>
+    {%- comment -%}
+      The attribute's value is what tells initPdpRows the group goes static
+      above 769px, so it can unhide the panels the accordion left closed.
+    {%- endcomment -%}
+    <div class="pdp__rows" data-pdp-rows="{% if desktop_layout == 'columns' %}columns{% else %}stack{% endif %}">
       {%- comment -%}
         Only the first row asking to be open gets it. The group is
         one-at-a-time by design, so two blocks ticking the box would render
@@ -41,6 +67,15 @@
             <span>{{ block.settings.heading }}</span>
             <span class="pdp__row-icon" aria-hidden="true"></span>
           </button>
+
+          {%- comment -%}
+            Desktop column heading. Hidden below 769px, where the button above
+            takes over — only one of the two is ever displayed. Not emitted at
+            all in stack mode, where nothing would ever reveal it.
+          {%- endcomment -%}
+          {%- if desktop_layout == 'columns' -%}
+            <h3 class="pdp__row-title">{{ block.settings.heading }}</h3>
+          {%- endif -%}
 
           <div class="pdp__row-panel" data-row-panel {% unless is_open %}hidden{% endunless %}>
             {%- if block.settings.content != blank -%}
@@ -116,7 +151,8 @@
 
 <style>
   /* Matches the inset and rhythm the rows had inside Product Info, now that
-     they own their own band of the page. */
+     they own their own band of the page. This is the mobile case, and the
+     desktop case too whenever the four-up band is switched off. */
   .pdp-details {
     padding: 0 clamp(1.25rem, 0.5rem + 3vw, 4rem);
     max-width: 640px;
@@ -134,6 +170,12 @@
   }
 </style>
 
+{%- comment -%}
+  The four-up desktop band lives in component-product-page.css alongside the
+  rest of the .pdp__row rules it overrides — keeping it here would put the
+  override in a different stylesheet from the thing it overrides.
+{%- endcomment -%}
+
 {% schema %}
 {
   "name": "Company Details",
@@ -144,6 +186,24 @@
       "id": "heading",
       "label": "Heading",
       "info": "Leave blank to show the rows with no heading above them."
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "Desktop layout",
+      "info": "Mobile is always the stacked accordion. Columns line the rows up on the same grid as Foreign Engineering above, with every panel open.",
+      "options": [
+        { "value": "columns", "label": "Equal columns, full width" },
+        { "value": "stack", "label": "Stacked accordion (same as mobile)" }
+      ],
+      "default": "columns"
+    },
+    {
+      "type": "checkbox",
+      "id": "desktop_media",
+      "label": "Show row images in the desktop columns",
+      "info": "Off by default. Sitting straight under the Foreign Engineering images, four more pictures at quarter width is what makes the band look busy. Images always show on mobile.",
+      "default": false
     }
   ],
   "blocks": [
@@ -184,8 +244,9 @@
       "name": "Company Details",
       "blocks": [
         { "type": "detail_row", "settings": { "heading": "Our Packaging", "open_by_default": true } },
-        { "type": "detail_row", "settings": { "heading": "Our Fabrics" } },
-        { "type": "detail_row", "settings": { "heading": "Our Colors" } }
+        { "type": "detail_row", "settings": { "heading": "Our Mission" } },
+        { "type": "detail_row", "settings": { "heading": "Our Colors" } },
+        { "type": "detail_row", "settings": { "heading": "Our Fabrics" } }
       ]
     }
   ]

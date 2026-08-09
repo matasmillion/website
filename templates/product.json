@@ -87,6 +87,17 @@
             "link_url": "/pages/packaging"
           }
         },
+        "row_mission": {
+          "type": "detail_row",
+          "settings": {
+            "heading": "Our Mission",
+            "open_by_default": false,
+            "content": "<p>To inspire global travel. We make premium essentials for the modern explorer — built to move with you, from the airport to the city, from the coast to the mountains.</p><p>Every purchase contributes to the Foreign Fund, our matched donation to UNHCR in support of displaced communities worldwide.</p>",
+            "swatches": "",
+            "link_label": "More on the Foreign Fund",
+            "link_url": "/pages/foreign-fund"
+          }
+        },
         "row_fabric": {
           "type": "detail_row",
           "settings": {
@@ -113,11 +124,14 @@
       },
       "block_order": [
         "row_packaging",
-        "row_fabric",
-        "row_color"
+        "row_mission",
+        "row_color",
+        "row_fabric"
       ],
       "settings": {
-        "heading": ""
+        "heading": "",
+        "desktop_layout": "columns",
+        "desktop_media": false
       }
     },
     "band_rest": {
