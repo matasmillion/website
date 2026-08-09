@@ -1609,10 +1609,15 @@
     }
 
     /* ---- Touch: the fullscreen viewer, since there is no hover to pan with ---- */
-    const open = (slide) => {
+    // inset: open as a panel floating over a dimmed page rather than replacing
+    // the page outright. The gallery's touch viewer wants the full bleed — it
+    // is a pan-and-zoom surface — but a fabric swatch is being compared against
+    // the product it belongs to, so the page has to stay visible behind it.
+    const open = (slide, inset) => {
       if (!slide || !img) return;
       img.src = slide.dataset.zoomSrc || '';
       img.alt = slide.dataset.zoomAlt || '';
+      zoom.classList.toggle('pdp-zoom--inset', !!inset);
       zoom.classList.add('is-active');
       zoom.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -1652,7 +1657,7 @@
       const trigger = e.target.closest('[data-zoom-open]');
       if (!trigger) return;
       e.preventDefault();
-      open(trigger);
+      open(trigger, true);
     });
 
     // Release the zoom rather than let a magnified frame snap past.
@@ -1676,7 +1681,11 @@
     if (zin) zin.addEventListener('click', () => setZoomed(true));
     if (zout) zout.addEventListener('click', () => setZoomed(false));
     if (stage) stage.addEventListener('click', (e) => {
-      if (e.target === img) setZoomed(!zoom.classList.contains('is-zoomed'));
+      if (e.target === img) { setZoomed(!zoom.classList.contains('is-zoomed')); return; }
+      // Everything around the image is scrim in inset mode, and a scrim you can
+      // see the page through reads as dismissable — so it is. The full-bleed
+      // viewer has no "outside" to click, which is why this is scoped.
+      if (zoom.classList.contains('pdp-zoom--inset')) close();
     });
 
     zoom.querySelectorAll('[data-zoom-close]').forEach(b => b.addEventListener('click', close));
