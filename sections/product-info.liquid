@@ -5,15 +5,79 @@
   # FABRIC. Resolved once so the tab button and its panel cannot disagree about
   # whether there is anything to show.
   #
-  # WATCH THE BACK KEY. "Fabric (Back)" is custom.fabric_image, not fabric_back
-  # — it predates the front/back pair and was never renamed. Only the front
-  # follows the obvious convention.
+  # TWO KEY TRAPS, both from fields that predate the current naming:
+  #   "Fabric (Back)"        is custom.fabric_image, NOT fabric_back
+  #   "Fabric (Composition)" is custom.composition,  NOT fabric_composition
+  #   "Fabric (Weight)"      is custom.weight,       NOT fabric_weight
+  # Everything else follows the obvious fabric_* convention.
   assign fabric_text = product.metafields.custom.fabric.value
   assign fabric_front = product.metafields.custom.fabric_front.value
   assign fabric_back = product.metafields.custom.fabric_image.value
+  assign fabric_name = product.metafields.custom.fabric_name.value
+  assign fabric_type = product.metafields.custom.fabric_type.value
+  assign fabric_composition = product.metafields.custom.composition.value
+  assign fabric_weight = product.metafields.custom.weight.value
+  assign fabric_method = product.metafields.custom.fabric_method.value
+  assign fabric_certs = product.metafields.custom.fabric_certifications.value
   assign has_fabric = false
   if fabric_text != blank or fabric_front != blank or fabric_back != blank
     assign has_fabric = true
+  endif
+  # Specs alone are enough to earn the tab — a product can carry the cloth's
+  # composition without anyone having shot the swatch yet.
+  if fabric_name != blank or fabric_type != blank or fabric_composition != blank or fabric_weight != blank or fabric_method != blank or fabric_certs != blank
+    assign has_fabric = true
+  endif
+
+  # MODEL MEASUREMENTS. Imperial for the US, metric everywhere else — the US is
+  # the only market we sell to that reads feet and pounds. Resolved from the
+  # storefront's country, the same source the Returns panel defaults its picker
+  # to, so it is server-rendered and never flashes the wrong units.
+  #
+  # This replaces custom.model_stats, which was read here for months but has no
+  # metafield definition and no value on any product — the line on screen was
+  # actually coming from custom.sizing.
+  assign model_line = product.metafields.custom.model_metric_system.value
+  if localization.country.iso_code == 'US'
+    assign model_imperial = product.metafields.custom.model_imperial.value
+    if model_imperial != blank
+      assign model_line = model_imperial
+    endif
+  endif
+
+  # custom.sizing is the fit note above that line, and on most products it is
+  # real copy — "Fits oversized", "Check size chart", and so on — with the
+  # measurements written into it as one more paragraph. Those products have no
+  # model_* fields, so nothing collides.
+  #
+  # On a product that HAS the model fields, a sizing note consisting of nothing
+  # but a lone "Model is ..." line is the same fact again in different units.
+  # Suppress that one case rather than print it twice. Deliberately narrow: it
+  # needs the model fields present AND a single line AND that line naming the
+  # model, so a multi-paragraph fit note can never be swallowed.
+  #
+  # This is a display guard, not a data fix. Clearing the duplicate metafield
+  # would be tidier, but the field is shared with the published theme, so that
+  # is the merchant's call to make in admin, not ours to make from here.
+  assign sizing_copy = product.metafields.custom.sizing.value
+  assign show_sizing_copy = true
+  if model_line != blank and sizing_copy != blank
+    assign sizing_lines = sizing_copy | strip | newline_to_br | split: '<br />'
+    assign sizing_kept = ''
+    for sizing_line in sizing_lines
+      assign sizing_line_trim = sizing_line | strip
+      unless sizing_line_trim == blank
+        assign sizing_kept = sizing_kept | append: sizing_line_trim | append: '||'
+      endunless
+    endfor
+    assign sizing_kept = sizing_kept | split: '||'
+    # Nested rather than `and`-joined: Liquid evaluates conditions right to
+    # left, so a one-line version of this reads differently than it looks.
+    if sizing_kept.size == 1
+      if sizing_kept[0] contains 'Model is'
+        assign show_sizing_copy = false
+      endif
+    endif
   endif
 
   # Instalment figure — this shop's money format drops decimals, so it is
@@ -455,19 +519,21 @@
 
         {%- comment -%} ===== SIZING ===== {% endcomment -%}
         <div class="pdp__tab-panel" data-tab-panel="sizing" role="tabpanel">
-          {%- if product.metafields.custom.sizing != blank -%}
-            <div class="pdp__tab-description">{{ product.metafields.custom.sizing }}</div>
-          {%- endif -%}
-
-          {%- if product.metafields.custom.model_stats != blank -%}
-            <p class="pdp__tab-meta">{{ product.metafields.custom.model_stats }}</p>
-          {%- endif -%}
-
           {%- comment -%}
-            The SmartSize app block — the SIZE GUIDE link. It renders here and
-            nowhere else: an app block can only be output once, so moving it out
-            of the buy column meant moving it, not copying it. Products with no
-            Size option get it too, since the panel is unconditional.
+            ACTIONS FIRST, then the copy. Someone opening Sizing is trying to
+            pick a size, not read — the two tools that answer that question lead
+            the panel and the measurements support them underneath.
+
+            The SmartSize app block renders here and nowhere else: an app block
+            can only be output once, so moving it out of the buy column meant
+            moving it, not copying it. Products with no Size option get it too,
+            since the panel is unconditional.
+
+            In practice both live buttons arrive from SmartSize's app EMBEDS,
+            which inject #smartrecom-triggers at runtime; initSmartSizePlacement
+            PREPENDS that wrapper to this panel so it lands above this copy too.
+            The two theme links below are dormant (both settings are blank) but
+            are ordered to match, so enabling one changes nothing about layout.
           {%- endcomment -%}
           {%- if app_blocks.size > 0 -%}
             {%- for block in app_blocks -%}
@@ -475,36 +541,70 @@
             {%- endfor -%}
           {%- endif -%}
 
-          {%- if section.settings.size_chart_content != blank -%}
-            <button type="button" class="pdp__tab-link" data-modal-open="size-chart-modal">Size guide</button>
+          {%- if section.settings.size_chart_content != blank or section.settings.size_calculator_url != blank -%}
+            <div class="pdp__size-actions">
+              {%- if section.settings.size_calculator_url != blank -%}
+                <a href="{{ section.settings.size_calculator_url }}" class="pdp__size-btn-cta pdp__size-btn-cta--primary">Find my size</a>
+              {%- endif -%}
+              {%- if section.settings.size_chart_content != blank -%}
+                <button type="button" class="pdp__size-btn-cta" data-modal-open="size-chart-modal">Size guide</button>
+              {%- endif -%}
+            </div>
           {%- endif -%}
 
-          {%- if section.settings.size_calculator_url != blank -%}
-            <a href="{{ section.settings.size_calculator_url }}" class="pdp__tab-link">Find my size</a>
+          {%- if sizing_copy != blank and show_sizing_copy -%}
+            <div class="pdp__tab-description">{{ sizing_copy | newline_to_br }}</div>
+          {%- endif -%}
+
+          {%- comment -%} Imperial or metric, resolved at the top of this file {%- endcomment -%}
+          {%- if model_line != blank -%}
+            <p class="pdp__tab-meta">{{ model_line }}</p>
           {%- endif -%}
         </div>
 
         {%- comment -%} ===== FABRIC ===== {% endcomment -%}
         {%- if has_fabric -%}
           <div class="pdp__tab-panel" data-tab-panel="fabric" role="tabpanel">
-            {%- if fabric_text != blank -%}
-              {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
-              <div class="pdp__tab-description">{{ fabric_text | newline_to_br }}</div>
+            {%- comment -%}
+              THE CLOTH LEADS. Name, then the swatch, then the prose, then the
+              specs — identity, evidence, story, data. The description used to
+              open the panel, which asked people to read about a texture before
+              being shown it.
+
+              The name is a brand-level object, not a per-product one: the same
+              cloth recurs across styles and gets its own entry on the fabric
+              page. Setting it in the same words on every product using it is
+              what makes that legible on the PDP.
+            {%- endcomment -%}
+            {%- if fabric_name != blank -%}
+              <p class="pdp__fabric-name">{{ fabric_name }}</p>
             {%- endif -%}
 
             {%- comment -%}
               Front and back of the cloth. Either may be missing — the grid is
               auto-fit so a lone image fills the width instead of sitting in
               half of an empty two-column row.
+
+              data-zoom-open/-src/-alt hand these to the gallery's existing
+              lightbox; see initPdpZoom. 2048 matches the gallery's zoom source,
+              since the whole point of opening one is to inspect the weave.
             {%- endcomment -%}
             {%- if fabric_front != blank or fabric_back != blank -%}
               <div class="pdp__fabric-shots">
                 {%- if fabric_front != blank -%}
-                  <figure class="pdp__fabric-shot">
+                  <button
+                    type="button"
+                    class="pdp__fabric-shot"
+                    data-zoom-open
+                    data-zoom-src="{{ fabric_front | image_url: width: 2048 }}"
+                    data-zoom-alt="{{ product.title | escape }} fabric, front"
+                    aria-label="View {{ product.title | escape }} fabric front full screen"
+                  >
                     <img
                       src="{{ fabric_front | image_url: width: 800 }}"
                       srcset="{{ fabric_front | image_url: width: 400 }} 400w,
-                              {{ fabric_front | image_url: width: 800 }} 800w"
+                              {{ fabric_front | image_url: width: 800 }} 800w,
+                              {{ fabric_front | image_url: width: 1200 }} 1200w"
                       sizes="(min-width: 769px) 20vw, 45vw"
                       alt="{{ product.title | escape }} fabric, front"
                       width="{{ fabric_front.width }}"
@@ -512,15 +612,23 @@
                       loading="lazy"
                       decoding="async"
                     >
-                    <figcaption>Front</figcaption>
-                  </figure>
+                    <span class="pdp__fabric-caption">Front</span>
+                  </button>
                 {%- endif -%}
                 {%- if fabric_back != blank -%}
-                  <figure class="pdp__fabric-shot">
+                  <button
+                    type="button"
+                    class="pdp__fabric-shot"
+                    data-zoom-open
+                    data-zoom-src="{{ fabric_back | image_url: width: 2048 }}"
+                    data-zoom-alt="{{ product.title | escape }} fabric, back"
+                    aria-label="View {{ product.title | escape }} fabric back full screen"
+                  >
                     <img
                       src="{{ fabric_back | image_url: width: 800 }}"
                       srcset="{{ fabric_back | image_url: width: 400 }} 400w,
-                              {{ fabric_back | image_url: width: 800 }} 800w"
+                              {{ fabric_back | image_url: width: 800 }} 800w,
+                              {{ fabric_back | image_url: width: 1200 }} 1200w"
                       sizes="(min-width: 769px) 20vw, 45vw"
                       alt="{{ product.title | escape }} fabric, back"
                       width="{{ fabric_back.width }}"
@@ -528,10 +636,74 @@
                       loading="lazy"
                       decoding="async"
                     >
-                    <figcaption>Back</figcaption>
-                  </figure>
+                    <span class="pdp__fabric-caption">Back</span>
+                  </button>
                 {%- endif -%}
               </div>
+            {%- endif -%}
+
+            {%- if fabric_text != blank -%}
+              {%- comment -%} newline_to_br: .pdp__tab-description has no pre-line, so the composition and weight lines would otherwise run together. {%- endcomment -%}
+              <div class="pdp__tab-description">{{ fabric_text | newline_to_br }}</div>
+            {%- endif -%}
+
+            {%- comment -%}
+              Spec table. Shares its rules with the returns table rather than
+              carrying a copy of them, so the two cannot drift apart — see
+              .pdp__spec-* in component-product-page.css. Every row is guarded:
+              a blank field drops its row rather than printing an empty value.
+            {%- endcomment -%}
+            {%- if fabric_type != blank or fabric_composition != blank or fabric_weight != blank or fabric_method != blank or fabric_certs != blank -%}
+              <ul class="pdp__spec-list">
+                {%- if fabric_type != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Type</span>
+                    <span class="pdp__spec-value">{{ fabric_type }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if fabric_composition != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Composition</span>
+                    <span class="pdp__spec-value">{{ fabric_composition }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if fabric_weight != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Weight</span>
+                    <span class="pdp__spec-value">{{ fabric_weight }}</span>
+                  </li>
+                {%- endif -%}
+                {%- comment -%}
+                  Method runs long — "Brushed fleece back face & interlock
+                  knitted front face" is a sentence, not a value. --stack drops
+                  it to its own line instead of squeezing it against the label.
+                {%- endcomment -%}
+                {%- if fabric_method != blank -%}
+                  <li class="pdp__spec-row pdp__spec-row--stack">
+                    <span class="pdp__spec-label">Method</span>
+                    <span class="pdp__spec-value">{{ fabric_method }}</span>
+                  </li>
+                {%- endif -%}
+                {%- comment -%}
+                  Certifications are a list of image files (OEKO-TEX, OCS …), so
+                  the value cell holds marks rather than words.
+                {%- endcomment -%}
+                {%- if fabric_certs != blank -%}
+                  <li class="pdp__spec-row">
+                    <span class="pdp__spec-label">Certifications</span>
+                    <span class="pdp__spec-value pdp__spec-value--marks">
+                      {%- for cert in fabric_certs -%}
+                        <img
+                          src="{{ cert | image_url: height: 48 }}"
+                          alt="{{ cert.alt | default: 'Certification' | escape }}"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      {%- endfor -%}
+                    </span>
+                  </li>
+                {%- endif -%}
+              </ul>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -623,7 +795,19 @@
           {%- endcomment -%}
           <p class="pdp__returns-intro" data-returns-intro data-template="{{ section.settings.returns_intro | escape }}" hidden></p>
 
-          <p class="pdp__returns-intro" data-returns-none hidden>{{ section.settings.returns_unavailable | default: 'Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out.' }}</p>
+          {%- comment -%}
+            Two rows, not one sentence. The first states the position; the
+            second is the reassurance, and it only lands if it is not buried at
+            the tail of the first. `hidden` stays on the wrapper — that is the
+            node initReturnsByCountry toggles — so the paragraphs inside are
+            never individually addressed by JS.
+          {%- endcomment -%}
+          <div class="pdp__returns-none" data-returns-none hidden>
+            <p class="pdp__returns-intro pdp__returns-intro--muted">{{ section.settings.returns_unavailable | default: 'Returns & Exchanges are not yet offered for your region.' }}</p>
+            {%- if section.settings.returns_unavailable_note != blank -%}
+              <p class="pdp__returns-note">{{ section.settings.returns_unavailable_note }}</p>
+            {%- endif -%}
+          </div>
 
           <div class="pdp__returns-actions" data-returns-actions>
             {%- if section.settings.returns_start_label != blank -%}
@@ -730,7 +914,15 @@
       "type": "text",
       "id": "returns_unavailable",
       "label": "Message where returns aren't offered",
-      "default": "Returns & Exchanges are not yet offered for your region. Our team is working hard to roll this feature out."
+      "info": "The position. Keep the reassurance in the line below it — as one sentence the second half gets lost.",
+      "default": "Returns & Exchanges are not yet offered for your region."
+    },
+    {
+      "type": "text",
+      "id": "returns_unavailable_note",
+      "label": "Message where returns aren't offered — second line",
+      "info": "Rendered on its own row, under the message above. Leave blank to show only the first line.",
+      "default": "Our team is working hard to roll this feature out."
     },
     {
       "type": "text",

@@ -1530,6 +1530,24 @@
       zoomIn(slide, e);
     });
 
+    // Anything else on the page that wants the full-screen viewer: the fabric
+    // swatches in the Fabric tab today. Same contract as a gallery slide —
+    // data-zoom-src and data-zoom-alt — so nothing new has to be taught here.
+    //
+    // Straight to open(), never the isDesktop() fork above: that branch runs
+    // the in-place magnifier, which needs a .pdp__gallery-img child and
+    // gallery-relative pointer geometry a fabric swatch does not have.
+    //
+    // Bound on document, so it also covers nodes moved between panels after
+    // load. It does inherit this function's early return — no gallery on the
+    // page means no lightbox markup either, so there is nothing to open.
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-zoom-open]');
+      if (!trigger) return;
+      e.preventDefault();
+      open(trigger);
+    });
+
     // Release the zoom rather than let a magnified frame snap past.
     gallery.addEventListener('pointerleave', zoomOut);
     if (main) main.addEventListener('scroll', zoomOut, { passive: true });
@@ -1751,7 +1769,10 @@
       // than trading moves for the life of the page.
       if (moves >= 5) return;
       moves += 1;
-      panel.appendChild(triggers);
+      // prepend, not appendChild: the buttons lead the panel and the sizing
+      // copy sits under them. Someone opening Sizing is picking a size, not
+      // reading.
+      panel.prepend(triggers);
     };
 
     park();
