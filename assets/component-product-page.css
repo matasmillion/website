@@ -1152,13 +1152,16 @@
    line with the copy above it. Our own slot div is a safe target; same
    !important weight as the rules above, placed after them so order decides. */
 @media (min-width: 769px) {
-  .pdp__tab-panel .pdp__size-guide-slot {
+  .pdp__tab-panel .pdp__size-guide-slot,
+  .pdp__tab-panel [class*="smartrecom"] {
     text-align: left !important;
     justify-content: flex-start !important;
   }
 
   .pdp__tab-panel .pdp__size-guide-slot a,
-  .pdp__tab-panel .pdp__size-guide-slot button {
+  .pdp__tab-panel .pdp__size-guide-slot button,
+  .pdp__tab-panel [class*="smartrecom"] a,
+  .pdp__tab-panel [class*="smartrecom"] button {
     margin: 0 !important;
   }
 }

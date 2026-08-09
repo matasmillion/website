@@ -1717,6 +1717,59 @@
     mobileBtn.addEventListener('click', () => form.requestSubmit());
   };
 
+  /* --- SmartSize: park the injected size links in the Sizing tab ---
+     SIZE GUIDE and FIND MY SIZE come from SmartSize APP EMBEDS, not from the
+     section's app block. An embed is injected and positioned by the app's own
+     JS, so Liquid cannot place it — moving the {% render block %} slot moved
+     the block and left the embeds where they were. They are reparented here
+     instead, once they exist, into the Sizing panel where the fit information
+     belongs. The section app block already renders into .pdp__size-guide-slot
+     inside that panel and needs no move.
+
+     Buttons only. The app also appends its size-chart modal to <body>; that has
+     to stay there, because a modal inside a display:none panel cannot open.
+
+     Each node is moved once and stamped. If the app relocates one back we let
+     it be rather than trading moves with it for the life of the page. */
+  const initSmartSizePlacement = () => {
+    const panel = document.querySelector('[data-tab-panel="sizing"]');
+    if (!panel) return;
+
+    const WRAPS = [
+      '#smartrecom-sizechart-button',
+      '.smartrecom-sizechart-btn-wrap',
+      '#smartrecom-recommender-button',
+      '.smartrecom-recommender-btn-wrap',
+      '[class*="smartrecom"][class*="btn-wrap"]',
+    ].join(',');
+    // Anything that reads as a layer rather than a trigger stays put.
+    const LAYER = /modal|popup|overlay|drawer|dialog|backdrop/i;
+
+    const park = () => {
+      document.querySelectorAll(WRAPS).forEach((el) => {
+        if (el.dataset.frParked) return;
+        const id = el.getAttribute('id') || '';
+        const cls = el.getAttribute('class') || '';
+        if (LAYER.test(id) || LAYER.test(cls)) return;
+        // Never reparent something the panel lives inside — that would take the
+        // page with it.
+        if (el.contains(panel)) return;
+        el.dataset.frParked = '1';
+        if (panel.contains(el)) return;
+        panel.appendChild(el);
+      });
+    };
+
+    park();
+    // The embeds land after this file runs, so watch for them. Stamping makes
+    // the observer's own appendChild a no-op on the next pass.
+    const mo = new MutationObserver(park);
+    mo.observe(document.body, { childList: true, subtree: true });
+    // Not left running for the life of the page — the embeds are in within
+    // seconds or they are not coming.
+    setTimeout(() => mo.disconnect(), 15000);
+  };
+
   /* --- Initialize Everything (each isolated so one failure can't break others) --- */
   const init = () => {
     [
@@ -1724,7 +1777,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
+      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromiseCoordination, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }
