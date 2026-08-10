@@ -137,7 +137,7 @@
   <div
     class="pdp__gallery"
     data-product-gallery
-    style="--pdp-fit: {{ section.settings.desktop_image_fit | default: 'cover' }}; --pdp-focal-y: {{ focal_y }};"
+    style="--pdp-fit: {{ section.settings.desktop_image_fit | default: 'cover' }}; --pdp-focal-y: {{ focal_y }}; --pdp-backdrop: {{ section.settings.gallery_backdrop | default: '#F2EEE5' }};"
   >
     <div class="pdp__gallery-main" data-gallery-main>
       {%- for image in product.images -%}
@@ -1026,6 +1026,13 @@
         }
       ],
       "default": "cover"
+    },
+    {
+      "type": "color",
+      "id": "gallery_backdrop",
+      "label": "Gallery backdrop",
+      "info": "Only visible under Contain, where it fills the space either side of the image. Set it to your photography's background colour exactly — anything else draws a visible edge around every product.",
+      "default": "#F2EEE5"
     },
     {
       "type": "select",

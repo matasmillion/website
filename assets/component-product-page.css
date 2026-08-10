@@ -65,14 +65,24 @@
     height: 100%;
   }
   /* Crop is merchant-tunable: cover with a top-biased focal point keeps heads
-     in frame (a centred cover crops heads AND feet); contain letterboxes. */
+     in frame (a centred cover crops heads AND feet); contain letterboxes.
+
+     The desktop window is square — 58vw x 100vh lands at ~1.03:1 on every common
+     resolution — so `cover` takes a horizontal band out of a portrait master and
+     throws away about a third of its height. That is what was cutting hems off.
+
+     Under `contain` the backdrop fills the space either side of the image, so it
+     has to be the photography's own background colour or it draws a visible edge
+     around every product. Merchant-set for that reason; the fallback is the
+     current studio backdrop rather than the old #F5F4F2, which was 13 points off
+     on blue and showed as a seam. */
   .pdp__gallery-img {
     aspect-ratio: unset;
     width: 100%;
     height: 100%;
     object-fit: var(--pdp-fit, cover);
     object-position: 50% var(--pdp-focal-y, 25%);
-    background: #F5F4F2;
+    background: var(--pdp-backdrop, #F2EEE5);
   }
 }
 
