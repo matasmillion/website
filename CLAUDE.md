@@ -21,6 +21,9 @@ Never render on the homepage:
 This is a hard rule, not a customizer toggle. Names and prices live on the collection page and the
 PDP, where they belong. The image links through to the PDP.
 
+This survives the colourway work: `colorway-cards.liquid` forwards all four flags, so an
+image-only card stays image-only however many colours it stands for.
+
 Implementation: `snippets/product-card.liquid` takes `show_title`, `show_price`, `show_wishlist` and
 `show_badge`, all defaulting to `true`. Every homepage section passes all four as `false`, which
 makes the snippet skip the `.product-card__info` block entirely:
@@ -39,16 +42,37 @@ Two things to keep in mind when touching this:
 
 ## Where the theme actually lives
 
-The theme is **not in this repo** — this repo holds the build spec only. The live code is on Shopify:
+**This repo is the theme** — `assets/`, `sections/`, `snippets/`, `layout/`, `templates/`,
+`config/`, `locales/`. It syncs to Shopify through the GitHub integration. (An earlier version of
+this file said the theme was not in the repo; that has not been true for some time.)
 
-- `JACQUEMUS 1.1` (unpublished) — the build described by the spec. Edit this one.
+Two themes exist on the store:
+
+- `JACQUEMUS 1.1` (unpublished) — what this repo builds.
 - `STILLETO 2.2` (published / MAIN) — the old theme still serving foreignresource.com.
 
-Theme file writes via the Shopify MCP are allowed on unpublished themes only; the published theme
-has to be changed through Shopify admin. Editing markdown in this repo changes nothing on the site.
+The connected theme tracks a branch, so work on a feature branch changes nothing on Shopify until
+it is merged into that branch. See `SHOPIFY_SETUP.md` for the deploy path.
+
+## Colourways
+
+A colourway is a (product, colour) pair, and it is a first-class thing: its own images, its own
+card, its own URL, its own wishlist entry. It arrives two ways — a Colour option on one product,
+or separate products linked by `custom.colorway_siblings` — and the theme treats both the same.
+Shopify's native answer to the second case, Combined Listings, is Plus-only and this store is on
+Basic, which is why it is hand-rolled.
+
+- `snippets/colorway-hex.liquid` is the **only** place a colour becomes a hex. Don't add a second
+  name→hex ladder; there used to be two and they disagreed.
+- Per-colour galleries read `image.variants` — attach a colour's photos to that colour's variants
+  in admin. Liquid cannot ask a variant for its images, only the reverse.
+- A colour with no images of its own shows the whole gallery rather than an empty one. Keep that
+  fallback: most of the catalogue is still in that state.
+- Wishlist keys are `handle` or `handle::colour`. A bare handle is a pre-colourway save and must
+  keep working.
 
 ## Working on this repo
 
-- Develop on `claude/homepage-product-display-wylacw`.
+- Develop on the feature branch named in the task, never on `main`.
 - Every section must be Online Store 2.0 compliant with a configurable schema — nothing hardcoded.
 - Vanilla JS only. No React, no Vue, no CSS frameworks.

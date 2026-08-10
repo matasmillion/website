@@ -591,6 +591,15 @@
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
+/* A colourway sold as its own product. It looks identical on purpose — which
+   product a colour lives on is Shopify's problem, not the customer's — but it
+   is an anchor, so it needs the box behaviour a button gets for free. */
+.pdp__swatch--link {
+  display: block;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+
 .pdp__swatch.is-selected::after {
   content: '';
   position: absolute;

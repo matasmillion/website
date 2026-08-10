@@ -361,51 +361,108 @@
         <p class="pdp__description">{{ product.description | strip_html | truncate: 200 }}</p>
       {%- endif -%}
 
-      {%- comment -%} ===== COLOR SWATCHES ===== {% endcomment -%}
-      {%- for option in product.options_with_values -%}
-        {%- if option.name == 'Color' or option.name == 'Colour' -%}
-          {%- comment -%}
-            The colour name is deliberately not shown — no label above the row,
-            no title tooltip on the chips. The chip is the colour; the customer
-            meets the name at cart and checkout, on the variant title.
-            aria-label stays: it is how a screen reader tells the chips apart,
-            and it is not a visual reveal.
-          {%- endcomment -%}
-          <div class="pdp__swatches">
-            <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
-              {%- for value in option.values -%}
-                {%- comment -%}
-                  The metaobject's texture image is deliberately not used — a
-                  flat chip reads cleaner at this size. See colorway-hex for
-                  where the colour comes from.
-                {%- endcomment -%}
-                {%- capture swatch_color -%}
-                  {%- render 'colorway-hex', product: product, value: value -%}
+      {%- comment -%}
+        ===== COLOR SWATCHES =====
+
+        The colour name is deliberately not shown — no label above the row, no
+        title tooltip on the chips. The chip is the colour; the customer meets
+        the name at cart and checkout, on the variant title, and in the colours
+        panel. aria-label stays: it is how a screen reader tells the chips
+        apart, and it is not a visual reveal.
+
+        Two kinds of chip can appear in this one row:
+
+          - Colours of THIS product, as buttons that switch variant in place.
+          - Colours sold as SEPARATE products, as links to those products.
+
+        The second kind is what Shopify's Combined Listings would do natively,
+        and it is Plus-only — this store is on Basic. So the relationship is
+        declared by hand with custom.colorway_siblings, a list of product
+        references, and each sibling names its own colour with
+        custom.colorway_name (or, if it has a single-value Colour option,
+        that value).
+
+        A sibling with no name to show is skipped rather than guessed at: the
+        product title is not the colour, whatever "Slate Staple Sweatpants"
+        looks like.
+      {%- endcomment -%}
+      {%- liquid
+        assign cw_siblings = product.metafields.custom.colorway_siblings.value
+        assign cw_sibling_count = 0
+        if cw_siblings != blank
+          assign cw_sibling_count = cw_siblings.size
+        endif
+        assign cw_own_count = 0
+        if cw_option != blank
+          assign cw_own_count = cw_option.values.size
+        endif
+        assign cw_total = cw_own_count | plus: cw_sibling_count
+      -%}
+      {%- if cw_total > 1 -%}
+        <div class="pdp__swatches">
+          <div
+            class="pdp__swatch-list"
+            {% if cw_option != blank %}data-variant-select data-option-position="{{ cw_option.position }}"{% endif %}
+          >
+            {%- for value in cw_option.values -%}
+              {%- comment -%}
+                The metaobject's texture image is deliberately not used — a flat
+                chip reads cleaner at this size. See colorway-hex for where the
+                colour comes from.
+              {%- endcomment -%}
+              {%- capture swatch_color -%}
+                {%- render 'colorway-hex', product: product, value: value -%}
+              {%- endcapture -%}
+              {%- assign swatch_color = swatch_color | strip -%}
+              <button
+                type="button"
+                class="pdp__swatch{% if cw_option.selected_value == value %} is-selected{% endif %}"
+                data-variant-option="{{ value }}"
+                data-colorway="{{ value | handleize }}"
+                aria-label="{{ value }}"
+                aria-pressed="{% if cw_option.selected_value == value %}true{% else %}false{% endif %}"
+                style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
+              ></button>
+            {%- endfor -%}
+
+            {%- for sibling in cw_siblings -%}
+              {%- liquid
+                assign sib_name = sibling.metafields.custom.colorway_name.value
+                if sib_name == blank
+                  for sib_option in sibling.options_with_values
+                    if sib_option.name == 'Color' or sib_option.name == 'Colour'
+                      if sib_option.values.size == 1
+                        assign sib_name = sib_option.values.first
+                      endif
+                    endif
+                  endfor
+                endif
+              -%}
+              {%- if sib_name != blank -%}
+                {%- capture sib_color -%}
+                  {%- render 'colorway-hex', product: sibling, value: sib_name -%}
                 {%- endcapture -%}
-                {%- assign swatch_color = swatch_color | strip -%}
-                <button
-                  type="button"
-                  class="pdp__swatch{% if option.selected_value == value %} is-selected{% endif %}"
-                  data-variant-option="{{ value }}"
-                  data-colorway="{{ value | handleize }}"
-                  aria-label="{{ value }}"
-                  aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
-                  style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
-                ></button>
-              {%- endfor -%}
-            </div>
-            {%- comment -%}
-              The chips say nothing about what the colour looks like on the
-              garment, which is the whole question. This opens the answer.
-            {%- endcomment -%}
-            {%- if option.values.size > 1 -%}
-              <button type="button" class="pdp__colors-trigger" data-colors-open>
-                {{ section.settings.colors_trigger_label | default: 'View the colors' }}
-              </button>
-            {%- endif -%}
+                {%- assign sib_color = sib_color | strip -%}
+                <a
+                  class="pdp__swatch pdp__swatch--link"
+                  href="{{ sibling.url }}"
+                  aria-label="{{ sib_name }} — {{ sibling.title }}"
+                  style="background-color: {{ sib_color }};{% if sib_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"
+                ></a>
+              {%- endif -%}
+            {%- endfor -%}
           </div>
-        {%- endif -%}
-      {%- endfor -%}
+          {%- comment -%}
+            The chips say nothing about what the colour looks like on the
+            garment, which is the whole question. This opens the answer.
+          {%- endcomment -%}
+          {%- if cw_own_count > 1 -%}
+            <button type="button" class="pdp__colors-trigger" data-colors-open>
+              {{ section.settings.colors_trigger_label | default: 'View the colors' }}
+            </button>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
 
       {%- comment -%} ===== SIZE SELECTOR + ADD TO CART ===== {% endcomment -%}
       {%- form 'product', product, data-add-to-cart: true, class: 'pdp__form' -%}

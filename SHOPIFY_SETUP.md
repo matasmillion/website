@@ -67,6 +67,8 @@ icon links there.
 | Field (in the product editor) | Namespace / key | Drives |
 |---|---|---|
 | **Main Collection** | `custom.main_collection` | The small grey collection line above the product name — mobile add-to-cart band and desktop details column |
+| **Colourway name** | `custom.colorway_name` | Single line text. For a product that *is* one colour (colour in the title, no Colour option). Names the chip other products link to it with. |
+| **Colourway siblings** | `custom.colorway_siblings` | List of product references. Other products that are the same garment in a different colour. |
 
 Pick the collection the product really belongs to (e.g. `BORDERLESS BASICS`), even though the
 product also sits in `ALL` and in whatever sale or seasonal collections it has been added to. This
@@ -77,7 +79,54 @@ ignore list in *Customize → Theme settings → Product page* — `all-products
 `for-shopify-performance-tracking` (Faire) by default — and finally to the label `ALL`. Add any
 other catch-all or internal collection to that list rather than editing the theme.
 
-## 6. Deploying the theme
+## 6. Colourways
+
+There are two ways a garment comes in several colours, and the theme handles
+both. Which one you get depends on how the product was built, not on a setting.
+
+### One product, a Colour option (the `v1` line)
+
+Add **Colour** as a product option and link it to Shopify's standard colour
+metaobject (admin offers this automatically — it is what gives each value a real
+hex). The swatch chips, the colours panel and the per-colour galleries all come
+from that. Nothing else to configure.
+
+**Attach each colour's photographs to that colour's variants.** This is the part
+that has to be done by hand, and nothing per-colour appears until it is:
+
+- In the product's **Media**, upload every colour's shots.
+- Open each variant and set its media to that colour's images — all four sizes
+  of Slate get the Slate shots.
+- Leave images that belong to *every* colour — flat lays, hardware, fabric
+  detail — attached to no variant. Those always show.
+
+Liquid can't ask a variant for its images, only ask an image for its variants,
+which is why the attachment is what the gallery reads. A colour with no images
+of its own falls back to showing the whole gallery, so a half-finished product
+looks the same as it did before rather than broken.
+
+The first image attached to a variant is also what Shopify uses for the cart
+line and the collection thumbnail, so getting this right fixes those too.
+
+### Separate products, one per colour (the older items)
+
+Shopify's own answer to this is the Combined Listings app, and it is **Plus
+only** — this store is on Basic, so the link is declared by hand instead:
+
+- On each product, set **Colourway name** (`custom.colorway_name`) to the colour
+  it is — `Stone`, `Slate`. Skip this if the product already has a single-value
+  Colour option; the theme reads that instead.
+- On each product, set **Colourway siblings** (`custom.colorway_siblings`) to
+  the *other* products in the group. Do this on every member, pointing at the
+  others — the theme does not infer the reverse direction.
+
+Their swatch rows then link to each other. A sibling with no colour name is
+skipped rather than guessed at, so the group stays quiet until it is named.
+
+Worth doing first: there are currently two active products both titled
+**Eroded Edges Cargo** (Stone and Sand), which read as duplicates until linked.
+
+## 7. Deploying the theme
 
 This repo syncs with Shopify via the **GitHub integration** (you'll see
 "Update from Shopify" commits on the connected branch). That means:
@@ -91,7 +140,7 @@ This repo syncs with Shopify via the **GitHub integration** (you'll see
 - The old `foreign-resource-theme.zip` that lived in this repo was a stale
   snapshot and has been deleted — don't upload it.
 
-## 7. Known intentional gaps
+## 8. Known intentional gaps
 
 - Blog articles render without a comments section (off-brand; can be added
   later if wanted).
