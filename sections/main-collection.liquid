@@ -144,7 +144,16 @@
       {%- if collection.products.size > 0 -%}
         <div class="collection-grid__products collection-grid__products--{{ columns_desktop }}-cols" id="product-grid">
           {%- for product in collection.products -%}
-            {%- render 'product-card', product: product, image_aspect_ratio: image_ratio, context: 'below' -%}
+            {%- comment -%}
+              Splitting by colourway changes how many tiles a page holds, so the
+              per-page count stops matching the row count. That is the trade the
+              setting makes, and why it is off unless a collection asks for it.
+            {%- endcomment -%}
+            {%- if section.settings.split_colorways -%}
+              {%- render 'colorway-cards', product: product, image_aspect_ratio: image_ratio, context: 'below' -%}
+            {%- else -%}
+              {%- render 'product-card', product: product, image_aspect_ratio: image_ratio, context: 'below' -%}
+            {%- endif -%}
           {%- endfor -%}
         </div>
 
@@ -213,6 +222,13 @@
     {
       "type": "header",
       "content": "Grid layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "split_colorways",
+      "label": "Show each colourway as its own card",
+      "default": false,
+      "info": "One tile per colour instead of one per product, each opening the product on that colour. Products with a single colour are unaffected. Note that this changes how many tiles a page holds, so the products-per-page count below stops matching the number of rows."
     },
     {
       "type": "range",

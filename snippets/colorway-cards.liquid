@@ -1,0 +1,87 @@
+{%- comment -%}
+  Colourway cards — one tile per colour instead of one tile per product.
+
+  A grid normally shows a product once, with the other colours reduced to
+  decorative dots that don't lead anywhere. Where a colourway deserves to be
+  merchandised in its own right — its own photograph, its own link, its own
+  save — render through this instead of calling product-card directly.
+
+  Each tile links to that colour's variant, so the PDP opens on it.
+
+  Falls back to a single ordinary card when the product has no colour option, or
+  only one colour: five identical tiles of a one-colour product is noise.
+
+  Accepts the same parameters as product-card and forwards them:
+    product, context, show_title, show_price, show_wishlist, show_badge,
+    image_aspect_ratio
+
+  Usage:
+    {%- render 'colorway-cards', product: product, context: 'below' -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign cw_option = blank
+  for option in product.options_with_values
+    if option.name == 'Color' or option.name == 'Colour'
+      assign cw_option = option
+    endif
+  endfor
+-%}
+
+{%- if cw_option == blank or cw_option.values.size < 2 -%}
+  {%- render 'product-card',
+      product: product,
+      context: context,
+      show_title: show_title,
+      show_price: show_price,
+      show_wishlist: show_wishlist,
+      show_badge: show_badge,
+      image_aspect_ratio: image_aspect_ratio -%}
+{%- else -%}
+  {%- assign cw_index = cw_option.position | minus: 1 -%}
+  {%- for value in cw_option.values -%}
+    {%- liquid
+      # First variant in this colour, preferring one that can actually be
+      # bought — otherwise a colour with a sold-out small would open the PDP on
+      # the sold-out size and read as unavailable.
+      assign cw_variant = blank
+      for v in product.variants
+        if v.options[cw_index] == value
+          if cw_variant == blank
+            assign cw_variant = v
+          endif
+          if v.available and cw_variant.available != true
+            assign cw_variant = v
+          endif
+        endif
+      endfor
+
+      # variant.featured_image is the first image attached to that variant, which
+      # is exactly the convention the PDP gallery relies on. Products with no
+      # per-colour photography yet fall back to the product shot, so every tile
+      # still has an image.
+      assign cw_image = cw_variant.featured_image | default: product.featured_image
+      assign cw_url = product.url
+      if cw_variant.id
+        assign cw_url = product.url | append: '?variant=' | append: cw_variant.id
+      endif
+
+      # Handleize the colour on its own. Handleizing the joined string would
+      # collapse the '::' separator into a single dash and break the key.
+      assign cw_slug = value | handleize
+      assign cw_key = product.handle | append: '::' | append: cw_slug
+    -%}
+    {%- render 'product-card',
+        product: product,
+        context: context,
+        show_title: show_title,
+        show_price: show_price,
+        show_wishlist: show_wishlist,
+        show_badge: show_badge,
+        image_aspect_ratio: image_aspect_ratio,
+        colorway_label: value,
+        colorway_url: cw_url,
+        colorway_key: cw_key,
+        colorway_image: cw_image -%}
+  {%- endfor -%}
+{%- endif -%}
