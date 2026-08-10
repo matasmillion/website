@@ -1630,6 +1630,8 @@
       zoom.classList.remove('is-active', 'is-zoomed');
       zoom.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      // Or the next image opens already magnified at the last pointer position.
+      clearInsetZoom();
     };
 
     // Mobile swipes share this surface, so a drag must not count as a click.
@@ -1683,8 +1685,46 @@
     const zout = zoom.querySelector('[data-zoom-out]');
     if (zin) zin.addEventListener('click', () => setZoomed(true));
     if (zout) zout.addEventListener('click', () => setZoomed(false));
+    /* --- Inset panel: magnify under the pointer, like the gallery ---
+       The frame holds still and the image scales inside it. Mapping the pointer
+       to an origin needs the image's UNSCALED box, so it is captured at the
+       moment of zooming in — once scale(2) is on, getBoundingClientRect reports
+       the magnified box and the mapping would drift as you move.
+
+       Fine pointers only, mirroring the gallery: touch has nothing to follow and
+       keeps the scroll-pan. */
+    const finePointer = () => window.matchMedia('(min-width: 769px) and (pointer: fine)').matches;
+    let insetFrame = null;
+
+    const insetOrigin = (e) => {
+      if (!insetFrame || !img) return;
+      const clamp = (n) => Math.max(0, Math.min(100, n));
+      img.style.transformOrigin =
+        clamp(((e.clientX - insetFrame.left) / insetFrame.width) * 100) + '% ' +
+        clamp(((e.clientY - insetFrame.top) / insetFrame.height) * 100) + '%';
+    };
+
+    const clearInsetZoom = () => {
+      insetFrame = null;
+      if (img) img.style.transformOrigin = '';
+    };
+
+    if (stage) stage.addEventListener('pointermove', (e) => {
+      if (!insetFrame) return;
+      if (!zoom.classList.contains('is-zoomed')) return;
+      insetOrigin(e);
+    }, { passive: true });
+
     if (stage) stage.addEventListener('click', (e) => {
-      if (e.target === img) { setZoomed(!zoom.classList.contains('is-zoomed')); return; }
+      if (e.target === img) {
+        const on = !zoom.classList.contains('is-zoomed');
+        if (zoom.classList.contains('pdp-zoom--inset') && finePointer()) {
+          if (on) { insetFrame = img.getBoundingClientRect(); insetOrigin(e); }
+          else clearInsetZoom();
+        }
+        setZoomed(on);
+        return;
+      }
       // Everything around the image is scrim in inset mode, and a scrim you can
       // see the page through reads as dismissable — so it is. The full-bleed
       // viewer has no "outside" to click, which is why this is scoped.
@@ -1872,35 +1912,51 @@
     const panel = document.querySelector('[data-tab-panel="sizing"]');
     if (!panel) return;
 
-    // Both buttons arrive inside one wrapper the app injects into
-    // .pdp__details-inner, so this is a single move, not a hunt:
+    // The app injects into .pdp__details-inner:
     //   #smartrecom-triggers
-    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE GUIDE
+    //     #smartrecom-sizechart-injected-button > #smartrecom-sizechart-trigger  SIZE CHART
     //     #smartrecom-inline-button-injected    > #smartrecom-button             FIND MY SIZE
-    // The app's size-chart modal is appended to <body> separately and is left
-    // there — a modal inside a display:none panel could not open.
-    let moves = 0;
+    // Its size-chart modal goes to <body> separately and is left there — a modal
+    // inside a display:none panel could not open.
+    //
+    // THE TWO BUTTONS ARRIVE INDEPENDENTLY, and that is the whole difficulty.
+    // Moving the wrapper the moment it appears can beat the second button to it,
+    // and the app then drops that one back into .pdp__details-inner where it is
+    // never seen again — which is why previews showed SIZE CHART alone while the
+    // theme editor, with fewer scripts competing, happened to win the race and
+    // showed both.
+    //
+    // So this adopts rather than moves once: the wrapper goes to the panel, and
+    // any trigger container that lands outside afterwards is pulled in after it.
+    const adopt = () => {
+      const wrap = document.getElementById('smartrecom-triggers');
+      if (wrap && !panel.contains(wrap)) {
+        // prepend, not appendChild: the buttons lead the panel and the sizing
+        // copy sits under them. Someone opening Sizing is picking a size, not
+        // reading.
+        panel.prepend(wrap);
+      }
 
-    const park = () => {
-      const triggers = document.getElementById('smartrecom-triggers');
-      if (!triggers || panel.contains(triggers)) return;
-      // If the app insists on putting it back, let it have the last word rather
-      // than trading moves for the life of the page.
-      if (moves >= 5) return;
-      moves += 1;
-      // prepend, not appendChild: the buttons lead the panel and the sizing
-      // copy sits under them. Someone opening Sizing is picking a size, not
-      // reading.
-      panel.prepend(triggers);
+      const home = panel.querySelector('#smartrecom-triggers') || wrap;
+      if (!home || !panel.contains(home)) return;
+
+      // --inline is the injected button wrappers specifically; the app's other
+      // furniture, the modal included, does not carry it.
+      document.querySelectorAll('.smartrecom-container--inline').forEach((c) => {
+        if (!panel.contains(c)) home.appendChild(c);
+      });
     };
 
-    park();
-    // The wrapper lands after this file runs, so watch for it.
-    const mo = new MutationObserver(park);
+    adopt();
+    // Everything lands after this file runs, so watch for it. Each pass leaves
+    // the nodes inside the panel, so the observer's own moves are a no-op on the
+    // next pass and this cannot loop.
+    const mo = new MutationObserver(adopt);
     mo.observe(document.body, { childList: true, subtree: true });
-    // Not left running for the life of the page — it is in within seconds or
-    // it is not coming.
-    setTimeout(() => mo.disconnect(), 15000);
+    // Long enough for a storefront carrying a dozen app scripts to get there.
+    // The previous 15s was tuned against the theme editor, which is not the
+    // slow case.
+    setTimeout(() => mo.disconnect(), 45000);
   };
 
   /* --- Initialize Everything (each isolated so one failure can't break others) --- */
