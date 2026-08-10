@@ -68,7 +68,8 @@
     "engineering": {
       "type": "fr-engineering",
       "settings": {
-        "label": "Foreign Engineering",
+        "heading": "Foreign Engineering",
+        "label": "",
         "text_position": "bottom-left"
       }
     },
@@ -129,9 +130,9 @@
         "row_fabric"
       ],
       "settings": {
-        "heading": "",
+        "heading": "Company Details",
         "desktop_layout": "columns",
-        "desktop_media": false
+        "hide_desktop_media": false
       }
     },
     "band_rest": {
