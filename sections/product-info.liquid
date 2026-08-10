@@ -134,6 +134,67 @@
       endif
     endfor
   -%}
+
+  {%- comment -%}
+    ===== COLOURWAY → IMAGES =====
+
+    Liquid gives no media list per variant — variant.featured_media is the FIRST
+    one and there is no way to ask for the rest. The inverse does exist, so we
+    read it that way round: image.variants is every variant an image is attached
+    to, which is available on product.images and empty when it belongs to none.
+
+    So the convention is: attach a colour's photographs to that colour's variants
+    in admin (all four sizes of Slate get the Slate shots), and leave anything
+    that belongs to every colour — flat lays, hardware crops — unattached.
+
+    An image attached to more than one colour is treated as shared rather than
+    guessed at.
+
+    colorways_with_images records which colours actually have their own shots.
+    A colour missing from it has nothing to filter down to, so filtering is
+    skipped for it and the full gallery shows. That is what makes this safe to
+    ship before the photography exists.
+  {%- endcomment -%}
+  {%- liquid
+    assign color_index = -1
+    assign selected_colorway = ''
+    for option in product.options_with_values
+      if option.name == 'Color' or option.name == 'Colour'
+        assign color_index = option.position | minus: 1
+        assign selected_colorway = option.selected_value | handleize
+      endif
+    endfor
+
+    assign colorways_with_images = ','
+    if color_index >= 0
+      for image in product.images
+        if image.variants.size > 0
+          assign img_cw = ''
+          assign img_shared = false
+          for v in image.variants
+            assign v_cw = v.options[color_index] | handleize
+            if img_cw == ''
+              assign img_cw = v_cw
+            elsif img_cw != v_cw
+              assign img_shared = true
+            endif
+          endfor
+          if img_shared == false and img_cw != ''
+            assign probe = img_cw | append: ','
+            unless colorways_with_images contains probe
+              assign colorways_with_images = colorways_with_images | append: img_cw | append: ','
+            endunless
+          endif
+        endif
+      endfor
+    endif
+
+    assign selected_probe = selected_colorway | append: ','
+    assign filter_active = false
+    if selected_colorway != '' and colorways_with_images contains selected_probe
+      assign filter_active = true
+    endif
+  -%}
   <div
     class="pdp__gallery"
     data-product-gallery
@@ -141,9 +202,42 @@
   >
     <div class="pdp__gallery-main" data-gallery-main>
       {%- for image in product.images -%}
+        {%- liquid
+          assign slide_cw = ''
+          if color_index >= 0 and image.variants.size > 0
+            assign slide_shared = false
+            for v in image.variants
+              assign v_cw = v.options[color_index] | handleize
+              if slide_cw == ''
+                assign slide_cw = v_cw
+              elsif slide_cw != v_cw
+                assign slide_shared = true
+              endif
+            endfor
+            if slide_shared
+              assign slide_cw = ''
+            endif
+          endif
+
+          assign slide_hidden = false
+          if filter_active and slide_cw != '' and slide_cw != selected_colorway
+            assign slide_hidden = true
+          endif
+
+          # Eager-load the first image the customer will actually see. Filtering
+          # can hide slide 0, and preloading a photograph of a colour they did
+          # not pick delays the one they did.
+          assign slide_loading = 'lazy'
+          if slide_hidden == false and eager_spent != true
+            assign slide_loading = 'eager'
+            assign eager_spent = true
+          endif
+        -%}
         <div
           class="pdp__gallery-slide{% if forloop.first %} is-active{% endif %}"
           data-gallery-slide="{{ forloop.index0 }}"
+          data-colorway="{{ slide_cw }}"
+          {% if slide_hidden %}hidden{% endif %}
           data-zoom-src="{{ image | image_url: width: 2048 }}"
           data-zoom-alt="{{ image.alt | default: product.title | escape }}"
         >
@@ -156,7 +250,7 @@
             alt="{{ image.alt | default: product.title | escape }}"
             width="{{ image.width }}"
             height="{{ image.height }}"
-            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            loading="{{ slide_loading }}"
             class="pdp__gallery-img"
           >
         </div>

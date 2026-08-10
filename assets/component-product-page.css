@@ -35,6 +35,13 @@
   scroll-snap-align: start;
 }
 
+/* Slides belonging to a colour you haven't chosen. Stated explicitly rather
+   than left to the UA sheet: a later `display` on this class would silently
+   override it and put every colourway back in the scroller at once. */
+.pdp__gallery-slide[hidden] {
+  display: none;
+}
+
 /* Mobile: image fills the screen minus the fixed band, giving the 390x718
    photo area inside a 390x844 frame from the reference measurements. */
 .pdp__gallery-img {
@@ -140,6 +147,13 @@
   height: 2px;
   background: rgba(45,44,47,0.12);
   z-index: 2;
+}
+
+/* Filtering to one colourway can leave a single image, and a bar that is always
+   full announces a gallery that isn't there. JS sets this; stated explicitly for
+   the same reason as the slide rule above. */
+.pdp__gallery-progress[hidden] {
+  display: none;
 }
 
 .pdp__gallery-progress-fill {

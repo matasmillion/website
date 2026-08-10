@@ -206,13 +206,41 @@
       return vals;
     };
 
+    // The colour is the only option that changes what you are looking at, so it
+    // is the only one the gallery and the URL follow. Sizes share photographs.
+    let lastColorway = null;
+    const syncColorway = () => {
+      const chip = pdp.querySelector('[data-variant-select] [data-colorway].is-selected');
+      const cw = chip ? (chip.dataset.colorway || '') : '';
+      if (cw === lastColorway) return;
+      lastColorway = cw;
+      if (window.FRPdpGallery) window.FRPdpGallery.showColorway(cw);
+    };
+
+    // Deep links already work — Liquid reads ?variant= server-side — but nothing
+    // ever wrote one, so a chosen colourway could not be shared or bookmarked.
+    // replaceState rather than pushState: switching colours is refining one
+    // decision, not somewhere to press Back to.
+    let urlReady = false;
+    const syncUrl = (variant) => {
+      if (!urlReady) { urlReady = true; return; }
+      if (!variant || !window.history || !history.replaceState) return;
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', variant.id);
+        history.replaceState({}, '', url);
+      } catch (e) { /* older browsers keep the plain URL */ }
+    };
+
     const resolve = () => {
       const vals = selectedValues();
       const variant = variants.find((v) =>
         vals.every((val, i) => val == null || v['option' + (i + 1)] === val));
 
-      // No colour label to sync — the PDP never names the colour. The chip's
-      // is-selected rule is the whole indication.
+      // The colour is still never named on the PDP — the chip's is-selected rule
+      // is the whole indication. What follows it now is the gallery.
+      syncColorway();
+      syncUrl(variant);
 
       const setState = (btn, textEl, priceSel) => {
         if (!btn) return;
@@ -1744,12 +1772,23 @@
     const gallery = document.querySelector('[data-product-gallery]');
     if (!gallery) return;
     const main = gallery.querySelector('[data-gallery-main]');
-    const slides = gallery.querySelectorAll('[data-gallery-slide]');
+    const allSlides = Array.from(gallery.querySelectorAll('[data-gallery-slide]'));
     const fill = gallery.querySelector('[data-gallery-progress]');
-    if (!main || !slides.length) return;
+    const progress = gallery.querySelector('.pdp__gallery-progress');
+    if (!main || !allSlides.length) return;
 
     let current = 0;
-    const total = slides.length;
+
+    // Counted, not captured. Choosing a colourway hides the slides belonging to
+    // the other colours, so a count taken once at load would leave the progress
+    // bar describing a gallery that is no longer there.
+    let visible = allSlides;
+    const recount = () => {
+      visible = allSlides.filter((s) => !s.hasAttribute('hidden'));
+      // One image is not a gallery; a permanently full bar just announces one.
+      if (progress) progress.hidden = visible.length < 2;
+    };
+    recount();
 
     // Desktop stacks the images and scrolls vertically; mobile swipes horizontally.
     const isVertical = () => window.matchMedia('(min-width: 769px)').matches;
@@ -1763,10 +1802,10 @@
       fill.style.transform = (isVertical() ? 'scaleY(' : 'scaleX(') + clamped + ')';
     };
 
-    const syncUI = (idx) => setFill((idx + 1) / total);
+    const syncUI = (idx) => setFill(visible.length ? (idx + 1) / visible.length : 0);
 
     const goTo = (idx) => {
-      current = Math.max(0, Math.min(total - 1, idx));
+      current = Math.max(0, Math.min(visible.length - 1, idx));
       main.scrollTo(
         isVertical()
           ? { top: main.offsetHeight * current, behavior: 'smooth' }
@@ -1774,6 +1813,28 @@
       );
       syncUI(current);
     };
+
+    // Show only the images belonging to one colourway, plus the ones attached to
+    // no colour at all (flat lays, hardware) which belong to all of them.
+    //
+    // A colour with no photographs of its own would filter down to nothing, so
+    // it opts out and shows the whole gallery instead. That is the state the
+    // entire catalogue is in until per-colour shots are attached to variants,
+    // and it is why this is safe to ship ahead of the photography.
+    const showColorway = (cw) => {
+      const hasOwn = allSlides.some((s) => s.dataset.colorway === cw);
+      allSlides.forEach((s) => {
+        const own = s.dataset.colorway || '';
+        s.toggleAttribute('hidden', hasOwn && own !== '' && own !== cw);
+      });
+      recount();
+      current = 0;
+      // Jump, don't glide: this is a change of subject, not a step through one.
+      main.scrollTo(isVertical() ? { top: 0 } : { left: 0 });
+      syncUI(0);
+    };
+
+    window.FRPdpGallery = { showColorway, goTo };
 
     // The bar tracks the gesture continuously, so it gets its own undebounced
     // listener rather than waiting on the 100ms settle below.
