@@ -1932,6 +1932,54 @@
     }, { passive: true });
   };
 
+  /* --- PDP colours panel ("View the colors") --- */
+  const initPdpColorsPanel = () => {
+    const panel = document.querySelector('[data-colors-panel]');
+    if (!panel) return;
+    const pdp = panel.closest('[data-pdp]');
+
+    const close = () => {
+      panel.classList.remove('is-active');
+      panel.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+    const open = () => {
+      panel.classList.add('is-active');
+      panel.setAttribute('aria-hidden', 'false');
+      // Only the mobile panel takes the screen; on desktop the page behind it
+      // is the gallery you are comparing against, so it stays scrollable.
+      if (!window.matchMedia('(min-width: 769px)').matches) {
+        document.body.style.overflow = 'hidden';
+      }
+    };
+
+    document.querySelectorAll('[data-colors-open]').forEach((b) =>
+      b.addEventListener('click', (e) => { e.preventDefault(); open(); }));
+    panel.querySelectorAll('[data-colors-close]').forEach((b) =>
+      b.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && panel.classList.contains('is-active')) close();
+    });
+
+    // Picking a colour here is the same choice as picking a chip. Drive the
+    // chip rather than following the href: a page load would throw away the
+    // gallery position and the panel for a change we can make in place.
+    panel.addEventListener('click', (e) => {
+      const pick = e.target.closest('[data-colors-pick]');
+      if (!pick || !pdp) return;
+      const chip = pdp.querySelector('[data-variant-select] [data-colorway="' + pick.dataset.colorsPick + '"]');
+      if (!chip) return; // no matching chip — let the link navigate
+      e.preventDefault();
+      chip.click();
+      panel.querySelectorAll('[data-colors-pick]').forEach((a) => {
+        a.classList.toggle('is-current', a === pick);
+        if (a === pick) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+      close();
+    });
+  };
+
   /* --- Localization selectors (country + language) --- */
   const initLocalization = () => {
     document.querySelectorAll('[data-loc-select]').forEach((select) => {
@@ -2088,7 +2136,7 @@
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
       initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
-      initPdpMobileBand, initPdpVariants, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromise, initReturnsByCountry, initOverlayContrast,
+      initPdpMobileBand, initPdpVariants, initPdpColorsPanel, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromise, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
     ].forEach((fn) => {
       try { fn(); } catch (e) { console.error('[FR init]', fn.name, e); }

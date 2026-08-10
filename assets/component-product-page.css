@@ -460,6 +460,124 @@
   justify-content: center;
 }
 
+/* "View the colors" — quiet, underlined, sat under the chips. On desktop the
+   details column is centred and narrow, so it centres with everything else
+   rather than trying to sit on the swatch row's right. */
+.pdp__colors-trigger {
+  display: inline-block;
+  margin-top: 1.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pdp__colors-trigger:hover { opacity: 0.6; }
+
+/* ---- Colours panel ---------------------------------------------------------
+   Mobile: takes the screen. Desktop: covers only the details column, so the
+   gallery stays beside it and the comparison is possible at all. */
+.pdp__colors-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: var(--color-secondary, #fff);
+  padding: 1.5rem 1.25rem 3rem;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-base) var(--ease-out), visibility var(--duration-base);
+}
+.pdp__colors-panel.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.pdp__colors-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.pdp__colors-title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: var(--color-primary);
+}
+.pdp__colors-close {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--color-primary);
+  line-height: 0;
+}
+.pdp__colors-close:hover { opacity: 0.6; }
+
+.pdp__colors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.pdp__colors-item {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+.pdp__colors-img {
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #F5F4F2;
+}
+.pdp__colors-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Over the photograph, bottom-left, as in the reference. The garment fills the
+   frame, so the name needs its own shadow rather than a background plate. */
+.pdp__colors-name {
+  position: absolute;
+  left: 0.625rem;
+  bottom: 0.625rem;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  text-shadow: 0 0 6px rgba(255,255,255,0.85);
+}
+.pdp__colors-item.is-current .pdp__colors-img {
+  outline: 1px solid #2D2C2F;
+  outline-offset: -1px;
+}
+
+@media (min-width: 769px) {
+  .pdp__colors-panel {
+    /* The details column is the right 42% of the .pdp grid. */
+    left: 58%;
+    padding: 2rem 2.5rem 3rem;
+  }
+  .pdp__colors-grid { gap: 1rem; }
+  .pdp__colors-name { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp__colors-panel { transition: none; }
+}
+
 /* Box swatches — square, with a rule under the selected colour */
 .pdp__swatch {
   width: 26px;

@@ -158,10 +158,12 @@
   {%- liquid
     assign color_index = -1
     assign selected_colorway = ''
+    assign cw_option = blank
     for option in product.options_with_values
       if option.name == 'Color' or option.name == 'Colour'
         assign color_index = option.position | minus: 1
         assign selected_colorway = option.selected_value | handleize
+        assign cw_option = option
       endif
     endfor
 
@@ -392,6 +394,15 @@
                 ></button>
               {%- endfor -%}
             </div>
+            {%- comment -%}
+              The chips say nothing about what the colour looks like on the
+              garment, which is the whole question. This opens the answer.
+            {%- endcomment -%}
+            {%- if option.values.size > 1 -%}
+              <button type="button" class="pdp__colors-trigger" data-colors-open>
+                {{ section.settings.colors_trigger_label | default: 'View the colors' }}
+              </button>
+            {%- endif -%}
           </div>
         {%- endif -%}
       {%- endfor -%}
@@ -891,6 +902,73 @@
       </div>
     </div>
   </div>
+
+  {%- comment -%}
+    ===== COLOURS PANEL =====
+
+    The swatch chips are deliberately unlabelled and, at 26px, say nothing about
+    how a colour actually reads on the garment. This is where that question gets
+    answered: every colourway as a photograph with its name against it.
+
+    It sits inside .pdp so it can cover the details column on desktop and leave
+    the gallery visible beside it, as a comparison should. On mobile it takes
+    the screen, because there is nothing to compare against there anyway.
+  {%- endcomment -%}
+  {%- if cw_option.values.size > 1 -%}
+    <div class="pdp__colors-panel" data-colors-panel aria-hidden="true" role="dialog" aria-modal="true" aria-label="Colors">
+      <div class="pdp__colors-head">
+        <span class="pdp__colors-title">{{ section.settings.colors_panel_title | default: 'Colors' }}</span>
+        <button class="pdp__colors-close" data-colors-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="pdp__colors-grid">
+        {%- for value in cw_option.values -%}
+          {%- liquid
+            assign panel_variant = blank
+            for v in product.variants
+              if v.options[color_index] == value
+                if panel_variant == blank
+                  assign panel_variant = v
+                endif
+                if v.available and panel_variant.available != true
+                  assign panel_variant = v
+                endif
+              endif
+            endfor
+
+            assign panel_image = panel_variant.featured_image | default: product.featured_image
+            assign panel_url = product.url
+            if panel_variant.id
+              assign panel_url = product.url | append: '?variant=' | append: panel_variant.id
+            endif
+          -%}
+          <a
+            class="pdp__colors-item{% if cw_option.selected_value == value %} is-current{% endif %}"
+            href="{{ panel_url }}"
+            data-colors-pick="{{ value | handleize }}"
+            {% if cw_option.selected_value == value %}aria-current="true"{% endif %}
+          >
+            <span class="pdp__colors-img">
+              {%- if panel_image -%}
+                <img
+                  src="{{ panel_image | image_url: width: 600 }}"
+                  srcset="{{ panel_image | image_url: width: 400 }} 400w,
+                          {{ panel_image | image_url: width: 600 }} 600w"
+                  sizes="(min-width: 769px) 14vw, 30vw"
+                  alt="{{ product.title }} — {{ value }}"
+                  loading="lazy"
+                  width="{{ panel_image.width }}"
+                  height="{{ panel_image.height }}"
+                >
+              {%- endif -%}
+            </span>
+            <span class="pdp__colors-name">{{ value }}</span>
+          </a>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
 </div>
 
 {%- comment -%}
@@ -961,6 +1039,23 @@
       "type": "url",
       "id": "size_calculator_url",
       "label": "Size calculator link"
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "text",
+      "id": "colors_trigger_label",
+      "label": "Colours link label",
+      "default": "View the colors",
+      "info": "Sits under the swatch chips and opens the colours panel. Only shown on products with more than one colour."
+    },
+    {
+      "type": "text",
+      "id": "colors_panel_title",
+      "label": "Colours panel title",
+      "default": "Colors"
     },
     {
       "type": "header",
