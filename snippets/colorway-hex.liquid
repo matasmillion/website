@@ -1,0 +1,90 @@
+{%- comment -%}
+  Colourway hex — the one place the theme turns a colour into a swatch colour.
+
+  This used to be two hand-maintained name→hex ladders that had already drifted
+  apart: the PDP knew about Stone, cream, pink, orange and purple; the product
+  card didn't, and only matched the US spelling of the option name. A card and a
+  PDP could paint the same colour differently. There is now one ladder, here.
+
+  Resolution order, best source first:
+
+    1. value.swatch.color — Shopify's native swatch, present whenever the Color
+       option is linked to the shopify.color-pattern metaobject. This is the hex
+       the merchant actually picked in admin, so it always wins.
+    2. The product's shopify.color-pattern metafield, matched on label. Covers
+       products carrying the metaobject list without the option being linked.
+    3. The name ladder. A guess, and only reached for colours with no metaobject.
+
+  Accepts:
+    value    (required) a product_option_value drop, or a plain colour name
+    product  (optional) needed for step 2 only
+
+  Returns the hex as its output, so capture it:
+
+    {%- capture swatch_color -%}
+      {%- render 'colorway-hex', product: product, value: value -%}
+    {%- endcapture -%}
+
+  Never returns blank — step 3 always lands on something.
+{%- endcomment -%}
+{%- liquid
+  assign cw_hex = blank
+
+  if value.swatch.color != blank
+    assign cw_hex = value.swatch.color
+  endif
+
+  if cw_hex == blank
+    assign cw_needle = value | downcase
+    for entry in product.metafields.shopify['color-pattern'].value
+      assign entry_label = entry.label | downcase
+      if entry_label == cw_needle
+        assign cw_hex = entry.color
+        break
+      endif
+    endfor
+  endif
+
+  if cw_hex == blank
+    assign cw_name = value | downcase | replace: ' ', ''
+    assign cw_hex = '#000000'
+
+    if cw_name contains 'black'
+      assign cw_hex = '#000000'
+    elsif cw_name contains 'white' or cw_name contains 'ivory'
+      assign cw_hex = '#FFFFFF'
+    elsif cw_name contains 'navy'
+      assign cw_hex = '#1B2A4A'
+    elsif cw_name contains 'slate'
+      assign cw_hex = '#3A3A3A'
+    elsif cw_name contains 'stone'
+      assign cw_hex = '#716F71'
+    elsif cw_name contains 'soil'
+      assign cw_hex = '#9A816B'
+    elsif cw_name contains 'sea'
+      assign cw_hex = '#B5C7D3'
+    elsif cw_name contains 'brown' or cw_name contains 'tan'
+      assign cw_hex = '#8B6914'
+    elsif cw_name contains 'green' or cw_name contains 'khaki' or cw_name contains 'olive'
+      assign cw_hex = '#556B2F'
+    elsif cw_name contains 'blue'
+      assign cw_hex = '#3B5998'
+    elsif cw_name contains 'red' or cw_name contains 'burgundy'
+      assign cw_hex = '#8B0000'
+    elsif cw_name contains 'grey' or cw_name contains 'gray'
+      assign cw_hex = '#808080'
+    elsif cw_name contains 'beige' or cw_name contains 'sand' or cw_name contains 'cream'
+      assign cw_hex = '#D4C5A9'
+    elsif cw_name contains 'pink'
+      assign cw_hex = '#D4A0A0'
+    elsif cw_name contains 'orange'
+      assign cw_hex = '#C4632A'
+    elsif cw_name contains 'yellow' or cw_name contains 'mimosa'
+      assign cw_hex = '#D4B44A'
+    elsif cw_name contains 'purple'
+      assign cw_hex = '#663399'
+    endif
+  endif
+
+  echo cw_hex
+-%}

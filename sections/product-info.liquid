@@ -270,60 +270,20 @@
           <div class="pdp__swatches">
             <div class="pdp__swatch-list" data-variant-select data-option-position="{{ option.position }}">
               {%- for value in option.values -%}
-                {%- liquid
-                  # Takes the hex from Shopify's colour metaobject so the chip
-                  # is the true colour rather than a guess. The metaobject's
-                  # texture image is deliberately not used — a flat chip reads
-                  # cleaner at this size. The name map is the fallback for
-                  # colours with no metaobject yet.
-                  assign swatch_color = blank
-                  assign value_down = value | downcase
-
-                  for entry in product.metafields.shopify['color-pattern'].value
-                    assign entry_label = entry.label | downcase
-                    if entry_label == value_down
-                      assign swatch_color = entry.color
-                    endif
-                  endfor
-
-                  if swatch_color == blank
-                    assign color_lower = value | downcase | replace: ' ', ''
-                    assign swatch_color = '#000000'
-                    if color_lower contains 'black'
-                      assign swatch_color = '#000000'
-                    elsif color_lower contains 'white' or color_lower contains 'ivory'
-                      assign swatch_color = '#FFFFFF'
-                    elsif color_lower contains 'navy'
-                      assign swatch_color = '#1B2A4A'
-                    elsif color_lower contains 'stone'
-                      assign swatch_color = '#716F71'
-                    elsif color_lower contains 'brown' or color_lower contains 'tan'
-                      assign swatch_color = '#8B6914'
-                    elsif color_lower contains 'green' or color_lower contains 'khaki' or color_lower contains 'olive'
-                      assign swatch_color = '#556B2F'
-                    elsif color_lower contains 'blue'
-                      assign swatch_color = '#3B5998'
-                    elsif color_lower contains 'red' or color_lower contains 'burgundy'
-                      assign swatch_color = '#8B0000'
-                    elsif color_lower contains 'grey' or color_lower contains 'gray'
-                      assign swatch_color = '#808080'
-                    elsif color_lower contains 'beige' or color_lower contains 'sand' or color_lower contains 'cream'
-                      assign swatch_color = '#D4C5A9'
-                    elsif color_lower contains 'pink'
-                      assign swatch_color = '#D4A0A0'
-                    elsif color_lower contains 'orange'
-                      assign swatch_color = '#C4632A'
-                    elsif color_lower contains 'yellow'
-                      assign swatch_color = '#D4B44A'
-                    elsif color_lower contains 'purple'
-                      assign swatch_color = '#663399'
-                    endif
-                  endif
-                -%}
+                {%- comment -%}
+                  The metaobject's texture image is deliberately not used — a
+                  flat chip reads cleaner at this size. See colorway-hex for
+                  where the colour comes from.
+                {%- endcomment -%}
+                {%- capture swatch_color -%}
+                  {%- render 'colorway-hex', product: product, value: value -%}
+                {%- endcapture -%}
+                {%- assign swatch_color = swatch_color | strip -%}
                 <button
                   type="button"
                   class="pdp__swatch{% if option.selected_value == value %} is-selected{% endif %}"
                   data-variant-option="{{ value }}"
+                  data-colorway="{{ value | handleize }}"
                   aria-label="{{ value }}"
                   aria-pressed="{% if option.selected_value == value %}true{% else %}false{% endif %}"
                   style="background-color: {{ swatch_color }};{% if swatch_color == '#FFFFFF' %} border-color: rgba(0,0,0,0.2);{% endif %}"

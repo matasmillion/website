@@ -19,25 +19,41 @@
 
   Names and prices belong on the collection page and the PDP, which use the defaults.
 
+  COLOURWAY CARDS — a card can stand for one colourway rather than the whole
+  product. Pass the colorway_* set (colorway-cards.liquid does this for you) and
+  the tile shows that colour's photograph, links to that colour's variant, and
+  hearts that colour on its own. Pass none of them and the card behaves exactly
+  as it always has.
+
   Accepts:
-    product              (required)
-    context              'overlay' (default) | 'below'
-    show_title           default true
-    show_price           default true
-    show_wishlist        default true
-    show_badge           default true
-    show_secondary_image default true
-    image_aspect_ratio   default 'portrait'
+    product                  (required)
+    context                  'overlay' (default) | 'below'
+    show_title               default true
+    show_price               default true
+    show_wishlist            default true
+    show_badge               default true
+    show_secondary_image     default true
+    image_aspect_ratio       default 'portrait'
+    colorway_label           colour name, e.g. 'Stone' — presence turns this into
+                             a colourway card
+    colorway_url             link target for this colourway
+    colorway_key             wishlist key for this colourway
+    colorway_image           primary image for this colourway
+    colorway_image_secondary hover image for this colourway
 {%- endcomment -%}
 
 {%- liquid
-  assign show_secondary = show_secondary_image | default: true
   assign image_ratio = image_aspect_ratio | default: 'portrait'
 
   assign card_context = context | default: 'overlay'
 
   # Explicit nil checks. The `default` filter treats false as "missing", so
   # `show_price | default: true` would silently switch the price back on.
+  # show_secondary_image used to use `default` and so could never be turned off.
+  if show_secondary_image == nil
+    assign show_secondary_image = true
+  endif
+  assign show_secondary = show_secondary_image
   if show_title == nil
     assign show_title = true
   endif
@@ -49,6 +65,29 @@
   endif
   if show_badge == nil
     assign show_badge = true
+  endif
+
+  # Colour option, either spelling. The PDP has always accepted both; the card
+  # used to accept only 'Color', so a 'Colour' product showed no dots.
+  assign color_option = product.options_by_name['Color']
+  if color_option == blank
+    assign color_option = product.options_by_name['Colour']
+  endif
+  assign color_values = color_option.values
+
+  # Everything below reads these rather than product.* directly, so a colourway
+  # card and a product card share one code path.
+  assign card_url = colorway_url | default: product.url
+  assign card_key = colorway_key | default: product.handle
+  assign card_image = colorway_image | default: product.featured_image
+  assign card_image_2 = colorway_image_secondary
+  if card_image_2 == nil and colorway_label == blank
+    assign card_image_2 = product.images[1]
+  endif
+
+  assign card_aria = product.title
+  if colorway_label != blank
+    assign card_aria = product.title | append: ' — ' | append: colorway_label
   endif
 
   # show_meta drives the grid layout; show_info decides whether the block exists.
@@ -66,33 +105,37 @@
 {%- capture badge %}{% if show_badge %}{% render 'product-badge-label', product: product %}{% endif %}{% endcapture -%}
 {%- assign badge = badge | strip -%}
 
-<article class="product-card product-card--{{ card_context }}">
-  <a href="{{ product.url }}" class="product-card__link" aria-label="{{ product.title }}">
+<article
+  class="product-card product-card--{{ card_context }}"
+  data-product-handle="{{ product.handle }}"
+  {% if colorway_label != blank %}data-colorway="{{ colorway_label | handleize }}"{% endif %}
+>
+  <a href="{{ card_url }}" class="product-card__link" aria-label="{{ card_aria }}">
     <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
-      {%- if product.featured_image -%}
+      {%- if card_image -%}
         <img
-          src="{{ product.featured_image | image_url: width: 600 }}"
-          srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
-                  {{ product.featured_image | image_url: width: 600 }} 600w,
-                  {{ product.featured_image | image_url: width: 800 }} 800w"
+          src="{{ card_image | image_url: width: 600 }}"
+          srcset="{{ card_image | image_url: width: 400 }} 400w,
+                  {{ card_image | image_url: width: 600 }} 600w,
+                  {{ card_image | image_url: width: 800 }} 800w"
           sizes="(max-width: 768px) 50vw, 25vw"
-          alt="{{ product.featured_image.alt | escape }}"
+          alt="{{ card_image.alt | default: card_aria | escape }}"
           loading="lazy"
-          width="{{ product.featured_image.width }}"
-          height="{{ product.featured_image.height }}"
+          width="{{ card_image.width }}"
+          height="{{ card_image.height }}"
           class="product-card__image product-card__image--primary"
         >
-        {%- if show_secondary and product.images.size > 1 -%}
+        {%- if show_secondary and card_image_2 -%}
           <img
-            src="{{ product.images[1] | image_url: width: 600 }}"
-            srcset="{{ product.images[1] | image_url: width: 400 }} 400w,
-                    {{ product.images[1] | image_url: width: 600 }} 600w,
-                    {{ product.images[1] | image_url: width: 800 }} 800w"
+            src="{{ card_image_2 | image_url: width: 600 }}"
+            srcset="{{ card_image_2 | image_url: width: 400 }} 400w,
+                    {{ card_image_2 | image_url: width: 600 }} 600w,
+                    {{ card_image_2 | image_url: width: 800 }} 800w"
             sizes="(max-width: 768px) 50vw, 25vw"
-            alt="{{ product.images[1].alt | escape }}"
+            alt="{{ card_image_2.alt | default: card_aria | escape }}"
             loading="lazy"
-            width="{{ product.images[1].width }}"
-            height="{{ product.images[1].height }}"
+            width="{{ card_image_2.width }}"
+            height="{{ card_image_2.height }}"
             class="product-card__image product-card__image--secondary"
           >
         {%- endif -%}
@@ -107,39 +150,21 @@
         <span class="product-card__badge">{{ badge | upcase }}</span>
       {%- endif -%}
 
-      {%- comment -%} Variant colors — top-right {% endcomment -%}
-      {%- if product.options_by_name['Color'].values.size > 1 -%}
+      {%- comment -%}
+        Variant colors — top-right. Suppressed when this card already IS a single
+        colourway: the dots would be advertising siblings the tile doesn't lead to.
+      {%- endcomment -%}
+      {%- if colorway_label == blank and color_values.size > 1 -%}
         <div class="product-card__colors">
-          {%- for color in product.options_by_name['Color'].values limit: 5 -%}
-            {%- liquid
-              assign cl = color | downcase | replace: ' ', ''
-              assign sc = '#000'
-              if cl contains 'white' or cl contains 'ivory' or cl contains 'cream'
-                assign sc = '#FFFFFF'
-              elsif cl contains 'black'
-                assign sc = '#000000'
-              elsif cl contains 'navy'
-                assign sc = '#1B2A4A'
-              elsif cl contains 'brown' or cl contains 'tan'
-                assign sc = '#8B6914'
-              elsif cl contains 'green' or cl contains 'olive'
-                assign sc = '#556B2F'
-              elsif cl contains 'blue'
-                assign sc = '#3B5998'
-              elsif cl contains 'red' or cl contains 'burgundy'
-                assign sc = '#8B0000'
-              elsif cl contains 'grey' or cl contains 'gray'
-                assign sc = '#808080'
-              elsif cl contains 'beige' or cl contains 'sand'
-                assign sc = '#D4C5A9'
-              elsif cl contains 'yellow' or cl contains 'mimosa'
-                assign sc = '#D4B44A'
-              endif
-            -%}
-            <span class="product-card__color-dot" style="background:{{ sc }};{% if cl contains 'white' or cl contains 'ivory' %}border-color:rgba(0,0,0,0.15);{% endif %}"></span>
+          {%- for color in color_values limit: 5 -%}
+            {%- capture dot_hex -%}
+              {%- render 'colorway-hex', product: product, value: color -%}
+            {%- endcapture -%}
+            {%- assign dot_hex = dot_hex | strip -%}
+            <span class="product-card__color-dot" style="background:{{ dot_hex }};{% if dot_hex == '#FFFFFF' %}border-color:rgba(0,0,0,0.15);{% endif %}"></span>
           {%- endfor -%}
-          {%- if product.options_by_name['Color'].values.size > 5 -%}
-            <span class="product-card__color-more">+ {{ product.options_by_name['Color'].values.size | minus: 5 }}</span>
+          {%- if color_values.size > 5 -%}
+            <span class="product-card__color-more">+ {{ color_values.size | minus: 5 }}</span>
           {%- endif -%}
         </div>
       {%- endif -%}
@@ -150,8 +175,16 @@
   {%- if show_info -%}
     <div class="product-card__info{% unless show_meta %} product-card__info--name-only{% endunless %}">
       {%- if show_title -%}
-        <a href="{{ product.url }}" class="product-card__title-link">
+        <a href="{{ card_url }}" class="product-card__title-link">
           <h3 class="product-card__title">{{ product.title }}</h3>
+          {%- comment -%}
+            Colourway tiles of one product carry the same name, so the colour is
+            what tells them apart. It is named here — unlike the PDP swatch row,
+            where the chip stands alone.
+          {%- endcomment -%}
+          {%- if colorway_label != blank -%}
+            <span class="product-card__colorway">{{ colorway_label }}</span>
+          {%- endif -%}
         </a>
       {%- endif -%}
       {%- if show_price -%}
@@ -167,8 +200,8 @@
       {%- if show_wishlist -%}
         <button
           class="product-card__wishlist"
-          data-wishlist-toggle="{{ product.handle }}"
-          aria-label="Save {{ product.title }}"
+          data-wishlist-toggle="{{ card_key }}"
+          aria-label="Save {{ card_aria }}"
           aria-pressed="false"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
