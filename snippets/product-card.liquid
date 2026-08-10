@@ -90,6 +90,56 @@
     assign card_aria = product.title | append: ' — ' | append: colorway_label
   endif
 
+  # SLIDE LIST — which of the product's images this card can page through.
+  #
+  # Held as indices into product.images rather than as images, because Liquid
+  # cannot build an array of objects; a comma string split back apart is the
+  # standard way round that. Indices are re-resolved at render time.
+  #
+  # A colourway tile must show only its own colour. Same convention the PDP
+  # gallery uses: read image.variants, since Liquid can ask an image which
+  # variants it belongs to but cannot ask a variant for its images.
+  assign slide_ids = ''
+  if colorway_label != blank
+    for image in product.images
+      assign in_colorway = false
+      for v in image.variants
+        if v.options contains colorway_label
+          assign in_colorway = true
+        endif
+      endfor
+      if in_colorway
+        assign slide_ids = slide_ids | append: forloop.index0 | append: ','
+      endif
+    endfor
+    # No photography attached to this colour yet — most of the catalogue is
+    # still in that state. Show the one image the tile was handed rather than
+    # every colour's shots, which is what an unfiltered fallback would do here.
+    if slide_ids == blank and card_image
+      for image in product.images
+        if image.id == card_image.id
+          assign slide_ids = forloop.index0 | append: ','
+        endif
+      endfor
+    endif
+  else
+    for image in product.images
+      assign slide_ids = slide_ids | append: forloop.index0 | append: ','
+    endfor
+  endif
+  assign slide_ids = slide_ids | split: ','
+
+  # A 12-product grid at a dozen images each is 144 requests. Five is enough to
+  # read as "there is more here" without paying for the whole gallery.
+  assign slide_cap = 5
+  if show_secondary == false
+    assign slide_cap = 1
+  endif
+  assign slide_total = slide_ids.size
+  if slide_total > slide_cap
+    assign slide_total = slide_cap
+  endif
+
   # show_meta drives the grid layout; show_info decides whether the block exists.
   assign show_meta = false
   if show_price or show_wishlist
@@ -113,31 +163,48 @@
   <a href="{{ card_url }}" class="product-card__link" aria-label="{{ card_aria }}">
     <div class="product-card__image-wrapper product-card__image-wrapper--{{ image_ratio }}">
       {%- if card_image -%}
-        <img
-          src="{{ card_image | image_url: width: 600 }}"
-          srcset="{{ card_image | image_url: width: 400 }} 400w,
-                  {{ card_image | image_url: width: 600 }} 600w,
-                  {{ card_image | image_url: width: 800 }} 800w"
-          sizes="(max-width: 768px) 50vw, 25vw"
-          alt="{{ card_image.alt | default: card_aria | escape }}"
-          loading="lazy"
-          width="{{ card_image.width }}"
-          height="{{ card_image.height }}"
-          class="product-card__image product-card__image--primary"
-        >
-        {%- if show_secondary and card_image_2 -%}
-          <img
-            src="{{ card_image_2 | image_url: width: 600 }}"
-            srcset="{{ card_image_2 | image_url: width: 400 }} 400w,
-                    {{ card_image_2 | image_url: width: 600 }} 600w,
-                    {{ card_image_2 | image_url: width: 800 }} 800w"
-            sizes="(max-width: 768px) 50vw, 25vw"
-            alt="{{ card_image_2.alt | default: card_aria | escape }}"
-            loading="lazy"
-            width="{{ card_image_2.width }}"
-            height="{{ card_image_2.height }}"
-            class="product-card__image product-card__image--secondary"
-          >
+        {%- comment -%}
+          Scroll-snap track, same shape as the PDP gallery: the swipe is native,
+          JS only paints the progress bar and drives the desktop hover.
+        {%- endcomment -%}
+        <div class="product-card__track" data-card-track>
+          {%- for id in slide_ids limit: slide_cap -%}
+            {%- comment -%}
+              `split` yields strings, and indexing an array with a string returns
+              nil rather than erroring — which the fallback below would quietly
+              paper over as the same photograph N times. `plus: 0` makes it an
+              integer so the lookup actually resolves.
+            {%- endcomment -%}
+            {%- assign slide_idx = id | plus: 0 -%}
+            {%- assign slide_img = product.images[slide_idx] -%}
+            {%- unless slide_img -%}{%- assign slide_img = card_image -%}{%- endunless -%}
+            <div class="product-card__slide">
+              <img
+                src="{{ slide_img | image_url: width: 600 }}"
+                srcset="{{ slide_img | image_url: width: 400 }} 400w,
+                        {{ slide_img | image_url: width: 600 }} 600w,
+                        {{ slide_img | image_url: width: 800 }} 800w"
+                sizes="(max-width: 768px) 50vw, 25vw"
+                alt="{{ slide_img.alt | default: card_aria | escape }}"
+                loading="lazy"
+                width="{{ slide_img.width }}"
+                height="{{ slide_img.height }}"
+                class="product-card__image"
+              >
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%}
+          Same affordance as the PDP, scaled down: no track, just the fill, so it
+          reads as a mark on the photograph rather than a widget. Omitted at one
+          image, where a permanently full bar would announce a gallery that
+          isn't there.
+        {%- endcomment -%}
+        {%- if slide_total > 1 -%}
+          <div class="product-card__progress" aria-hidden="true">
+            <span class="product-card__progress-fill" data-card-progress></span>
+          </div>
         {%- endif -%}
       {%- else -%}
         <div class="product-card__placeholder">

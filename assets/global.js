@@ -469,25 +469,74 @@
     window.FROpenCart = open;
   };
 
-  /* --- Product Gallery --- */
-  const initProductGallery = () => {
-    const gallery = document.querySelector('[data-product-gallery]');
-    if (!gallery) return;
+  /* --- Product card image slider ---
+     Each card pages through that product's shots. Touch swiping is the
+     browser's own scroll-snap, so this only paints the progress fill and adds
+     the desktop hover-scrub. Mirrors initPdpGallery deliberately — same fill
+     maths, same "no track, fill only" treatment. */
+  const initProductCardGalleries = () => {
+    const tracks = document.querySelectorAll('[data-card-track]');
+    if (!tracks.length) return;
 
-    const mainImage = gallery.querySelector('[data-gallery-main]');
-    const thumbnails = gallery.querySelectorAll('[data-gallery-thumb]');
+    // Hover-scrub is a mouse idea. On touch the swipe IS the interaction, and
+    // a synthesised hover would fight it.
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
 
-    thumbnails.forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        thumbnails.forEach(t => t.classList.remove('is-active'));
-        thumb.classList.add('is-active');
-        if (mainImage) {
-          const img = mainImage.querySelector('img');
-          if (img) {
-            img.src = thumb.dataset.galleryThumb;
-            img.srcset = thumb.dataset.thumbSrcset || '';
-          }
-        }
+    tracks.forEach((track) => {
+      const slides = track.children;
+      const total = slides.length;
+      if (total < 2) return;
+
+      const wrapper = track.closest('.product-card__image-wrapper');
+      const fill = wrapper && wrapper.querySelector('[data-card-progress]');
+      const setFill = (frac) => {
+        if (!fill) return;
+        fill.style.transform = 'scaleX(' + Math.min(1, Math.max(0, frac)) + ')';
+      };
+
+      // Position 1 of n at rest, not an empty bar.
+      setFill(1 / total);
+
+      track.addEventListener('scroll', () => {
+        setFill((track.scrollLeft + track.clientWidth) / track.scrollWidth);
+      }, { passive: true });
+
+      if (!wrapper) return;
+
+      // Desktop: pointer position across the card selects the image, which is
+      // what makes a grid browsable without clicking into anything.
+      let shown = 0;
+      wrapper.addEventListener('pointermove', (e) => {
+        if (!canHover.matches) return;
+        const r = wrapper.getBoundingClientRect();
+        if (!r.width) return;
+        const idx = Math.min(total - 1, Math.max(0, Math.floor(((e.clientX - r.left) / r.width) * total)));
+        if (idx === shown) return;
+        shown = idx;
+        // Instant, not smooth: a smooth scroll queues up behind every sample
+        // and the image lags the cursor by a slide or more.
+        track.scrollTo({ left: track.clientWidth * idx, behavior: 'auto' });
+      });
+
+      wrapper.addEventListener('pointerleave', () => {
+        if (!canHover.matches || shown === 0) return;
+        shown = 0;
+        track.scrollTo({ left: 0, behavior: 'auto' });
+      });
+    });
+
+    // The whole card is a link, so a swipe would land as a click and navigate.
+    // Same 10px threshold initPdpZoom uses to tell a drag from a tap.
+    document.querySelectorAll('.product-card__link').forEach((link) => {
+      let sx = 0, sy = 0, dragged = false;
+      link.addEventListener('pointerdown', (e) => {
+        sx = e.clientX; sy = e.clientY; dragged = false;
+      });
+      link.addEventListener('pointermove', (e) => {
+        if (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) dragged = true;
+      });
+      link.addEventListener('click', (e) => {
+        if (dragged) { e.preventDefault(); dragged = false; }
       });
     });
   };
@@ -2134,7 +2183,7 @@
     [
       initReveal, initMobileMenu, initChrome, initAnnouncement, initStickyHeader,
       initCarousels, initVariantSelectors, initQuantitySelectors, initAccordions,
-      initModals, initCartDrawer, initProductGallery, initFilters, initAddToCart,
+      initModals, initCartDrawer, initProductCardGalleries, initFilters, initAddToCart,
       initWishlist, initWishlistDrawer, initSearchDrawer, initPdpTabs, initPdpGallery,
       initPdpMobileBand, initPdpVariants, initPdpColorsPanel, initDeliveryEstimator, initContentPanels, initPdpRows, initPdpZoom, initPdpStickyBand, initKlaviyoBisSkin, initSmartSizePlacement, initShopPromise, initReturnsByCountry, initOverlayContrast,
       initFooterAccordions, initNewsletterForms, initLocalization,
