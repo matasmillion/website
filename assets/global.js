@@ -215,6 +215,18 @@
       if (cw === lastColorway) return;
       lastColorway = cw;
       if (window.FRPdpGallery) window.FRPdpGallery.showColorway(cw);
+
+      // Saving is per colourway, so the hearts have to be re-pointed as the
+      // colour changes — otherwise every colour of a product shares one save.
+      // They sit outside the form and were previously left untouched entirely.
+      const handle = pdp.dataset.productHandle;
+      if (handle && window.FRWishlist) {
+        const key = cw ? handle + '::' + cw : handle;
+        pdp.querySelectorAll('[data-wishlist-toggle]').forEach((btn) => {
+          btn.dataset.wishlistToggle = key;
+        });
+        window.FRWishlist.updateButtons();
+      }
     };
 
     // Deep links already work — Liquid reads ?variant= server-side — but nothing
@@ -593,6 +605,48 @@
     has(handle) {
       return this.get().includes(handle);
     },
+
+    // A saved entry is "handle" for a whole product, or "handle::colour" for a
+    // single colourway. Saves written before colourways existed are the first
+    // shape and remain valid keys, so there is nothing to migrate.
+    parse(key) {
+      const str = String(key);
+      const at = str.indexOf('::');
+      if (at === -1) return { key: str, handle: str, colorway: '' };
+      return { key: str, handle: str.slice(0, at), colorway: str.slice(at + 2) };
+    },
+
+    // Shopify's handleize, near enough: the colour in a key was handleized by
+    // Liquid, so anything compared against it has to be handleized the same way.
+    handleize(value) {
+      return String(value).toLowerCase().trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    },
+
+    // Resolve a saved entry against a /products/x.js payload. Lives here rather
+    // than in a renderer because three of them need it — the card, the drawer
+    // and the saved-items page — and they had already drifted into three
+    // different ideas of how to show a product.
+    view(product, colorway) {
+      const out = {
+        image: product.featured_image || (product.images && product.images[0]) || '',
+        label: '',
+        url: '/products/' + product.handle
+      };
+      if (!colorway) return out;
+
+      const variant = (product.variants || []).find((v) =>
+        (v.options || []).some((o) => this.handleize(o) === colorway));
+      if (!variant) return out;
+
+      out.label = (variant.options || []).find((o) => this.handleize(o) === colorway) || '';
+      out.url += '?variant=' + variant.id;
+      if (variant.featured_image && variant.featured_image.src) {
+        out.image = variant.featured_image.src;
+      }
+      return out;
+    },
     updateCounts() {
       const count = this.get().length;
       document.querySelectorAll('[data-wishlist-count]').forEach(el => {
@@ -652,22 +706,29 @@
         return;
       }
       empty.style.display = 'none';
-      const products = await Promise.all(items.map(async (h) => {
-        try { const r = await fetch('/products/' + h + '.js'); if (r.ok) return r.json(); } catch (e) {}
-        return null;
+      // Two colourways of one product are two entries but one fetch.
+      const entries = items.map((k) => window.FRWishlist.parse(k));
+      const handles = [...new Set(entries.map((e) => e.handle))];
+      const byHandle = {};
+      await Promise.all(handles.map(async (h) => {
+        try { const r = await fetch('/products/' + h + '.js'); if (r.ok) byHandle[h] = await r.json(); }
+        catch (e) {}
       }));
-      const valid = products.filter(Boolean);
+
+      const valid = entries.filter((e) => byHandle[e.handle]);
       if (!valid.length) { empty.style.display = ''; grid.innerHTML = ''; return; }
-      grid.innerHTML = valid.map((p) => {
-        const img = p.featured_image || (p.images && p.images[0]) || '';
+      grid.innerHTML = valid.map((entry) => {
+        const p = byHandle[entry.handle];
+        const v = window.FRWishlist.view(p, entry.colorway);
         return '<div class="wl-item">' +
-          '<button class="wl-item__remove" data-wishlist-remove="' + p.handle + '" aria-label="Remove">' +
+          '<button class="wl-item__remove" data-wishlist-remove="' + entry.key + '" aria-label="Remove">' +
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
           '</button>' +
-          '<a href="/products/' + p.handle + '" class="wl-item__link">' +
-            '<div class="wl-item__img">' + (img ? '<img src="' + img + '" alt="" loading="lazy">' : '') + '</div>' +
+          '<a href="' + v.url + '" class="wl-item__link">' +
+            '<div class="wl-item__img">' + (v.image ? '<img src="' + v.image + '" alt="" loading="lazy">' : '') + '</div>' +
             '<div class="wl-item__info">' +
               '<span class="wl-item__title">' + p.title + '</span>' +
+              (v.label ? '<span class="wl-item__colorway">' + v.label + '</span>' : '') +
               '<span class="wl-item__price">' + money(p.price) + '</span>' +
             '</div>' +
           '</a>' +

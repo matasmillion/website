@@ -394,6 +394,14 @@
   text-transform: uppercase;
   color: var(--color-primary);
 }
+/* Two colourways of one product are two saves under the same name — the colour
+   is the only thing telling them apart in this list. */
+.wl-item__colorway {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-light);
+}
 .wl-item__price { font-size: 10px; color: var(--color-text-light); }
 .wl-item__remove {
   position: absolute;

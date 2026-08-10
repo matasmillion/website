@@ -122,7 +122,7 @@
   html, body { overflow-x: clip; }
 </style>
 
-<div class="pdp" data-pdp data-low-stock-threshold="{{ section.settings.low_stock_threshold | default: 5 }}">
+<div class="pdp" data-pdp data-product-handle="{{ product.handle }}" data-low-stock-threshold="{{ section.settings.low_stock_threshold | default: 5 }}">
   {%- comment -%} ===== IMAGE GALLERY (LEFT ON DESKTOP) ===== {% endcomment -%}
   {%- liquid
     assign focal_map = 'top:12%,upper:25%,center:50%,lower:75%,bottom:88%' | split: ','
@@ -194,6 +194,14 @@
     if selected_colorway != '' and colorways_with_images contains selected_probe
       assign filter_active = true
     endif
+
+    # Saving is per colourway. "handle" alone still means the whole product, so
+    # saves made before colourways existed keep working untouched. JS re-points
+    # these as the colour changes.
+    assign wishlist_key = product.handle
+    if selected_colorway != ''
+      assign wishlist_key = product.handle | append: '::' | append: selected_colorway
+    endif
   -%}
   <div
     class="pdp__gallery"
@@ -264,7 +272,7 @@
       {%- endcomment -%}
       <button
         class="pdp__wishlist-img"
-        data-wishlist-toggle="{{ product.handle }}"
+        data-wishlist-toggle="{{ wishlist_key }}"
         aria-label="Save {{ product.title }}"
         aria-pressed="false"
       >
@@ -317,7 +325,7 @@
       </div>
       <button
         class="pdp-band__heart"
-        data-wishlist-toggle="{{ product.handle }}"
+        data-wishlist-toggle="{{ wishlist_key }}"
         aria-label="Save {{ product.title }}"
         aria-pressed="false"
       >
