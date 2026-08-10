@@ -17,9 +17,13 @@
 
   The accordion is a mobile behaviour only. Across four short columns there is
   nothing to collapse, and a click that reflowed a quarter of the row would be
-  the messy part — so on desktop every panel is simply open, the toggle is
-  replaced by a plain heading, and the images stay off by default (the band
-  above is already carrying the pictures).
+  the messy part — so on desktop every panel is simply open and the toggle is
+  replaced by a plain heading.
+
+  Set the section Heading. FOREIGN ENGINEERING runs the same column grid
+  immediately above, and two unlabelled bands on one grid read as a single
+  eight-cell table, as though each detail belonged to the image over it. A
+  centred title on each, with air above it, is what keeps them apart.
 
   Two headings are rendered per row, one shown per breakpoint: a <button> for
   the mobile accordion and an <h3> for the static desktop column. Duplicating
@@ -35,7 +39,7 @@
   {{ 'component-pdp-details.css' | asset_url | stylesheet_tag }}
 
   <section
-    class="pdp-details reveal{% if desktop_layout == 'columns' %} pdp-details--columns{% if section.settings.desktop_media %} pdp-details--media{% endif %}{% endif %}"
+    class="pdp-details reveal{% if desktop_layout == 'columns' %} pdp-details--columns{% if section.settings.hide_desktop_media %} pdp-details--no-media{% endif %}{% endif %}"
     style="--pdp-cols: {{ detail_rows.size }};"
   >
     {%- if section.settings.heading != blank -%}
@@ -247,9 +251,9 @@
     },
     {
       "type": "checkbox",
-      "id": "desktop_media",
-      "label": "Show row images in the desktop columns",
-      "info": "Off by default. Sitting straight under the Foreign Engineering images, four more pictures at quarter width is what makes the band look busy. Images always show on mobile.",
+      "id": "hide_desktop_media",
+      "label": "Hide row images in the desktop columns",
+      "info": "For a band that should stay pure type. Images are capped to 4:3 in the columns so one tall picture cannot stretch its column past its neighbours. Mobile always shows them in full.",
       "default": false
     }
   ],

@@ -10,6 +10,27 @@
   border-top: 1px solid var(--color-border);
 }
 
+/* Section title — desktop only. Paired with .pdp-details__heading on the band
+   below: same type, same inset, same air, so the two bands read as two named
+   things rather than one grid. Hidden on mobile, where the carousel and the
+   accordion are already obviously separate. */
+.fre__heading { display: none; }
+
+@media (min-width: 769px) {
+  .fre__heading {
+    display: block;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #A4A4A4;
+    margin: 0;
+    padding: 3.5rem 1.25rem 1.5rem;
+  }
+}
+
 .fre__track {
   display: flex;
   gap: 0;

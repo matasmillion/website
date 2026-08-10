@@ -42,6 +42,19 @@
   {{ 'component-fr-engineering.css' | asset_url | stylesheet_tag }}
 
   <section class="fre reveal">
+    {%- comment -%}
+      Desktop-only section title. Company Details runs on the same column grid
+      directly below, and without a name over each band the two read as one
+      eight-cell table — as though each detail belonged to the image above it.
+      The heading and the air around it are what separate them.
+
+      Hidden below 769px: on mobile the two are already a carousel and an
+      accordion, which nobody confuses for each other.
+    {%- endcomment -%}
+    {%- if section.settings.heading != blank -%}
+      <h2 class="fre__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
     <div class="fre__track" data-fre-track>
       {%- assign card_i = 0 -%}
       {%- for img_key in fe_imgs -%}
@@ -65,7 +78,7 @@
             srcset="{{ fe_image | image_url: width: 700 }} 700w,
                     {{ fe_image | image_url: width: 1400 }} 1400w"
             sizes="(min-width: 769px) 26vw, 86vw"
-            alt="{{ fe_title | default: section.settings.label | escape }}"
+            alt="{{ fe_title | default: section.settings.heading | escape }}"
             width="{{ fe_image.width }}"
             height="{{ fe_image.height }}"
             loading="lazy"
@@ -108,9 +121,16 @@
     },
     {
       "type": "text",
+      "id": "heading",
+      "label": "Section title (desktop)",
+      "info": "Centred above the images, naming the band so it does not run into Company Details below. Leave blank to show no title. Hidden on mobile.",
+      "default": "Foreign Engineering"
+    },
+    {
+      "type": "text",
       "id": "label",
       "label": "Label (first card only)",
-      "default": "Foreign Engineering"
+      "info": "The old in-image label. Leave blank when the section title above is set, or the words appear twice."
     },
     {
       "type": "select",
