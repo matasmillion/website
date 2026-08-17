@@ -44,9 +44,14 @@
       # First variant in this colour, preferring one that can actually be
       # bought — otherwise a colour with a sold-out small would open the PDP on
       # the sold-out size and read as unavailable.
+      # Handleized on both sides: `value` is a product_option_value drop and the
+      # variant's option is a plain string, so a bare == depends on which side
+      # Liquid asks. Comparing two slugs takes that question off the table.
+      assign cw_needle = value | handleize
       assign cw_variant = blank
       for v in product.variants
-        if v.options[cw_index] == value
+        assign v_slug = v.options[cw_index] | handleize
+        if v_slug == cw_needle
           if cw_variant == blank
             assign cw_variant = v
           endif

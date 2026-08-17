@@ -99,14 +99,23 @@
   # A colourway tile must show only its own colour. Same convention the PDP
   # gallery uses: read image.variants, since Liquid can ask an image which
   # variants it belongs to but cannot ask a variant for its images.
+  # colorway_label arrives as a product_option_value drop from colorway-cards,
+  # and `array contains x` compares the array's STRINGS against it — the drop's
+  # own == never gets a say. Handleize both sides so the match is string to
+  # string and cannot depend on which operand Liquid asks first.
+  assign cw_needle = colorway_label | handleize
+
   assign slide_ids = ''
   if colorway_label != blank
     for image in product.images
       assign in_colorway = false
       for v in image.variants
-        if v.options contains colorway_label
-          assign in_colorway = true
-        endif
+        for o in v.options
+          assign o_slug = o | handleize
+          if o_slug == cw_needle
+            assign in_colorway = true
+          endif
+        endfor
       endfor
       if in_colorway
         assign slide_ids = slide_ids | append: forloop.index0 | append: ','

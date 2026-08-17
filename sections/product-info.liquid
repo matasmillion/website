@@ -982,9 +982,11 @@
       <div class="pdp__colors-grid">
         {%- for value in cw_option.values -%}
           {%- liquid
+            assign panel_needle = value | handleize
             assign panel_variant = blank
             for v in product.variants
-              if v.options[color_index] == value
+              assign panel_v_slug = v.options[color_index] | handleize
+              if panel_v_slug == panel_needle
                 if panel_variant == blank
                   assign panel_variant = v
                 endif
